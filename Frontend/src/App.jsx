@@ -88,7 +88,9 @@ function MainLayout() {
 
           {activeTab === 'locations' && (
             <LocationsView
+              locations={readingsData.locations}
               devices={devices}
+              selectedDevice={readingsData.selectedDevice}
               onSelectDevice={(id) => {
                 readingsData.setSelectedDevice(id);
                 setActiveTab('dashboard');

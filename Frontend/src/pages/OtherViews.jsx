@@ -192,50 +192,207 @@ export function AirQualityView({ readingsData }) {
 }
 
 /* ─── 3. LOCATIONS VIEW (R9, Section 8) ─── */
-export function LocationsView({ locations = [], devices = [], onSelectDevice }) {
+export function LocationsView({ locations = [], devices = [], onSelectDevice, selectedDevice }) {
+  const [selectedLocation, setSelectedLocation] = useState('all');
+
+  // Filter locations based on selection
+  const filteredLocations = useMemo(() => {
+    if (selectedLocation === 'all') return locations;
+    return locations.filter((l) => l.location === selectedLocation);
+  }, [locations, selectedLocation]);
+
+  // Current active location object if a single one is picked
+  const activeLocObj = useMemo(() => {
+    if (selectedLocation === 'all') return locations[0] || null;
+    return locations.find((l) => l.location === selectedLocation) || null;
+  }, [locations, selectedLocation]);
+
   return (
     <div className="subpage-view">
-      <div className="page-header">
-        <h1 className="page-title">Locations</h1>
-        <p className="page-subtitle">Hyperlocal sensor node distribution across monitored premises.</p>
+      <div className="page-header" style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start', flexWrap: 'wrap', gap: '16px' }}>
+        <div>
+          <h1 className="page-title">Locations & Micro-Zones</h1>
+          <p className="page-subtitle">Select a specific location to inspect its live sensors, AQI, and micro-climate telemetry.</p>
+        </div>
+
+        {/* Location Selector Filter Bar */}
+        <div className="location-filter-bar">
+          <button
+            type="button"
+            className={`location-filter-btn ${selectedLocation === 'all' ? 'is-active' : ''}`}
+            onClick={() => setSelectedLocation('all')}
+          >
+            All Locations ({locations.length})
+          </button>
+          {locations.map((loc) => (
+            <button
+              key={loc.location}
+              type="button"
+              className={`location-filter-btn ${selectedLocation === loc.location ? 'is-active' : ''}`}
+              onClick={() => setSelectedLocation(loc.location)}
+            >
+              📍 {loc.location}
+            </button>
+          ))}
+        </div>
       </div>
 
+      {/* Grid of Locations */}
       <div className="locations-grid">
         {locations.length === 0 ? (
           <div className="card location-card text-muted">Loading campus location telemetry...</div>
         ) : (
-          locations.map((loc) => (
-            <div key={loc.location} className="card location-card">
-              <div className="location-card__top">
-                <span className="location-name">{loc.location}</span>
-                <span className="status-indicator">
-                  <span className={`status-dot ${loc.onlineCount > 0 ? 'is-online' : 'is-standby'}`} />
-                  <span className="status-label">{loc.onlineCount > 0 ? `${loc.onlineCount} Online` : 'Standby'}</span>
-                </span>
-              </div>
-              <div className="location-meta text-muted">
-                <span>{loc.deviceCount} Installed Nodes</span>
-                <span className="dot-sep">·</span>
-                <span>ESP32 Wi-Fi Node</span>
-              </div>
-              <div className="location-stats">
-                <div className="loc-stat">
-                  <span className="text-faint fs-xs">AVERAGE AQI</span>
-                  <span className="mono loc-val">
-                    {loc.averageAQI != null ? loc.averageAQI : '—'}
+          filteredLocations.map((loc) => {
+            const isPicked = selectedLocation === loc.location;
+            const aqiObj = loc.averageAQI != null ? classifyAQI(loc.averageAQI) : null;
+            return (
+              <div
+                key={loc.location}
+                className={`card location-card ${isPicked ? 'is-selected' : ''}`}
+                onClick={() => setSelectedLocation(loc.location)}
+                style={{ cursor: 'pointer' }}
+              >
+                <div className="location-card__top">
+                  <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
+                    <span style={{ fontSize: '1.2rem' }}>📍</span>
+                    <span className="location-name">{loc.location}</span>
+                  </div>
+                  <span className="status-indicator">
+                    <span className={`status-dot ${loc.onlineCount > 0 ? 'is-online' : 'is-standby'}`} />
+                    <span className="status-label">{loc.onlineCount > 0 ? `${loc.onlineCount} Online` : 'Standby'}</span>
                   </span>
                 </div>
-                <div className="loc-stat">
-                  <span className="text-faint fs-xs">STATUS</span>
-                  <span className="mono loc-val text-online">
-                    {loc.onlineCount > 0 ? 'Active' : 'Offline'}
-                  </span>
+
+                <div className="location-meta text-muted">
+                  <span>{loc.deviceCount} Installed Node{loc.deviceCount !== 1 ? 's' : ''}</span>
+                  <span className="dot-sep">·</span>
+                  <span>ESP32 Wi-Fi Node</span>
                 </div>
+
+                <div className="location-stats">
+                  <div className="loc-stat">
+                    <span className="text-faint fs-xs">AVG AQI</span>
+                    <span className="mono loc-val" style={{ color: aqiObj ? aqiObj.color : 'inherit' }}>
+                      {loc.averageAQI != null ? loc.averageAQI : '—'}
+                    </span>
+                  </div>
+                  <div className="loc-stat">
+                    <span className="text-faint fs-xs">CATEGORY</span>
+                    <span className="mono loc-val" style={{ fontSize: '0.95rem', color: aqiObj ? aqiObj.color : 'inherit' }}>
+                      {aqiObj ? aqiObj.category : 'No Data'}
+                    </span>
+                  </div>
+                  <div className="loc-stat">
+                    <span className="text-faint fs-xs">STATUS</span>
+                    <span className={`mono loc-val ${loc.onlineCount > 0 ? 'text-online' : 'text-muted'}`}>
+                      {loc.onlineCount > 0 ? 'Active' : 'Offline'}
+                    </span>
+                  </div>
+                </div>
+
+                {isPicked && (
+                  <div className="location-active-tag">
+                    ✓ Currently Selected Zone
+                  </div>
+                )}
               </div>
-            </div>
-          ))
+            );
+          })
         )}
       </div>
+
+      {/* Specific Location Inspection View */}
+      {activeLocObj && (
+        <div className="card location-detail-card" style={{ marginTop: '24px' }}>
+          <div className="location-detail-header">
+            <div>
+              <div className="location-detail-tag">LOCATION TELEMETRY INSPECTION</div>
+              <h2 className="location-detail-title">📍 {activeLocObj.location}</h2>
+              <p className="text-muted" style={{ fontSize: '0.85rem', margin: '4px 0 0' }}>
+                Displaying real-time sensor metrics for all nodes deployed at this specific location.
+              </p>
+            </div>
+            {activeLocObj.devices?.[0]?.id && (
+              <button
+                type="button"
+                className="btn btn--primary"
+                onClick={() => onSelectDevice?.(activeLocObj.devices[0].id)}
+              >
+                Open Live Dashboard for this Location ➔
+              </button>
+            )}
+          </div>
+
+          <div className="location-devices-list" style={{ marginTop: '16px' }}>
+            <table className="devices-table">
+              <thead>
+                <tr>
+                  <th>NODE IDENTIFIER</th>
+                  <th>HARDWARE</th>
+                  <th>STATUS</th>
+                  <th>AQI</th>
+                  <th>CATEGORY</th>
+                  <th>TEMP</th>
+                  <th>HUMIDITY</th>
+                  <th>GAS CONC.</th>
+                  <th>ACTION</th>
+                </tr>
+              </thead>
+              <tbody>
+                {activeLocObj.devices && activeLocObj.devices.length > 0 ? (
+                  activeLocObj.devices.map((dev) => {
+                    const devAqiObj = dev.aqi != null ? classifyAQI(dev.aqi) : null;
+                    return (
+                      <tr key={dev.id}>
+                        <td>
+                          <div style={{ fontWeight: 600 }}>{dev.name || dev.id}</div>
+                          <div className="mono text-muted" style={{ fontSize: '0.75rem' }}>{dev.id}</div>
+                        </td>
+                        <td className="text-muted">{dev.type || 'ESP32 Node'}</td>
+                        <td>
+                          <span className={`device-status-pill ${dev.status === 'Online' ? 'is-online' : 'is-offline'}`}>
+                            <span className="dot" />
+                            {dev.status || 'Offline'}
+                          </span>
+                        </td>
+                        <td className="mono" style={{ fontWeight: 700, color: devAqiObj?.color }}>
+                          {dev.aqi != null ? dev.aqi : '—'}
+                        </td>
+                        <td>
+                          {devAqiObj ? (
+                            <span className="category-badge" style={{ color: devAqiObj.color, borderColor: devAqiObj.color }}>
+                              {devAqiObj.category}
+                            </span>
+                          ) : '—'}
+                        </td>
+                        <td className="mono">{dev.temperature != null ? `${dev.temperature}°C` : '—'}</td>
+                        <td className="mono">{dev.humidity != null ? `${dev.humidity}%` : '—'}</td>
+                        <td className="mono">{dev.gasPPM != null ? `${dev.gasPPM} ppm` : '—'}</td>
+                        <td>
+                          <button
+                            type="button"
+                            className="btn btn--ghost"
+                            style={{ padding: '6px 12px', fontSize: '0.8rem' }}
+                            onClick={() => onSelectDevice?.(dev.id)}
+                          >
+                            View Live ➔
+                          </button>
+                        </td>
+                      </tr>
+                    );
+                  })
+                ) : (
+                  <tr>
+                    <td colSpan="9" className="text-muted" style={{ textAlign: 'center', padding: '24px' }}>
+                      No sensing nodes currently deployed at this location.
+                    </td>
+                  </tr>
+                )}
+              </tbody>
+            </table>
+          </div>
+        </div>
+      )}
     </div>
   );
 }

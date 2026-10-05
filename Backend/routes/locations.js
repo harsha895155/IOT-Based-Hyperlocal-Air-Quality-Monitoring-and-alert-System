@@ -42,8 +42,10 @@ router.get('/', async (req, res, next) => {
         status: devObj.status,
         lastSeen: dev.lastSeen,
         aqi: latest ? latest.airQuality : null,
+        category: latest ? latest.category : null,
         temperature: latest ? latest.temperature : null,
         humidity: latest ? latest.humidity : null,
+        gasPPM: latest ? latest.gasPPM : null,
       });
     }
 
