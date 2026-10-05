@@ -2,6 +2,7 @@
 #include "config.h"
 #include <WiFi.h>
 #include <HTTPClient.h>
+#include <WiFiClientSecure.h>
 
 bool NodeNetworkManager::connectWiFi() {
   if (WiFi.status() == WL_CONNECTED) return true;
@@ -41,9 +42,20 @@ bool NodeNetworkManager::sendReading(const SensorReading &reading) {
   }
 
   HTTPClient http;
-  String url = String("http://") + BACKEND_HOST + ":" + BACKEND_PORT + READINGS_PATH;
+  String url = String(BACKEND_URL);
 
-  http.begin(url);
+  if (url.startsWith("https://")) {
+    WiFiClientSecure *client = new WiFiClientSecure;
+    if (client) {
+      client->setInsecure(); // Skip CA certificate check for simplicity
+      http.begin(*client, url);
+    } else {
+      http.begin(url);
+    }
+  } else {
+    http.begin(url);
+  }
+
   http.addHeader("Content-Type", "application/json");
   http.addHeader("x-api-key", DEVICE_API_KEY);
   http.setTimeout(HTTP_TIMEOUT_MS);

@@ -12,11 +12,11 @@
 #define WIFI_PASSWORD "Firstfloor@1"
 
 // ---- Backend endpoint ----
-// Use your machine's LAN IP (not localhost/127.0.0.1 — the ESP32
-// is a separate device on the network). Current detected host IPv4: 192.168.1.6
-#define BACKEND_HOST "192.168.1.6"
-#define BACKEND_PORT 5001
-#define READINGS_PATH "/api/readings"
+// Live Cloud Deployment (Render):
+#define BACKEND_URL "https://iot-based-hyperlocal-air-quality.onrender.com/api/readings"
+
+// Local alternative (if testing on local LAN):
+// #define BACKEND_URL "http://192.168.1.6:5001/api/readings"
 
 // Device identity — must be unique per node once you scale to
 // multiple sensing nodes.
