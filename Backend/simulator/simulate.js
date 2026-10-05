@@ -21,7 +21,7 @@
 
 require('dotenv').config({ path: require('path').join(__dirname, '..', '.env') });
 
-const BACKEND_URL = process.env.SIM_BACKEND_URL || `http://localhost:${process.env.PORT || 5000}`;
+const BACKEND_URL = process.argv[2] || process.env.SIM_BACKEND_URL || process.env.API_URL || `http://localhost:${process.env.PORT || 5000}`;
 const DEVICE_ID = process.env.SIM_DEVICE_ID || 'esp32-node-01';
 const INTERVAL_MS = parseInt(process.env.SIM_INTERVAL_MS, 10) || 15000;
 const API_KEY = process.env.API_KEY;
