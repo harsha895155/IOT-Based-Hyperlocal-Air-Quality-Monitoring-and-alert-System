@@ -1,0 +1,13 @@
+{
+  "name": "airquality-project-root",
+  "version": "1.0.0",
+  "description": "Root project for running AirQuality frontend and backend concurrently",
+  "scripts": {
+    "install-all": "npm install && npm install --prefix Backend && npm install --prefix Frontend",
+    "dev": "concurrently \"npm run dev --prefix Backend\" \"npm run dev --prefix Frontend\" \"npm run simulate --prefix Backend\"",
+    "dev:nosim": "concurrently \"npm run dev --prefix Backend\" \"npm run dev --prefix Frontend\""
+  },
+  "devDependencies": {
+    "concurrently": "^8.2.2"
+  }
+}
