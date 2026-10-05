@@ -21,18 +21,20 @@ const { notFound, errorHandler } = require('./middleware/errorHandler');
 const app = express();
 const server = http.createServer(app);
 
-const allowedOrigins = (process.env.CORS_ORIGINS || '').split(',').map((s) => s.trim()).filter(Boolean);
-
 const io = new Server(server, {
-  cors: { origin: allowedOrigins.length ? allowedOrigins : '*' },
+  cors: {
+    origin: '*',
+    methods: ['GET', 'POST', 'PATCH', 'PUT', 'DELETE'],
+  },
 });
 app.set('io', io); // controllers reach this via req.app.get('io')
 
 // ---- Security middleware ----
-app.use(helmet());
+app.use(helmet({ crossOriginResourcePolicy: false }));
 app.use(
   cors({
-    origin: allowedOrigins.length ? allowedOrigins : '*',
+    origin: (origin, callback) => callback(null, true),
+    credentials: true,
   })
 );
 app.use(express.json({ limit: '100kb' })); // sensor payloads are tiny; cap defensively
