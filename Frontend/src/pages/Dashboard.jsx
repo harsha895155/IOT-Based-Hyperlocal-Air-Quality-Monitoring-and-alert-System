@@ -45,11 +45,17 @@ export default function Dashboard({ readingsData, onNavigateTab }) {
     error: weatherError,
     searchResults,
     searching,
+    isLiveLocation,
+    permissionStatus,
     selectLocation,
     search,
     useCurrentLocation,
     refreshWeather,
-  } = useWeather(currentDevice?.location || 'Current Location', currentDevice?.coordinates || null);
+  } = useWeather(
+    currentDevice?.coordinates?.lat ? currentDevice?.location : null,
+    currentDevice?.coordinates?.lat ? currentDevice.coordinates : null,
+    true
+  );
 
   const [customSearchedLocation, setCustomSearchedLocation] = useState(null);
   const [searchQuery, setSearchQuery] = useState('');
@@ -57,7 +63,7 @@ export default function Dashboard({ readingsData, onNavigateTab }) {
   const [deviceDropdownOpen, setDeviceDropdownOpen] = useState(false);
   const searchRef = useRef(null);
 
-  // When currentDevice changes, sync location coords; if no device, probe current location
+  // When currentDevice changes, sync location coords; if no device or device coords missing, use user live location
   useEffect(() => {
     if (!customSearchedLocation && currentDevice?.coordinates?.lat && currentDevice?.coordinates?.lng) {
       selectLocation({
@@ -65,7 +71,7 @@ export default function Dashboard({ readingsData, onNavigateTab }) {
         latitude: currentDevice.coordinates.lat,
         longitude: currentDevice.coordinates.lng,
       });
-    } else if (!customSearchedLocation && !currentDevice && typeof navigator !== 'undefined' && navigator.geolocation) {
+    } else if (!customSearchedLocation && (!currentDevice?.coordinates?.lat || selectedDevice === 'current-location')) {
       useCurrentLocation();
     }
   }, [
@@ -74,6 +80,7 @@ export default function Dashboard({ readingsData, onNavigateTab }) {
     currentDevice?.coordinates?.lat,
     currentDevice?.coordinates?.lng,
     customSearchedLocation,
+    selectedDevice,
     selectLocation,
     useCurrentLocation,
   ]);
@@ -195,9 +202,9 @@ export default function Dashboard({ readingsData, onNavigateTab }) {
             <h1 className="weather-location-title">
               {customSearchedLocation || (isDeviceConnected ? currentDevice?.location : null) || locationName || 'Current Location'}
             </h1>
-            <div className={`live-pulse-badge ${isDeviceConnected ? 'is-live' : 'is-standby'}`}>
-              <span className="live-dot" />
-              <span>{isDeviceConnected ? 'LIVE IOT FEED' : 'CURRENT LOCATION'}</span>
+            <div className={`live-pulse-badge ${isDeviceConnected ? 'is-live' : (isLiveLocation ? 'is-live' : 'is-standby')}`}>
+              <span className="live-dot" style={isLiveLocation && !isDeviceConnected ? { background: '#10b981', boxShadow: '0 0 8px #10b981' } : {}} />
+              <span>{isDeviceConnected ? 'LIVE IOT FEED' : (isLiveLocation ? 'LIVE GPS ACTIVE' : 'LOCATION MODE')}</span>
             </div>
           </div>
           <div className="weather-location-sub">
@@ -211,9 +218,11 @@ export default function Dashboard({ readingsData, onNavigateTab }) {
               </>
             ) : (
               <>
-                <span style={{ color: 'var(--color-primary, #38bdf8)' }}>📍 Current Location Data Mode</span>
+                <span style={{ color: isLiveLocation ? '#10b981' : 'var(--color-primary, #38bdf8)', fontWeight: 600 }}>
+                  {isLiveLocation ? '📍 Live User GPS Tracked' : '📍 Location Mode'}
+                </span>
                 <span className="sep">•</span>
-                <span>No Hardware Device Connected</span>
+                <span>{coords ? `${coords.lat.toFixed(4)}°, ${coords.lng.toFixed(4)}°` : 'Resolving GPS'}</span>
                 <span className="sep">•</span>
                 <span>{weatherData?.updatedAt ? `Updated ${formatTimeAgo(weatherData.updatedAt)}` : 'Live Forecast'}</span>
               </>
@@ -259,14 +268,31 @@ export default function Dashboard({ readingsData, onNavigateTab }) {
           {/* GPS Button */}
           <button
             type="button"
-            className="btn-icon-glass"
-            title="Use My Current GPS Location"
+            className={`btn-icon-glass ${isLiveLocation ? 'is-active-gps' : ''}`}
+            title="Track My Live Location (GPS Permission)"
+            style={
+              isLiveLocation
+                ? {
+                    borderColor: '#10b981',
+                    color: '#10b981',
+                    background: 'rgba(16, 185, 129, 0.15)',
+                    boxShadow: '0 0 10px rgba(16, 185, 129, 0.25)',
+                  }
+                : {}
+            }
             onClick={() => {
               setCustomSearchedLocation(null);
-              useCurrentLocation();
+              useCurrentLocation(true);
             }}
           >
-            <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
+            <svg
+              width="18"
+              height="18"
+              viewBox="0 0 24 24"
+              fill={isLiveLocation ? '#10b981' : 'none'}
+              stroke="currentColor"
+              strokeWidth="2"
+            >
               <polygon points="3 11 22 2 13 21 11 13 3 11" />
             </svg>
           </button>
@@ -279,7 +305,7 @@ export default function Dashboard({ readingsData, onNavigateTab }) {
               onClick={() => setDeviceDropdownOpen(!deviceDropdownOpen)}
             >
               <span className="dot-node" style={{ background: isDeviceConnected ? '#10b981' : '#38bdf8' }} />
-              <span>{isDeviceConnected ? currentDevice.name : '📍 Current Location'}</span>
+              <span>{isDeviceConnected ? currentDevice.name : (isLiveLocation ? '📍 Live User Location' : '📍 Current Location')}</span>
               <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5">
                 <polyline points="6 9 12 15 18 9" />
               </svg>
@@ -345,7 +371,43 @@ export default function Dashboard({ readingsData, onNavigateTab }) {
         </div>
       </div>
 
-      {weatherError && (
+      {/* Geolocation permission denied notification banner */}
+      {permissionStatus === 'denied' && (
+        <div
+          style={{
+            display: 'flex',
+            alignItems: 'center',
+            justifyContent: 'space-between',
+            flexWrap: 'wrap',
+            gap: '12px',
+            background: 'rgba(234, 179, 8, 0.1)',
+            border: '1px solid rgba(234, 179, 8, 0.3)',
+            borderRadius: '12px',
+            padding: '10px 16px',
+            marginBottom: '16px',
+            fontSize: '0.85rem',
+            color: '#fef08a',
+          }}
+        >
+          <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
+            <span>📍</span>
+            <span>
+              <strong>Live Location Permission:</strong> Location access was blocked in browser settings.
+              Click the lock/settings icon in your browser URL bar to allow location tracking, or search your city above.
+            </span>
+          </div>
+          <button
+            type="button"
+            className="btn-secondary btn-sm"
+            style={{ padding: '4px 12px', fontSize: '0.78rem', whiteSpace: 'nowrap' }}
+            onClick={() => useCurrentLocation(true)}
+          >
+            Retry Location Access
+          </button>
+        </div>
+      )}
+
+      {weatherError && !weatherData && (
         <div className="weather-alert-banner">
           <span>⚠️ {weatherError}</span>
         </div>

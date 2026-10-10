@@ -10,7 +10,7 @@ router.get('/', async (req, res) => {
     let lng = req.query.lng ? parseFloat(req.query.lng) : null;
     let locationName = req.query.location || 'Current Location';
 
-    // If no coordinates provided, try to grab the coordinates from the first registered device in DB
+    // If no coordinates provided, try device coords, or fallback to default coordinates
     if (lat == null || lng == null || isNaN(lat) || isNaN(lng)) {
       const dev = await Device.findOne({ 'coordinates.lat': { $exists: true } });
       if (dev && dev.coordinates?.lat && dev.coordinates?.lng) {
@@ -18,10 +18,10 @@ router.get('/', async (req, res) => {
         lng = dev.coordinates.lng;
         if (!req.query.location) locationName = dev.location || locationName;
       } else {
-        // No device registered yet — default to primary AirGuard sensing station coordinates (GIST Campus)
+        // Fallback default coordinates (sensing hub) so the dashboard always has live data
         lat = 14.4426;
         lng = 79.9865;
-        if (!req.query.location) locationName = 'GIST Campus (Nellore)';
+        if (!req.query.location) locationName = 'AirGuard Regional Station';
       }
     }
 

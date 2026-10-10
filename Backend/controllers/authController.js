@@ -264,15 +264,41 @@ async function resetPassword(req, res, next) {
 // POST /api/auth/google
 async function googleLogin(req, res, next) {
   try {
-    const { credential, email: passedEmail, name: passedName, googleId: passedGoogleId, avatar: passedAvatar } = req.body;
+    const {
+      credential,
+      access_token,
+      accessToken,
+      email: passedEmail,
+      name: passedName,
+      googleId: passedGoogleId,
+      avatar: passedAvatar,
+    } = req.body;
 
     let email = passedEmail;
     let name = passedName;
     let googleId = passedGoogleId;
     let avatar = passedAvatar || '';
 
+    const tokenToVerify = accessToken || access_token;
+    if (tokenToVerify) {
+      try {
+        const userInfoRes = await fetch('https://www.googleapis.com/oauth2/v3/userinfo', {
+          headers: { Authorization: `Bearer ${tokenToVerify}` },
+        });
+        if (userInfoRes.ok) {
+          const profile = await userInfoRes.json();
+          email = profile.email || email;
+          name = profile.name || name;
+          googleId = profile.sub || googleId;
+          avatar = profile.picture || avatar;
+        }
+      } catch (tokenErr) {
+        console.warn('Google accessToken verification failed:', tokenErr.message);
+      }
+    }
+
     // If Google ID token (credential) was provided, verify with Google tokeninfo
-    if (credential) {
+    if (credential && !email) {
       try {
         const response = await fetch(`https://oauth2.googleapis.com/tokeninfo?id_token=${encodeURIComponent(credential)}`);
         if (response.ok) {
