@@ -12,9 +12,10 @@
   min-width: 0;
   height: 100vh;
   overflow-y: auto;
+  scroll-behavior: smooth;
 }
 
 .app-content {
   flex: 1;
-  overflow-y: auto;
+  min-height: 0;
 }

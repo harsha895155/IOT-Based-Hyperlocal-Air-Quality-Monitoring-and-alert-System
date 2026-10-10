@@ -16,6 +16,8 @@ const devicesRoutes = require('./routes/devices');
 const locationsRoutes = require('./routes/locations');
 const analyticsRoutes = require('./routes/analytics');
 const reportsRoutes = require('./routes/reports');
+const systemRoutes = require('./routes/system');
+const weatherRoutes = require('./routes/weather');
 const { notFound, errorHandler } = require('./middleware/errorHandler');
 
 const app = express();
@@ -37,14 +39,15 @@ app.use(
     credentials: true,
   })
 );
-app.use(express.json({ limit: '100kb' })); // sensor payloads are tiny; cap defensively
+app.use(express.json({ limit: '10mb' }));
+app.use(express.urlencoded({ limit: '10mb', extended: true }));
 
 // General API rate limit (per-route limiters in routes/ are stricter
 // where it matters — auth, ingestion).
 app.use(
   rateLimit({
     windowMs: 15 * 60 * 1000,
-    max: 300,
+    max: process.env.NODE_ENV === 'production' ? 1000 : 5000,
     standardHeaders: true,
     legacyHeaders: false,
   })
@@ -86,13 +89,35 @@ app.use('/api/devices', devicesRoutes);
 app.use('/api/locations', locationsRoutes);
 app.use('/api/analytics', analyticsRoutes);
 app.use('/api/reports', reportsRoutes);
+app.use('/api/system', systemRoutes);
+app.use('/api/weather', weatherRoutes);
 
 // ---- Socket.IO: dashboard/mobile clients join to receive live pushes ----
+const jwt = require('jsonwebtoken');
+
 io.on('connection', (socket) => {
-  console.log(`[Socket] Client connected: ${socket.id}`);
-  socket.on('disconnect', () => {
-    console.log(`[Socket] Client disconnected: ${socket.id}`);
+  // Support client authentication to scope device telemetry per user
+  socket.on('authenticate', (token) => {
+    try {
+      if (!token) return;
+      const decoded = jwt.verify(token, process.env.JWT_SECRET || 'airguard_default_secret_key_2026');
+      if (decoded?.id) {
+        socket.userId = decoded.id;
+        socket.join(`user_${decoded.id}`);
+        if (decoded.role === 'admin') {
+          socket.join('admin_room');
+        }
+      }
+    } catch (e) {}
   });
+
+  socket.on('subscribe_device', (deviceId) => {
+    if (deviceId) {
+      socket.join(`device_${String(deviceId).trim()}`);
+    }
+  });
+
+  socket.on('disconnect', () => {});
 });
 
 // ---- 404 + error handling (must be last) ----

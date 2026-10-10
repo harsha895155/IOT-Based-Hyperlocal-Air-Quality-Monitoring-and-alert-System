@@ -1,14 +1,28 @@
 const express = require('express');
 const router = express.Router();
 const Reading = require('../models/Reading');
+const { Device } = require('../models/Device');
+const { optionalAuth } = require('../middleware/auth');
 
 // GET /api/analytics
-router.get('/', async (req, res, next) => {
+router.get('/', optionalAuth, async (req, res, next) => {
   try {
     const { deviceId, from, to } = req.query;
 
     const matchStage = {};
-    if (deviceId) matchStage.deviceId = deviceId.trim();
+    if (deviceId && deviceId !== 'all') {
+      const dev = await Device.findOne({ deviceId: deviceId.trim() });
+      if (dev && dev.userId) {
+        if (!req.user || (req.user.role !== 'admin' && dev.userId.toString() !== req.user._id.toString())) {
+          return res.status(403).json({ error: 'Access forbidden. This device belongs to another user.' });
+        }
+      }
+      matchStage.deviceId = deviceId.trim();
+    } else if (req.user && req.user.role !== 'admin') {
+      const userDevices = await Device.find({ userId: req.user._id }).select('deviceId');
+      matchStage.deviceId = { $in: userDevices.map((d) => d.deviceId) };
+    }
+
     if (from || to) {
       matchStage.createdAt = {};
       if (from) matchStage.createdAt.$gte = new Date(from);

@@ -17,8 +17,60 @@ const userSchema = new mongoose.Schema(
     },
     password: {
       type: String,
-      required: true,
+      required: function () {
+        return !this.googleId;
+      },
       minlength: 6,
+    },
+    googleId: {
+      type: String,
+      sparse: true,
+      index: true,
+    },
+    authProvider: {
+      type: String,
+      enum: ['local', 'google'],
+      default: 'local',
+    },
+    avatar: {
+      type: String,
+      default: '',
+    },
+    phone: {
+      type: String,
+      default: '',
+    },
+    organization: {
+      type: String,
+      default: 'AirGuard Environmental Intelligence',
+    },
+    bio: {
+      type: String,
+      default: '',
+    },
+    status: {
+      type: String,
+      enum: ['Active', 'Suspended', 'Deactivated'],
+      default: 'Active',
+    },
+    lastLogin: {
+      type: Date,
+      default: Date.now,
+    },
+    activityLog: [
+      {
+        action: { type: String, required: true },
+        detail: { type: String, default: '' },
+        timestamp: { type: Date, default: Date.now },
+      },
+    ],
+    resetPasswordToken: {
+      type: String,
+      default: null,
+    },
+    resetPasswordExpires: {
+      type: Date,
+      default: null,
     },
     role: {
       type: String,
@@ -28,10 +80,21 @@ const userSchema = new mongoose.Schema(
     preferences: {
       emailAlerts: { type: Boolean, default: true },
       pushAlerts: { type: Boolean, default: true },
-      theme: { type: String, enum: ['light', 'dark', 'system'], default: 'dark' },
+      dailyDigest: { type: Boolean, default: false },
+      soundAlerts: { type: Boolean, default: true },
+      theme: { type: String, default: 'obsidian' },
+      tempUnit: { type: String, default: 'C' },
+      windUnit: { type: String, default: 'km/h' },
+      pressureUnit: { type: String, default: 'hPa' },
+      refreshRate: { type: Number, default: 15 },
+      defaultStation: { type: String, default: 'AIRGUARD-001' },
+      aqiWarnThreshold: { type: Number, default: 100 },
+      aqiCriticalThreshold: { type: Number, default: 150 },
+      sensitivityProfile: { type: String, default: 'standard' },
+      organization: { type: String, default: 'GIST Environmental Research' },
     },
   },
-  { timestamps: true }
+  { timestamps: true, strict: false }
 );
 
 userSchema.pre('save', async function (next) {

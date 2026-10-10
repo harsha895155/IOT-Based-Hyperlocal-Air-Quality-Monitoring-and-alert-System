@@ -1,4 +1,5 @@
 import React from 'react';
+import { NavLink, useLocation, useNavigate } from 'react-router-dom';
 import AirGuardLogo from './AirGuardLogo';
 import { useAuth } from '../context/AuthContext';
 import './Sidebar.css';
@@ -11,16 +12,6 @@ const Icons = {
       <rect x="14" y="3" width="7" height="7" rx="1" />
       <rect x="14" y="14" width="7" height="7" rx="1" />
       <rect x="3" y="14" width="7" height="7" rx="1" />
-    </svg>
-  ),
-  LiveMonitoring: () => (
-    <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
-      <polyline points="22 12 18 12 15 21 9 3 6 12 2 12" />
-    </svg>
-  ),
-  AirQuality: () => (
-    <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
-      <path d="M9.59 4.59A2 2 0 1 1 11 8H2m10.59 11.41A2 2 0 1 0 14 16H2m15.73-8.27A2.5 2.5 0 1 1 19.5 12H2" />
     </svg>
   ),
   Devices: () => (
@@ -95,11 +86,6 @@ const Icons = {
       <circle cx="12" cy="7" r="4" />
     </svg>
   ),
-  GuestMode: () => (
-    <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
-      <path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z" />
-    </svg>
-  ),
   Login: () => (
     <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
       <path d="M15 3h4a2 2 0 0 1 2 2v14a2 2 0 0 1-2 2h-4" />
@@ -116,15 +102,24 @@ const Icons = {
   ),
 };
 
-export default function Sidebar({ activeTab, setActiveTab, isOpen, setIsOpen, unreadAlerts = 0 }) {
+export default function Sidebar({ isOpen, setIsOpen, unreadAlerts = 0 }) {
   const { user, isGuest, logout } = useAuth();
+  const location = useLocation();
+  const navigate = useNavigate();
 
-  const handleNavClick = (tabId) => {
-    setActiveTab(tabId);
-    if (window.innerWidth <= 768) {
+  const handleLinkClick = () => {
+    if (window.innerWidth <= 768 && setIsOpen) {
       setIsOpen(false);
     }
   };
+
+  const handleLogout = () => {
+    logout();
+    navigate('/');
+  };
+
+  // Helper to test if Devices group is active (including /devices/:id)
+  const isDevicesActive = location.pathname.startsWith('/devices');
 
   return (
     <>
@@ -137,160 +132,145 @@ export default function Sidebar({ activeTab, setActiveTab, isOpen, setIsOpen, un
       )}
 
       <aside className={`sidebar ${isOpen ? 'is-open' : ''}`}>
-        <div className="sidebar__brand" onClick={() => handleNavClick('dashboard')}>
+        <NavLink to="/" className="sidebar__brand" onClick={handleLinkClick}>
           <AirGuardLogo size={26} />
           <span className="sidebar__brand-name">AirGuard</span>
-        </div>
+        </NavLink>
 
         <nav className="sidebar__nav">
-          {/* MAIN SECTION */}
+          {/* ─── 1. MONITORING SECTION ─── */}
           <div className="sidebar__section">
-            <div className="sidebar__section-title">MAIN</div>
-            <button
-              className={`sidebar__item ${activeTab === 'dashboard' ? 'is-active' : ''}`}
-              onClick={() => handleNavClick('dashboard')}
+            <div className="sidebar__section-title">MONITORING</div>
+            <NavLink
+              to="/dashboard"
+              className={({ isActive }) => `sidebar__item ${isActive ? 'is-active' : ''}`}
+              onClick={handleLinkClick}
             >
               <Icons.Dashboard />
               <span>Dashboard</span>
-            </button>
-            <button
-              className={`sidebar__item ${activeTab === 'live' ? 'is-active' : ''}`}
-              onClick={() => handleNavClick('live')}
-            >
-              <Icons.LiveMonitoring />
-              <span>Live Monitoring</span>
-            </button>
-            <button
-              className={`sidebar__item ${activeTab === 'air-quality' ? 'is-active' : ''}`}
-              onClick={() => handleNavClick('air-quality')}
-            >
-              <Icons.AirQuality />
-              <span>Air Quality</span>
-            </button>
-          </div>
-
-          {/* MONITORING SECTION */}
-          <div className="sidebar__section">
-            <div className="sidebar__section-title">MONITORING</div>
-            <button
-              className={`sidebar__item ${activeTab === 'devices' ? 'is-active' : ''}`}
-              onClick={() => handleNavClick('devices')}
+            </NavLink>
+            <NavLink
+              to="/devices"
+              className={`sidebar__item ${isDevicesActive ? 'is-active' : ''}`}
+              onClick={handleLinkClick}
             >
               <Icons.Devices />
-              <span>Devices</span>
-            </button>
-            <button
-              className={`sidebar__item ${activeTab === 'locations' ? 'is-active' : ''}`}
-              onClick={() => handleNavClick('locations')}
+              <span>My Devices</span>
+            </NavLink>
+            <NavLink
+              to="/locations"
+              className={({ isActive }) => `sidebar__item ${isActive ? 'is-active' : ''}`}
+              onClick={handleLinkClick}
             >
               <Icons.Locations />
-              <span>Locations</span>
-            </button>
-            <button
-              className={`sidebar__item ${activeTab === 'analytics' ? 'is-active' : ''}`}
-              onClick={() => handleNavClick('analytics')}
+              <span>Location Weather</span>
+            </NavLink>
+          </div>
+
+          {/* ─── 2. ANALYTICS SECTION ─── */}
+          <div className="sidebar__section">
+            <div className="sidebar__section-title">ANALYTICS</div>
+            <NavLink
+              to="/analytics"
+              className={({ isActive }) => `sidebar__item ${isActive ? 'is-active' : ''}`}
+              onClick={handleLinkClick}
             >
               <Icons.Analytics />
               <span>Analytics</span>
-            </button>
-            <button
-              className={`sidebar__item ${activeTab === 'history' ? 'is-active' : ''}`}
-              onClick={() => handleNavClick('history')}
+            </NavLink>
+            <NavLink
+              to="/history"
+              className={({ isActive }) => `sidebar__item ${isActive ? 'is-active' : ''}`}
+              onClick={handleLinkClick}
             >
               <Icons.History />
               <span>History</span>
-            </button>
+            </NavLink>
           </div>
 
-          {/* ALERTS & REPORTS */}
+          {/* ─── 3. ALERTS & REPORTS ─── */}
           <div className="sidebar__section">
             <div className="sidebar__section-title">ALERTS & REPORTS</div>
-            <button
-              className={`sidebar__item ${activeTab === 'alerts' ? 'is-active' : ''}`}
-              onClick={() => handleNavClick('alerts')}
+            <NavLink
+              to="/alerts"
+              className={({ isActive }) => `sidebar__item ${isActive ? 'is-active' : ''}`}
+              onClick={handleLinkClick}
             >
               <Icons.Alerts />
               <span>Alerts</span>
               {unreadAlerts > 0 && <span className="sidebar__badge">{unreadAlerts}</span>}
-            </button>
-            <button
-              className={`sidebar__item ${activeTab === 'reports' ? 'is-active' : ''}`}
-              onClick={() => handleNavClick('reports')}
+            </NavLink>
+            <NavLink
+              to="/reports"
+              className={({ isActive }) => `sidebar__item ${isActive ? 'is-active' : ''}`}
+              onClick={handleLinkClick}
             >
               <Icons.Reports />
               <span>Reports</span>
-            </button>
+            </NavLink>
           </div>
 
-          {/* SYSTEM */}
-          <div className="sidebar__section">
-            <div className="sidebar__section-title">SYSTEM</div>
-            <button
-              className={`sidebar__item ${activeTab === 'health' ? 'is-active' : ''}`}
-              onClick={() => handleNavClick('health')}
-            >
-              <Icons.SystemHealth />
-              <span>System Health</span>
-            </button>
-            <button
-              className={`sidebar__item ${activeTab === 'settings' ? 'is-active' : ''}`}
-              onClick={() => handleNavClick('settings')}
-            >
-              <Icons.Settings />
-              <span>Settings</span>
-            </button>
-            <button
-              className={`sidebar__item ${activeTab === 'help' ? 'is-active' : ''}`}
-              onClick={() => handleNavClick('help')}
-            >
-              <Icons.HelpSupport />
-              <span>Help & Support</span>
-            </button>
-          </div>
+          {/* ─── 4. SYSTEM (REGISTERED USERS ONLY — STRICTLY HIDDEN FROM GUESTS) ─── */}
+          {!isGuest && user && (
+            <div className="sidebar__section">
+              <div className="sidebar__section-title">SYSTEM</div>
+              <NavLink
+                to="/system-health"
+                className={({ isActive }) => `sidebar__item ${isActive ? 'is-active' : ''}`}
+                onClick={handleLinkClick}
+              >
+                <Icons.SystemHealth />
+                <span>System Health</span>
+              </NavLink>
+              <NavLink
+                to="/settings"
+                className={({ isActive }) => `sidebar__item ${isActive ? 'is-active' : ''}`}
+                onClick={handleLinkClick}
+              >
+                <Icons.Settings />
+                <span>Settings</span>
+              </NavLink>
+              <NavLink
+                to="/help"
+                className={({ isActive }) => `sidebar__item ${isActive ? 'is-active' : ''}`}
+                onClick={handleLinkClick}
+              >
+                <Icons.HelpSupport />
+                <span>Help & Support</span>
+              </NavLink>
+            </div>
+          )}
 
-          {/* ACCOUNT */}
-          <div className="sidebar__section">
-            <div className="sidebar__section-title">ACCOUNT</div>
-            {user ? (
-              <>
-                <button
-                  className={`sidebar__item ${activeTab === 'profile' ? 'is-active' : ''}`}
-                  onClick={() => handleNavClick('profile')}
-                >
-                  <Icons.Profile />
-                  <span>Profile ({user.name})</span>
-                </button>
-                <button className="sidebar__item" onClick={logout}>
-                  <Icons.Logout />
-                  <span>Log out</span>
-                </button>
-              </>
-            ) : (
-              <>
-                <button
-                  className={`sidebar__item ${activeTab === 'profile' ? 'is-active' : ''}`}
-                  onClick={() => handleNavClick('profile')}
-                >
-                  <Icons.Profile />
-                  <span>Profile</span>
-                </button>
-                <button
-                  className={`sidebar__item ${isGuest ? 'is-guest-badge' : ''}`}
-                  onClick={() => handleNavClick('settings')}
-                >
-                  <Icons.GuestMode />
-                  <span>Guest Mode</span>
-                </button>
-                <button
-                  className={`sidebar__item ${activeTab === 'login' ? 'is-active' : ''}`}
-                  onClick={() => handleNavClick('login')}
-                >
-                  <Icons.Login />
-                  <span>Log in</span>
-                </button>
-              </>
-            )}
-          </div>
+          {/* ─── 5. ACCOUNT (REGISTERED USERS ONLY — STRICTLY HIDDEN FROM GUESTS) ─── */}
+          {!isGuest && user ? (
+            <div className="sidebar__section">
+              <div className="sidebar__section-title">ACCOUNT</div>
+              <NavLink
+                to="/profile"
+                className={({ isActive }) => `sidebar__item ${isActive ? 'is-active' : ''}`}
+                onClick={handleLinkClick}
+              >
+                <Icons.Profile />
+                <span>Profile ({user.name?.split(' ')[0] || 'User'})</span>
+              </NavLink>
+              <button type="button" className="sidebar__item" onClick={handleLogout}>
+                <Icons.Logout />
+                <span>Log out</span>
+              </button>
+            </div>
+          ) : (
+            /* ─── 6. GUEST ACCESS CALLOUT (WHEN IN GUEST MODE) ─── */
+            <div className="sidebar__section sidebar__guest-panel">
+              <div className="sidebar__section-title">GUEST ACCESS</div>
+              <div className="sidebar__guest-notice">
+                <span className="guest-badge-pill">Public Guest</span>
+                <p className="guest-desc">Viewing public monitoring streams. System and Account controls require login.</p>
+                <NavLink to="/login" className="btn btn--primary btn--sm guest-login-btn" onClick={handleLinkClick}>
+                  Sign In / Register
+                </NavLink>
+              </div>
+            </div>
+          )}
         </nav>
       </aside>
     </>

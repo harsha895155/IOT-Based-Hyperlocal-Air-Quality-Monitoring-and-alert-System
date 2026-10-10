@@ -1,0 +1,546 @@
+/* ─── Environmental Compliance Reports & Audits ─── */
+
+.reports-header-actions {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 12px;
+}
+
+.report-controls-bar {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  justify-content: space-between;
+  gap: 16px;
+  background: var(--bg-card, #121624);
+  border: 1px solid var(--border-subtle, rgba(255, 255, 255, 0.08));
+  border-radius: 14px;
+  padding: 14px 20px;
+  margin-bottom: 24px;
+}
+
+.report-controls-group {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 14px;
+}
+
+.report-filter-item {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.report-filter-label {
+  font-size: 0.75rem;
+  font-weight: 600;
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+  color: var(--text-faint, #64748b);
+}
+
+.report-select {
+  background: var(--bg-surface, #1e2438);
+  color: var(--text-primary, #f8fafc);
+  border: 1px solid var(--border-subtle, rgba(255, 255, 255, 0.12));
+  border-radius: 8px;
+  padding: 6px 12px;
+  font-size: 0.85rem;
+  font-family: inherit;
+  cursor: pointer;
+  outline: none;
+  transition: border-color 0.2s;
+}
+
+.report-select:focus {
+  border-color: var(--accent, #00d2b4);
+}
+
+.audit-meta-pill {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  background: rgba(0, 210, 180, 0.1);
+  border: 1px solid rgba(0, 210, 180, 0.25);
+  border-radius: 20px;
+  padding: 4px 12px;
+  font-size: 0.75rem;
+  color: #00d2b4;
+  font-family: var(--font-mono, monospace);
+}
+
+/* ─── Executive KPI Grid ─── */
+.compliance-kpi-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+  gap: 16px;
+  margin-bottom: 24px;
+}
+
+.compliance-kpi-card {
+  background: var(--bg-card, #121624);
+  border: 1px solid var(--border-subtle, rgba(255, 255, 255, 0.08));
+  border-radius: 14px;
+  padding: 18px 20px;
+  position: relative;
+  overflow: hidden;
+  transition: transform 0.2s, border-color 0.2s;
+}
+
+.compliance-kpi-card:hover {
+  border-color: rgba(0, 210, 180, 0.3);
+  transform: translateY(-2px);
+}
+
+.compliance-kpi-card::before {
+  content: '';
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 4px;
+  height: 100%;
+  background: var(--card-accent, #00d2b4);
+}
+
+.compliance-kpi-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  margin-bottom: 8px;
+}
+
+.compliance-kpi-title {
+  font-size: 0.72rem;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 0.06em;
+  color: var(--text-faint, #64748b);
+}
+
+.compliance-kpi-badge {
+  font-size: 0.7rem;
+  font-weight: 700;
+  padding: 2px 8px;
+  border-radius: 6px;
+}
+
+.compliance-kpi-badge.is-good {
+  background: rgba(16, 185, 129, 0.15);
+  color: #10b981;
+}
+
+.compliance-kpi-badge.is-warning {
+  background: rgba(245, 158, 11, 0.15);
+  color: #f59e0b;
+}
+
+.compliance-kpi-badge.is-danger {
+  background: rgba(239, 68, 68, 0.15);
+  color: #ef4444;
+}
+
+.compliance-kpi-val {
+  font-size: 1.8rem;
+  font-weight: 800;
+  font-family: var(--font-mono, monospace);
+  color: var(--text-primary, #f8fafc);
+  margin-bottom: 4px;
+}
+
+.compliance-kpi-sub {
+  font-size: 0.75rem;
+  color: var(--text-muted, #94a3b8);
+}
+
+/* ─── Breakdown & Distribution ─── */
+.reports-mid-grid {
+  display: grid;
+  grid-template-columns: 1.2fr 1fr;
+  gap: 20px;
+  margin-bottom: 24px;
+}
+
+@media (max-width: 960px) {
+  .reports-mid-grid {
+    grid-template-columns: 1fr;
+  }
+}
+
+.report-section-card {
+  background: var(--bg-card, #121624);
+  border: 1px solid var(--border-subtle, rgba(255, 255, 255, 0.08));
+  border-radius: 14px;
+  padding: 22px;
+}
+
+.report-section-title {
+  font-size: 1rem;
+  font-weight: 700;
+  color: var(--text-primary, #f8fafc);
+  margin-bottom: 6px;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+}
+
+.report-section-subtitle {
+  font-size: 0.8rem;
+  color: var(--text-muted, #94a3b8);
+  margin-bottom: 18px;
+}
+
+.distribution-bars {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+}
+
+.dist-bar-item {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+}
+
+.dist-bar-info {
+  display: flex;
+  justify-content: space-between;
+  font-size: 0.78rem;
+}
+
+.dist-bar-name {
+  font-weight: 600;
+  display: flex;
+  align-items: center;
+  gap: 6px;
+}
+
+.dist-dot {
+  width: 8px;
+  height: 8px;
+  border-radius: 50%;
+  display: inline-block;
+}
+
+.dist-bar-track {
+  width: 100%;
+  height: 8px;
+  background: rgba(255, 255, 255, 0.05);
+  border-radius: 4px;
+  overflow: hidden;
+}
+
+.dist-bar-fill {
+  height: 100%;
+  border-radius: 4px;
+  transition: width 0.5s cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+/* ─── Standards Comparison Table ─── */
+.standards-table {
+  width: 100%;
+  border-collapse: collapse;
+  font-size: 0.82rem;
+}
+
+.standards-table th {
+  text-align: left;
+  padding: 10px 12px;
+  font-size: 0.72rem;
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+  color: var(--text-faint, #64748b);
+  border-bottom: 1px solid var(--border-subtle, rgba(255, 255, 255, 0.08));
+}
+
+.standards-table td {
+  padding: 10px 12px;
+  border-bottom: 1px solid rgba(255, 255, 255, 0.04);
+  color: var(--text-primary, #f8fafc);
+}
+
+.verdict-tag {
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+  font-size: 0.7rem;
+  font-weight: 700;
+  padding: 2px 8px;
+  border-radius: 4px;
+}
+
+.verdict-tag.is-pass {
+  background: rgba(16, 185, 129, 0.15);
+  color: #10b981;
+}
+
+.verdict-tag.is-advisory {
+  background: rgba(245, 158, 11, 0.15);
+  color: #f59e0b;
+}
+
+.verdict-tag.is-breach {
+  background: rgba(239, 68, 68, 0.15);
+  color: #ef4444;
+}
+
+/* ─── Exceedance Log Table ─── */
+.exceedance-table-wrap {
+  overflow-x: auto;
+  margin-top: 12px;
+}
+
+.exceedance-table {
+  width: 100%;
+  border-collapse: collapse;
+  font-size: 0.82rem;
+}
+
+.exceedance-table th {
+  text-align: left;
+  padding: 10px 14px;
+  font-size: 0.72rem;
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+  color: var(--text-faint, #64748b);
+  border-bottom: 1px solid var(--border-subtle, rgba(255, 255, 255, 0.08));
+}
+
+.exceedance-table td {
+  padding: 12px 14px;
+  border-bottom: 1px solid rgba(255, 255, 255, 0.04);
+  color: var(--text-primary, #f8fafc);
+}
+
+/* ─── Export & Audit Actions Grid ─── */
+.export-suite-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(260px, 1fr));
+  gap: 16px;
+  margin-bottom: 24px;
+}
+
+.export-card {
+  background: var(--bg-card, #121624);
+  border: 1px solid var(--border-subtle, rgba(255, 255, 255, 0.08));
+  border-radius: 14px;
+  padding: 20px;
+  display: flex;
+  flex-direction: column;
+  justify-content: space-between;
+  gap: 14px;
+  transition: transform 0.2s, border-color 0.2s;
+}
+
+.export-card:hover {
+  border-color: rgba(0, 210, 180, 0.4);
+  transform: translateY(-2px);
+}
+
+.export-card-top {
+  display: flex;
+  align-items: flex-start;
+  gap: 14px;
+}
+
+.export-icon-box {
+  width: 44px;
+  height: 44px;
+  border-radius: 10px;
+  background: rgba(0, 210, 180, 0.1);
+  color: #00d2b4;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 1.25rem;
+  flex-shrink: 0;
+}
+
+.export-card-title {
+  font-size: 0.95rem;
+  font-weight: 700;
+  color: var(--text-primary, #f8fafc);
+  margin-bottom: 4px;
+}
+
+.export-card-desc {
+  font-size: 0.78rem;
+  color: var(--text-muted, #94a3b8);
+  line-height: 1.4;
+}
+
+.export-card-btn {
+  width: 100%;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+  padding: 8px 16px;
+  border-radius: 8px;
+  font-size: 0.82rem;
+  font-weight: 600;
+  cursor: pointer;
+  text-decoration: none;
+  border: 1px solid rgba(255, 255, 255, 0.1);
+  background: var(--bg-surface, #1e2438);
+  color: var(--text-primary, #f8fafc);
+  transition: background 0.2s, border-color 0.2s, color 0.2s;
+}
+
+.export-card-btn:hover {
+  background: #00d2b4;
+  border-color: #00d2b4;
+  color: #0a0e17;
+}
+
+.export-card-btn.primary {
+  background: #00d2b4;
+  border-color: #00d2b4;
+  color: #0a0e17;
+}
+
+.export-card-btn.primary:hover {
+  background: #00f0ce;
+  border-color: #00f0ce;
+}
+
+/* ─── Digital Certification Stamp ─── */
+.certification-card {
+  background: linear-gradient(135deg, rgba(18, 22, 36, 0.9) 0%, rgba(15, 28, 48, 0.9) 100%);
+  border: 1px solid rgba(0, 210, 180, 0.25);
+  border-radius: 14px;
+  padding: 24px;
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  justify-content: space-between;
+  gap: 20px;
+  margin-bottom: 24px;
+}
+
+.cert-left {
+  display: flex;
+  align-items: center;
+  gap: 18px;
+}
+
+.cert-seal {
+  width: 60px;
+  height: 60px;
+  border-radius: 50%;
+  border: 2px dashed #00d2b4;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  color: #00d2b4;
+  font-size: 1.5rem;
+  flex-shrink: 0;
+  box-shadow: 0 0 15px rgba(0, 210, 180, 0.2);
+}
+
+.cert-title {
+  font-size: 1rem;
+  font-weight: 700;
+  color: var(--text-primary, #f8fafc);
+  margin-bottom: 4px;
+}
+
+.cert-sub {
+  font-size: 0.78rem;
+  color: var(--text-muted, #94a3b8);
+}
+
+.cert-right {
+  display: flex;
+  flex-direction: column;
+  align-items: flex-end;
+  gap: 6px;
+}
+
+@media (max-width: 640px) {
+  .cert-right {
+    align-items: flex-start;
+  }
+}
+
+.cert-hash {
+  font-family: var(--font-mono, monospace);
+  font-size: 0.72rem;
+  color: var(--text-faint, #64748b);
+  word-break: break-all;
+}
+
+/* ─── Scheduled Digest Modal ─── */
+.report-modal-backdrop {
+  position: fixed;
+  inset: 0;
+  background: rgba(0, 0, 0, 0.75);
+  backdrop-filter: blur(4px);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  z-index: 9999;
+  padding: 16px;
+}
+
+.report-modal {
+  background: var(--bg-card, #121624);
+  border: 1px solid var(--border-subtle, rgba(255, 255, 255, 0.15));
+  border-radius: 16px;
+  max-width: 480px;
+  width: 100%;
+  padding: 24px;
+  box-shadow: 0 20px 40px rgba(0, 0, 0, 0.5);
+}
+
+.modal-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  margin-bottom: 16px;
+}
+
+.modal-title {
+  font-size: 1.1rem;
+  font-weight: 700;
+  color: var(--text-primary, #f8fafc);
+}
+
+.modal-close-btn {
+  background: none;
+  border: none;
+  color: var(--text-faint, #64748b);
+  font-size: 1.25rem;
+  cursor: pointer;
+}
+
+.modal-close-btn:hover {
+  color: var(--text-primary, #f8fafc);
+}
+
+/* ─── Print View Styling ─── */
+@media print {
+  body {
+    background: #fff !important;
+    color: #000 !important;
+  }
+  .app-sidebar,
+  .top-nav,
+  .report-controls-bar,
+  .export-suite-grid,
+  .reports-header-actions {
+    display: none !important;
+  }
+  .subpage-view {
+    padding: 0 !important;
+  }
+  .compliance-kpi-card,
+  .report-section-card,
+  .certification-card {
+    border: 1px solid #ccc !important;
+    background: #fff !important;
+    color: #000 !important;
+    break-inside: avoid;
+  }
+}

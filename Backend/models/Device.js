@@ -11,6 +11,12 @@ const deviceSchema = new mongoose.Schema(
       trim: true,
       index: true,
     },
+    userId: {
+      type: mongoose.Schema.Types.ObjectId,
+      ref: 'User',
+      default: null,
+      index: true,
+    },
     name: {
       type: String,
       required: true,
@@ -31,8 +37,8 @@ const deviceSchema = new mongoose.Schema(
       default: ['MQ135', 'DHT22'],
     },
     coordinates: {
-      lat: { type: Number, default: 14.4426 },
-      lng: { type: Number, default: 79.9865 },
+      lat: { type: Number, default: null },
+      lng: { type: Number, default: null },
     },
     lastSeen: {
       type: Date,
@@ -46,6 +52,45 @@ const deviceSchema = new mongoose.Schema(
     offlineTimeoutMs: {
       type: Number,
       default: OFFLINE_TIMEOUT_MS,
+    },
+    description: {
+      type: String,
+      default: '',
+      trim: true,
+    },
+    locality: {
+      type: String,
+      default: '',
+      trim: true,
+    },
+    city: {
+      type: String,
+      default: '',
+      trim: true,
+    },
+    state: {
+      type: String,
+      default: '',
+      trim: true,
+    },
+    country: {
+      type: String,
+      default: 'India',
+      trim: true,
+    },
+    hardwareMac: {
+      type: String,
+      default: '',
+      trim: true,
+    },
+    firmwareVersion: {
+      type: String,
+      default: '2.2.0',
+    },
+    provisioningStatus: {
+      type: String,
+      enum: ['pending', 'provisioned', 'active'],
+      default: 'active',
     },
   },
   { timestamps: true, toJSON: { virtuals: true }, toObject: { virtuals: true } }

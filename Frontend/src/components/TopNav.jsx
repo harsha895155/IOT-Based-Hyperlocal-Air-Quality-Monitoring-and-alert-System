@@ -1,34 +1,63 @@
 import React from 'react';
+import { useLocation, useNavigate, Link } from 'react-router-dom';
 import { useAuth } from '../context/AuthContext';
 import { useTheme } from '../context/ThemeContext';
 import './TopNav.css';
 
-const PAGE_TITLES = {
-  dashboard: 'Dashboard',
-  live: 'Live Monitoring',
-  'air-quality': 'Air Quality',
-  devices: 'Devices',
-  locations: 'Locations',
-  analytics: 'Analytics',
-  history: 'History',
-  alerts: 'Alerts',
-  reports: 'Reports',
-  health: 'System Health',
-  settings: 'Settings',
-  help: 'Help & Support',
-  profile: 'Profile',
+const PATH_TITLES = {
+  '/dashboard': 'Dashboard',
+  '/devices': 'My Connected Devices',
+  '/locations': 'Location Weather Search',
+  '/analytics': 'Analytics & Trends',
+  '/history': 'Readings History',
+  '/alerts': 'Real-Time Alerts',
+  '/reports': 'Compliance Reports',
+  '/system-health': 'System Health',
+  '/settings': 'Settings',
+  '/help': 'Help & Support',
+  '/profile': 'User Profile',
+  '/login': 'Account Access',
 };
 
-export default function TopNav({ activeTab, setActiveTab, onToggleSidebar, connected, unreadAlerts = 0 }) {
+export default function TopNav({ onToggleSidebar, connected, unreadAlerts = 0 }) {
   const { user, isGuest, logout } = useAuth();
   const { resolvedTheme, toggleTheme } = useTheme();
+  const location = useLocation();
+  const navigate = useNavigate();
 
-  const title = PAGE_TITLES[activeTab] || 'Dashboard';
+  const [menuOpen, setMenuOpen] = React.useState(false);
+  const userMenuRef = React.useRef(null);
+
+  // Close dropdown on outside click
+  React.useEffect(() => {
+    function handleClickOutside(e) {
+      if (userMenuRef.current && !userMenuRef.current.contains(e.target)) {
+        setMenuOpen(false);
+      }
+    }
+    document.addEventListener('mousedown', handleClickOutside);
+    return () => document.removeEventListener('mousedown', handleClickOutside);
+  }, []);
+
+  let title = PATH_TITLES[location.pathname];
+  if (!title) {
+    if (location.pathname.startsWith('/devices/')) {
+      title = 'Device Details';
+    } else {
+      title = 'Dashboard';
+    }
+  }
+
+  const handleLogout = () => {
+    logout();
+    navigate('/');
+  };
 
   return (
     <header className="topnav">
       <div className="topnav__left">
         <button
+          type="button"
           className="topnav__hamburger"
           onClick={onToggleSidebar}
           aria-label="Toggle navigation sidebar"
@@ -45,7 +74,7 @@ export default function TopNav({ activeTab, setActiveTab, onToggleSidebar, conne
         {isGuest ? (
           <span className="topnav__badge-guest">GUEST MODE</span>
         ) : (
-          <span className="topnav__badge-user">{user?.role?.toUpperCase() || 'USER'}</span>
+          <span className="topnav__badge-user">{user?.role?.toUpperCase() || 'REGISTERED'}</span>
         )}
       </div>
 
@@ -58,6 +87,7 @@ export default function TopNav({ activeTab, setActiveTab, onToggleSidebar, conne
 
         {/* Theme Toggle (Sun / Moon) */}
         <button
+          type="button"
           className="topnav__icon-btn"
           onClick={toggleTheme}
           title={`Switch to ${resolvedTheme === 'dark' ? 'light' : 'dark'} mode`}
@@ -84,8 +114,9 @@ export default function TopNav({ activeTab, setActiveTab, onToggleSidebar, conne
 
         {/* Notification Bell with unread badge */}
         <button
+          type="button"
           className="topnav__icon-btn topnav__bell-btn"
-          onClick={() => setActiveTab('alerts')}
+          onClick={() => navigate('/alerts')}
           title="View alerts"
           aria-label="Alerts"
         >
@@ -97,24 +128,97 @@ export default function TopNav({ activeTab, setActiveTab, onToggleSidebar, conne
         </button>
 
         {/* Login or User profile button */}
-        {user ? (
-          <div className="topnav__user-menu">
+        {!isGuest && user ? (
+          <div className="topnav__user-menu" ref={userMenuRef}>
             <button
-              className="topnav__user-chip"
-              onClick={() => setActiveTab('profile')}
+              type="button"
+              className={`topnav__user-chip ${menuOpen ? 'is-active' : ''}`}
+              onClick={() => setMenuOpen(!menuOpen)}
               title={`Logged in as ${user.email}`}
+              aria-haspopup="true"
+              aria-expanded={menuOpen}
             >
-              <span className="topnav__avatar">{user.name?.charAt(0)?.toUpperCase() || 'U'}</span>
+              <span className="topnav__avatar">
+                {user.avatar ? (
+                  <img src={user.avatar} alt={user.name} style={{ width: '100%', height: '100%', borderRadius: '50%', objectFit: 'cover' }} />
+                ) : (
+                  user.name?.charAt(0)?.toUpperCase() || 'U'
+                )}
+              </span>
               <span className="topnav__user-name">{user.name}</span>
+              <span style={{ fontSize: '0.65rem', marginLeft: '2px', opacity: 0.7 }}>{menuOpen ? '▲' : '▼'}</span>
             </button>
-            <button className="topnav__logout-btn" onClick={logout} title="Log out">
-              Log out
-            </button>
+
+            {menuOpen && (
+              <div className="topnav__dropdown">
+                <div className="topnav__dropdown-header">
+                  <div className="topnav__dropdown-name">{user.name}</div>
+                  <div className="topnav__dropdown-email">{user.email}</div>
+                  <span className={`topnav__badge-user`} style={{ marginTop: '6px', display: 'inline-block' }}>
+                    {user.role?.toUpperCase() || 'USER'}
+                  </span>
+                </div>
+
+                <div className="topnav__dropdown-divider" />
+
+                <div className="topnav__dropdown-items">
+                  <button
+                    type="button"
+                    className="topnav__dropdown-item"
+                    onClick={() => {
+                      setMenuOpen(false);
+                      navigate('/profile?tab=personal');
+                    }}
+                  >
+                    <span>👤</span>
+                    <span>Profile</span>
+                  </button>
+                  <button
+                    type="button"
+                    className="topnav__dropdown-item"
+                    onClick={() => {
+                      setMenuOpen(false);
+                      navigate('/profile?tab=security');
+                    }}
+                  >
+                    <span>🔒</span>
+                    <span>Account & Security</span>
+                  </button>
+                  <button
+                    type="button"
+                    className="topnav__dropdown-item"
+                    onClick={() => {
+                      setMenuOpen(false);
+                      navigate('/profile?tab=preferences');
+                    }}
+                  >
+                    <span>⚙️</span>
+                    <span>Preferences</span>
+                  </button>
+                </div>
+
+                <div className="topnav__dropdown-divider" />
+
+                <div className="topnav__dropdown-footer">
+                  <button
+                    type="button"
+                    className="topnav__dropdown-item topnav__dropdown-item--logout"
+                    onClick={() => {
+                      setMenuOpen(false);
+                      handleLogout();
+                    }}
+                  >
+                    <span>🚪</span>
+                    <span>Log out</span>
+                  </button>
+                </div>
+              </div>
+            )}
           </div>
         ) : (
-          <button className="topnav__login-btn" onClick={() => setActiveTab('login')}>
+          <Link to="/login" className="topnav__login-btn" style={{ textDecoration: 'none' }}>
             Log in
-          </button>
+          </Link>
         )}
       </div>
     </header>

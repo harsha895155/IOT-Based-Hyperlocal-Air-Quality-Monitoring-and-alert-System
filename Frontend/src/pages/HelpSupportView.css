@@ -1,0 +1,565 @@
+/* ─── Help & Support Platform View Styles ─── */
+.help-page {
+  padding: 32px 36px 64px;
+  margin: 0;
+}
+
+/* Category Filter Tabs */
+.help-tabs-row {
+  display: flex;
+  gap: 10px;
+  overflow-x: auto;
+  padding-bottom: 8px;
+  margin-bottom: 24px;
+  scrollbar-width: thin;
+}
+
+.help-tab-btn {
+  padding: 8px 16px;
+  border-radius: var(--radius-full, 999px);
+  background: var(--surface-raised, rgba(15, 23, 42, 0.6));
+  border: 1px solid var(--border, rgba(255, 255, 255, 0.08));
+  color: var(--text-muted, #94a3b8);
+  font-size: var(--fs-xs, 0.8rem);
+  font-weight: 500;
+  cursor: pointer;
+  white-space: nowrap;
+  transition: all 0.2s cubic-bezier(0.16, 1, 0.3, 1);
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.help-tab-btn:hover {
+  color: var(--text-primary, #ffffff);
+  border-color: rgba(56, 189, 248, 0.3);
+  background: rgba(30, 41, 59, 0.8);
+}
+
+.help-tab-btn.is-active {
+  background: linear-gradient(135deg, rgba(2, 132, 199, 0.3) 0%, rgba(37, 99, 235, 0.3) 100%);
+  border-color: #38bdf8;
+  color: #38bdf8;
+  font-weight: 600;
+  box-shadow: 0 0 14px rgba(56, 189, 248, 0.2);
+}
+
+/* Search bar */
+.help-search-card {
+  padding: 16px 20px;
+  background: var(--surface, #0b1322);
+  border: 1px solid var(--border, rgba(255, 255, 255, 0.08));
+  border-radius: var(--radius-lg, 16px);
+  margin-bottom: 24px;
+  display: flex;
+  align-items: center;
+  gap: 14px;
+  box-shadow: var(--shadow-card, 0 4px 20px rgba(0, 0, 0, 0.2));
+}
+
+.help-search-input {
+  flex: 1;
+  background: transparent;
+  border: none;
+  outline: none;
+  color: #ffffff;
+  font-size: 0.95rem;
+  font-family: inherit;
+}
+
+.help-search-input::placeholder {
+  color: rgba(148, 163, 184, 0.5);
+}
+
+/* Pinout Grid & Cards */
+.pinout-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+  gap: 16px;
+  margin-top: 16px;
+}
+
+.pinout-card {
+  padding: 18px;
+  background: var(--surface-raised, rgba(15, 23, 42, 0.5));
+  border: 1px solid var(--border, rgba(255, 255, 255, 0.08));
+  border-radius: var(--radius-md, 12px);
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+}
+
+.pinout-card__header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+}
+
+.pinout-badge {
+  font-size: 0.72rem;
+  font-family: var(--font-mono, monospace);
+  padding: 2px 8px;
+  border-radius: 4px;
+  font-weight: 600;
+}
+
+.pinout-badge--adc {
+  background: rgba(245, 158, 11, 0.15);
+  color: #fbbf24;
+  border: 1px solid rgba(245, 158, 11, 0.3);
+}
+
+.pinout-badge--gpio {
+  background: rgba(56, 189, 248, 0.15);
+  color: #38bdf8;
+  border: 1px solid rgba(56, 189, 248, 0.3);
+}
+
+.pinout-badge--power {
+  background: rgba(239, 68, 68, 0.15);
+  color: #f87171;
+  border: 1px solid rgba(239, 68, 68, 0.3);
+}
+
+.pinout-table {
+  width: 100%;
+  border-collapse: collapse;
+  font-size: 0.84rem;
+}
+
+.pinout-table td {
+  padding: 7px 0;
+  border-bottom: 1px solid rgba(255, 255, 255, 0.05);
+}
+
+.pinout-table tr:last-child td {
+  border-bottom: none;
+}
+
+.pin-wire-badge {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  font-family: var(--font-mono, monospace);
+  font-size: 0.75rem;
+}
+
+.wire-dot {
+  width: 8px;
+  height: 8px;
+  border-radius: 50%;
+}
+
+.wire-dot--red { background: #ef4444; box-shadow: 0 0 6px #ef4444; }
+.wire-dot--black { background: #64748b; box-shadow: 0 0 6px #64748b; }
+.wire-dot--yellow { background: #eab308; box-shadow: 0 0 6px #eab308; }
+.wire-dot--blue { background: #38bdf8; box-shadow: 0 0 6px #38bdf8; }
+
+/* Interactive Calculator Box */
+.calc-box {
+  padding: 22px;
+  background: linear-gradient(135deg, rgba(14, 25, 45, 0.7) 0%, rgba(8, 14, 25, 0.85) 100%);
+  border: 1px solid rgba(56, 189, 248, 0.2);
+  border-radius: var(--radius-lg, 16px);
+  margin-top: 16px;
+}
+
+.calc-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
+  gap: 16px;
+  margin-bottom: 20px;
+}
+
+.calc-field {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+}
+
+.live-telemetry-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  flex-wrap: wrap;
+  gap: 12px;
+  margin-bottom: 16px;
+  padding-bottom: 14px;
+  border-bottom: 1px solid rgba(255, 255, 255, 0.06);
+}
+
+.live-stream-badge {
+  display: inline-flex;
+  align-items: center;
+  gap: 7px;
+  font-size: 0.72rem;
+  font-family: var(--font-mono, monospace);
+  color: #10b981;
+  background: rgba(16, 185, 129, 0.12);
+  border: 1px solid rgba(16, 185, 129, 0.25);
+  padding: 4px 10px;
+  border-radius: 999px;
+  font-weight: 600;
+  letter-spacing: 0.02em;
+}
+
+.live-pulse-dot {
+  width: 7px;
+  height: 7px;
+  border-radius: 50%;
+  background: #10b981;
+  box-shadow: 0 0 8px #10b981;
+  animation: pulseLiveDot 2s infinite ease-in-out;
+}
+
+@keyframes pulseLiveDot {
+  0%, 100% { opacity: 1; transform: scale(1); }
+  50% { opacity: 0.4; transform: scale(0.85); }
+}
+
+.live-metric-card {
+  padding: 16px;
+  background: rgba(15, 23, 42, 0.65);
+  border: 1px solid rgba(56, 189, 248, 0.15);
+  border-radius: 10px;
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+  transition: all 0.2s ease;
+}
+
+.live-metric-card:hover {
+  border-color: rgba(56, 189, 248, 0.35);
+  background: rgba(15, 23, 42, 0.85);
+}
+
+.live-metric-card-label {
+  font-size: 0.75rem;
+  color: var(--text-muted, #94a3b8);
+  font-weight: 600;
+  text-transform: uppercase;
+  letter-spacing: 0.03em;
+}
+
+.live-metric-card-val {
+  font-family: var(--font-mono, monospace);
+  font-size: 1.45rem;
+  font-weight: 700;
+  color: #ffffff;
+  margin: 2px 0;
+}
+
+.live-metric-card-sub {
+  font-size: 0.72rem;
+  color: var(--text-faint, #64748b);
+  font-family: var(--font-mono, monospace);
+}
+
+.calc-results-row {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(180px, 1fr));
+  gap: 14px;
+  padding: 16px;
+  background: rgba(10, 16, 28, 0.7);
+  border-radius: 12px;
+  border: 1px solid rgba(255, 255, 255, 0.06);
+}
+
+.calc-result-stat {
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+}
+
+.calc-result-label {
+  font-size: 0.72rem;
+  color: var(--text-faint, #64748b);
+  text-transform: uppercase;
+  letter-spacing: 0.04em;
+  font-weight: 600;
+}
+
+.calc-result-val {
+  font-family: var(--font-mono, monospace);
+  font-size: 1.25rem;
+  font-weight: 700;
+  color: #38bdf8;
+}
+
+/* Firmware Code Snippet Box & Device Customizer */
+.firmware-customizer-card {
+  padding: 20px;
+  background: linear-gradient(135deg, rgba(14, 25, 45, 0.7) 0%, rgba(9, 15, 27, 0.9) 100%);
+  border: 1px solid rgba(56, 189, 248, 0.25);
+  border-radius: var(--radius-md, 12px);
+  margin-top: 16px;
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+}
+
+.firmware-customizer-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  flex-wrap: wrap;
+  gap: 10px;
+}
+
+.firmware-inputs-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
+  gap: 14px;
+}
+
+.firmware-field {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+}
+
+.firmware-field-label {
+  font-size: 0.78rem;
+  font-weight: 600;
+  color: var(--text-primary, #f1f5f9);
+  display: flex;
+  align-items: center;
+  gap: 6px;
+}
+
+.firmware-input-wrap {
+  position: relative;
+  display: flex;
+  align-items: center;
+  width: 100%;
+}
+
+.firmware-cred-input {
+  width: 100%;
+  padding: 9px 38px 9px 12px;
+  background: var(--surface-raised, rgba(15, 23, 42, 0.7));
+  border: 1px solid rgba(56, 189, 248, 0.3);
+  border-radius: 8px;
+  color: #38bdf8;
+  font-family: var(--font-mono, monospace);
+  font-size: 0.88rem;
+  font-weight: 600;
+  outline: none;
+  transition: all 0.2s ease;
+  box-sizing: border-box;
+}
+
+.firmware-cred-input:focus {
+  border-color: #38bdf8;
+  background: rgba(10, 18, 30, 0.95);
+  box-shadow: 0 0 0 3px rgba(56, 189, 248, 0.2);
+}
+
+.firmware-cred-input::placeholder {
+  color: rgba(148, 163, 184, 0.4);
+}
+
+.firmware-toggle-btn {
+  position: absolute;
+  right: 8px;
+  background: none;
+  border: none;
+  color: #94a3b8;
+  cursor: pointer;
+  padding: 4px;
+  font-size: 0.9rem;
+  display: flex;
+  align-items: center;
+}
+
+.firmware-toggle-btn:hover {
+  color: #ffffff;
+}
+
+.code-snippet-box {
+  background: #060911;
+  border: 1px solid rgba(255, 255, 255, 0.08);
+  border-radius: 12px;
+  overflow: hidden;
+  margin-top: 14px;
+}
+
+.code-snippet-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 10px 16px;
+  background: rgba(255, 255, 255, 0.03);
+  border-bottom: 1px solid rgba(255, 255, 255, 0.06);
+  flex-wrap: wrap;
+  gap: 10px;
+}
+
+.code-highlight-row {
+  background: rgba(56, 189, 248, 0.12);
+  border-left: 3px solid #38bdf8;
+  padding: 2px 0;
+  margin: 1px 0;
+  display: block;
+}
+
+.code-editable-val {
+  color: #38bdf8;
+  font-weight: 700;
+  background: rgba(56, 189, 248, 0.2);
+  padding: 1px 6px;
+  border-radius: 4px;
+  border: 1px dashed rgba(56, 189, 248, 0.5);
+}
+
+/* Connect Device Guide Card */
+.connect-guide-card {
+  margin-top: 18px;
+  padding: 20px;
+  background: rgba(15, 23, 42, 0.5);
+  border: 1px solid rgba(255, 255, 255, 0.07);
+  border-radius: 12px;
+}
+
+.connect-steps-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
+  gap: 14px;
+  margin-top: 14px;
+}
+
+.connect-step-item {
+  padding: 14px;
+  background: rgba(10, 16, 28, 0.6);
+  border: 1px solid rgba(255, 255, 255, 0.05);
+  border-radius: 10px;
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+}
+
+.connect-step-num {
+  width: 24px;
+  height: 24px;
+  border-radius: 50%;
+  background: #0284c7;
+  color: #ffffff;
+  font-size: 0.75rem;
+  font-weight: 700;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  margin-bottom: 4px;
+}
+
+.connect-step-title {
+  font-size: 0.86rem;
+  font-weight: 600;
+  color: #f1f5f9;
+}
+
+.connect-step-desc {
+  font-size: 0.78rem;
+  color: var(--text-muted, #94a3b8);
+  line-height: 1.45;
+  margin: 0;
+}
+
+.code-snippet-pre {
+  margin: 0;
+  padding: 16px;
+  overflow-x: auto;
+  font-family: var(--font-mono, monospace);
+  font-size: 0.8rem;
+  line-height: 1.5;
+  color: #cbd5e1;
+}
+
+/* FAQ Accordion */
+.faq-list {
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+  margin-top: 16px;
+}
+
+.faq-item {
+  background: var(--surface-raised, rgba(15, 23, 42, 0.45));
+  border: 1px solid var(--border, rgba(255, 255, 255, 0.07));
+  border-radius: 12px;
+  overflow: hidden;
+  transition: all 0.2s ease;
+}
+
+.faq-item:hover {
+  border-color: rgba(56, 189, 248, 0.25);
+}
+
+.faq-question {
+  width: 100%;
+  padding: 16px 20px;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  background: none;
+  border: none;
+  color: var(--text-primary, #ffffff);
+  font-size: 0.92rem;
+  font-weight: 600;
+  cursor: pointer;
+  text-align: left;
+}
+
+.faq-chevron {
+  font-size: 0.8rem;
+  color: var(--text-muted, #94a3b8);
+  transition: transform 0.2s ease;
+}
+
+.faq-item.is-open .faq-chevron {
+  transform: rotate(180deg);
+  color: #38bdf8;
+}
+
+.faq-answer {
+  padding: 0 20px 18px;
+  font-size: 0.85rem;
+  color: var(--text-muted, #94a3b8);
+  line-height: 1.55;
+  border-top: 1px solid rgba(255, 255, 255, 0.04);
+  padding-top: 12px;
+}
+
+/* Support Form */
+.support-form-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(260px, 1fr));
+  gap: 16px;
+  margin-top: 16px;
+}
+
+.support-textarea {
+  width: 100%;
+  padding: 12px 14px;
+  background: var(--surface-raised, rgba(15, 23, 42, 0.6));
+  border: 1px solid var(--border, rgba(255, 255, 255, 0.12));
+  border-radius: 8px;
+  color: #ffffff;
+  font-family: inherit;
+  font-size: 0.88rem;
+  outline: none;
+  resize: vertical;
+  min-height: 100px;
+  box-sizing: border-box;
+}
+
+.support-textarea:focus {
+  border-color: #38bdf8;
+  box-shadow: 0 0 0 3px rgba(56, 189, 248, 0.18);
+}
+
+@media (max-width: 600px) {
+  .help-page {
+    padding: 20px 16px 40px;
+  }
+}

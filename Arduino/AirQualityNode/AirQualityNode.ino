@@ -41,9 +41,73 @@ void setup() {
   }
 
   Serial.println("[Node] Setup complete. Entering sampling loop.");
+  
+  // Output initial JSON identification announcement for Web Serial detection
+  uint64_t chipid = ESP.getEfuseMac();
+  char chipHex[24];
+  snprintf(chipHex, sizeof(chipHex), "%04X%08X", (uint16_t)(chipid >> 32), (uint32_t)chipid);
+  String mac = WiFi.macAddress();
+  Serial.printf("{\"status\":\"READY\",\"device\":\"AirGuard ESP32 Sensing Node\",\"hardwareId\":\"AG-ESP32-%s\",\"mac\":\"%s\",\"chip\":\"ESP32\",\"firmware\":\"2.2.0\"}\n", chipHex, mac.c_str());
+}
+
+// Handle Web Serial provisioning commands from browser / console
+void handleSerialCommands() {
+  if (Serial.available()) {
+    String input = Serial.readStringUntil('\n');
+    input.trim();
+    if (input.length() == 0) return;
+
+    if (input.indexOf("IDENTIFY") >= 0) {
+      uint64_t chipid = ESP.getEfuseMac();
+      char chipHex[24];
+      snprintf(chipHex, sizeof(chipHex), "%04X%08X", (uint16_t)(chipid >> 32), (uint32_t)chipid);
+      String mac = WiFi.macAddress();
+      Serial.printf("{\"status\":\"OK\",\"device\":\"AirGuard ESP32 Sensing Node\",\"hardwareId\":\"AG-ESP32-%s\",\"mac\":\"%s\",\"chip\":\"ESP32\",\"revision\":%d,\"firmware\":\"2.2.0\",\"connection\":\"USB / Serial\"}\n",
+                    chipHex, mac.c_str(), ESP.getChipRevision());
+    } else if (input.indexOf("SCAN_WIFI") >= 0) {
+      int n = WiFi.scanNetworks();
+      Serial.print("{\"status\":\"OK\",\"networks\":[");
+      for (int i = 0; i < n; ++i) {
+        Serial.printf("\"%s\"%s", WiFi.SSID(i).c_str(), (i < n - 1) ? "," : "");
+      }
+      Serial.println("]}");
+    } else if (input.indexOf("PROVISION") >= 0) {
+      Serial.println("{\"status\":\"WIFI_CONNECTING\"}");
+      int ssidStart = input.indexOf("\"ssid\":\"");
+      if (ssidStart >= 0) {
+        ssidStart += 8;
+        int ssidEnd = input.indexOf("\"", ssidStart);
+        String newSsid = input.substring(ssidStart, ssidEnd);
+
+        int passStart = input.indexOf("\"password\":\"");
+        String newPass = "";
+        if (passStart >= 0) {
+          passStart += 12;
+          int passEnd = input.indexOf("\"", passStart);
+          newPass = input.substring(passStart, passEnd);
+        }
+
+        Serial.printf("[WiFi] Provisioning new credentials: SSID \"%s\"\n", newSsid.c_str());
+        WiFi.disconnect();
+        WiFi.begin(newSsid.c_str(), newPass.c_str());
+        unsigned long start = millis();
+        while (WiFi.status() != WL_CONNECTED && millis() - start < 15000) {
+          delay(300);
+          Serial.print(".");
+        }
+        if (WiFi.status() == WL_CONNECTED) {
+          Serial.printf("\n{\"status\":\"PROVISIONED\",\"ip\":\"%s\"}\n", WiFi.localIP().toString().c_str());
+        } else {
+          Serial.println("\n{\"status\":\"WIFI_FAILED\",\"error\":\"Authentication timeout\"}");
+        }
+      }
+    }
+  }
 }
 
 void loop() {
+  handleSerialCommands();
+
   unsigned long now = millis();
 
   // Non-blocking timer for sensor sampling and transmission

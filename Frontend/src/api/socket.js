@@ -9,6 +9,12 @@ let socket;
 export function getSocket() {
   if (!socket) {
     socket = io(API_URL, { autoConnect: true, reconnection: true });
+    socket.on('connect', () => {
+      const token = localStorage.getItem('airguard_token');
+      if (token) {
+        socket.emit('authenticate', token);
+      }
+    });
   }
   return socket;
 }

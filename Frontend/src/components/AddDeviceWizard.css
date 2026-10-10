@@ -1,0 +1,628 @@
+/* ============================================================
+   AirGuard — Consumer IoT Device Onboarding Wizard CSS
+   ============================================================ */
+
+.wizard-overlay {
+  position: fixed;
+  inset: 0;
+  z-index: 10000;
+  background: rgba(8, 12, 22, 0.88);
+  backdrop-filter: blur(14px);
+  -webkit-backdrop-filter: blur(14px);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 16px;
+  overflow-y: auto;
+  animation: wizardFadeIn 0.25s ease-out;
+}
+
+@keyframes wizardFadeIn {
+  from { opacity: 0; transform: scale(0.98); }
+  to { opacity: 1; transform: scale(1); }
+}
+
+.wizard-card {
+  width: 100%;
+  max-width: 680px;
+  background: linear-gradient(145deg, #13192b 0%, #0c101c 100%);
+  border: 1px solid rgba(56, 189, 248, 0.25);
+  border-radius: 24px;
+  box-shadow: 0 24px 60px rgba(0, 0, 0, 0.65), 0 0 40px rgba(56, 189, 248, 0.12);
+  display: flex;
+  flex-direction: column;
+  overflow: hidden;
+  position: relative;
+  max-height: 90vh;
+}
+
+/* ─── Header & Progress Stepper ─── */
+.wizard-header {
+  padding: 24px 28px 18px;
+  border-bottom: 1px solid rgba(255, 255, 255, 0.08);
+  background: rgba(15, 23, 42, 0.4);
+}
+
+.wizard-header-top {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 16px;
+}
+
+.wizard-title-group {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+}
+
+.wizard-icon-badge {
+  width: 42px;
+  height: 42px;
+  border-radius: 12px;
+  background: linear-gradient(135deg, rgba(56, 189, 248, 0.2) 0%, rgba(0, 210, 180, 0.2) 100%);
+  border: 1px solid rgba(56, 189, 248, 0.35);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 1.3rem;
+}
+
+.wizard-title {
+  margin: 0;
+  font-size: 1.25rem;
+  font-weight: 700;
+  color: #f8fafc;
+  letter-spacing: -0.01em;
+}
+
+.wizard-subtitle {
+  margin: 2px 0 0 0;
+  font-size: 0.8rem;
+  color: #94a3b8;
+}
+
+.wizard-close-btn {
+  background: rgba(255, 255, 255, 0.06);
+  border: 1px solid rgba(255, 255, 255, 0.1);
+  color: #94a3b8;
+  width: 34px;
+  height: 34px;
+  border-radius: 50%;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 1rem;
+  transition: all 0.2s;
+}
+
+.wizard-close-btn:hover {
+  background: rgba(239, 68, 68, 0.2);
+  color: #ef4444;
+  border-color: rgba(239, 68, 68, 0.4);
+}
+
+/* ─── Stepper Bar ─── */
+.wizard-stepper {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  position: relative;
+  padding: 8px 6px 0;
+}
+
+.wizard-stepper::before {
+  content: '';
+  position: absolute;
+  top: 20px;
+  left: 20px;
+  right: 20px;
+  height: 2px;
+  background: rgba(255, 255, 255, 0.08);
+  z-index: 1;
+}
+
+.wizard-step-node {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  position: relative;
+  z-index: 2;
+  cursor: default;
+}
+
+.wizard-step-circle {
+  width: 26px;
+  height: 26px;
+  border-radius: 50%;
+  background: #0f172a;
+  border: 2px solid rgba(255, 255, 255, 0.2);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 0.72rem;
+  font-weight: 700;
+  color: #64748b;
+  transition: all 0.25s;
+}
+
+.wizard-step-node.is-complete .wizard-step-circle {
+  background: #10b981;
+  border-color: #10b981;
+  color: #ffffff;
+}
+
+.wizard-step-node.is-active .wizard-step-circle {
+  background: #0284c7;
+  border-color: #38bdf8;
+  color: #ffffff;
+  box-shadow: 0 0 14px rgba(56, 189, 248, 0.6);
+}
+
+.wizard-step-label {
+  font-size: 0.68rem;
+  font-weight: 600;
+  color: #64748b;
+  margin-top: 6px;
+  text-align: center;
+  white-space: nowrap;
+}
+
+.wizard-step-node.is-active .wizard-step-label {
+  color: #38bdf8;
+}
+
+.wizard-step-node.is-complete .wizard-step-label {
+  color: #10b981;
+}
+
+/* ─── Wizard Body ─── */
+.wizard-body {
+  padding: 28px;
+  overflow-y: auto;
+  flex: 1;
+}
+
+.wizard-step-title {
+  font-size: 1.15rem;
+  font-weight: 700;
+  color: #f8fafc;
+  margin: 0 0 6px 0;
+}
+
+.wizard-step-desc {
+  font-size: 0.85rem;
+  color: #94a3b8;
+  margin: 0 0 22px 0;
+  line-height: 1.5;
+}
+
+/* Form inputs */
+.wizard-field-group {
+  margin-bottom: 18px;
+}
+
+.wizard-field-label {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  font-size: 0.82rem;
+  font-weight: 600;
+  color: #cbd5e1;
+  margin-bottom: 6px;
+}
+
+.wizard-input-wrap {
+  position: relative;
+  display: flex;
+  align-items: center;
+}
+
+.wizard-input {
+  width: 100%;
+  background: rgba(15, 23, 42, 0.7);
+  border: 1px solid rgba(255, 255, 255, 0.12);
+  border-radius: 12px;
+  padding: 12px 16px;
+  font-size: 0.92rem;
+  color: #f8fafc;
+  outline: none;
+  transition: all 0.2s;
+  box-sizing: border-box;
+}
+
+.wizard-input:focus {
+  border-color: #38bdf8;
+  box-shadow: 0 0 0 3px rgba(56, 189, 248, 0.18);
+}
+
+.wizard-input::placeholder {
+  color: #64748b;
+}
+
+.wizard-input-action-btn {
+  position: absolute;
+  right: 10px;
+  background: transparent;
+  border: none;
+  color: #94a3b8;
+  cursor: pointer;
+  padding: 6px;
+  border-radius: 6px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.wizard-input-action-btn:hover {
+  color: #f8fafc;
+}
+
+/* Hardware Visual Diagram (Step 3) */
+.wizard-connection-diagram {
+  background: rgba(15, 23, 42, 0.6);
+  border: 1px solid rgba(56, 189, 248, 0.2);
+  border-radius: 16px;
+  padding: 22px;
+  margin-bottom: 22px;
+  display: flex;
+  align-items: center;
+  justify-content: space-around;
+  text-align: center;
+}
+
+.diagram-device-node {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 8px;
+}
+
+.diagram-icon-box {
+  width: 58px;
+  height: 58px;
+  border-radius: 14px;
+  background: rgba(56, 189, 248, 0.1);
+  border: 1px solid rgba(56, 189, 248, 0.3);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 1.8rem;
+}
+
+.diagram-device-lbl {
+  font-size: 0.82rem;
+  font-weight: 700;
+  color: #f8fafc;
+}
+
+.diagram-device-sub {
+  font-size: 0.72rem;
+  color: #64748b;
+}
+
+.diagram-cable-link {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 4px;
+  color: #00d2b4;
+}
+
+.diagram-cable-line {
+  width: 80px;
+  height: 3px;
+  background: linear-gradient(90deg, #38bdf8 0%, #00d2b4 100%);
+  position: relative;
+  border-radius: 2px;
+}
+
+.diagram-cable-line::after {
+  content: '';
+  position: absolute;
+  top: -3px;
+  right: -2px;
+  width: 8px;
+  height: 8px;
+  border-radius: 50%;
+  background: #00d2b4;
+  box-shadow: 0 0 8px #00d2b4;
+}
+
+.diagram-cable-lbl {
+  font-size: 0.72rem;
+  font-weight: 600;
+  color: #38bdf8;
+  letter-spacing: 0.04em;
+}
+
+/* Detection Card */
+.wizard-detection-box {
+  background: rgba(16, 185, 129, 0.08);
+  border: 1px solid rgba(16, 185, 129, 0.3);
+  border-radius: 14px;
+  padding: 18px 20px;
+  margin-bottom: 20px;
+}
+
+.detection-title-row {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  color: #10b981;
+  font-size: 0.95rem;
+  font-weight: 700;
+  margin-bottom: 12px;
+}
+
+.detection-meta-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(160px, 1fr));
+  gap: 12px;
+}
+
+.detection-meta-item {
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+}
+
+.detection-meta-lbl {
+  font-size: 0.72rem;
+  color: #64748b;
+  text-transform: uppercase;
+  font-weight: 700;
+  letter-spacing: 0.04em;
+}
+
+.detection-meta-val {
+  font-size: 0.88rem;
+  color: #f8fafc;
+  font-weight: 600;
+  font-family: var(--font-mono, monospace);
+}
+
+/* Progress verification checklist (Step 5 & 6) */
+.wizard-checklist {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+  margin: 20px 0;
+}
+
+.checklist-item {
+  display: flex;
+  align-items: center;
+  gap: 14px;
+  background: rgba(15, 23, 42, 0.6);
+  border: 1px solid rgba(255, 255, 255, 0.08);
+  border-radius: 12px;
+  padding: 12px 18px;
+  transition: all 0.25s;
+}
+
+.checklist-item.is-done {
+  border-color: rgba(16, 185, 129, 0.35);
+  background: rgba(16, 185, 129, 0.08);
+}
+
+.checklist-item.is-active {
+  border-color: rgba(56, 189, 248, 0.4);
+  background: rgba(56, 189, 248, 0.08);
+}
+
+.checklist-icon {
+  width: 24px;
+  height: 24px;
+  border-radius: 50%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 0.82rem;
+  font-weight: 700;
+  flex-shrink: 0;
+}
+
+.checklist-item.is-done .checklist-icon {
+  background: #10b981;
+  color: #ffffff;
+}
+
+.checklist-item.is-active .checklist-icon {
+  background: #0284c7;
+  color: #ffffff;
+  animation: pulseDot 1.4s infinite;
+}
+
+.checklist-item.is-pending .checklist-icon {
+  background: rgba(255, 255, 255, 0.1);
+  color: #64748b;
+}
+
+@keyframes pulseDot {
+  0%, 100% { transform: scale(1); opacity: 1; }
+  50% { transform: scale(1.15); opacity: 0.8; }
+}
+
+.checklist-label {
+  font-size: 0.9rem;
+  font-weight: 600;
+  color: #cbd5e1;
+}
+
+.checklist-item.is-done .checklist-label {
+  color: #f8fafc;
+}
+
+.checklist-item.is-active .checklist-label {
+  color: #38bdf8;
+}
+
+/* Live Reading Telemetry Card (Step 7 & 8) */
+.wizard-telemetry-card {
+  background: linear-gradient(135deg, rgba(16, 185, 129, 0.12) 0%, rgba(6, 78, 59, 0.18) 100%);
+  border: 1px solid rgba(16, 185, 129, 0.35);
+  border-radius: 18px;
+  padding: 22px;
+  margin: 18px 0;
+}
+
+.telemetry-card-head {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 16px;
+}
+
+.telemetry-live-badge {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  background: rgba(16, 185, 129, 0.2);
+  color: #34d399;
+  border: 1px solid rgba(16, 185, 129, 0.4);
+  padding: 4px 10px;
+  border-radius: 999px;
+  font-size: 0.72rem;
+  font-weight: 700;
+  letter-spacing: 0.05em;
+}
+
+.telemetry-metrics-grid {
+  display: grid;
+  grid-template-columns: repeat(4, 1fr);
+  gap: 12px;
+}
+
+@media (max-width: 600px) {
+  .telemetry-metrics-grid {
+    grid-template-columns: repeat(2, 1fr);
+  }
+}
+
+.telemetry-metric-tile {
+  background: rgba(15, 23, 42, 0.6);
+  border: 1px solid rgba(255, 255, 255, 0.08);
+  border-radius: 12px;
+  padding: 12px;
+  text-align: center;
+}
+
+.telemetry-metric-lbl {
+  font-size: 0.7rem;
+  color: #94a3b8;
+  font-weight: 700;
+  text-transform: uppercase;
+  margin-bottom: 4px;
+}
+
+.telemetry-metric-val {
+  font-size: 1.25rem;
+  font-weight: 800;
+  color: #f8fafc;
+  font-family: var(--font-mono, monospace);
+}
+
+.telemetry-metric-sub {
+  font-size: 0.68rem;
+  color: #64748b;
+  margin-top: 2px;
+}
+
+/* Callout Notice */
+.wizard-callout {
+  display: flex;
+  align-items: flex-start;
+  gap: 12px;
+  background: rgba(56, 189, 248, 0.08);
+  border: 1px solid rgba(56, 189, 248, 0.25);
+  border-radius: 14px;
+  padding: 14px 18px;
+  font-size: 0.84rem;
+  color: #cbd5e1;
+  line-height: 1.5;
+  margin: 18px 0;
+}
+
+.wizard-callout-icon {
+  font-size: 1.1rem;
+  flex-shrink: 0;
+  margin-top: 2px;
+}
+
+.wizard-callout strong {
+  color: #38bdf8;
+}
+
+/* ─── Footer Controls ─── */
+.wizard-footer {
+  padding: 18px 28px 24px;
+  border-top: 1px solid rgba(255, 255, 255, 0.08);
+  background: rgba(15, 23, 42, 0.5);
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+}
+
+.wizard-btn-secondary {
+  background: rgba(255, 255, 255, 0.06);
+  border: 1px solid rgba(255, 255, 255, 0.12);
+  color: #cbd5e1;
+  padding: 10px 20px;
+  border-radius: 12px;
+  font-size: 0.9rem;
+  font-weight: 600;
+  cursor: pointer;
+  transition: all 0.2s;
+}
+
+.wizard-btn-secondary:hover:not(:disabled) {
+  background: rgba(255, 255, 255, 0.12);
+  color: #f8fafc;
+}
+
+.wizard-btn-primary {
+  background: linear-gradient(135deg, #0284c7 0%, #00d2b4 100%);
+  border: none;
+  color: #ffffff;
+  padding: 11px 24px;
+  border-radius: 12px;
+  font-size: 0.92rem;
+  font-weight: 700;
+  cursor: pointer;
+  transition: all 0.2s;
+  box-shadow: 0 4px 14px rgba(0, 210, 180, 0.25);
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.wizard-btn-primary:hover:not(:disabled) {
+  transform: translateY(-1px);
+  box-shadow: 0 6px 20px rgba(0, 210, 180, 0.35);
+}
+
+.wizard-btn-primary:disabled,
+.wizard-btn-secondary:disabled {
+  opacity: 0.5;
+  cursor: not-allowed;
+}
+
+.wizard-btn-success {
+  background: linear-gradient(135deg, #059669 0%, #10b981 100%);
+  border: none;
+  color: #ffffff;
+  padding: 11px 24px;
+  border-radius: 12px;
+  font-size: 0.92rem;
+  font-weight: 700;
+  cursor: pointer;
+  transition: all 0.2s;
+  box-shadow: 0 4px 14px rgba(16, 185, 129, 0.25);
+}
+
+.wizard-btn-success:hover {
+  transform: translateY(-1px);
+  box-shadow: 0 6px 20px rgba(16, 185, 129, 0.35);
+}

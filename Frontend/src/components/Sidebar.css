@@ -67,6 +67,10 @@
   text-align: left;
   position: relative;
   transition: all 0.15s ease;
+  text-decoration: none;
+  background: transparent;
+  border: none;
+  cursor: pointer;
 }
 
 .sidebar__item svg {
@@ -156,3 +160,49 @@
     z-index: 40;
   }
 }
+
+/* Guest Mode Sidebar Panel */
+.sidebar__guest-panel {
+  margin-top: auto;
+  padding-top: 16px;
+}
+
+.sidebar__guest-notice {
+  background: rgba(255, 255, 255, 0.03);
+  border: 1px solid var(--border-soft);
+  border-radius: 12px;
+  padding: 12px;
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+
+.guest-badge-pill {
+  display: inline-block;
+  font-size: 0.68rem;
+  font-weight: 700;
+  letter-spacing: 0.06em;
+  text-transform: uppercase;
+  color: var(--primary-accent);
+  background: rgba(56, 189, 248, 0.12);
+  border: 1px solid rgba(56, 189, 248, 0.25);
+  padding: 3px 8px;
+  border-radius: 999px;
+  align-self: flex-start;
+}
+
+.guest-desc {
+  font-size: 0.74rem;
+  color: var(--text-muted);
+  line-height: 1.4;
+  margin: 0;
+}
+
+.guest-login-btn {
+  width: 100%;
+  text-align: center;
+  text-decoration: none;
+  font-size: 0.78rem;
+  padding: 6px 10px;
+}
+

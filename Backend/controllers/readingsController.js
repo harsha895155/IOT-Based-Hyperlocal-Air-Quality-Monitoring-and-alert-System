@@ -110,11 +110,10 @@ async function createReading(req, res, next) {
       }
     }
 
-    // 4. Real-time push for reading & device status
+    // 4. Real-time push for reading & device status (Scoped to user room & device room)
     const io = req.app.get('io');
     if (io) {
-      io.emit('reading', reading);
-      io.emit('device_status', {
+      const statusPayload = {
         deviceId: device.deviceId,
         name: device.name,
         location: device.location,
@@ -124,7 +123,19 @@ async function createReading(req, res, next) {
         humidity: reading.humidity,
         gasPPM: reading.gasPPM,
         lastSeen: now,
-      });
+      };
+
+      if (device.userId) {
+        io.to(`user_${device.userId}`).emit('reading', reading);
+        io.to(`device_${device.deviceId}`).emit('reading', reading);
+        io.to(`user_${device.userId}`).emit('device_status', statusPayload);
+        io.to(`device_${device.deviceId}`).emit('device_status', statusPayload);
+      } else {
+        io.emit('reading', reading);
+        io.emit('device_status', statusPayload);
+      }
+      io.to('admin_room').emit('reading', reading);
+      io.to('admin_room').emit('device_status', statusPayload);
     }
 
     res.status(201).json({ reading, alert });
@@ -137,7 +148,22 @@ async function createReading(req, res, next) {
 async function getLatestReading(req, res, next) {
   try {
     const { deviceId } = req.query;
-    const filter = deviceId ? { deviceId: deviceId.trim() } : {};
+    let filter = {};
+    if (deviceId) {
+      const dev = await Device.findOne({ deviceId: deviceId.trim() });
+      if (dev && dev.userId) {
+        if (!req.user || (req.user.role !== 'admin' && dev.userId.toString() !== req.user._id.toString())) {
+          return res.status(403).json({ error: 'Access forbidden. This device belongs to another user.' });
+        }
+      }
+      filter = { deviceId: deviceId.trim() };
+    } else if (req.user && req.user.role !== 'admin') {
+      const userDevices = await Device.find({ userId: req.user._id }).select('deviceId');
+      if (userDevices.length === 0) {
+        return res.status(404).json({ error: 'No devices registered for this user.' });
+      }
+      filter = { deviceId: { $in: userDevices.map((d) => d.deviceId) } };
+    }
 
     const reading = await Reading.findOne(filter).sort({ createdAt: -1 });
     if (!reading) return res.status(404).json({ error: 'No readings found.' });
@@ -150,32 +176,91 @@ async function getLatestReading(req, res, next) {
 
 /**
  * GET /api/readings/history?deviceId=...&from=...&to=...&page=1&limit=50
- * Supports pagination and optional date-range filtering.
+ * Supports pagination and optional date-range filtering with user device ownership enforcement.
  */
 async function getReadingHistory(req, res, next) {
   try {
-    const { deviceId, from, to } = req.query;
+    const { deviceId, from, to, category, minAQI, maxAQI, sort = 'desc' } = req.query;
+
+    if (deviceId && deviceId !== 'all') {
+      const dev = await Device.findOne({ deviceId: deviceId.trim() });
+      if (dev && dev.userId) {
+        if (!req.user || (req.user.role !== 'admin' && dev.userId.toString() !== req.user._id.toString())) {
+          return res.status(403).json({ error: 'Access forbidden. This device belongs to another user.' });
+        }
+      }
+    }
+
     const page = Math.max(1, parseInt(req.query.page, 10) || 1);
-    const limit = Math.min(500, Math.max(1, parseInt(req.query.limit, 10) || 50));
+    const limit = Math.min(500, Math.max(1, parseInt(req.query.limit, 10) || 20));
 
     const filter = {};
-    if (deviceId) filter.deviceId = deviceId.trim();
+    if (deviceId && deviceId !== 'all') {
+      filter.deviceId = deviceId.trim();
+    } else if (req.user && req.user.role !== 'admin') {
+      const userDevices = await Device.find({ userId: req.user._id }).select('deviceId');
+      filter.deviceId = { $in: userDevices.map((d) => d.deviceId) };
+    }
+    if (category && category !== 'all') filter.category = category.trim();
+
+    if (minAQI !== undefined || maxAQI !== undefined) {
+      filter.airQuality = {};
+      if (minAQI !== undefined && !Number.isNaN(Number(minAQI))) {
+        filter.airQuality.$gte = Number(minAQI);
+      }
+      if (maxAQI !== undefined && !Number.isNaN(Number(maxAQI))) {
+        filter.airQuality.$lte = Number(maxAQI);
+      }
+    }
+
     if (from || to) {
       filter.createdAt = {};
       if (from) filter.createdAt.$gte = new Date(from);
       if (to) filter.createdAt.$lte = new Date(to);
     }
 
+    const sortOrder = sort === 'asc' ? 1 : -1;
+
     const [readings, total] = await Promise.all([
       Reading.find(filter)
-        .sort({ createdAt: -1 })
+        .sort({ createdAt: sortOrder })
         .skip((page - 1) * limit)
         .limit(limit),
       Reading.countDocuments(filter),
     ]);
 
+    // Fast quick stats for the active filter
+    let stats = null;
+    if (total > 0) {
+      const [agg] = await Reading.aggregate([
+        { $match: filter },
+        {
+          $group: {
+            _id: null,
+            avgAQI: { $avg: '$airQuality' },
+            maxAQI: { $max: '$airQuality' },
+            minAQI: { $min: '$airQuality' },
+            avgTemp: { $avg: '$temperature' },
+            avgHumidity: { $avg: '$humidity' },
+            avgGasPPM: { $avg: '$gasPPM' },
+          },
+        },
+      ]);
+      if (agg) {
+        stats = {
+          avgAQI: Math.round(agg.avgAQI || 0),
+          maxAQI: Math.round(agg.maxAQI || 0),
+          minAQI: Math.round(agg.minAQI || 0),
+          avgTemp: Number((agg.avgTemp || 0).toFixed(1)),
+          avgHumidity: Number((agg.avgHumidity || 0).toFixed(1)),
+          avgGasPPM: Number((agg.avgGasPPM || 0).toFixed(1)),
+        };
+      }
+    }
+
     res.json({
       data: readings,
+      stats: stats || { avgAQI: 0, maxAQI: 0, minAQI: 0, avgTemp: 0, avgHumidity: 0, avgGasPPM: 0 },
       pagination: {
         page,
         limit,

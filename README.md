@@ -1,46 +1,79 @@
 # AirGuard — IoT-Based Hyperlocal Air Quality Monitoring and Alert System
 
-Companion codebase to the IEEE paper of the same name. Three
-independently runnable parts:
+Official full-stack IoT and cloud engineering codebase accompanying the base paper:
+**"IoT-Based Hyperlocal Air Quality Monitoring and Alert System with Cloud Integration"**
 
+---
+
+## 🏗️ System Architecture
+
+```text
+                                AIRGUARD PLATFORM
+                                        │
+                       ┌────────────────┴────────────────┐
+                       │                                 │
+              REACT WEB DASHBOARD              FLUTTER MOBILE APP
+             (React 18 / Vite / Recharts)      (Android / iOS Native)
+                       │                                 │
+                       └────────────────┬────────────────┘
+                                        │
+                            Node.js / Express REST API
+                                        │
+                           MongoDB Atlas Cloud Database
+                                        │
+                           Socket.IO Real-Time Engine
+                                        │
+                         ESP32 Micro-Station & Transducers
+                             (MQ-135 Gas + DHT22 Climate)
 ```
+
+---
+
+## 📂 Repository Structure
+
+```text
 AirQuality-Project/
-├── Arduino/AirQualityNode/   ESP32 firmware — MQ135 + DHT22 sensing node
-├── Backend/                  Node.js / Express / MongoDB Atlas API + Socket.IO
-└── Frontend/                 React / Vite web dashboard
+├── Arduino/AirQualityNode/   ESP32 firmware — MQ-135 (GPIO 34) + DHT22 (GPIO 27) sensing node
+├── Backend/                  Node.js / Express REST API, MongoDB Atlas schemas, Socket.IO
+├── Frontend/                 React / Vite Web Dashboard, Recharts trends, Compliance reports
+├── Flutter/                  Flutter cross-platform mobile client for Android & iOS
+└── tools/                    Automated diagnostic utilities
 ```
 
-Each folder has its own `README.md` with full setup steps. Quick
-start order:
+---
 
-1. **Backend** — `cd Backend && npm install`, copy `.env.example` → `.env`, fill in your MongoDB Atlas URI, `npm run dev`.
-2. **Frontend** — `cd Frontend && npm install`, copy `.env.example` → `.env`, `npm run dev`. Register an account and you'll land on the live dashboard.
-3. Either **run the simulator** (`npm run simulate` in `Backend/`, no hardware needed) or **flash the Arduino firmware** to a real ESP32 (see `Arduino/AirQualityNode/README.md` for wiring + calibration) — both post to the same `/api/readings` endpoint on the same schema, so the dashboard doesn't care which one is feeding it.
+## 🚀 Quick Start Guide
 
-## How the pieces fit together
-
-```
-MQ135 + DHT22 → ESP32 → Wi-Fi (JSON/HTTPS) → Express API → MongoDB Atlas
-                                                    │
-                                          Socket.IO push ──→ React Dashboard
+### 1. Backend & Live Simulator
+```bash
+cd Backend
+npm install
+npm run dev
+# In another terminal:
+npm run simulate
 ```
 
-The backend's device-ingestion endpoint (`POST /api/readings`,
-authenticated via a shared `x-api-key`) is schema-identical whether
-the caller is the real ESP32 firmware or `Backend/simulator/simulate.js`
-— this is what let the dashboard, alert engine, and auth flow all get
-built and tested well before physical hardware was wired up (see the
-paper, Section VII-A).
+### 2. React Web Dashboard
+```bash
+cd Frontend
+npm install
+npm run dev
+```
+Open [http://localhost:5173](http://localhost:5173) in your browser.
 
-## What's implemented
+### 3. Flutter Mobile Client
+```bash
+cd Flutter
+flutter pub get
+flutter run
+```
+To build the Android release APK:
+```bash
+flutter build apk --release
+```
 
-- **Arduino**: modular firmware (separate sensor/network managers), Wi-Fi reconnect + backoff logic, MQ135 calibration workflow, status-LED diagnostics
-- **Backend**: JWT auth (register/login) + role field (admin/user/technician), separate API-key auth for device ingestion, REST endpoints for readings (latest/history with pagination + date filtering) and alerts (list/acknowledge), Socket.IO real-time push, rate limiting, Helmet security headers, CORS allowlist, shared AQI breakpoint/category logic
-- **Frontend**: JWT-gated login/register, live AQI hero with a horizon-gradient gauge, stat cards, historical trend chart (Recharts), real-time alerts panel with acknowledge action, a from-scratch design system (see `Frontend/README.md` §4)
-
-## What you'll still need to do before a real deployment
-
-- Calibrate the MQ135 against known-clean air (placeholder `R0` in `Arduino/AirQualityNode/config.h`)
-- Provision a real MongoDB Atlas cluster and network-access rule
-- Generate real secrets for `JWT_SECRET` and `API_KEY` (the `.env.example` files ship with placeholders only)
-- Deploy the backend somewhere reachable by the ESP32 and the deployed frontend (Render/Railway/a VPS behind Nginx+HTTPS are all reasonable)
+### 4. Hardware Deployment (ESP32)
+1. Open `Arduino/AirQualityNode/AirQualityNode.ino` in Arduino IDE.
+2. Enter your Wi-Fi SSID and Password in `config.h`.
+3. Set your backend IP or cloud URL in `config.h`.
+4. Flash to the ESP32 board.
