@@ -3,6 +3,10 @@ import client from '../api/client';
 
 export function useWeather(initialLocation = 'Current Location', initialCoords = null, autoTrack = true) {
   const [locationName, setLocationName] = useState(initialLocation || 'Current Location');
+  const [placeName, setPlaceName] = useState(null);
+  const [buildingName, setBuildingName] = useState(null);
+  const [houseName, setHouseName] = useState(null);
+  const [gpsLocation, setGpsLocation] = useState(null);
   const [coords, setCoords] = useState(initialCoords);
   const [weatherData, setWeatherData] = useState(null);
   const [loading, setLoading] = useState(false);
@@ -11,8 +15,6 @@ export function useWeather(initialLocation = 'Current Location', initialCoords =
   const [searching, setSearching] = useState(false);
   const [isLiveLocation, setIsLiveLocation] = useState(false);
   const [permissionStatus, setPermissionStatus] = useState('unknown'); // 'unknown' | 'prompt' | 'granted' | 'denied'
-
-  const watchIdRef = useRef(null);
 
   // Check browser permission status if supported
   useEffect(() => {
@@ -70,11 +72,13 @@ export function useWeather(initialLocation = 'Current Location', initialCoords =
     setError(null);
 
     const onGeoSuccess = async (pos) => {
-      const { latitude, longitude, accuracy } = pos.coords;
+      const { latitude, longitude } = pos.coords;
       const newCoords = {
         lat: Number(latitude.toFixed(4)),
         lng: Number(longitude.toFixed(4)),
       };
+      const defaultGpsStr = `${Math.abs(newCoords.lat).toFixed(4)}° ${newCoords.lat >= 0 ? 'N' : 'S'}, ${Math.abs(newCoords.lng).toFixed(4)}° ${newCoords.lng >= 0 ? 'E' : 'W'}`;
+
       setCoords(newCoords);
       setIsLiveLocation(true);
       setPermissionStatus('granted');
@@ -83,10 +87,23 @@ export function useWeather(initialLocation = 'Current Location', initialCoords =
         const rev = await client.get('/weather/reverse', {
           params: { lat: newCoords.lat, lng: newCoords.lng },
         });
-        const resolvedName = rev.data?.name || rev.data?.city || 'Current Location';
+
+        const bName = rev.data?.buildingName || null;
+        const hName = rev.data?.houseName || null;
+        const pName = rev.data?.placeName || bName || hName || (rev.data?.name !== 'Current Location' ? rev.data?.name : null);
+        const gpsStr = rev.data?.gpsLocation || defaultGpsStr;
+
+        setBuildingName(bName);
+        setHouseName(hName);
+        setPlaceName(pName);
+        setGpsLocation(gpsStr);
+
+        // Current place: show building name / house name / place name; if no name, show 'Current Location'
+        const resolvedName = pName || rev.data?.city || 'Current Location';
         setLocationName(resolvedName);
         fetchWeather(newCoords.lat, newCoords.lng, resolvedName);
       } catch {
+        setGpsLocation(defaultGpsStr);
         setLocationName('Current Location');
         fetchWeather(newCoords.lat, newCoords.lng, 'Current Location');
       } finally {
@@ -160,7 +177,10 @@ export function useWeather(initialLocation = 'Current Location', initialCoords =
 
   const selectLocation = useCallback((newLoc) => {
     const locTitle = newLoc.name || newLoc.label || newLoc.location;
-    if (locTitle) setLocationName(locTitle);
+    if (locTitle) {
+      setLocationName(locTitle);
+      setPlaceName(locTitle);
+    }
     if (newLoc.latitude && newLoc.longitude) {
       setCoords({ lat: newLoc.latitude, lng: newLoc.longitude });
     } else if (newLoc.coordinates?.lat && newLoc.coordinates?.lng) {
@@ -188,6 +208,10 @@ export function useWeather(initialLocation = 'Current Location', initialCoords =
 
   return {
     locationName,
+    placeName,
+    buildingName,
+    houseName,
+    gpsLocation,
     coords,
     weatherData,
     loading,

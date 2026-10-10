@@ -39,6 +39,10 @@ export default function Dashboard({ readingsData, onNavigateTab }) {
   // Weather Hook initialized with device coordinates or current location default
   const {
     locationName,
+    placeName,
+    buildingName,
+    houseName,
+    gpsLocation,
     coords,
     weatherData,
     loading: weatherLoading,
@@ -56,6 +60,15 @@ export default function Dashboard({ readingsData, onNavigateTab }) {
     currentDevice?.coordinates?.lat ? currentDevice.coordinates : null,
     true
   );
+
+  const displayPlaceName =
+    customSearchedLocation ||
+    (isDeviceConnected ? currentDevice?.location : null) ||
+    placeName ||
+    buildingName ||
+    houseName ||
+    (locationName && locationName !== 'Current Location' ? locationName : null) ||
+    'Current Location';
 
   const [customSearchedLocation, setCustomSearchedLocation] = useState(null);
   const [searchQuery, setSearchQuery] = useState('');
@@ -200,7 +213,7 @@ export default function Dashboard({ readingsData, onNavigateTab }) {
         <div className="weather-topbar__location">
           <div className="weather-location-title-row">
             <h1 className="weather-location-title">
-              {customSearchedLocation || (isDeviceConnected ? currentDevice?.location : null) || locationName || 'Current Location'}
+              {displayPlaceName}
             </h1>
             <div className={`live-pulse-badge ${isDeviceConnected ? 'is-live' : (isLiveLocation ? 'is-live' : 'is-standby')}`}>
               <span className="live-dot" style={isLiveLocation && !isDeviceConnected ? { background: '#10b981', boxShadow: '0 0 8px #10b981' } : {}} />
@@ -219,10 +232,10 @@ export default function Dashboard({ readingsData, onNavigateTab }) {
             ) : (
               <>
                 <span style={{ color: isLiveLocation ? '#10b981' : 'var(--color-primary, #38bdf8)', fontWeight: 600 }}>
-                  {isLiveLocation ? '📍 Live User GPS Tracked' : '📍 Location Mode'}
+                  {isLiveLocation ? (buildingName || houseName ? `🏠 ${buildingName || houseName}` : '📍 Live Place Tracked') : '📍 Location Mode'}
                 </span>
                 <span className="sep">•</span>
-                <span>{coords ? `${coords.lat.toFixed(4)}°, ${coords.lng.toFixed(4)}°` : 'Resolving GPS'}</span>
+                <span>{gpsLocation || (coords ? `${coords.lat.toFixed(4)}°, ${coords.lng.toFixed(4)}°` : 'Resolving GPS')}</span>
                 <span className="sep">•</span>
                 <span>{weatherData?.updatedAt ? `Updated ${formatTimeAgo(weatherData.updatedAt)}` : 'Live Forecast'}</span>
               </>
@@ -434,12 +447,12 @@ export default function Dashboard({ readingsData, onNavigateTab }) {
           <div style={{ display: 'flex', alignItems: 'center', gap: '10px' }}>
             <span style={{ fontSize: '1.2rem' }}>📍</span>
             <div>
-              <strong style={{ color: '#38bdf8' }}>Current Location Mode:</strong>{' '}
+              <strong style={{ color: '#38bdf8' }}>Current Place Mode:</strong>{' '}
               {devices.length === 0
                 ? 'No AirGuard IoT device connected yet. Displaying live weather, temperature, humidity, and ambient air quality for '
                 : 'Device is offline or not connected. Displaying real-time weather and air quality for '}
               <span style={{ fontWeight: 600, color: '#f8fafc' }}>
-                {customSearchedLocation || locationName || 'your current location'}
+                {displayPlaceName}
               </span>.
             </div>
           </div>
@@ -475,7 +488,7 @@ export default function Dashboard({ readingsData, onNavigateTab }) {
                 <span>
                   {isDeviceConnected
                     ? `AirGuard Sensing Node (${currentDevice?.name || currentDevice?.id})`
-                    : `📍 Ambient Air Quality (${customSearchedLocation || locationName || 'Current Location'})`}
+                    : `📍 Ambient Air Quality (${displayPlaceName})`}
                 </span>
               </div>
             </div>

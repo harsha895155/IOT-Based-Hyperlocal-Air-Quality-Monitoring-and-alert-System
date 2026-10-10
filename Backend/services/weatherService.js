@@ -140,10 +140,69 @@ async function searchLocations(query) {
 async function reverseGeocode(lat, lng) {
   if (lat == null || lng == null) return null;
 
-  // 1. Try Google Geocoding API if key configured
+  const latNum = Number(parseFloat(lat).toFixed(4));
+  const lngNum = Number(parseFloat(lng).toFixed(4));
+  const gpsString = `${Math.abs(latNum).toFixed(4)}° ${latNum >= 0 ? 'N' : 'S'}, ${Math.abs(lngNum).toFixed(4)}° ${lngNum >= 0 ? 'E' : 'W'}`;
+
+  // 1. Try OpenStreetMap Nominatim for hyperlocal building / house / street resolution
+  try {
+    const nomEndpoint = `https://nominatim.openstreetmap.org/reverse?lat=${latNum}&lon=${lngNum}&format=json&addressdetails=1`;
+    const controller = new AbortController();
+    const timeout = setTimeout(() => controller.abort(), 4500);
+    const nomRes = await fetch(nomEndpoint, {
+      signal: controller.signal,
+      headers: { 'User-Agent': 'AirGuard/1.0 (Air Quality Intelligence Platform)' },
+    });
+    clearTimeout(timeout);
+
+    if (nomRes.ok) {
+      const nomData = await nomRes.json();
+      const addr = nomData.address || {};
+
+      const buildingName = addr.building || addr.house_name || addr.amenity || addr.office || addr.shop || addr.leisure || null;
+      const houseNumber = addr.house_number || null;
+      const road = addr.road || addr.pedestrian || null;
+      const houseName = houseNumber ? (road ? `${houseNumber}, ${road}` : houseNumber) : null;
+      const neighbourhood = addr.neighbourhood || addr.suburb || addr.quarter || addr.residential || addr.hamlet || null;
+      const city = addr.city || addr.town || addr.village || addr.municipality || '';
+      const state = addr.state || '';
+      const country = addr.country || '';
+
+      // Hyperlocal place hierarchy: Building > House > Road with Neighbourhood > Road > Area > City
+      let specificPlace = buildingName || houseName;
+      if (!specificPlace && road) {
+        specificPlace = neighbourhood ? `${road}, ${neighbourhood}` : road;
+      }
+      if (!specificPlace && neighbourhood) {
+        specificPlace = city ? `${neighbourhood}, ${city}` : neighbourhood;
+      }
+
+      if (specificPlace || city) {
+        return {
+          name: specificPlace || city || 'Current Location',
+          placeName: specificPlace || null,
+          buildingName: buildingName || null,
+          houseName: houseName || null,
+          road: road || null,
+          neighbourhood: neighbourhood || null,
+          city,
+          state,
+          country,
+          label: nomData.display_name || [specificPlace || city, state, country].filter(Boolean).join(', '),
+          gpsLocation: gpsString,
+          latitude: latNum,
+          longitude: lngNum,
+        };
+      }
+    }
+  } catch (e) {
+    console.warn('[WeatherService] Nominatim reverse geocode notice:', e.message);
+  }
+
+  // 2. Try Google Geocoding API if configured
   if (GOOGLE_API_KEY) {
     try {
-      const gEndpoint = `https://maps.googleapis.com/maps/api/geocode/json?latlng=${lat},${lng}&key=${GOOGLE_API_KEY}`;
+      const gEndpoint = `https://maps.googleapis.com/maps/api/geocode/json?latlng=${latNum},${lngNum}&key=${GOOGLE_API_KEY}`;
       const controller = new AbortController();
       const timeout = setTimeout(() => controller.abort(), 4000);
       const gRes = await fetch(gEndpoint, { signal: controller.signal });
@@ -153,31 +212,51 @@ async function reverseGeocode(lat, lng) {
         const gData = await gRes.json();
         if (gData.status === 'OK' && Array.isArray(gData.results) && gData.results.length > 0) {
           const item = gData.results[0];
+          let premise = '';
+          let subpremise = '';
+          let route = '';
+          let streetNumber = '';
+          let neighborhood = '';
           let city = '';
           let state = '';
           for (const comp of item.address_components || []) {
+            if (comp.types.includes('premise') || comp.types.includes('point_of_interest') || comp.types.includes('establishment')) {
+              premise = comp.long_name;
+            }
+            if (comp.types.includes('subpremise')) subpremise = comp.long_name;
+            if (comp.types.includes('street_number')) streetNumber = comp.long_name;
+            if (comp.types.includes('route')) route = comp.long_name;
+            if (comp.types.includes('neighborhood') || comp.types.includes('sublocality')) neighborhood = comp.long_name;
             if (comp.types.includes('locality')) city = comp.long_name;
             if (!city && comp.types.includes('administrative_area_level_2')) city = comp.long_name;
             if (comp.types.includes('administrative_area_level_1')) state = comp.short_name || comp.long_name;
           }
-          const parts = item.formatted_address.split(',').map((s) => s.trim());
-          const name = city ? (state ? `${city}, ${state}` : city) : parts[0];
+
+          const houseName = streetNumber ? (route ? `${streetNumber}, ${route}` : streetNumber) : null;
+          const specificPlace = premise || (subpremise && premise ? `${subpremise}, ${premise}` : null) || houseName || (route ? `${route}, ${neighborhood || city}` : neighborhood);
+
           return {
-            name: name || 'Current Location',
-            label: item.formatted_address,
-            city: city || parts[0],
+            name: specificPlace || city || item.formatted_address.split(',')[0] || 'Current Location',
+            placeName: specificPlace || null,
+            buildingName: premise || null,
+            houseName: houseName || null,
+            road: route || null,
+            neighbourhood: neighborhood || null,
+            city: city || '',
             state,
-            latitude: Number(lat.toFixed(4)),
-            longitude: Number(lng.toFixed(4)),
+            label: item.formatted_address,
+            gpsLocation: gpsString,
+            latitude: latNum,
+            longitude: lngNum,
           };
         }
       }
     } catch (e) {}
   }
 
-  // 2. High-precision fallback
+  // 3. High-precision fallback
   try {
-    const endpoint = `https://api.bigdatacloud.net/data/reverse-geocode-client?latitude=${lat}&longitude=${lng}&localityLanguage=en`;
+    const endpoint = `https://api.bigdatacloud.net/data/reverse-geocode-client?latitude=${latNum}&longitude=${lngNum}&localityLanguage=en`;
     const controller = new AbortController();
     const timeout = setTimeout(() => controller.abort(), 3500);
     const res = await fetch(endpoint, { signal: controller.signal });
@@ -187,20 +266,32 @@ async function reverseGeocode(lat, lng) {
       const data = await res.json();
       const city = data.city || data.locality || data.principalSubdivision;
       const label = [city, data.principalSubdivision, data.countryName].filter(Boolean).join(', ');
-      if (city) {
-        return {
-          name: city,
-          label,
-          city,
-          state: data.principalSubdivision || '',
-          latitude: Number(lat.toFixed(4)),
-          longitude: Number(lng.toFixed(4)),
-        };
-      }
+      return {
+        name: city || 'Current Location',
+        placeName: data.locality || null,
+        buildingName: null,
+        houseName: null,
+        road: null,
+        neighbourhood: data.locality || null,
+        city: city || '',
+        state: data.principalSubdivision || '',
+        label,
+        gpsLocation: gpsString,
+        latitude: latNum,
+        longitude: lngNum,
+      };
     }
   } catch (e) {}
 
-  return null;
+  return {
+    name: 'Current Location',
+    placeName: null,
+    buildingName: null,
+    houseName: null,
+    gpsLocation: gpsString,
+    latitude: latNum,
+    longitude: lngNum,
+  };
 }
 
 /**

@@ -30,8 +30,10 @@ export default function LocationsView() {
       }
     } catch (e) {}
     return {
-      name: 'Current Location',
-      label: 'Acquiring current GPS location...',
+      name: 'Locating place...',
+      placeName: null,
+      gpsLocation: null,
+      label: 'Acquiring GPS coordinates...',
       lat: null,
       lng: null,
       isCurrentLocation: true,
@@ -195,29 +197,54 @@ export default function LocationsView() {
     navigator.geolocation.getCurrentPosition(
       async (pos) => {
         const { latitude, longitude } = pos.coords;
-        let resolvedCity = 'Current Location';
-        let resolvedLabel = `GPS (${latitude.toFixed(2)}°, ${longitude.toFixed(2)}°)`;
+        const latNum = Number(latitude.toFixed(4));
+        const lngNum = Number(longitude.toFixed(4));
+        const defaultGpsStr = `${Math.abs(latNum).toFixed(4)}° ${latNum >= 0 ? 'N' : 'S'}, ${Math.abs(lngNum).toFixed(4)}° ${lngNum >= 0 ? 'E' : 'W'}`;
+
+        let resolvedPlace = null;
+        let buildingName = null;
+        let houseName = null;
+        let resolvedLabel = defaultGpsStr;
+        let gpsString = defaultGpsStr;
 
         try {
           const revRes = await client.get('/weather/reverse', {
             params: { lat: latitude, lng: longitude },
           });
-          if (revRes.data?.name) resolvedCity = revRes.data.name;
-          if (revRes.data?.label) resolvedLabel = revRes.data.label;
+          const d = revRes.data || {};
+          buildingName = d.buildingName || null;
+          houseName = d.houseName || null;
+          resolvedPlace = d.placeName || buildingName || houseName || (d.name && d.name !== 'Current Location' ? d.name : null);
+          if (d.label) resolvedLabel = d.label;
+          if (d.gpsLocation) gpsString = d.gpsLocation;
         } catch (e) {}
 
+        // In the location page: show current place (building name / house name / specific place); if no name, show GPS location!
+        const finalDisplayName = resolvedPlace || gpsString;
+
         const gpsLoc = {
-          name: resolvedCity,
-          label: resolvedLabel,
+          name: finalDisplayName,
+          placeName: resolvedPlace,
+          buildingName,
+          houseName,
+          gpsLocation: gpsString,
+          label: resolvedLabel || gpsString,
           lat: latitude,
           lng: longitude,
           isCurrentLocation: true,
+          hasSpecificName: Boolean(resolvedPlace),
         };
         setCurrentLocation(gpsLoc);
         try {
           localStorage.setItem('airguard_last_gps_location', JSON.stringify(gpsLoc));
         } catch (e) {}
-        if (!isInitialAuto) showToast(`✓ Switched to your current location: ${resolvedCity}`);
+        if (!isInitialAuto) {
+          showToast(
+            resolvedPlace
+              ? `✓ Switched to your current place: ${resolvedPlace}`
+              : `✓ Switched to your GPS location: ${gpsString}`
+          );
+        }
       },
       (err) => {
         if (!isInitialAuto) showToast(`Could not acquire GPS: ${err.message}`);
@@ -482,16 +509,18 @@ export default function LocationsView() {
                 <div>
                   <div className="loc-hero-place-row">
                     <span className="loc-hero-pin">📍</span>
-                    <h2 className="loc-hero-place">{currentLocation.label || currentLocation.name}</h2>
+                    <h2 className="loc-hero-place">{currentLocation.name}</h2>
                     {currentLocation.isCurrentLocation && (
                       <span className="loc-live-gps-pill">
                         <span className="live-dot" />
-                        CURRENT LOCATION
+                        {currentLocation.hasSpecificName ? 'CURRENT PLACE' : 'GPS LOCATION'}
                       </span>
                     )}
                   </div>
                   <span className="loc-hero-source">
-                    Source: {weatherData.source || 'Google Weather Service'} · Updated {new Date(weatherData.updatedAt).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })}
+                    {currentLocation.hasSpecificName
+                      ? `${currentLocation.buildingName ? `🏠 ${currentLocation.buildingName} · ` : ''}📍 GPS: ${currentLocation.gpsLocation || `${currentLocation.lat}°, ${currentLocation.lng}°`} · ${currentLocation.label}`
+                      : `📍 GPS Coordinates: ${currentLocation.gpsLocation || `${currentLocation.lat}°, ${currentLocation.lng}°`} · Source: ${weatherData.source || 'Google Weather'}`}
                   </span>
                 </div>
 
