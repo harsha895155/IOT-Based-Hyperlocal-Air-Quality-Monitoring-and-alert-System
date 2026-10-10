@@ -52,6 +52,7 @@ export default function AddDeviceWizard({ isOpen, onClose, onDeviceAdded, onNavi
   const [detectedHardware, setDetectedHardware] = useState(null);
   const [scannedNetworks, setScannedNetworks] = useState([]);
   const [scanningWifi, setScanningWifi] = useState(false);
+  const [wifiScanNotice, setWifiScanNotice] = useState(null);
   const serialWriterRef = useRef(null);
   const serialReaderRef = useRef(null);
 
@@ -277,13 +278,29 @@ export default function AddDeviceWizard({ isOpen, onClose, onDeviceAdded, onNavi
 
   // Step 3: Wi-Fi Scan via Serial
   const handleScanWifi = async () => {
-    if (!serialConnected || !serialWriterRef.current) return;
+    setWifiScanNotice(null);
+    if (!serialConnected || !serialWriterRef.current) {
+      setWifiScanNotice(
+        'Direct over-the-air Wi-Fi scanning requires an active USB Serial connection to the ESP32. Please type your Wi-Fi Name (SSID) and Password directly into the boxes below, or click "Skip Wi-Fi input" if your ESP32 is already programmed.'
+      );
+      return;
+    }
     setScanningWifi(true);
+    setWifiScanNotice('Instructing connected ESP32 to scan nearby 2.4GHz Wi-Fi networks (this takes 3–5 seconds)...');
     try {
       await serialWriterRef.current.write('{"cmd":"SCAN_WIFI"}\n');
-      setTimeout(() => setScanningWifi(false), 5000);
-    } catch {
+      setTimeout(() => {
+        setScanningWifi(false);
+        setScannedNetworks((nets) => {
+          if (!nets || nets.length === 0) {
+            setWifiScanNotice('ESP32 did not return any Wi-Fi networks. Please type your Wi-Fi network name directly in the box below.');
+          }
+          return nets;
+        });
+      }, 6000);
+    } catch (err) {
       setScanningWifi(false);
+      setWifiScanNotice(`USB scan failed: ${err.message}. Please type your Wi-Fi name manually.`);
     }
   };
 
@@ -789,17 +806,21 @@ export default function AddDeviceWizard({ isOpen, onClose, onDeviceAdded, onNavi
                   <label className="wizard-field-label" style={{ margin: 0 }}>
                     <span>Wi-Fi Network (SSID)</span>
                   </label>
-                  {serialConnected && (
-                    <button
-                      type="button"
-                      onClick={handleScanWifi}
-                      disabled={scanningWifi}
-                      style={{ background: 'transparent', border: 'none', color: '#38bdf8', cursor: 'pointer', fontSize: '0.75rem', fontWeight: 600 }}
-                    >
-                      {scanningWifi ? '🔍 Scanning...' : '📡 Scan Nearby Networks'}
-                    </button>
-                  )}
+                  <button
+                    type="button"
+                    onClick={handleScanWifi}
+                    disabled={scanningWifi}
+                    style={{ background: 'transparent', border: 'none', color: '#38bdf8', cursor: 'pointer', fontSize: '0.75rem', fontWeight: 600 }}
+                  >
+                    {scanningWifi ? '🔍 Scanning...' : '📡 Scan Nearby Networks'}
+                  </button>
                 </div>
+
+                {wifiScanNotice && (
+                  <div style={{ background: 'rgba(56, 189, 248, 0.1)', border: '1px solid rgba(56, 189, 248, 0.3)', borderRadius: '8px', padding: '8px 12px', fontSize: '0.8rem', color: '#38bdf8', marginBottom: '10px' }}>
+                    ℹ️ {wifiScanNotice}
+                  </div>
+                )}
 
                 {scannedNetworks.length > 0 ? (
                   <select
@@ -819,10 +840,13 @@ export default function AddDeviceWizard({ isOpen, onClose, onDeviceAdded, onNavi
                       className="wizard-input"
                       value={formData.wifiSsid}
                       onChange={(e) => setFormData({ ...formData, wifiSsid: e.target.value })}
-                      placeholder="e.g. Home_WiFi_2.4G"
+                      placeholder="Type your Wi-Fi name (e.g. Home_WiFi_2.4G)"
                     />
                   </div>
                 )}
+                <span style={{ fontSize: '0.75rem', color: '#94a3b8', display: 'block', marginTop: '4px' }}>
+                  ✍️ Type your router or phone hotspot Wi-Fi network name directly in the box above.
+                </span>
               </div>
 
               {/* Wi-Fi Password */}
@@ -836,7 +860,7 @@ export default function AddDeviceWizard({ isOpen, onClose, onDeviceAdded, onNavi
                     className="wizard-input"
                     value={formData.wifiPassword}
                     onChange={(e) => setFormData({ ...formData, wifiPassword: e.target.value })}
-                    placeholder="Enter Wi-Fi password"
+                    placeholder="Enter your Wi-Fi password"
                   />
                   <button
                     type="button"
@@ -845,6 +869,57 @@ export default function AddDeviceWizard({ isOpen, onClose, onDeviceAdded, onNavi
                     aria-label="Toggle password visibility"
                   >
                     {showPassword ? '👁️' : '👁️‍🗨️'}
+                  </button>
+                </div>
+              </div>
+
+              {/* Option to skip Wi-Fi if already programmed in Arduino config.h */}
+              <div style={{ marginTop: '14px', marginBottom: '14px', padding: '12px 14px', background: 'rgba(16, 185, 129, 0.08)', border: '1px solid rgba(16, 185, 129, 0.25)', borderRadius: '10px' }}>
+                <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', flexWrap: 'wrap', gap: '8px' }}>
+                  <div>
+                    <div style={{ fontSize: '0.84rem', color: '#10b981', fontWeight: 600 }}>
+                      ⚡ Already programmed Wi-Fi in Arduino config.h?
+                    </div>
+                    <div style={{ fontSize: '0.74rem', color: '#94a3b8', marginTop: '2px' }}>
+                      If your ESP32 is already pre-configured with Wi-Fi credentials, you can skip typing them here.
+                    </div>
+                  </div>
+                  <button
+                    type="button"
+                    style={{
+                      background: '#10b981',
+                      border: 'none',
+                      color: '#0f172a',
+                      fontWeight: 600,
+                      borderRadius: '6px',
+                      padding: '8px 14px',
+                      fontSize: '0.8rem',
+                      cursor: 'pointer',
+                    }}
+                    onClick={async () => {
+                      try {
+                        const fullLoc = [formData.locality, formData.city, formData.state].filter(Boolean).join(', ') || formData.location;
+                        await client.post('/devices/provision-session', {
+                          deviceId: formData.deviceId || 'esp32-node-01',
+                          name: formData.name,
+                          location: fullLoc,
+                          locality: formData.locality,
+                          city: formData.city,
+                          state: formData.state,
+                          country: formData.country,
+                          type: formData.type,
+                          description: formData.description,
+                          hardwareMac: detectedHardware?.mac || '',
+                          coordinates: { lat: formData.lat, lng: formData.lng },
+                        });
+                        setStep(5);
+                        startVerification();
+                      } catch (err) {
+                        setProvisionError(err.response?.data?.error || err.message);
+                      }
+                    }}
+                  >
+                    Skip Wi-Fi & Verify Device Directly →
                   </button>
                 </div>
               </div>
