@@ -61,6 +61,12 @@ export default function Dashboard({ readingsData, onNavigateTab }) {
     true
   );
 
+  const [customSearchedLocation, setCustomSearchedLocation] = useState(null);
+  const [searchQuery, setSearchQuery] = useState('');
+  const [searchDropdownOpen, setSearchDropdownOpen] = useState(false);
+  const [deviceDropdownOpen, setDeviceDropdownOpen] = useState(false);
+  const searchRef = useRef(null);
+
   const displayPlaceName =
     customSearchedLocation ||
     (isDeviceConnected ? currentDevice?.location : null) ||
@@ -69,12 +75,6 @@ export default function Dashboard({ readingsData, onNavigateTab }) {
     houseName ||
     (locationName && locationName !== 'Current Location' ? locationName : null) ||
     'Current Location';
-
-  const [customSearchedLocation, setCustomSearchedLocation] = useState(null);
-  const [searchQuery, setSearchQuery] = useState('');
-  const [searchDropdownOpen, setSearchDropdownOpen] = useState(false);
-  const [deviceDropdownOpen, setDeviceDropdownOpen] = useState(false);
-  const searchRef = useRef(null);
 
   // When currentDevice changes, sync location coords; if no device or device coords missing, use user live location
   useEffect(() => {
