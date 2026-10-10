@@ -63,17 +63,6 @@ export default function LoginView() {
             },
             auto_select: false,
           });
-
-          const googleBtnContainer = document.getElementById('google-signin-btn-container');
-          if (googleBtnContainer) {
-            window.google.accounts.id.renderButton(googleBtnContainer, {
-              theme: 'outline',
-              size: 'large',
-              width: '100%',
-              text: 'continue_with',
-              shape: 'rectangular',
-            });
-          }
         } catch (err) {
           console.warn('Google Identity Services initialization notice:', err);
         }
@@ -285,7 +274,6 @@ export default function LoginView() {
           {/* GOOGLE SSO BUTTON (Only for login and register modes) */}
           {(mode === 'login' || mode === 'register') && (
             <div style={{ marginBottom: '18px' }}>
-              <div id="google-signin-btn-container" style={{ width: '100%', marginBottom: '8px' }}></div>
               <button
                 type="button"
                 className="login-google-btn"
