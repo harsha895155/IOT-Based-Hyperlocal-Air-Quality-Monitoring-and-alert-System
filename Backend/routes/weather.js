@@ -18,11 +18,10 @@ router.get('/', async (req, res) => {
         lng = dev.coordinates.lng;
         if (!req.query.location) locationName = dev.location || locationName;
       } else {
-        // No device registered and no coords provided — require client to provide coordinates
-        return res.status(400).json({
-          error: 'No coordinates provided',
-          message: 'Please provide lat and lng query parameters, or connect a device with location data.',
-        });
+        // No device registered yet — default to primary AirGuard sensing station coordinates (GIST Campus)
+        lat = 14.4426;
+        lng = 79.9865;
+        if (!req.query.location) locationName = 'GIST Campus (Nellore)';
       }
     }
 
