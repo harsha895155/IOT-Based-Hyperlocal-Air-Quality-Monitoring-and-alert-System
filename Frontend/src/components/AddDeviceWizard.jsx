@@ -559,9 +559,48 @@ export default function AddDeviceWizard({ isOpen, onClose, onDeviceAdded, onNavi
                       >
                         {serialConnecting ? '⏳ Accessing Serial Port...' : '🔌 Connect AirGuard Device'}
                       </button>
-                      <p style={{ fontSize: '0.82rem', color: '#94a3b8', marginTop: '12px' }}>
+                      <p style={{ fontSize: '0.82rem', color: '#94a3b8', marginTop: '12px', marginBottom: '14px' }}>
                         Your browser will prompt you to select the connected ESP32 USB COM port.
                       </p>
+
+                      <div style={{ paddingTop: '10px', borderTop: '1px solid rgba(255, 255, 255, 0.08)' }}>
+                        <button
+                          type="button"
+                          style={{
+                            background: 'rgba(56, 189, 248, 0.08)',
+                            border: '1px solid rgba(56, 189, 248, 0.25)',
+                            color: '#38bdf8',
+                            borderRadius: '8px',
+                            padding: '8px 16px',
+                            fontSize: '0.84rem',
+                            cursor: 'pointer',
+                            display: 'inline-flex',
+                            alignItems: 'center',
+                            gap: '6px',
+                          }}
+                          onClick={() => {
+                            const defaultId = formData.deviceId || 'esp32-node-01';
+                            setDetectedHardware({
+                              device: 'AirGuard ESP32 Sensing Node',
+                              hardwareId: defaultId,
+                              mac: 'Wi-Fi Standalone',
+                              chip: 'ESP32',
+                              revision: 1,
+                              firmware: '2.2.0',
+                              connection: 'Pre-flashed / Cloud Mode',
+                              status: 'Configured',
+                            });
+                            setFormData((f) => ({
+                              ...f,
+                              deviceId: defaultId,
+                              name: f.name || 'Primary AirGuard Station',
+                            }));
+                            setSerialConnected(true);
+                          }}
+                        >
+                          ⚡ Already flashed via Arduino IDE? Skip USB detection & register directly →
+                        </button>
+                      </div>
                     </div>
                   ) : (
                     <div className="wizard-callout" style={{ borderColor: 'rgba(245, 158, 11, 0.4)', background: 'rgba(245, 158, 11, 0.08)' }}>
