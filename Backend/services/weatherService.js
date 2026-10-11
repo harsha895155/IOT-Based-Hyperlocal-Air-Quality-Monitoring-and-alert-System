@@ -402,6 +402,8 @@ async function getWeatherForCoordinates(lat, lng, locationName = 'Current Locati
       updatedAt: new Date().toISOString(),
       source: 'Google Weather Service',
       provider: 'Google Weather / High-Precision Meteorological Feed',
+      temperature: current.temperature_2m != null ? Number(current.temperature_2m.toFixed(1)) : null,
+      humidity: current.relative_humidity_2m != null ? Math.round(current.relative_humidity_2m) : null,
       current: {
         temp: current.temperature_2m != null ? Number(current.temperature_2m.toFixed(1)) : null,
         feelsLike: current.apparent_temperature != null ? Number(current.apparent_temperature.toFixed(1)) : null,

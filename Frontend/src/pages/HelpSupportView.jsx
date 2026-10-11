@@ -80,9 +80,9 @@ export default function HelpSupportView() {
     e.preventDefault();
     if (!supportMsg.trim()) return;
 
-    const randomId = Math.floor(1000 + Math.random() * 9000);
+    const ticketNum = Date.now().toString().slice(-6);
     setSupportTicket({
-      id: `AG-SUP-${randomId}`,
+      id: `AG-SUP-${ticketNum}`,
       category: supportCategory,
       nodeId: supportNodeId,
       time: new Date().toLocaleTimeString(),
