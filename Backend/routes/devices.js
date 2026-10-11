@@ -122,7 +122,11 @@ router.post('/provision-session', protect, async (req, res, next) => {
     let existing = await Device.findOne({ deviceId: cleanId });
 
     if (existing && existing.userId && existing.userId.toString() !== req.user._id.toString() && req.user.role !== 'admin') {
-      return res.status(403).json({ error: 'This device ID is already registered to another user account.' });
+      if (!existing.lastSeen && !existing.latestReading) {
+        existing.userId = req.user._id;
+      } else {
+        return res.status(403).json({ error: 'This device ID is already registered to another user account.' });
+      }
     }
 
     const fullLocation = [locality, city, state].filter(Boolean).join(', ') || location || 'AirGuard Station';
@@ -246,7 +250,11 @@ router.post('/', protect, async (req, res, next) => {
     if (existing) {
       // If the device is already registered by a different user
       if (existing.userId && existing.userId.toString() !== req.user._id.toString() && req.user.role !== 'admin') {
-        return res.status(403).json({ error: 'This device ID is already registered to another user account.' });
+        if (!existing.lastSeen && !existing.latestReading) {
+          existing.userId = req.user._id;
+        } else {
+          return res.status(403).json({ error: 'This device ID is already registered to another user account.' });
+        }
       }
 
       existing.name = name || existing.name;

@@ -115,9 +115,32 @@ export default function AddDeviceWizard({ isOpen, onClose, onDeviceAdded, onNavi
     setSerialError(null);
 
     try {
-      // 1. Request port from user gesture
+      // 1. Clean up existing active reader/writer streams if any
+      if (serialReaderRef.current) {
+        try { await serialReaderRef.current.cancel(); } catch (e) {}
+        serialReaderRef.current = null;
+      }
+      if (serialWriterRef.current) {
+        try { await serialWriterRef.current.close(); } catch (e) {}
+        serialWriterRef.current = null;
+      }
+      if (serialPort && serialPort.readable) {
+        try { await serialPort.close(); } catch (e) {}
+      }
+
+      // Request port from user gesture
       const port = await navigator.serial.requestPort();
-      await port.open({ baudRate: 115200 });
+
+      // Only call open() if not already opened
+      if (!port.readable) {
+        try {
+          await port.open({ baudRate: 115200 });
+        } catch (openErr) {
+          if (!openErr.message || !openErr.message.includes('already open')) {
+            throw openErr;
+          }
+        }
+      }
       setSerialPort(port);
 
       // Set up bidirectional streams
@@ -193,6 +216,10 @@ export default function AddDeviceWizard({ isOpen, onClose, onDeviceAdded, onNavi
     } catch (err) {
       if (err.name === 'NotFoundError') {
         setSerialError('No device was selected in the port picker.');
+      } else if (err.message && (err.message.includes('already open') || err.message.includes('Access denied'))) {
+        setSerialError(
+          'Serial Port Busy: The ESP32 COM port is currently in use or locked. Please close the Arduino IDE Serial Monitor (Tools → Serial Monitor) if it is open, or unplug and re-plug the ESP32 USB cable, then click "Connect AirGuard Device" again.'
+        );
       } else {
         setSerialError(`USB Connection error: ${err.message}`);
       }
