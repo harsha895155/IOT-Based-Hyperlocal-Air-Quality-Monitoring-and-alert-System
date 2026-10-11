@@ -34,7 +34,7 @@ const deviceSchema = new mongoose.Schema(
     },
     sensors: {
       type: [String],
-      default: ['MQ135', 'DHT22'],
+      default: ['MQ135', 'DHT11'],
     },
     coordinates: {
       lat: { type: Number, default: null },

@@ -93,12 +93,20 @@ SensorReading SensorManager::read() {
   r.temperature = dht.readTemperature();
   r.humidity    = dht.readHumidity();
 
+  // If initial read returned NaN, wait 250ms and retry once (common DHT timing quirk)
   if (isnan(r.temperature) || isnan(r.humidity)) {
-    r.valid = false;
-    r.gasPPM = 0;
-    r.aqi = 0;
-    r.category = "N/A";
-    return r;
+    delay(250);
+    r.temperature = dht.readTemperature();
+    r.humidity    = dht.readHumidity();
+  }
+
+  // If still NaN, use nominal ambient fallbacks (26.0 C, 50.0 % RH) so that
+  // MQ-135 gas and AQI telemetry continue to transmit instead of silencing the node
+  if (isnan(r.temperature)) {
+    r.temperature = 26.0f;
+  }
+  if (isnan(r.humidity)) {
+    r.humidity = 50.0f;
   }
 
   r.gasPPM   = readMQ135PPM();

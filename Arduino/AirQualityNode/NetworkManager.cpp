@@ -41,25 +41,6 @@ bool NodeNetworkManager::sendReading(const SensorReading &reading) {
     return false;
   }
 
-  HTTPClient http;
-  String url = String(BACKEND_URL);
-
-  if (url.startsWith("https://")) {
-    WiFiClientSecure *client = new WiFiClientSecure;
-    if (client) {
-      client->setInsecure(); // Skip CA certificate check for simplicity
-      http.begin(*client, url);
-    } else {
-      http.begin(url);
-    }
-  } else {
-    http.begin(url);
-  }
-
-  http.addHeader("Content-Type", "application/json");
-  http.addHeader("x-api-key", DEVICE_API_KEY);
-  http.setTimeout(HTTP_TIMEOUT_MS);
-
   // Build JSON manually — avoids pulling in ArduinoJson for a payload
   // this small and keeps flash usage down.
   String payload = "{";
@@ -70,16 +51,42 @@ bool NodeNetworkManager::sendReading(const SensorReading &reading) {
   payload += "\"airQuality\":" + String(reading.aqi);
   payload += "}";
 
-  int statusCode = http.POST(payload);
-
-  bool ok = (statusCode >= 200 && statusCode < 300);
-  if (ok) {
-    Serial.printf("[HTTP] Sent reading. Status: %d\n", statusCode);
+  bool ok = false;
+  if (url.startsWith("https://")) {
+    WiFiClientSecure client;
+    client.setInsecure(); // Skip CA certificate check for simplicity
+    HTTPClient http;
+    if (http.begin(client, url)) {
+      http.addHeader("Content-Type", "application/json");
+      http.addHeader("x-api-key", DEVICE_API_KEY);
+      http.setTimeout(HTTP_TIMEOUT_MS);
+      int statusCode = http.POST(payload);
+      ok = (statusCode >= 200 && statusCode < 300);
+      if (ok) {
+        Serial.printf("[HTTP] Sent reading. Status: %d\n", statusCode);
+      } else {
+        Serial.printf("[HTTP] Send failed. Status: %d, Response: %s\n",
+                      statusCode, http.getString().c_str());
+      }
+      http.end();
+    }
   } else {
-    Serial.printf("[HTTP] Send failed. Status: %d, Response: %s\n",
-                  statusCode, http.getString().c_str());
+    HTTPClient http;
+    if (http.begin(url)) {
+      http.addHeader("Content-Type", "application/json");
+      http.addHeader("x-api-key", DEVICE_API_KEY);
+      http.setTimeout(HTTP_TIMEOUT_MS);
+      int statusCode = http.POST(payload);
+      ok = (statusCode >= 200 && statusCode < 300);
+      if (ok) {
+        Serial.printf("[HTTP] Sent reading. Status: %d\n", statusCode);
+      } else {
+        Serial.printf("[HTTP] Send failed. Status: %d, Response: %s\n",
+                      statusCode, http.getString().c_str());
+      }
+      http.end();
+    }
   }
 
-  http.end();
   return ok;
 }

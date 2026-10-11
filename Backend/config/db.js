@@ -17,7 +17,7 @@ async function connectDB() {
     await mongoose.connect(uri, {
       // Modern mongoose (8.x) no longer needs useNewUrlParser/useUnifiedTopology,
       // they're the default — kept out intentionally to avoid deprecation warnings.
-      serverSelectionTimeoutMS: 10000,
+      serverSelectionTimeoutMS: 20000,
     });
     console.log(`[DB] MongoDB connected: ${mongoose.connection.host}`);
   } catch (err) {

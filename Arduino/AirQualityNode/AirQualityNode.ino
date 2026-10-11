@@ -4,7 +4,7 @@
  * Companion firmware for the IEEE paper:
  * "IoT-Based Hyperlocal Air Quality Monitoring and Alert System with Cloud Integration"
  * 
- * Samples MQ135 + DHT22 sensors, computes AQI, and POSTs readings
+ * Samples MQ135 + DHT11 sensors, computes AQI, and POSTs readings
  * to the Express / MongoDB Atlas API over Wi-Fi.
  */
 
