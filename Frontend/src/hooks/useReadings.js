@@ -190,6 +190,29 @@ export function useReadings() {
     loadData();
   }, [loadData]);
 
+  // Remove a device from local cache and active state
+  const removeDevice = useCallback(
+    (deletedId) => {
+      if (!deletedId) return;
+      setDevices((prev) => {
+        const next = prev.filter((d) => d.deviceId !== deletedId && d.id !== deletedId);
+        try {
+          localStorage.setItem(`airguard_devices_cache_${accountKey}`, JSON.stringify(next));
+          localStorage.setItem('airguard_devices_cache', JSON.stringify(next));
+        } catch (e) {}
+        return next;
+      });
+
+      setSelectedDeviceRaw((curr) => {
+        if (curr === deletedId) {
+          return '';
+        }
+        return curr;
+      });
+    },
+    [accountKey]
+  );
+
   // Real-time Socket.IO listener for live telemetry updates (R4, R5, R7)
   useEffect(() => {
     const socket = getSocket();
@@ -235,11 +258,16 @@ export function useReadings() {
       setAlerts((prev) => [alert, ...prev.filter((a) => a._id !== alert._id)].slice(0, 100));
     };
 
+    const onDeviceDeleted = ({ deviceId: deletedId }) => {
+      removeDevice(deletedId);
+    };
+
     socket.on('connect', onConnect);
     socket.on('disconnect', onDisconnect);
     socket.on('reading', onReading);
     socket.on('device_status', onDeviceStatus);
     socket.on('alert', onAlert);
+    socket.on('device_deleted', onDeviceDeleted);
 
     setConnected(socket.connected);
 
@@ -249,8 +277,9 @@ export function useReadings() {
       socket.off('reading', onReading);
       socket.off('device_status', onDeviceStatus);
       socket.off('alert', onAlert);
+      socket.off('device_deleted', onDeviceDeleted);
     };
-  }, [selectedDevice]);
+  }, [selectedDevice, removeDevice]);
 
   const acknowledgeAlert = useCallback(async (id) => {
     try {
@@ -295,6 +324,7 @@ export function useReadings() {
     loadError,
     acknowledgeAlert,
     acknowledgeAllAlerts,
+    removeDevice,
     reload: loadData,
   };
 }

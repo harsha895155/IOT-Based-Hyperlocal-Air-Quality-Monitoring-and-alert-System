@@ -125,6 +125,9 @@ export default function DeviceDetailView({ readingsData }) {
 
     try {
       await client.delete(`/devices/${devId}`);
+      if (readingsData?.removeDevice) {
+        readingsData.removeDevice(devId);
+      }
       navigate('/devices');
     } catch (err) {
       alert(`Failed to delete node: ${err.response?.data?.error || err.message}`);

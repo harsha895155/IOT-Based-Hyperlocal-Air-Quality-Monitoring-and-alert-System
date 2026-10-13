@@ -40,11 +40,20 @@ async function createReading(req, res, next) {
       return res.status(400).json({ error: 'airQuality out of range (0 to 500).' });
     }
 
+    // 1. Verify device exists in fleet registry
+    const cleanId = deviceId.trim();
+    let device = await Device.findOne({ deviceId: cleanId });
+    if (!device) {
+      return res.status(404).json({
+        error: `Device "${cleanId}" is not registered in the fleet registry. Please onboard via the Add Device Wizard.`,
+      });
+    }
+
     const { category } = classifyAQI(airQuality);
 
-    // 1. Persist sensor reading
+    // 2. Persist sensor reading
     const reading = await Reading.create({
-      deviceId: deviceId.trim(),
+      deviceId: cleanId,
       temperature,
       humidity,
       gasPPM,
@@ -52,22 +61,11 @@ async function createReading(req, res, next) {
       category,
     });
 
-    // 2. Update/upsert Device registry in MongoDB
+    // 3. Update device telemetry
     const now = new Date();
-    let device = await Device.findOne({ deviceId: deviceId.trim() });
-    if (!device) {
-      device = await Device.create({
-        deviceId: deviceId.trim(),
-        name: deviceId.trim() === 'esp32-node-01' ? 'AIRGUARD-001' : deviceId.trim().toUpperCase(),
-        location: 'GIST Campus',
-        lastSeen: now,
-        latestReading: reading._id,
-      });
-    } else {
-      device.lastSeen = now;
-      device.latestReading = reading._id;
-      await device.save();
-    }
+    device.lastSeen = now;
+    device.latestReading = reading._id;
+    await device.save();
 
     // 3. Alert deduplication & occurrence counting (R7)
     let alert = null;

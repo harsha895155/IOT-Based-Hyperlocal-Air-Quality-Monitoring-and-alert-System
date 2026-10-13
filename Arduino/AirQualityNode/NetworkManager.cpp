@@ -52,11 +52,12 @@ bool NodeNetworkManager::sendReading(const SensorReading &reading) {
   payload += "}";
 
   bool ok = false;
-  if (url.startsWith("https://")) {
+  String targetUrl = BACKEND_URL;
+  if (targetUrl.startsWith("https://")) {
     WiFiClientSecure client;
     client.setInsecure(); // Skip CA certificate check for simplicity
     HTTPClient http;
-    if (http.begin(client, url)) {
+    if (http.begin(client, targetUrl)) {
       http.addHeader("Content-Type", "application/json");
       http.addHeader("x-api-key", DEVICE_API_KEY);
       http.setTimeout(HTTP_TIMEOUT_MS);
@@ -72,7 +73,7 @@ bool NodeNetworkManager::sendReading(const SensorReading &reading) {
     }
   } else {
     HTTPClient http;
-    if (http.begin(url)) {
+    if (http.begin(targetUrl)) {
       http.addHeader("Content-Type", "application/json");
       http.addHeader("x-api-key", DEVICE_API_KEY);
       http.setTimeout(HTTP_TIMEOUT_MS);

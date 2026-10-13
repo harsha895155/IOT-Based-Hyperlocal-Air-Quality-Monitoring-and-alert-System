@@ -2,6 +2,8 @@ const express = require('express');
 const router = express.Router();
 const { Device, OFFLINE_TIMEOUT_MS } = require('../models/Device');
 const Reading = require('../models/Reading');
+const Alert = require('../models/Alert');
+const User = require('../models/User');
 const { protect, optionalAuth } = require('../middleware/auth');
 
 // GET /api/devices — returns ONLY devices owned by the currently authenticated user
@@ -192,10 +194,16 @@ router.get('/verify/:id', protect, async (req, res, next) => {
       return res.status(404).json({ verified: false, error: 'Device not found' });
     }
 
-    // Verify ownership
-    const isOwner = device.userId && device.userId.toString() === req.user._id.toString();
+    // Verify ownership (or allow newly created/unclaimed hardware to be verified and claimed)
+    const isOwner = !device.userId || (device.userId && device.userId.toString() === req.user._id.toString());
     if (!isOwner && req.user.role !== 'admin') {
       return res.status(403).json({ verified: false, error: 'Not authorized for this device' });
+    }
+
+    let needsSave = false;
+    if (!device.userId) {
+      device.userId = req.user._id;
+      needsSave = true;
     }
 
     // Check latest reading from this hardware
@@ -204,6 +212,9 @@ router.get('/verify/:id', protect, async (req, res, next) => {
 
     if (latest && device.provisioningStatus !== 'active') {
       device.provisioningStatus = 'active';
+      needsSave = true;
+    }
+    if (needsSave) {
       await device.save();
     }
 
@@ -358,14 +369,46 @@ router.delete('/:id', protect, async (req, res, next) => {
       return res.status(403).json({ error: 'Access forbidden. You do not have permission to remove this device.' });
     }
 
+    // 1. Remove device from fleet registry
     await Device.deleteOne({ _id: device._id });
 
+    // 2. Cascade delete all historical readings and alerts for this device
+    await Reading.deleteMany({ deviceId: devId });
+    await Alert.deleteMany({ deviceId: devId });
+
+    // 3. Update user data: reset defaultStation if this device was the default
+    const targetUserId = device.userId || req.user._id;
+    const userDoc = await User.findById(targetUserId);
+    if (userDoc) {
+      let userUpdated = false;
+      if (userDoc.preferences && userDoc.preferences.defaultStation === devId) {
+        // Find if user has another device to fall back to
+        const anotherDevice = await Device.findOne({ userId: userDoc._id }).sort({ createdAt: -1 });
+        userDoc.preferences.defaultStation = anotherDevice ? anotherDevice.deviceId : '';
+        userUpdated = true;
+      }
+      if (!userDoc.activityLog) userDoc.activityLog = [];
+      userDoc.activityLog.push({
+        action: 'DEVICE_DELETED',
+        detail: `Removed node "${device.name || devId}" (${devId}) from fleet registry.`,
+        timestamp: new Date(),
+      });
+      userUpdated = true;
+      if (userUpdated) {
+        await userDoc.save();
+      }
+    }
+
+    // 4. Broadcast real-time deletion event
     const io = req.app.get('io');
     if (io) {
       io.emit('device_deleted', { deviceId: devId });
+      if (device.userId) {
+        io.to(`user_${device.userId}`).emit('device_deleted', { deviceId: devId });
+      }
     }
 
-    res.json({ success: true, message: `Device ${devId} removed from AirGuard fleet registry.` });
+    res.json({ success: true, message: `Device ${devId} and all associated telemetry removed from AirGuard fleet registry.` });
   } catch (err) {
     next(err);
   }

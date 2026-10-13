@@ -1,6 +1,7 @@
 import React, { useState, useMemo, useEffect } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
 import client from '../api/client';
+import { getSocket } from '../api/socket';
 import { formatTimeAgo } from '../hooks/useReadings';
 import { classifyAQI } from '../utils/aqi';
 import AddDeviceWizard from '../components/AddDeviceWizard';
@@ -10,6 +11,7 @@ export default function DevicesView({
   devices = [],
   onSelectDevice,
   currentDeviceId,
+  onDeleteDevice,
 }) {
   const navigate = useNavigate();
 
@@ -29,10 +31,20 @@ export default function DevicesView({
 
   // Sync internal list when parent prop updates
   useEffect(() => {
-    if (devices.length > 0) {
-      setDeviceList(devices);
-    }
+    setDeviceList(devices || []);
   }, [devices]);
+
+  // Real-time socket listener for device removal
+  useEffect(() => {
+    const socket = getSocket();
+    const handleDeviceDeleted = ({ deviceId: deletedId }) => {
+      setDeviceList((prev) => prev.filter((d) => d.deviceId !== deletedId && d.id !== deletedId));
+    };
+    socket.on('device_deleted', handleDeviceDeleted);
+    return () => {
+      socket.off('device_deleted', handleDeviceDeleted);
+    };
+  }, []);
 
   const showToast = (msg) => {
     setToastMessage(msg);
@@ -71,6 +83,9 @@ export default function DevicesView({
     try {
       await client.delete(`/devices/${devId}`);
       setDeviceList((prev) => prev.filter((d) => d.deviceId !== devId && d.id !== devId));
+      if (onDeleteDevice) {
+        onDeleteDevice(devId);
+      }
       if (selectedModalDevice?.deviceId === devId) {
         setSelectedModalDevice(null);
       }

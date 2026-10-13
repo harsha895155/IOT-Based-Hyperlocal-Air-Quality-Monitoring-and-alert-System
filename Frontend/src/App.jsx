@@ -136,6 +136,7 @@ function AppRoutes() {
                 navigate('/dashboard');
               }}
               currentDeviceId={readingsData.selectedDevice}
+              onDeleteDevice={readingsData.removeDevice}
             />
           }
         />

@@ -34,3 +34,12 @@ yarn-error.log*
 # OS generated files
 .DS_Store
 Thumbs.db
+
+# Scratch and temporary directories
+scratch/
+*/scratch/
+Backend/scratch/
+.gradle/
+*/.gradle/
+Flutter/android/.gradle/
+*.tmp

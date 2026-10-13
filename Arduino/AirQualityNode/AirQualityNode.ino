@@ -9,6 +9,7 @@
  */
 
 #include "config.h"
+#include <WiFi.h>
 #include "SensorManager.h"
 #include "NetworkManager.h"
 
