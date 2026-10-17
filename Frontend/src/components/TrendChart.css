@@ -27,11 +27,11 @@
 }
 
 .trend-tooltip {
-  background: var(--surface-raised);
-  border: 1px solid var(--border);
+  background: var(--bg-card, var(--surface-raised));
+  border: 1px solid var(--border-subtle, var(--border));
   border-radius: var(--radius-sm);
   padding: var(--space-3);
-  box-shadow: var(--shadow-card);
+  box-shadow: var(--shadow-dropdown, var(--shadow-card));
 }
 
 .trend-tooltip__time {

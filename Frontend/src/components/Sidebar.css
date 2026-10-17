@@ -168,7 +168,7 @@
 }
 
 .sidebar__guest-notice {
-  background: rgba(255, 255, 255, 0.03);
+  background: var(--card-sub-bg, rgba(255, 255, 255, 0.03));
   border: 1px solid var(--border-soft);
   border-radius: 12px;
   padding: 12px;

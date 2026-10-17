@@ -25,10 +25,10 @@
 .wizard-card {
   width: 100%;
   max-width: 680px;
-  background: linear-gradient(145deg, #13192b 0%, #0c101c 100%);
-  border: 1px solid rgba(56, 189, 248, 0.25);
+  background: var(--bg-card, #13192b);
+  border: 1px solid var(--border-subtle, rgba(56, 189, 248, 0.25));
   border-radius: 24px;
-  box-shadow: 0 24px 60px rgba(0, 0, 0, 0.65), 0 0 40px rgba(56, 189, 248, 0.12);
+  box-shadow: var(--shadow-card-hover, 0 24px 60px rgba(0, 0, 0, 0.25));
   display: flex;
   flex-direction: column;
   overflow: hidden;
@@ -39,8 +39,8 @@
 /* ─── Header & Progress Stepper ─── */
 .wizard-header {
   padding: 24px 28px 18px;
-  border-bottom: 1px solid rgba(255, 255, 255, 0.08);
-  background: rgba(15, 23, 42, 0.4);
+  border-bottom: 1px solid var(--border-soft, rgba(255, 255, 255, 0.08));
+  background: var(--bg-surface, rgba(15, 23, 42, 0.4));
 }
 
 .wizard-header-top {
@@ -60,8 +60,8 @@
   width: 42px;
   height: 42px;
   border-radius: 12px;
-  background: linear-gradient(135deg, rgba(56, 189, 248, 0.2) 0%, rgba(0, 210, 180, 0.2) 100%);
-  border: 1px solid rgba(56, 189, 248, 0.35);
+  background: linear-gradient(135deg, rgba(56, 189, 248, 0.15) 0%, rgba(0, 210, 180, 0.15) 100%);
+  border: 1px solid var(--border-subtle, rgba(56, 189, 248, 0.35));
   display: flex;
   align-items: center;
   justify-content: center;
@@ -72,20 +72,20 @@
   margin: 0;
   font-size: 1.25rem;
   font-weight: 700;
-  color: #f8fafc;
+  color: var(--text-primary, #f8fafc);
   letter-spacing: -0.01em;
 }
 
 .wizard-subtitle {
   margin: 2px 0 0 0;
   font-size: 0.8rem;
-  color: #94a3b8;
+  color: var(--text-muted, #94a3b8);
 }
 
 .wizard-close-btn {
-  background: rgba(255, 255, 255, 0.06);
-  border: 1px solid rgba(255, 255, 255, 0.1);
-  color: #94a3b8;
+  background: var(--surface-raised, rgba(255, 255, 255, 0.06));
+  border: 1px solid var(--border-soft, rgba(255, 255, 255, 0.1));
+  color: var(--text-muted, #94a3b8);
   width: 34px;
   height: 34px;
   border-radius: 50%;
@@ -98,9 +98,9 @@
 }
 
 .wizard-close-btn:hover {
-  background: rgba(239, 68, 68, 0.2);
+  background: rgba(239, 68, 68, 0.15);
   color: #ef4444;
-  border-color: rgba(239, 68, 68, 0.4);
+  border-color: rgba(239, 68, 68, 0.3);
 }
 
 /* ─── Stepper Bar ─── */
@@ -119,7 +119,7 @@
   left: 20px;
   right: 20px;
   height: 2px;
-  background: rgba(255, 255, 255, 0.08);
+  background: var(--border-soft, rgba(255, 255, 255, 0.08));
   z-index: 1;
 }
 
@@ -136,14 +136,14 @@
   width: 26px;
   height: 26px;
   border-radius: 50%;
-  background: #0f172a;
-  border: 2px solid rgba(255, 255, 255, 0.2);
+  background: var(--surface-raised, #0f172a);
+  border: 2px solid var(--border, rgba(255, 255, 255, 0.2));
   display: flex;
   align-items: center;
   justify-content: center;
   font-size: 0.72rem;
   font-weight: 700;
-  color: #64748b;
+  color: var(--text-faint, #64748b);
   transition: all 0.25s;
 }
 
@@ -154,23 +154,23 @@
 }
 
 .wizard-step-node.is-active .wizard-step-circle {
-  background: #0284c7;
-  border-color: #38bdf8;
+  background: var(--accent, #0284c7);
+  border-color: var(--accent, #38bdf8);
   color: #ffffff;
-  box-shadow: 0 0 14px rgba(56, 189, 248, 0.6);
+  box-shadow: 0 0 14px var(--border-glow, rgba(56, 189, 248, 0.6));
 }
 
 .wizard-step-label {
   font-size: 0.68rem;
   font-weight: 600;
-  color: #64748b;
+  color: var(--text-faint, #64748b);
   margin-top: 6px;
   text-align: center;
   white-space: nowrap;
 }
 
 .wizard-step-node.is-active .wizard-step-label {
-  color: #38bdf8;
+  color: var(--accent, #38bdf8);
 }
 
 .wizard-step-node.is-complete .wizard-step-label {
@@ -187,13 +187,13 @@
 .wizard-step-title {
   font-size: 1.15rem;
   font-weight: 700;
-  color: #f8fafc;
+  color: var(--text-primary, #f8fafc);
   margin: 0 0 6px 0;
 }
 
 .wizard-step-desc {
   font-size: 0.85rem;
-  color: #94a3b8;
+  color: var(--text-muted, #94a3b8);
   margin: 0 0 22px 0;
   line-height: 1.5;
 }
@@ -209,7 +209,7 @@
   align-items: center;
   font-size: 0.82rem;
   font-weight: 600;
-  color: #cbd5e1;
+  color: var(--text-primary, #cbd5e1);
   margin-bottom: 6px;
 }
 
@@ -221,24 +221,25 @@
 
 .wizard-input {
   width: 100%;
-  background: rgba(15, 23, 42, 0.7);
-  border: 1px solid rgba(255, 255, 255, 0.12);
+  background: var(--surface-raised, rgba(15, 23, 42, 0.7));
+  border: 1px solid var(--border, rgba(255, 255, 255, 0.12));
   border-radius: 12px;
   padding: 12px 16px;
   font-size: 0.92rem;
-  color: #f8fafc;
+  color: var(--text-primary, #f8fafc);
   outline: none;
   transition: all 0.2s;
   box-sizing: border-box;
 }
 
 .wizard-input:focus {
-  border-color: #38bdf8;
-  box-shadow: 0 0 0 3px rgba(56, 189, 248, 0.18);
+  border-color: var(--accent, #38bdf8);
+  background: var(--surface, rgba(10, 18, 30, 0.95));
+  box-shadow: 0 0 0 3px var(--border-glow, rgba(56, 189, 248, 0.18));
 }
 
 .wizard-input::placeholder {
-  color: #64748b;
+  color: var(--text-faint, #64748b);
 }
 
 .wizard-input-action-btn {
@@ -246,7 +247,7 @@
   right: 10px;
   background: transparent;
   border: none;
-  color: #94a3b8;
+  color: var(--text-muted, #94a3b8);
   cursor: pointer;
   padding: 6px;
   border-radius: 6px;
@@ -256,13 +257,13 @@
 }
 
 .wizard-input-action-btn:hover {
-  color: #f8fafc;
+  color: var(--text-primary, #f8fafc);
 }
 
 /* Hardware Visual Diagram (Step 3) */
 .wizard-connection-diagram {
-  background: rgba(15, 23, 42, 0.6);
-  border: 1px solid rgba(56, 189, 248, 0.2);
+  background: var(--card-sub-bg, rgba(15, 23, 42, 0.6));
+  border: 1px solid var(--border-subtle, rgba(56, 189, 248, 0.2));
   border-radius: 16px;
   padding: 22px;
   margin-bottom: 22px;
@@ -283,8 +284,8 @@
   width: 58px;
   height: 58px;
   border-radius: 14px;
-  background: rgba(56, 189, 248, 0.1);
-  border: 1px solid rgba(56, 189, 248, 0.3);
+  background: var(--surface-raised, rgba(56, 189, 248, 0.1));
+  border: 1px solid var(--border-subtle, rgba(56, 189, 248, 0.3));
   display: flex;
   align-items: center;
   justify-content: center;
@@ -294,12 +295,12 @@
 .diagram-device-lbl {
   font-size: 0.82rem;
   font-weight: 700;
-  color: #f8fafc;
+  color: var(--text-primary, #f8fafc);
 }
 
 .diagram-device-sub {
   font-size: 0.72rem;
-  color: #64748b;
+  color: var(--text-faint, #64748b);
 }
 
 .diagram-cable-link {
@@ -333,7 +334,7 @@
 .diagram-cable-lbl {
   font-size: 0.72rem;
   font-weight: 600;
-  color: #38bdf8;
+  color: var(--accent, #38bdf8);
   letter-spacing: 0.04em;
 }
 
@@ -370,7 +371,7 @@
 
 .detection-meta-lbl {
   font-size: 0.72rem;
-  color: #64748b;
+  color: var(--text-faint, #64748b);
   text-transform: uppercase;
   font-weight: 700;
   letter-spacing: 0.04em;
@@ -378,7 +379,7 @@
 
 .detection-meta-val {
   font-size: 0.88rem;
-  color: #f8fafc;
+  color: var(--text-primary, #f8fafc);
   font-weight: 600;
   font-family: var(--font-mono, monospace);
 }
@@ -395,8 +396,8 @@
   display: flex;
   align-items: center;
   gap: 14px;
-  background: rgba(15, 23, 42, 0.6);
-  border: 1px solid rgba(255, 255, 255, 0.08);
+  background: var(--card-sub-bg, rgba(15, 23, 42, 0.6));
+  border: 1px solid var(--border-soft, rgba(255, 255, 255, 0.08));
   border-radius: 12px;
   padding: 12px 18px;
   transition: all 0.25s;
@@ -430,14 +431,14 @@
 }
 
 .checklist-item.is-active .checklist-icon {
-  background: #0284c7;
+  background: var(--accent, #0284c7);
   color: #ffffff;
   animation: pulseDot 1.4s infinite;
 }
 
 .checklist-item.is-pending .checklist-icon {
-  background: rgba(255, 255, 255, 0.1);
-  color: #64748b;
+  background: var(--surface-raised, rgba(255, 255, 255, 0.1));
+  color: var(--text-faint, #64748b);
 }
 
 @keyframes pulseDot {
@@ -448,15 +449,15 @@
 .checklist-label {
   font-size: 0.9rem;
   font-weight: 600;
-  color: #cbd5e1;
+  color: var(--text-muted, #cbd5e1);
 }
 
 .checklist-item.is-done .checklist-label {
-  color: #f8fafc;
+  color: var(--text-primary, #f8fafc);
 }
 
 .checklist-item.is-active .checklist-label {
-  color: #38bdf8;
+  color: var(--accent, #38bdf8);
 }
 
 /* Live Reading Telemetry Card (Step 7 & 8) */
@@ -480,7 +481,7 @@
   align-items: center;
   gap: 6px;
   background: rgba(16, 185, 129, 0.2);
-  color: #34d399;
+  color: #10b981;
   border: 1px solid rgba(16, 185, 129, 0.4);
   padding: 4px 10px;
   border-radius: 999px;
@@ -502,8 +503,8 @@
 }
 
 .telemetry-metric-tile {
-  background: rgba(15, 23, 42, 0.6);
-  border: 1px solid rgba(255, 255, 255, 0.08);
+  background: var(--card-sub-bg, rgba(15, 23, 42, 0.6));
+  border: 1px solid var(--border-soft, rgba(255, 255, 255, 0.08));
   border-radius: 12px;
   padding: 12px;
   text-align: center;
@@ -511,7 +512,7 @@
 
 .telemetry-metric-lbl {
   font-size: 0.7rem;
-  color: #94a3b8;
+  color: var(--text-faint, #94a3b8);
   font-weight: 700;
   text-transform: uppercase;
   margin-bottom: 4px;
@@ -520,13 +521,13 @@
 .telemetry-metric-val {
   font-size: 1.25rem;
   font-weight: 800;
-  color: #f8fafc;
+  color: var(--text-primary, #f8fafc);
   font-family: var(--font-mono, monospace);
 }
 
 .telemetry-metric-sub {
   font-size: 0.68rem;
-  color: #64748b;
+  color: var(--text-muted, #64748b);
   margin-top: 2px;
 }
 
@@ -535,12 +536,12 @@
   display: flex;
   align-items: flex-start;
   gap: 12px;
-  background: rgba(56, 189, 248, 0.08);
-  border: 1px solid rgba(56, 189, 248, 0.25);
+  background: var(--card-sub-bg, rgba(56, 189, 248, 0.08));
+  border: 1px solid var(--border-subtle, rgba(56, 189, 248, 0.25));
   border-radius: 14px;
   padding: 14px 18px;
   font-size: 0.84rem;
-  color: #cbd5e1;
+  color: var(--text-muted, #cbd5e1);
   line-height: 1.5;
   margin: 18px 0;
 }
@@ -552,23 +553,23 @@
 }
 
 .wizard-callout strong {
-  color: #38bdf8;
+  color: var(--accent, #38bdf8);
 }
 
 /* ─── Footer Controls ─── */
 .wizard-footer {
   padding: 18px 28px 24px;
-  border-top: 1px solid rgba(255, 255, 255, 0.08);
-  background: rgba(15, 23, 42, 0.5);
+  border-top: 1px solid var(--border-soft, rgba(255, 255, 255, 0.08));
+  background: var(--bg-surface, rgba(15, 23, 42, 0.5));
   display: flex;
   justify-content: space-between;
   align-items: center;
 }
 
 .wizard-btn-secondary {
-  background: rgba(255, 255, 255, 0.06);
-  border: 1px solid rgba(255, 255, 255, 0.12);
-  color: #cbd5e1;
+  background: var(--surface-raised, rgba(255, 255, 255, 0.06));
+  border: 1px solid var(--border-soft, rgba(255, 255, 255, 0.12));
+  color: var(--text-primary, #cbd5e1);
   padding: 10px 20px;
   border-radius: 12px;
   font-size: 0.9rem;
@@ -578,8 +579,8 @@
 }
 
 .wizard-btn-secondary:hover:not(:disabled) {
-  background: rgba(255, 255, 255, 0.12);
-  color: #f8fafc;
+  background: var(--surface-hover, rgba(255, 255, 255, 0.12));
+  color: var(--text-primary, #f8fafc);
 }
 
 .wizard-btn-primary {

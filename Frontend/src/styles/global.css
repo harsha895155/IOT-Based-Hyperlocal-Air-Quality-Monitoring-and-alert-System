@@ -90,10 +90,10 @@ a:hover {
 
 /* Glassmorphic Card */
 .card {
-  background: var(--surface);
+  background: var(--bg-card, var(--surface));
   backdrop-filter: blur(16px);
   -webkit-backdrop-filter: blur(16px);
-  border: 1px solid var(--border);
+  border: 1px solid var(--border-subtle, var(--border));
   border-radius: var(--radius-lg);
   box-shadow: var(--shadow-card);
   transition: transform 0.2s cubic-bezier(0.16, 1, 0.3, 1), box-shadow 0.2s ease, border-color 0.2s ease;

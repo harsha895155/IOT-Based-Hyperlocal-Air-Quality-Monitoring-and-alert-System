@@ -12,11 +12,12 @@
   flex-wrap: wrap;
   gap: 16px;
   padding: 18px 24px;
-  background: linear-gradient(135deg, rgba(14, 25, 45, 0.7) 0%, rgba(8, 14, 25, 0.85) 100%);
-  border: 1px solid rgba(56, 189, 248, 0.25);
+  background: var(--hero-card-bg-day);
+  border: 1px solid var(--border);
   border-radius: var(--radius-lg, 16px);
   margin-bottom: 24px;
-  box-shadow: 0 4px 20px rgba(0, 0, 0, 0.25);
+  box-shadow: var(--shadow-card);
+  color: var(--hero-card-text, var(--text-primary));
 }
 
 .health-master-left {
@@ -40,13 +41,13 @@
 .health-master-status--good {
   background: rgba(16, 185, 129, 0.15);
   border: 1px solid rgba(16, 185, 129, 0.35);
-  color: #34d399;
+  color: #10b981;
 }
 
 .health-master-status--warn {
   background: rgba(245, 158, 11, 0.15);
   border: 1px solid rgba(245, 158, 11, 0.35);
-  color: #fbbf24;
+  color: #d97706;
 }
 
 .health-pulse-dot {
@@ -78,9 +79,9 @@
   font-size: 0.78rem;
   padding: 5px 12px;
   border-radius: 8px;
-  background: rgba(255, 255, 255, 0.05);
-  border: 1px solid rgba(255, 255, 255, 0.1);
-  color: #38bdf8;
+  background: var(--surface-raised);
+  border: 1px solid var(--border-subtle);
+  color: var(--accent);
 }
 
 /* 4-Card Infrastructure Grid */
@@ -93,9 +94,10 @@
 
 .health-infra-card {
   padding: 22px;
-  background: var(--surface, #0b1322);
-  border: 1px solid var(--border, rgba(255, 255, 255, 0.08));
+  background: var(--bg-card);
+  border: 1px solid var(--border-subtle);
   border-radius: var(--radius-lg, 14px);
+  box-shadow: var(--shadow-card);
   display: flex;
   flex-direction: column;
   justify-content: space-between;
@@ -104,9 +106,9 @@
 }
 
 .health-infra-card:hover {
-  border-color: rgba(56, 189, 248, 0.3);
+  border-color: var(--accent);
   transform: translateY(-2px);
-  box-shadow: 0 8px 24px rgba(0, 0, 0, 0.25);
+  box-shadow: var(--shadow-card-hover);
 }
 
 .health-infra-header {
@@ -119,7 +121,7 @@
 .health-infra-name {
   font-size: 0.95rem;
   font-weight: 600;
-  color: var(--text-primary, #f8fafc);
+  color: var(--text-primary);
   margin: 0;
 }
 
@@ -133,7 +135,7 @@
 
 .health-status-badge--online {
   background: rgba(16, 185, 129, 0.15);
-  color: #34d399;
+  color: #10b981;
   border: 1px solid rgba(16, 185, 129, 0.3);
 }
 
@@ -157,7 +159,7 @@
 .health-infra-val {
   font-family: var(--font-mono, monospace);
   font-weight: 600;
-  color: #f1f5f9;
+  color: var(--text-primary);
 }
 
 /* Node Health Table */
@@ -178,28 +180,30 @@
   font-size: 0.75rem;
   text-transform: uppercase;
   letter-spacing: 0.04em;
-  color: var(--text-faint, #64748b);
-  border-bottom: 1px solid rgba(255, 255, 255, 0.08);
+  color: var(--text-faint);
+  border-bottom: 1px solid var(--border-subtle);
+  background: var(--table-header-bg);
   font-weight: 600;
 }
 
 .node-health-table td {
   padding: 12px 14px;
-  border-bottom: 1px solid rgba(255, 255, 255, 0.04);
-  color: var(--text-muted, #cbd5e1);
+  border-bottom: 1px solid var(--border-subtle);
+  color: var(--text-primary);
 }
 
 .node-health-table tr:hover td {
-  background: rgba(255, 255, 255, 0.02);
+  background: var(--table-row-hover);
 }
 
 /* Terminal Event Console */
 .health-terminal-box {
   background: #060911;
-  border: 1px solid rgba(255, 255, 255, 0.08);
+  border: 1px solid var(--border-subtle);
   border-radius: 12px;
   overflow: hidden;
   margin-top: 14px;
+  box-shadow: var(--shadow-card);
 }
 
 .health-terminal-header {
@@ -233,7 +237,7 @@
 }
 
 .health-log-time {
-  color: var(--text-faint, #64748b);
+  color: var(--text-faint);
   flex-shrink: 0;
 }
 
@@ -257,8 +261,9 @@
 
 .health-bench-card {
   padding: 16px;
-  background: var(--surface-raised, rgba(15, 23, 42, 0.5));
-  border: 1px solid var(--border, rgba(255, 255, 255, 0.08));
+  background: var(--card-sub-bg);
+  border: 1px solid var(--border-subtle);
+  box-shadow: var(--shadow-card);
   border-radius: 10px;
   display: flex;
   flex-direction: column;
@@ -269,7 +274,7 @@
 .health-bench-title {
   font-size: 0.88rem;
   font-weight: 600;
-  color: #f1f5f9;
+  color: var(--text-primary);
   margin: 0;
 }
 

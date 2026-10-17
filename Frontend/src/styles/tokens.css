@@ -25,6 +25,12 @@
   --card-sub-bg: rgba(15, 23, 42, 0.55);
   --table-header-bg: rgba(255, 255, 255, 0.03);
   --table-row-hover: rgba(56, 189, 248, 0.05);
+  --surface-bg: var(--bg);
+  --surface-card: var(--bg-card);
+  --primary-accent: var(--accent);
+  --text-secondary: var(--text-muted);
+  --border-medium: var(--border);
+  --surface-overlay: rgba(10, 15, 29, 0.85);
 
   /* Hero Atmospheric Card */
   --hero-card-bg-day: linear-gradient(135deg, rgba(14, 38, 70, 0.85) 0%, rgba(10, 22, 42, 0.95) 100%);
@@ -182,6 +188,7 @@
   --surface-raised: #f1f5f9;
   --surface-hover: #e2e8f0;
   --surface-glass: rgba(255, 255, 255, 0.9);
+  --surface-overlay: rgba(255, 255, 255, 0.92);
 
   /* Card & Surface Tokens - Distinct Pure White Cards with Soft Shadow */
   --bg-card: #ffffff;

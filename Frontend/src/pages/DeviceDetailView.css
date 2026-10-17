@@ -83,7 +83,7 @@
   font-weight: 600;
   letter-spacing: 0.03em;
   border: 1px solid var(--border-soft);
-  background: rgba(255, 255, 255, 0.04);
+  background: var(--surface-raised);
 }
 
 .dd-chip--online {
@@ -172,7 +172,7 @@
   display: flex;
   align-items: center;
   justify-content: center;
-  background: rgba(255, 255, 255, 0.04);
+  background: var(--surface-raised);
   color: var(--accent);
   border: 1px solid var(--border-soft);
   font-size: 1.05rem;
@@ -236,7 +236,7 @@
   display: flex;
   flex-direction: column;
   gap: 18px;
-  box-shadow: 0 4px 20px rgba(0, 0, 0, 0.2);
+  box-shadow: var(--shadow-card);
 }
 
 .dd-panel__header {
@@ -259,7 +259,7 @@
 
 .dd-tabs-group {
   display: inline-flex;
-  background: rgba(0, 0, 0, 0.3);
+  background: var(--surface-raised);
   padding: 3px;
   border-radius: 8px;
   border: 1px solid var(--border-soft);
@@ -282,9 +282,9 @@
 }
 
 .dd-tab-btn.is-active {
-  background: var(--surface-raised);
+  background: var(--surface);
   color: var(--accent);
-  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.3);
+  box-shadow: var(--shadow-card);
 }
 
 /* Chart Summary Pills */
@@ -314,7 +314,7 @@
   align-items: center;
   padding: 10px 14px;
   border-radius: 8px;
-  background: rgba(255, 255, 255, 0.02);
+  background: var(--card-sub-bg);
   border: 1px solid var(--border-soft);
   gap: 12px;
 }
@@ -343,7 +343,7 @@
   gap: 18px;
   background: var(--surface);
   border: 1px solid var(--border);
-  box-shadow: 0 4px 20px rgba(0, 0, 0, 0.2);
+  box-shadow: var(--shadow-card);
 }
 
 .dd-advisory-icon {
@@ -390,7 +390,7 @@
   gap: 8px;
   font-size: 0.8rem;
   color: var(--text-primary);
-  background: rgba(255, 255, 255, 0.03);
+  background: var(--surface-raised);
   padding: 8px 12px;
   border-radius: 6px;
   border: 1px solid var(--border-soft);
@@ -411,7 +411,7 @@
 }
 
 .dd-table th {
-  background: rgba(0, 0, 0, 0.35);
+  background: var(--table-header-bg);
   color: var(--text-faint);
   font-weight: 600;
   font-size: 0.72rem;
@@ -423,10 +423,10 @@
 
 .dd-table td {
   padding: 10px 14px;
-  border-bottom: 1px solid rgba(255, 255, 255, 0.03);
+  border-bottom: 1px solid var(--border-soft);
   color: var(--text-primary);
 }
 
 .dd-table tr:hover td {
-  background: rgba(255, 255, 255, 0.02);
+  background: var(--table-row-hover);
 }

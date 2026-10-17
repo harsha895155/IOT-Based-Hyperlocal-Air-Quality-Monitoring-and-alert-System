@@ -17,9 +17,9 @@
 .help-tab-btn {
   padding: 8px 16px;
   border-radius: var(--radius-full, 999px);
-  background: var(--surface-raised, rgba(15, 23, 42, 0.6));
-  border: 1px solid var(--border, rgba(255, 255, 255, 0.08));
-  color: var(--text-muted, #94a3b8);
+  background: var(--surface-raised);
+  border: 1px solid var(--border);
+  color: var(--text-muted);
   font-size: var(--fs-xs, 0.8rem);
   font-weight: 500;
   cursor: pointer;
@@ -31,30 +31,30 @@
 }
 
 .help-tab-btn:hover {
-  color: var(--text-primary, #ffffff);
-  border-color: rgba(56, 189, 248, 0.3);
-  background: rgba(30, 41, 59, 0.8);
+  color: var(--text-primary);
+  border-color: var(--accent);
+  background: var(--surface-hover);
 }
 
 .help-tab-btn.is-active {
-  background: linear-gradient(135deg, rgba(2, 132, 199, 0.3) 0%, rgba(37, 99, 235, 0.3) 100%);
-  border-color: #38bdf8;
-  color: #38bdf8;
+  background: var(--btn-primary-bg);
+  border-color: var(--accent);
+  color: #ffffff;
   font-weight: 600;
-  box-shadow: 0 0 14px rgba(56, 189, 248, 0.2);
+  box-shadow: var(--btn-shadow);
 }
 
 /* Search bar */
 .help-search-card {
   padding: 16px 20px;
-  background: var(--surface, #0b1322);
-  border: 1px solid var(--border, rgba(255, 255, 255, 0.08));
+  background: var(--bg-card);
+  border: 1px solid var(--border-subtle);
   border-radius: var(--radius-lg, 16px);
   margin-bottom: 24px;
   display: flex;
   align-items: center;
   gap: 14px;
-  box-shadow: var(--shadow-card, 0 4px 20px rgba(0, 0, 0, 0.2));
+  box-shadow: var(--shadow-card);
 }
 
 .help-search-input {
@@ -62,13 +62,13 @@
   background: transparent;
   border: none;
   outline: none;
-  color: #ffffff;
+  color: var(--text-primary);
   font-size: 0.95rem;
   font-family: inherit;
 }
 
 .help-search-input::placeholder {
-  color: rgba(148, 163, 184, 0.5);
+  color: var(--text-faint);
 }
 
 /* Pinout Grid & Cards */
@@ -81,8 +81,9 @@
 
 .pinout-card {
   padding: 18px;
-  background: var(--surface-raised, rgba(15, 23, 42, 0.5));
-  border: 1px solid var(--border, rgba(255, 255, 255, 0.08));
+  background: var(--card-sub-bg);
+  border: 1px solid var(--border-subtle);
+  box-shadow: var(--shadow-card);
   border-radius: var(--radius-md, 12px);
   display: flex;
   flex-direction: column;
@@ -158,10 +159,12 @@
 /* Interactive Calculator Box */
 .calc-box {
   padding: 22px;
-  background: linear-gradient(135deg, rgba(14, 25, 45, 0.7) 0%, rgba(8, 14, 25, 0.85) 100%);
-  border: 1px solid rgba(56, 189, 248, 0.2);
+  background: var(--hero-card-bg-day);
+  border: 1px solid var(--border);
   border-radius: var(--radius-lg, 16px);
   margin-top: 16px;
+  box-shadow: var(--shadow-card);
+  color: var(--hero-card-text, var(--text-primary));
 }
 
 .calc-grid {
@@ -185,7 +188,7 @@
   gap: 12px;
   margin-bottom: 16px;
   padding-bottom: 14px;
-  border-bottom: 1px solid rgba(255, 255, 255, 0.06);
+  border-bottom: 1px solid var(--border-soft);
 }
 
 .live-stream-badge {
@@ -219,8 +222,9 @@
 
 .live-metric-card {
   padding: 16px;
-  background: rgba(15, 23, 42, 0.65);
-  border: 1px solid rgba(56, 189, 248, 0.15);
+  background: var(--card-sub-bg);
+  border: 1px solid var(--border-subtle);
+  box-shadow: var(--shadow-card);
   border-radius: 10px;
   display: flex;
   flex-direction: column;
@@ -229,13 +233,13 @@
 }
 
 .live-metric-card:hover {
-  border-color: rgba(56, 189, 248, 0.35);
-  background: rgba(15, 23, 42, 0.85);
+  border-color: var(--accent);
+  box-shadow: var(--shadow-card-hover);
 }
 
 .live-metric-card-label {
   font-size: 0.75rem;
-  color: var(--text-muted, #94a3b8);
+  color: var(--text-faint);
   font-weight: 600;
   text-transform: uppercase;
   letter-spacing: 0.03em;
@@ -245,13 +249,13 @@
   font-family: var(--font-mono, monospace);
   font-size: 1.45rem;
   font-weight: 700;
-  color: #ffffff;
+  color: var(--text-primary);
   margin: 2px 0;
 }
 
 .live-metric-card-sub {
   font-size: 0.72rem;
-  color: var(--text-faint, #64748b);
+  color: var(--text-muted);
   font-family: var(--font-mono, monospace);
 }
 
@@ -260,9 +264,9 @@
   grid-template-columns: repeat(auto-fit, minmax(180px, 1fr));
   gap: 14px;
   padding: 16px;
-  background: rgba(10, 16, 28, 0.7);
+  background: var(--surface-raised);
   border-radius: 12px;
-  border: 1px solid rgba(255, 255, 255, 0.06);
+  border: 1px solid var(--border-subtle);
 }
 
 .calc-result-stat {
@@ -273,7 +277,7 @@
 
 .calc-result-label {
   font-size: 0.72rem;
-  color: var(--text-faint, #64748b);
+  color: var(--text-faint);
   text-transform: uppercase;
   letter-spacing: 0.04em;
   font-weight: 600;
@@ -283,14 +287,15 @@
   font-family: var(--font-mono, monospace);
   font-size: 1.25rem;
   font-weight: 700;
-  color: #38bdf8;
+  color: var(--accent);
 }
 
 /* Firmware Code Snippet Box & Device Customizer */
 .firmware-customizer-card {
   padding: 20px;
-  background: linear-gradient(135deg, rgba(14, 25, 45, 0.7) 0%, rgba(9, 15, 27, 0.9) 100%);
-  border: 1px solid rgba(56, 189, 248, 0.25);
+  background: var(--card-sub-bg);
+  border: 1px solid var(--border-subtle);
+  box-shadow: var(--shadow-card);
   border-radius: var(--radius-md, 12px);
   margin-top: 16px;
   display: flex;
@@ -416,9 +421,10 @@
 .connect-guide-card {
   margin-top: 18px;
   padding: 20px;
-  background: rgba(15, 23, 42, 0.5);
-  border: 1px solid rgba(255, 255, 255, 0.07);
+  background: var(--card-sub-bg);
+  border: 1px solid var(--border-subtle);
   border-radius: 12px;
+  box-shadow: var(--shadow-card);
 }
 
 .connect-steps-grid {
@@ -430,8 +436,8 @@
 
 .connect-step-item {
   padding: 14px;
-  background: rgba(10, 16, 28, 0.6);
-  border: 1px solid rgba(255, 255, 255, 0.05);
+  background: var(--surface-raised);
+  border: 1px solid var(--border-subtle);
   border-radius: 10px;
   display: flex;
   flex-direction: column;
@@ -442,7 +448,7 @@
   width: 24px;
   height: 24px;
   border-radius: 50%;
-  background: #0284c7;
+  background: var(--accent);
   color: #ffffff;
   font-size: 0.75rem;
   font-weight: 700;
@@ -455,12 +461,12 @@
 .connect-step-title {
   font-size: 0.86rem;
   font-weight: 600;
-  color: #f1f5f9;
+  color: var(--text-primary);
 }
 
 .connect-step-desc {
   font-size: 0.78rem;
-  color: var(--text-muted, #94a3b8);
+  color: var(--text-muted);
   line-height: 1.45;
   margin: 0;
 }
@@ -484,15 +490,15 @@
 }
 
 .faq-item {
-  background: var(--surface-raised, rgba(15, 23, 42, 0.45));
-  border: 1px solid var(--border, rgba(255, 255, 255, 0.07));
+  background: var(--surface-raised);
+  border: 1px solid var(--border-subtle);
   border-radius: 12px;
   overflow: hidden;
   transition: all 0.2s ease;
 }
 
 .faq-item:hover {
-  border-color: rgba(56, 189, 248, 0.25);
+  border-color: var(--accent);
 }
 
 .faq-question {
@@ -503,7 +509,7 @@
   align-items: center;
   background: none;
   border: none;
-  color: var(--text-primary, #ffffff);
+  color: var(--text-primary);
   font-size: 0.92rem;
   font-weight: 600;
   cursor: pointer;
@@ -512,21 +518,21 @@
 
 .faq-chevron {
   font-size: 0.8rem;
-  color: var(--text-muted, #94a3b8);
+  color: var(--text-muted);
   transition: transform 0.2s ease;
 }
 
 .faq-item.is-open .faq-chevron {
   transform: rotate(180deg);
-  color: #38bdf8;
+  color: var(--accent);
 }
 
 .faq-answer {
   padding: 0 20px 18px;
   font-size: 0.85rem;
-  color: var(--text-muted, #94a3b8);
+  color: var(--text-muted);
   line-height: 1.55;
-  border-top: 1px solid rgba(255, 255, 255, 0.04);
+  border-top: 1px solid var(--border-soft);
   padding-top: 12px;
 }
 
@@ -541,10 +547,10 @@
 .support-textarea {
   width: 100%;
   padding: 12px 14px;
-  background: var(--surface-raised, rgba(15, 23, 42, 0.6));
-  border: 1px solid var(--border, rgba(255, 255, 255, 0.12));
+  background: var(--surface-raised);
+  border: 1px solid var(--border);
   border-radius: 8px;
-  color: #ffffff;
+  color: var(--text-primary);
   font-family: inherit;
   font-size: 0.88rem;
   outline: none;
@@ -554,8 +560,9 @@
 }
 
 .support-textarea:focus {
-  border-color: #38bdf8;
-  box-shadow: 0 0 0 3px rgba(56, 189, 248, 0.18);
+  border-color: var(--accent);
+  background: var(--surface);
+  box-shadow: 0 0 0 3px var(--border-glow);
 }
 
 @media (max-width: 600px) {

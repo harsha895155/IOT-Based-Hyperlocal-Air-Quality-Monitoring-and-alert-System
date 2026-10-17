@@ -42,20 +42,22 @@
 }
 
 .alerts-kpi-card {
-  background: var(--bg-card, #121624);
-  border: 1px solid var(--border-subtle, rgba(255, 255, 255, 0.08));
+  background: var(--bg-card);
+  border: 1px solid var(--border-subtle);
   border-radius: 12px;
   padding: 16px 18px;
+  box-shadow: var(--shadow-card);
   display: flex;
   flex-direction: column;
   gap: 4px;
   position: relative;
   overflow: hidden;
-  transition: transform 0.2s, border-color 0.2s;
+  transition: transform 0.2s, border-color 0.2s, box-shadow 0.2s;
 }
 
 .alerts-kpi-card:hover {
-  border-color: rgba(0, 210, 180, 0.3);
+  border-color: var(--accent);
+  box-shadow: var(--shadow-card-hover);
   transform: translateY(-2px);
 }
 
@@ -66,7 +68,7 @@
   left: 0;
   width: 4px;
   height: 100%;
-  background: var(--kpi-color, #00d2b4);
+  background: var(--kpi-color, var(--accent));
 }
 
 .alerts-kpi-title {
@@ -74,7 +76,7 @@
   font-weight: 700;
   text-transform: uppercase;
   letter-spacing: 0.05em;
-  color: var(--text-faint, #64748b);
+  color: var(--text-faint);
   display: flex;
   align-items: center;
   justify-content: space-between;
@@ -84,21 +86,22 @@
   font-size: 1.75rem;
   font-weight: 800;
   font-family: var(--font-mono, monospace);
-  color: var(--text-primary, #f8fafc);
+  color: var(--text-primary);
 }
 
 .alerts-kpi-sub {
   font-size: 0.74rem;
-  color: var(--text-muted, #94a3b8);
+  color: var(--text-muted);
 }
 
 /* ─── Search & Controls Bar ─── */
 .alerts-controls-card {
-  background: var(--bg-card, #121624);
-  border: 1px solid var(--border-subtle, rgba(255, 255, 255, 0.08));
+  background: var(--bg-card);
+  border: 1px solid var(--border-subtle);
   border-radius: 14px;
   padding: 16px 20px;
   margin-bottom: 22px;
+  box-shadow: var(--shadow-card);
   display: flex;
   flex-direction: column;
   gap: 14px;
@@ -116,8 +119,8 @@
   display: flex;
   align-items: center;
   gap: 8px;
-  background: var(--bg-surface, #1e2438);
-  border: 1px solid var(--border-subtle, rgba(255, 255, 255, 0.12));
+  background: var(--bg-surface);
+  border: 1px solid var(--border-subtle);
   border-radius: 8px;
   padding: 8px 14px;
   flex: 1;
@@ -128,7 +131,7 @@
   background: transparent;
   border: none;
   outline: none;
-  color: var(--text-primary, #f8fafc);
+  color: var(--text-primary);
   font-size: 0.85rem;
   width: 100%;
 }
@@ -278,10 +281,11 @@
 
 .alert-card {
   padding: 20px 22px;
-  background: var(--bg-card, #121624);
-  border: 1px solid var(--border-subtle, rgba(255, 255, 255, 0.08));
+  background: var(--bg-card);
+  border: 1px solid var(--border-subtle);
   border-left-width: 4px;
   border-radius: 12px;
+  box-shadow: var(--shadow-card);
   display: flex;
   justify-content: space-between;
   align-items: flex-start;
@@ -291,7 +295,7 @@
 }
 
 .alert-card:hover {
-  background: rgba(30, 36, 56, 0.6);
+  background: var(--surface-hover);
   transform: translateX(2px);
 }
 
@@ -318,6 +322,7 @@
   display: flex;
   align-items: center;
   gap: 8px;
+  color: var(--text-primary);
 }
 
 .alert-badge {
@@ -341,15 +346,15 @@
 
 .alert-card__message {
   font-size: 0.85rem;
-  color: var(--text-primary, #f8fafc);
+  color: var(--text-primary);
   line-height: 1.45;
 }
 
 .alert-advisory {
   font-size: 0.78rem;
-  color: var(--text-muted, #94a3b8);
-  background: rgba(255, 255, 255, 0.03);
-  border-left: 2px solid rgba(0, 210, 180, 0.4);
+  color: var(--text-muted);
+  background: var(--surface-raised);
+  border-left: 2px solid var(--accent);
   padding: 6px 12px;
   border-radius: 0 6px 6px 0;
   margin-top: 4px;
@@ -361,7 +366,7 @@
   align-items: center;
   gap: 8px;
   font-size: 0.75rem;
-  color: var(--text-faint, #64748b);
+  color: var(--text-faint);
   margin-top: 6px;
 }
 
@@ -369,7 +374,9 @@
   display: inline-flex;
   align-items: center;
   gap: 4px;
-  background: rgba(255, 255, 255, 0.05);
+  background: var(--surface-raised);
+  border: 1px solid var(--border-subtle);
+  color: var(--text-muted);
   padding: 2px 8px;
   border-radius: 4px;
   font-family: var(--font-mono, monospace);
@@ -387,15 +394,15 @@
 .alert-card__time {
   font-size: 0.72rem;
   font-family: var(--font-mono, monospace);
-  color: var(--text-faint, #64748b);
+  color: var(--text-faint);
 }
 
 .alert-card__ack-btn {
   font-size: 0.75rem;
   font-weight: 600;
-  background: var(--bg-surface, #1e2438);
-  border: 1px solid rgba(255, 255, 255, 0.12);
-  color: var(--text-primary, #f8fafc);
+  background: var(--bg-surface);
+  border: 1px solid var(--border-subtle);
+  color: var(--text-primary);
   padding: 6px 14px;
   border-radius: 6px;
   cursor: pointer;
@@ -403,9 +410,9 @@
 }
 
 .alert-card__ack-btn:hover {
-  background: #00d2b4;
-  border-color: #00d2b4;
-  color: #0a0e17;
+  background: var(--accent);
+  border-color: var(--accent);
+  color: #ffffff;
 }
 
 .alert-card__status-resolved {
@@ -420,10 +427,11 @@
 .alerts-empty {
   padding: 48px;
   text-align: center;
-  color: var(--text-muted, #94a3b8);
-  background: var(--bg-card, #121624);
+  color: var(--text-muted);
+  background: var(--bg-card);
   border-radius: 14px;
-  border: 1px dashed var(--border-subtle, rgba(255, 255, 255, 0.1));
+  border: 1px dashed var(--border-subtle);
+  box-shadow: var(--shadow-card);
 }
 
 @media (max-width: 768px) {

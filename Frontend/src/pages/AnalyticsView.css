@@ -20,11 +20,12 @@
   align-items: center;
   justify-content: space-between;
   gap: 16px;
-  background: var(--bg-card, #121624);
-  border: 1px solid var(--border-subtle, rgba(255, 255, 255, 0.08));
+  background: var(--bg-card);
+  border: 1px solid var(--border-subtle);
   border-radius: 14px;
   padding: 14px 20px;
   margin-bottom: 24px;
+  box-shadow: var(--shadow-card);
 }
 
 .analytics-controls-group {
@@ -45,13 +46,13 @@
   font-weight: 600;
   text-transform: uppercase;
   letter-spacing: 0.04em;
-  color: var(--text-faint, #64748b);
+  color: var(--text-faint);
 }
 
 .analytics-select {
-  background: var(--bg-surface, #1e2438);
-  color: var(--text-primary, #f8fafc);
-  border: 1px solid var(--border-subtle, rgba(255, 255, 255, 0.12));
+  background: var(--bg-surface);
+  color: var(--text-primary);
+  border: 1px solid var(--border-subtle);
   border-radius: 8px;
   padding: 6px 12px;
   font-size: 0.82rem;
@@ -62,7 +63,7 @@
 }
 
 .analytics-select:focus {
-  border-color: #00d2b4;
+  border-color: var(--accent);
 }
 
 /* ─── Statistical KPI Matrix ─── */
@@ -74,20 +75,22 @@
 }
 
 .analytics-kpi-card {
-  background: var(--bg-card, #121624);
-  border: 1px solid var(--border-subtle, rgba(255, 255, 255, 0.08));
+  background: var(--bg-card);
+  border: 1px solid var(--border-subtle);
   border-radius: 12px;
   padding: 16px 18px;
+  box-shadow: var(--shadow-card);
   display: flex;
   flex-direction: column;
   gap: 4px;
   position: relative;
   overflow: hidden;
-  transition: transform 0.2s, border-color 0.2s;
+  transition: transform 0.2s, border-color 0.2s, box-shadow 0.2s;
 }
 
 .analytics-kpi-card:hover {
-  border-color: rgba(0, 210, 180, 0.3);
+  border-color: var(--accent);
+  box-shadow: var(--shadow-card-hover);
   transform: translateY(-2px);
 }
 
@@ -98,7 +101,7 @@
   left: 0;
   width: 4px;
   height: 100%;
-  background: var(--kpi-accent, #00d2b4);
+  background: var(--kpi-accent, var(--accent));
 }
 
 .analytics-kpi-title {
@@ -106,7 +109,7 @@
   font-weight: 700;
   text-transform: uppercase;
   letter-spacing: 0.05em;
-  color: var(--text-faint, #64748b);
+  color: var(--text-faint);
   display: flex;
   align-items: center;
   justify-content: space-between;
@@ -116,12 +119,12 @@
   font-size: 1.7rem;
   font-weight: 800;
   font-family: var(--font-mono, monospace);
-  color: var(--text-primary, #f8fafc);
+  color: var(--text-primary);
 }
 
 .analytics-kpi-sub {
   font-size: 0.74rem;
-  color: var(--text-muted, #94a3b8);
+  color: var(--text-muted);
 }
 
 /* ─── Charts & Trends Row ─── */
@@ -139,10 +142,11 @@
 }
 
 .analytics-chart-card {
-  background: var(--bg-card, #121624);
-  border: 1px solid var(--border-subtle, rgba(255, 255, 255, 0.08));
+  background: var(--bg-card);
+  border: 1px solid var(--border-subtle);
   border-radius: 14px;
   padding: 22px;
+  box-shadow: var(--shadow-card);
   display: flex;
   flex-direction: column;
 }
@@ -157,7 +161,7 @@
 .analytics-card-title {
   font-size: 1rem;
   font-weight: 700;
-  color: var(--text-primary, #f8fafc);
+  color: var(--text-primary);
   display: flex;
   align-items: center;
   gap: 8px;
@@ -183,10 +187,11 @@
 }
 
 .correlation-card {
-  background: var(--bg-card, #121624);
-  border: 1px solid var(--border-subtle, rgba(255, 255, 255, 0.08));
+  background: var(--bg-card);
+  border: 1px solid var(--border-subtle);
   border-radius: 14px;
   padding: 18px 20px;
+  box-shadow: var(--shadow-card);
   display: flex;
   flex-direction: column;
   gap: 10px;
@@ -201,7 +206,7 @@
 .correlation-title {
   font-size: 0.88rem;
   font-weight: 700;
-  color: var(--text-primary, #f8fafc);
+  color: var(--text-primary);
   display: flex;
   align-items: center;
   gap: 8px;
@@ -219,7 +224,7 @@
 
 .correlation-desc {
   font-size: 0.78rem;
-  color: var(--text-muted, #94a3b8);
+  color: var(--text-muted);
   line-height: 1.45;
 }
 
@@ -228,9 +233,9 @@
   align-items: center;
   justify-content: space-between;
   font-size: 0.75rem;
-  border-top: 1px solid rgba(255, 255, 255, 0.05);
+  border-top: 1px solid var(--border-subtle);
   padding-top: 8px;
-  color: var(--text-faint, #64748b);
+  color: var(--text-faint);
 }
 
 /* ─── Category Breakdown Spectrum ─── */
@@ -262,7 +267,7 @@
 .cat-bar-track {
   width: 100%;
   height: 8px;
-  background: rgba(255, 255, 255, 0.05);
+  background: var(--surface-raised);
   border-radius: 4px;
   overflow: hidden;
 }
@@ -287,20 +292,22 @@
   font-size: 0.72rem;
   text-transform: uppercase;
   letter-spacing: 0.05em;
-  color: var(--text-faint, #64748b);
-  border-bottom: 1px solid var(--border-subtle, rgba(255, 255, 255, 0.08));
+  color: var(--text-faint);
+  border-bottom: 1px solid var(--border-subtle);
+  background: var(--table-header-bg);
 }
 
 .distribution-table td {
   padding: 12px 14px;
-  border-bottom: 1px solid rgba(255, 255, 255, 0.04);
-  color: var(--text-primary, #f8fafc);
+  border-bottom: 1px solid var(--border-subtle);
+  color: var(--text-primary);
 }
 
 /* ─── Diurnal Insights Box ─── */
 .diurnal-insight-box {
-  background: linear-gradient(135deg, rgba(0, 210, 180, 0.08) 0%, rgba(56, 189, 248, 0.05) 100%);
-  border: 1px solid rgba(0, 210, 180, 0.2);
+  background: var(--card-sub-bg);
+  border: 1px solid var(--border-subtle);
+  box-shadow: var(--shadow-card);
   border-radius: 12px;
   padding: 16px;
   margin-top: 18px;
@@ -316,12 +323,12 @@
 .diurnal-insight-title {
   font-size: 0.85rem;
   font-weight: 700;
-  color: var(--text-primary, #f8fafc);
+  color: var(--text-primary);
   margin-bottom: 3px;
 }
 
 .diurnal-insight-text {
   font-size: 0.76rem;
-  color: var(--text-muted, #94a3b8);
+  color: var(--text-muted);
   line-height: 1.4;
 }

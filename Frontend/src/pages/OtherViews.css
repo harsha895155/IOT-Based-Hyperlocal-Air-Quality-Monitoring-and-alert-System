@@ -206,41 +206,46 @@
   font-size: var(--fs-xs);
   font-weight: 500;
   border: 1px solid var(--border-soft);
-  background: var(--surface-card);
-  color: var(--text-secondary);
+  background: var(--surface-raised);
+  color: var(--text-muted);
   cursor: pointer;
   transition: all 0.2s ease;
 }
 
 .location-filter-btn:hover {
-  border-color: var(--border-medium);
+  border-color: var(--accent);
   color: var(--text-primary);
 }
 
 .location-filter-btn.is-active {
-  background: rgba(56, 189, 248, 0.12);
-  border-color: var(--primary-accent);
-  color: var(--primary-accent);
-  box-shadow: 0 0 12px rgba(56, 189, 248, 0.25);
+  background: var(--btn-primary-bg);
+  border-color: var(--accent);
+  color: #ffffff;
+  box-shadow: var(--btn-shadow);
 }
 
 .location-card {
+  background: var(--surface);
+  border: 1px solid var(--border);
+  border-radius: var(--radius-lg, 14px);
+  box-shadow: var(--shadow-card);
   transition: transform 0.2s ease, border-color 0.2s ease, box-shadow 0.2s ease;
 }
 
 .location-card:hover {
   transform: translateY(-2px);
-  border-color: var(--border-medium);
+  border-color: var(--accent);
+  box-shadow: var(--shadow-card-hover);
 }
 
 .location-card.is-selected {
-  border-color: var(--primary-accent) !important;
+  border-color: var(--accent) !important;
   box-shadow: 0 0 18px rgba(56, 189, 248, 0.22) !important;
 }
 
 .location-active-tag {
   font-size: 0.75rem;
-  color: var(--primary-accent);
+  color: var(--accent);
   font-weight: 600;
   margin-top: 6px;
   display: flex;
@@ -250,7 +255,10 @@
 
 .location-detail-card {
   padding: 24px 28px;
-  border: 1px solid var(--border-medium);
+  background: var(--surface);
+  border: 1px solid var(--border);
+  border-radius: var(--radius-lg, 14px);
+  box-shadow: var(--shadow-card);
 }
 
 .location-detail-header {
@@ -266,7 +274,7 @@
 .location-detail-tag {
   font-size: 0.7rem;
   letter-spacing: 0.08em;
-  color: var(--primary-accent);
+  color: var(--accent);
   font-weight: 700;
 }
 
@@ -286,6 +294,10 @@
 
 .report-box {
   padding: 24px 28px;
+  background: var(--surface);
+  border: 1px solid var(--border);
+  border-radius: var(--radius-lg, 14px);
+  box-shadow: var(--shadow-card);
   display: flex;
   flex-direction: column;
   gap: 12px;
@@ -295,6 +307,7 @@
 .report-box__title {
   font-size: 1.15rem;
   font-weight: 600;
+  color: var(--text-primary);
 }
 
 .report-box__desc {
@@ -313,6 +326,10 @@
 
 .health-card {
   padding: 22px 24px;
+  background: var(--surface);
+  border: 1px solid var(--border);
+  border-radius: var(--radius-lg, 14px);
+  box-shadow: var(--shadow-card);
   display: flex;
   flex-direction: column;
   gap: 6px;

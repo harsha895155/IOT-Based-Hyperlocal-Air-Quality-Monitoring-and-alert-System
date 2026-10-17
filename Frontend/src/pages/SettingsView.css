@@ -277,10 +277,10 @@
 .settings-select {
   width: 100%;
   padding: 10px 14px;
-  background: var(--surface-raised, rgba(15, 23, 42, 0.6));
-  border: 1px solid var(--border, rgba(255, 255, 255, 0.12));
+  background: var(--surface-raised);
+  border: 1px solid var(--border);
   border-radius: var(--radius-sm, 8px);
-  color: #ffffff;
+  color: var(--text-primary);
   font-size: var(--fs-sm);
   font-family: inherit;
   outline: none;
@@ -290,20 +290,20 @@
 
 .settings-input:focus,
 .settings-select:focus {
-  border-color: #38bdf8;
-  background: rgba(10, 18, 30, 0.95);
-  box-shadow: 0 0 0 3px rgba(56, 189, 248, 0.18);
+  border-color: var(--accent);
+  background: var(--surface);
+  box-shadow: 0 0 0 3px var(--border-glow);
 }
 
 .settings-input:disabled {
   opacity: 0.6;
   cursor: not-allowed;
-  background: rgba(0, 0, 0, 0.25);
+  background: var(--surface-raised);
 }
 
 .settings-select option {
-  background: #090e18;
-  color: #ffffff;
+  background: var(--surface);
+  color: var(--text-primary);
 }
 
 /* Threshold slider and input combination */

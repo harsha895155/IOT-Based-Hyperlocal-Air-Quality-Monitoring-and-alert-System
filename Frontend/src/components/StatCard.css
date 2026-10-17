@@ -3,8 +3,8 @@
   display: flex;
   align-items: center;
   gap: 18px;
-  background: var(--surface);
-  border: 1px solid var(--border);
+  background: var(--bg-card, var(--surface));
+  border: 1px solid var(--border-subtle, var(--border));
   border-radius: var(--radius-md);
   box-shadow: var(--shadow-card);
   transition: all 0.2s cubic-bezier(0.16, 1, 0.3, 1);
