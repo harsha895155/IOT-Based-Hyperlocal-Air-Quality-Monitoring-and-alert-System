@@ -1,0 +1,68 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9"
+        xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+        xsi:schemaLocation="http://www.sitemaps.org/schemas/sitemap/0.9
+                            http://www.sitemaps.org/schemas/sitemap/0.9/sitemap.xsd">
+  <!-- Homepage / Landing Page -->
+  <url>
+    <loc>https://airguard-hyperlocal.vercel.app/</loc>
+    <changefreq>daily</changefreq>
+    <priority>1.00</priority>
+  </url>
+
+  <!-- Real-Time Air Quality & Weather Dashboard -->
+  <url>
+    <loc>https://airguard-hyperlocal.vercel.app/dashboard</loc>
+    <changefreq>hourly</changefreq>
+    <priority>0.90</priority>
+  </url>
+
+  <!-- Live Telemetry Stream -->
+  <url>
+    <loc>https://airguard-hyperlocal.vercel.app/live</loc>
+    <changefreq>hourly</changefreq>
+    <priority>0.80</priority>
+  </url>
+
+  <!-- Air Quality Index & Health Standards -->
+  <url>
+    <loc>https://airguard-hyperlocal.vercel.app/air-quality</loc>
+    <changefreq>daily</changefreq>
+    <priority>0.80</priority>
+  </url>
+
+  <!-- Hyperlocal Weather & Environmental Stations -->
+  <url>
+    <loc>https://airguard-hyperlocal.vercel.app/locations</loc>
+    <changefreq>daily</changefreq>
+    <priority>0.70</priority>
+  </url>
+
+  <!-- Environmental Analytics & Trends -->
+  <url>
+    <loc>https://airguard-hyperlocal.vercel.app/analytics</loc>
+    <changefreq>daily</changefreq>
+    <priority>0.70</priority>
+  </url>
+
+  <!-- Historical Air Quality Timeline -->
+  <url>
+    <loc>https://airguard-hyperlocal.vercel.app/history</loc>
+    <changefreq>daily</changefreq>
+    <priority>0.70</priority>
+  </url>
+
+  <!-- Compliance Reports & PDF/CSV Export -->
+  <url>
+    <loc>https://airguard-hyperlocal.vercel.app/reports</loc>
+    <changefreq>weekly</changefreq>
+    <priority>0.60</priority>
+  </url>
+
+  <!-- User Portal Entry (Login & Registration) -->
+  <url>
+    <loc>https://airguard-hyperlocal.vercel.app/login</loc>
+    <changefreq>monthly</changefreq>
+    <priority>0.50</priority>
+  </url>
+</urlset>

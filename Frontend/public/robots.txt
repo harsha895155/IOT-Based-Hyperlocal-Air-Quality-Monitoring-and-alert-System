@@ -1,0 +1,33 @@
+# ============================================================
+# AirGuard — Robots Exclusion Standard (robots.txt)
+# Production URL: https://airguard-hyperlocal.vercel.app/
+# ============================================================
+
+User-agent: *
+
+# Allow public landing, live monitoring, and documentation pages
+Allow: /
+Allow: /dashboard
+Allow: /live
+Allow: /air-quality
+Allow: /locations
+Allow: /analytics
+Allow: /history
+Allow: /reports
+Allow: /login
+
+# Allow static assets and media
+Allow: /assets/
+Allow: /favicon.svg
+Allow: /og-image.png
+
+# Disallow private user accounts, authentication tokens, and hardware provisioning
+Disallow: /settings
+Disallow: /profile
+Disallow: /system-health
+Disallow: /reset-password
+Disallow: /devices/
+Disallow: /api/
+
+# XML Sitemap Location
+Sitemap: https://airguard-hyperlocal.vercel.app/sitemap.xml

@@ -3,17 +3,122 @@
   <head>
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <title>AirGuard — Hyperlocal Air Quality Monitor</title>
+    <meta http-equiv="X-UA-Compatible" content="IE=edge" />
+
+    <!-- Primary SEO Meta Tags -->
+    <title>AirGuard | Real-Time Hyperlocal Air Quality Monitoring</title>
+    <meta name="title" content="AirGuard | Real-Time Hyperlocal Air Quality Monitoring" />
+    <meta
+      name="description"
+      content="Explore AirGuard, an IoT-based air quality monitoring platform designed to track environmental conditions, visualize sensor readings, and support timely air-quality alerts."
+    />
+    <meta
+      name="keywords"
+      content="AirGuard, air quality monitoring, hyperlocal AQI, IoT environmental monitoring, ESP32 sensor, real-time air pollution, PM2.5, MQ135, air quality alerts, environmental intelligence, micro-climate weather"
+    />
+    <meta name="author" content="AirGuard Engineering Team" />
+    <meta name="robots" content="index, follow, max-image-preview:large, max-snippet:-1, max-video-preview:-1" />
+
+    <!-- Canonical URL -->
+    <link rel="canonical" href="https://airguard-hyperlocal.vercel.app/" />
+
+    <!-- Open Graph / Facebook -->
+    <meta property="og:type" content="website" />
+    <meta property="og:url" content="https://airguard-hyperlocal.vercel.app/" />
+    <meta property="og:site_name" content="AirGuard" />
+    <meta property="og:title" content="AirGuard | Real-Time Hyperlocal Air Quality Monitoring" />
+    <meta
+      property="og:description"
+      content="Explore AirGuard, an IoT-based air quality monitoring platform designed to track environmental conditions, visualize sensor readings, and support timely air-quality alerts."
+    />
+    <meta property="og:image" content="https://airguard-hyperlocal.vercel.app/og-image.png" />
+    <meta property="og:image:secure_url" content="https://airguard-hyperlocal.vercel.app/og-image.png" />
+    <meta property="og:image:type" content="image/png" />
+    <meta property="og:image:width" content="1200" />
+    <meta property="og:image:height" content="630" />
+    <meta property="og:image:alt" content="AirGuard Hyperlocal Air Quality Monitoring Platform Dashboard" />
+    <meta property="og:locale" content="en_US" />
+
+    <!-- Twitter / X -->
+    <meta name="twitter:card" content="summary_large_image" />
+    <meta name="twitter:url" content="https://airguard-hyperlocal.vercel.app/" />
+    <meta name="twitter:title" content="AirGuard | Real-Time Hyperlocal Air Quality Monitoring" />
+    <meta
+      name="twitter:description"
+      content="Explore AirGuard, an IoT-based air quality monitoring platform designed to track environmental conditions, visualize sensor readings, and support timely air-quality alerts."
+    />
+    <meta name="twitter:image" content="https://airguard-hyperlocal.vercel.app/og-image.png" />
+    <meta name="twitter:image:alt" content="AirGuard Hyperlocal Air Quality Monitoring Platform" />
+
+    <!-- Mobile Theme & Web App Presentation -->
+    <meta name="theme-color" content="#0b1120" />
+    <meta name="apple-mobile-web-app-capable" content="yes" />
+    <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent" />
+    <meta name="apple-mobile-web-app-title" content="AirGuard" />
+
+    <!-- Favicons -->
     <link rel="icon" type="image/svg+xml" href="/favicon.svg" />
     <link rel="apple-touch-icon" href="/favicon.svg" />
+
+    <!-- Google Search Console Verification Meta Tag -->
+    <!-- When you get your code from GSC (HTML Tag method), paste the code into the content attribute below: -->
+    <!-- <meta name="google-site-verification" content="YOUR_GOOGLE_SEARCH_CONSOLE_VERIFICATION_TOKEN" /> -->
+
+    <!-- Web Fonts -->
     <link rel="preconnect" href="https://fonts.googleapis.com" />
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
     <link
       href="https://fonts.googleapis.com/css2?family=Fraunces:opsz,wght@9..144,400;9..144,500;9..144,600&family=Outfit:wght@400;500;600;700&family=Plus+Jakarta+Sans:wght@400;500;600;700&family=Inter:wght@400;500;600;700&family=IBM+Plex+Mono:wght@400;500;600&display=swap"
       rel="stylesheet"
     />
+
     <!-- Google Identity Services (Sign in with Google) -->
     <script src="https://accounts.google.com/gsi/client" async defer></script>
+
+    <!-- Schema.org JSON-LD Structured Data: WebSite & SoftwareApplication -->
+    <script type="application/ld+json">
+      {
+        "@context": "https://schema.org",
+        "@graph": [
+          {
+            "@type": "WebSite",
+            "@id": "https://airguard-hyperlocal.vercel.app/#website",
+            "url": "https://airguard-hyperlocal.vercel.app/",
+            "name": "AirGuard",
+            "alternateName": ["AirGuard IoT", "AirGuard Air Quality Monitor"],
+            "description": "IoT-Based Hyperlocal Air Quality Monitoring and Alert System with Cloud Integration",
+            "inLanguage": "en-US",
+            "publisher": {
+              "@type": "Organization",
+              "name": "AirGuard",
+              "url": "https://airguard-hyperlocal.vercel.app/"
+            }
+          },
+          {
+            "@type": "WebApplication",
+            "@id": "https://airguard-hyperlocal.vercel.app/#app",
+            "name": "AirGuard Environmental Platform",
+            "url": "https://airguard-hyperlocal.vercel.app/",
+            "applicationCategory": "HealthApplication, UtilitiesApplication",
+            "operatingSystem": "All modern web browsers",
+            "description": "Real-time hyperlocal air quality index calculation, environmental sensor telemetry visualization, and threshold-based incident alerting platform.",
+            "browserRequirements": "Requires JavaScript. Requires HTML5.",
+            "offers": {
+              "@type": "Offer",
+              "price": "0",
+              "priceCurrency": "USD"
+            },
+            "featureList": [
+              "Real-time EPA 0-500 Air Quality Index calculation",
+              "ESP32 hardware telemetry stream via WebSockets",
+              "Hyperlocal micro-climate weather tracking",
+              "Historical pollution analytics and 24h trends",
+              "Automated health advisories and anti-spam threshold alerts"
+            ]
+          }
+        ]
+      }
+    </script>
   </head>
   <body>
     <div id="root"></div>
