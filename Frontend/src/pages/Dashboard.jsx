@@ -435,23 +435,24 @@ export default function Dashboard({ readingsData, onNavigateTab }) {
             justifyContent: 'space-between',
             flexWrap: 'wrap',
             gap: '12px',
-            background: 'linear-gradient(90deg, rgba(56, 189, 248, 0.12) 0%, rgba(37, 99, 235, 0.08) 100%)',
-            border: '1px solid rgba(56, 189, 248, 0.25)',
+            background: 'var(--current-mode-bg)',
+            border: '1px solid var(--border-active)',
             borderRadius: '12px',
             padding: '12px 18px',
             marginBottom: '18px',
-            color: '#f8fafc',
+            color: 'var(--text-primary)',
             fontSize: '0.88rem',
+            boxShadow: 'var(--shadow-card)',
           }}
         >
           <div style={{ display: 'flex', alignItems: 'center', gap: '10px' }}>
             <span style={{ fontSize: '1.2rem' }}>📍</span>
             <div>
-              <strong style={{ color: '#38bdf8' }}>Current Place Mode:</strong>{' '}
+              <strong style={{ color: 'var(--accent)' }}>Current Place Mode:</strong>{' '}
               {devices.length === 0
                 ? 'No AirGuard IoT device connected yet. Displaying live weather, temperature, humidity, and ambient air quality for '
                 : 'Device is offline or not connected. Displaying real-time weather and air quality for '}
-              <span style={{ fontWeight: 600, color: '#f8fafc' }}>
+              <span style={{ fontWeight: 600, color: 'var(--text-primary)' }}>
                 {displayPlaceName}
               </span>.
             </div>

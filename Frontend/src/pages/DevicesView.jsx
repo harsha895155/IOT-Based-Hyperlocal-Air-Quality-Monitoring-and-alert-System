@@ -337,12 +337,13 @@ export default function DevicesView({
         <div
           className="devices-empty-state-card"
           style={{
-            background: 'var(--bg-card, #121624)',
-            border: '1px dashed var(--border-subtle, rgba(255, 255, 255, 0.15))',
+            background: 'var(--bg-card)',
+            border: '1px dashed var(--border-subtle)',
             borderRadius: '16px',
             padding: '60px 24px',
             textAlign: 'center',
             margin: '24px 0',
+            boxShadow: 'var(--shadow-card)',
           }}
         >
           <div style={{ fontSize: '3.5rem', marginBottom: '16px' }}>📡</div>

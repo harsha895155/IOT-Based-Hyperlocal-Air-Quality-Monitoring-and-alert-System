@@ -334,21 +334,21 @@ export default function AnalyticsView() {
                       return (
                         <div
                           style={{
-                            background: '#121624',
-                            border: '1px solid rgba(255,255,255,0.15)',
+                            background: 'var(--bg-card)',
+                            border: '1px solid var(--border-subtle)',
                             padding: '10px 14px',
                             borderRadius: '8px',
-                            boxShadow: '0 8px 20px rgba(0,0,0,0.5)',
+                            boxShadow: 'var(--shadow-dropdown)',
                             fontSize: '0.8rem',
                           }}
                         >
-                          <div style={{ fontWeight: 700, color: '#f8fafc', marginBottom: '4px' }}>
+                          <div style={{ fontWeight: 700, color: 'var(--text-primary)', marginBottom: '4px' }}>
                             Time: {item.hour} ({item.sampleCount} samples)
                           </div>
                           <div style={{ color: item.color, fontWeight: 700 }}>
                             AQI: {item.avgAQI} ({item.category})
                           </div>
-                          <div style={{ color: '#94a3b8', fontSize: '0.74rem', marginTop: '2px' }}>
+                          <div style={{ color: 'var(--text-muted)', fontSize: '0.74rem', marginTop: '2px' }}>
                             Avg Temperature: {item.avgTemp}°C
                           </div>
                         </div>
