@@ -27,16 +27,28 @@
 > **Watch AirGuard in Action:** Real-time 0–500 EPA AQI circular dial gauge, Google Weather atmospheric forecasts, multi-node IoT hardware registry, interactive micro-zones, automated compliance audits, and full daylight/obsidian theme switching with on-screen guided explanations.
 
 <div align="center">
-  <video src="docs/airguard-demo.mp4" controls="controls" width="100%" poster="docs/airguard-demo.gif" style="border-radius: 14px; box-shadow: 0 12px 40px rgba(0,0,0,0.25);">
-    <source src="docs/airguard-demo.mp4" type="video/mp4">
-    <!-- Fallback for renderers that do not support inline HTML5 video playback -->
-    <a href="https://airguard-hyperlocal.vercel.app" target="_blank" rel="noopener noreferrer">
-      <img src="docs/airguard-demo.gif" alt="AirGuard Platform Interactive Demo Walkthrough with Guided On-Screen Subtitles" width="100%" style="border-radius: 14px; box-shadow: 0 12px 40px rgba(0,0,0,0.25);" />
-    </a>
-  </video>
+  <a href="https://github.com/harsha895155/IOT-Based-Hyperlocal-Air-Quality-Monitoring-and-alert-System/raw/main/docs/airguard-demo.mp4" target="_blank" rel="noopener noreferrer" title="Click to open video with full player controls (Seek, Fullscreen, Play/Pause)">
+    <img src="https://raw.githubusercontent.com/harsha895155/IOT-Based-Hyperlocal-Air-Quality-Monitoring-and-alert-System/main/docs/airguard-demo.gif" alt="AirGuard Platform Interactive Demo Walkthrough with Guided On-Screen Subtitles" width="100%" />
+  </a>
+
+  <br /><br />
+
   <p align="center">
-    <sub>🎮 <em>Full Video Controllers Enabled: <strong>Play / Pause</strong>, <strong>Timeline Seek Scrubber</strong>, <strong>Current Timestamp</strong>, <strong>Mute</strong>, and <strong>Fullscreen</strong>.</em></sub><br />
-    <sub>⚡ <em>Direct Video File: <a href="docs/airguard-demo.mp4"><strong>docs/airguard-demo.mp4 (1.6 MB)</strong></a> • Live Platform: <a href="https://airguard-hyperlocal.vercel.app"><strong>airguard-hyperlocal.vercel.app</strong></a></em></sub>
+    <a href="https://github.com/harsha895155/IOT-Based-Hyperlocal-Air-Quality-Monitoring-and-alert-System/raw/main/docs/airguard-demo.mp4">
+      <img src="https://img.shields.io/badge/▶%EF%B8%8F%20Play%20Video%20with%20Controllers%20(MP4)-0284c7?style=for-the-badge" alt="Play MP4 with Controllers" />
+    </a>
+    &nbsp;
+    <a href="https://airguard-hyperlocal.vercel.app">
+      <img src="https://img.shields.io/badge/🚀%20Live%20Web%20App-10b981?style=for-the-badge&logo=vercel" alt="Live Platform" />
+    </a>
+    &nbsp;
+    <a href="mailto:airguard396@gmail.com">
+      <img src="https://img.shields.io/badge/✉️%20Email%20airguard396%40gmail.com-ea580c?style=for-the-badge&logo=gmail" alt="Email Us" />
+    </a>
+  </p>
+
+  <p align="center">
+    <sub>🎬 <em>Video plays on loop above. Click <strong>"Play Video with Controllers (MP4)"</strong> or click the video itself to launch the native media player with <strong>Play / Pause</strong>, <strong>Timeline Seek Scrubber</strong>, <strong>Timestamp</strong>, and <strong>Fullscreen</strong>.</em></sub>
   </p>
 </div>
 
