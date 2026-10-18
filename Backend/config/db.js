@@ -4,13 +4,12 @@ const dns = require('dns');
 // Fix querySrv ESERVFAIL on Windows/ISP DNS by forcing Google Public DNS for SRV resolution
 dns.setServers(['8.8.8.8', '8.8.4.4', '1.1.1.1']);
 
-const DEFAULT_MONGO_URI = 'mongodb+srv://minddesk43_db_user:Minddesk%401234@cluster0.8q9noke.mongodb.net/airquality?retryWrites=true&w=majority&appName=Cluster0';
-
 async function connectDB() {
-  let uri = process.env.MONGO_URI;
+  const uri = process.env.MONGO_URI;
 
-  if (!uri || uri.includes('mh1zjhz')) {
-    uri = DEFAULT_MONGO_URI;
+  if (!uri) {
+    console.error('[DB] MONGO_URI is missing from environment variables (.env). Please configure it.');
+    process.exit(1);
   }
 
   try {
