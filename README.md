@@ -27,11 +27,16 @@
 > **Watch AirGuard in Action:** Real-time 0–500 EPA AQI circular dial gauge, Google Weather atmospheric forecasts, multi-node IoT hardware registry, interactive micro-zones, automated compliance audits, and full daylight/obsidian theme switching with on-screen guided explanations.
 
 <div align="center">
-  <a href="https://airguard-hyperlocal.vercel.app" target="_blank" rel="noopener noreferrer">
-    <img src="docs/airguard-demo.gif" alt="AirGuard Platform Interactive Demo Walkthrough with Guided On-Screen Subtitles" width="100%" style="border-radius: 14px; box-shadow: 0 12px 40px rgba(0,0,0,0.25);" />
-  </a>
+  <video src="docs/airguard-demo.mp4" controls="controls" width="100%" poster="docs/airguard-demo.gif" style="border-radius: 14px; box-shadow: 0 12px 40px rgba(0,0,0,0.25);">
+    <source src="docs/airguard-demo.mp4" type="video/mp4">
+    <!-- Fallback for renderers that do not support inline HTML5 video playback -->
+    <a href="https://airguard-hyperlocal.vercel.app" target="_blank" rel="noopener noreferrer">
+      <img src="docs/airguard-demo.gif" alt="AirGuard Platform Interactive Demo Walkthrough with Guided On-Screen Subtitles" width="100%" style="border-radius: 14px; box-shadow: 0 12px 40px rgba(0,0,0,0.25);" />
+    </a>
+  </video>
   <p align="center">
-    <sub>⚡ <em>Full 15-scene guided demo playing live with on-screen technical lower-thirds. Click the animation above to explore the live deployment at <a href="https://airguard-hyperlocal.vercel.app"><strong>airguard-hyperlocal.vercel.app</strong></a></em></sub>
+    <sub>🎮 <em>Full Video Controllers Enabled: <strong>Play / Pause</strong>, <strong>Timeline Seek Scrubber</strong>, <strong>Current Timestamp</strong>, <strong>Mute</strong>, and <strong>Fullscreen</strong>.</em></sub><br />
+    <sub>⚡ <em>Direct Video File: <a href="docs/airguard-demo.mp4"><strong>docs/airguard-demo.mp4 (1.6 MB)</strong></a> • Live Platform: <a href="https://airguard-hyperlocal.vercel.app"><strong>airguard-hyperlocal.vercel.app</strong></a></em></sub>
   </p>
 </div>
 
