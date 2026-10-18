@@ -3,6 +3,25 @@
 Official full-stack IoT and cloud engineering codebase accompanying the base paper:
 **"IoT-Based Hyperlocal Air Quality Monitoring and Alert System with Cloud Integration"**
 
+[![Live Deployment](https://img.shields.io/badge/Live%20Web%20App-airguard--hyperlocal.vercel.app-0284c7?style=for-the-badge&logo=vercel)](https://airguard-hyperlocal.vercel.app)
+[![Contact Email](https://img.shields.io/badge/Contact-airguard396%40gmail.com-10b981?style=for-the-badge&logo=gmail)](mailto:airguard396@gmail.com)
+[![Status](https://img.shields.io/badge/System%20Status-All%20Systems%20Operational-10b981?style=for-the-badge)](https://airguard-hyperlocal.vercel.app)
+
+---
+
+## 📺 Live Platform Walkthrough & Interactive Demo
+
+> **Watch AirGuard in Action:** Real-time 0–500 EPA AQI circular gauge, Google Weather atmospheric forecasts, multi-node IoT hardware registry, interactive micro-zones, automated compliance audits, and full daylight/obsidian theme switching.
+
+<div align="center">
+  <a href="https://airguard-hyperlocal.vercel.app" target="_blank" rel="noopener noreferrer">
+    <img src="docs/airguard-demo.gif" alt="AirGuard Platform Interactive Demo Walkthrough" width="100%" style="border-radius: 14px; box-shadow: 0 12px 40px rgba(0,0,0,0.25);" />
+  </a>
+  <p align="center">
+    <sub>⚡ <em>Animated demo walkthrough playing live. Click the preview above to explore the live deployment at <a href="https://airguard-hyperlocal.vercel.app"><strong>airguard-hyperlocal.vercel.app</strong></a></em></sub>
+  </p>
+</div>
+
 ---
 
 ## 🏗️ System Architecture
@@ -116,3 +135,21 @@ node Backend/scripts/audit_e2e_verification.js
 |---|---|
 | `VITE_API_URL` | Backend server base URL (e.g. `http://localhost:5001`) |
 | `VITE_GOOGLE_CLIENT_ID` | Google OAuth Client ID |
+
+---
+
+## 📬 Contact & Support
+
+For technical inquiries, academic research collaboration, custom sensor deployments, or API access:
+
+- **Official Email**: [`airguard396@gmail.com`](mailto:airguard396@gmail.com)
+- **Live Deployment**: [airguard-hyperlocal.vercel.app](https://airguard-hyperlocal.vercel.app)
+- **Base Research Paper**: *"IoT-Based Hyperlocal Air Quality Monitoring and Alert System with Cloud Integration"*
+- **Lead Developer**: Harsha ([harsha895155@gmail.com](mailto:harsha895155@gmail.com))
+
+---
+
+## 📄 License & Attribution
+
+This project is licensed for academic, environmental research, and institutional monitoring use. When using or referencing this codebase or hardware design, please cite the accompanying IEEE paper.
+
