@@ -364,7 +364,7 @@ Have questions regarding sensor calibration transfer functions, institutional de
 
 - **Official Project Email**: [`airguard396@gmail.com`](mailto:airguard396@gmail.com)
 - **Live Deployment**: [airguard-hyperlocal.vercel.app](https://airguard-hyperlocal.vercel.app)
-- **Lead Developer**: Harsha ([harsha895155@gmail.com](mailto:harshavardhan10003@gmail.com))
+- **Lead Developer**: Harsha ([harshavardhan10003@gmail.com](mailto:harshavardhan10003@gmail.com))
 - **Response Window**: Typical response within 24 hours on business days for research, sensor queries, and deployment assistance.
 
 ---
