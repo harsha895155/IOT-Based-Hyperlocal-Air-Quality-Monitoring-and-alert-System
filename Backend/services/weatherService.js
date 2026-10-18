@@ -9,7 +9,7 @@ const CACHE_TTL_MS = 10 * 60 * 1000; // 10 minutes cache
 const weatherCache = new Map();
 const searchCache = new Map();
 
-const GOOGLE_API_KEY = process.env.GOOGLE_WEATHER_API_KEY || 'AIzaSyBjHXmtQSo_VvaATHWpHQHQSM3O9K0PZ-s';
+const GOOGLE_API_KEY = process.env.GOOGLE_WEATHER_API_KEY || '';
 
 // Standard WMO Weather interpretation codes
 const WMO_CODES = {
