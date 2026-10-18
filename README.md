@@ -22,9 +22,17 @@
 
 ---
 
-## 📺 Live Platform Walkthrough & Interactive Demo (Voiceover + [CC] Subtitles)
+## 📺 Live Platform Walkthrough & Interactive Demo (Voiceover + Working [CC] Subtitles)
 
-> **Watch & Listen to AirGuard in Action:** Full audio-visual guided walkthrough with synchronized voiceover narration and **burned-in Closed Captions (`[CC]`)**, real-time 0–500 EPA AQI circular dial gauge, Google Weather atmospheric forecasts, multi-node IoT hardware registry, interactive micro-zones, automated compliance audits, and daylight/obsidian theme switching.
+> **Watch & Listen to AirGuard in Action:** Full audio-visual guided walkthrough with synchronized voiceover narration, real-time 0–500 EPA AQI circular dial gauge, Google Weather atmospheric forecasts, multi-node IoT hardware registry, interactive micro-zones, automated compliance audits, and daylight/obsidian theme switching.
+
+<div align="center">
+  <p align="center">
+    <a href="https://harsha895155.github.io/IOT-Based-Hyperlocal-Air-Quality-Monitoring-and-alert-System/">
+      <img src="https://img.shields.io/badge/🎬%20Launch%20Interactive%20Player%20(with%20Working%20[CC]%20Button)-0284c7?style=for-the-badge&logo=github" alt="Launch Interactive Player with Working CC Button" />
+    </a>
+  </p>
+</div>
 
 https://github.com/user-attachments/assets/bd5b2d45-83a9-475f-878e-ce9e470142d9
 
@@ -32,6 +40,10 @@ https://github.com/user-attachments/assets/bd5b2d45-83a9-475f-878e-ce9e470142d9
 
 <div align="center">
   <p align="center">
+    <a href="https://harsha895155.github.io/IOT-Based-Hyperlocal-Air-Quality-Monitoring-and-alert-System/">
+      <img src="https://img.shields.io/badge/🔘%20Working%20[CC]%20Player%20(GitHub%20Pages)-38bdf8?style=for-the-badge&logo=googlechrome" alt="Working CC Player" />
+    </a>
+    &nbsp;
     <a href="https://airguard-hyperlocal.vercel.app">
       <img src="https://img.shields.io/badge/🚀%20Live%20Web%20App-10b981?style=for-the-badge&logo=vercel" alt="Live Platform" />
     </a>
@@ -41,18 +53,15 @@ https://github.com/user-attachments/assets/bd5b2d45-83a9-475f-878e-ce9e470142d9
     </a>
     &nbsp;
     <a href="https://github.com/harsha895155/IOT-Based-Hyperlocal-Air-Quality-Monitoring-and-alert-System/raw/main/docs/airguard-demo.mp4">
-      <img src="https://img.shields.io/badge/💾%20Download%20MP4%20with%20Audio-0284c7?style=for-the-badge" alt="Download MP4" />
-    </a>
-    &nbsp;
-    <a href="https://github.com/harsha895155/IOT-Based-Hyperlocal-Air-Quality-Monitoring-and-alert-System/blob/main/docs/captions.vtt">
-      <img src="https://img.shields.io/badge/💬%20Captions%20(WebVTT)-38bdf8?style=for-the-badge" alt="WebVTT Subtitles" />
+      <img src="https://img.shields.io/badge/💾%20Download%20MP4-0284c7?style=for-the-badge" alt="Download MP4" />
     </a>
   </p>
 
   <p align="center">
-    <sub>🎬 <em>Native video player with full interactive controls (<strong>Play/Pause</strong>, <strong>Timeline Seek Scrubber</strong>, <strong>Voice Narration Audio</strong>, <strong>[CC] Closed Captions</strong>, and <strong>Fullscreen</strong>) embedded above.</em></sub>
+    <sub>💡 <em><strong>Note on the [CC] Button:</strong> GitHub's markdown security filter removes subtitle tags from READMEs. To use the <strong>clickable, working [CC] button</strong> to toggle subtitles ON/OFF in real time, click <a href="https://harsha895155.github.io/IOT-Based-Hyperlocal-Air-Quality-Monitoring-and-alert-System/"><strong>Launch Interactive Player</strong></a> hosted on GitHub Pages.</em></sub>
   </p>
 </div>
+
 
 <details open>
 <summary><strong>🔍 Video Chapter Breakdown & Closed Captions [CC] Script (Click to collapse)</strong></summary>
