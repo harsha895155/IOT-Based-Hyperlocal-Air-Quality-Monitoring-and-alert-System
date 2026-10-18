@@ -1,0 +1,62 @@
+WEBVTT - AirGuard Interactive Walkthrough Subtitles
+
+1
+00:00:00.000 --> 00:00:06.858
+Welcome to AirGuard, an IoT-based hyperlocal air quality monitoring and intelligent alert system.
+
+2
+00:00:06.858 --> 00:00:15.001
+AirGuard delivers street-level detection, capturing micro-climate pollution spikes using ESP32 edge hardware.
+
+3
+00:00:15.001 --> 00:00:22.659
+The platform integrates nine core engineering modules, from live telemetry to automated compliance audits.
+
+4
+00:00:22.659 --> 00:00:30.087
+Built on a five-layer pipeline, connecting hardware sensors through an Express gateway to MongoDB Atlas.
+
+5
+00:00:30.087 --> 00:00:39.625
+For research, sensor calibration, or deployment assistance, contact our team directly at airguard396@gmail.com.
+
+6
+00:00:39.625 --> 00:00:46.398
+An interactive one-click button lets you instantly copy the engineering mailbox with verified feedback.
+
+7
+00:00:46.398 --> 00:00:55.965
+Entering the live dashboard, you see a real-time 0 to 500 EPA circular air quality index gauge with instant sub-second telemetry.
+
+8
+00:00:55.965 --> 00:01:05.468
+Comprehensive atmospheric forecasting provides a 24-hour timeline, 7-day weather outlook, wind vectors, and UV index.
+
+9
+00:01:05.468 --> 00:01:11.976
+Seamless one-click switching between ultra-premium frosted daylight and obsidian dark presets.
+
+10
+00:01:11.976 --> 00:01:19.179
+The hardware registry tracks multi-node IoT sensor heartbeats, battery health, and packet telemetry.
+
+11
+00:01:19.179 --> 00:01:26.698
+Spatial micro-zones cluster sensors by campus laboratories, roadways, and sensitive outdoor areas.
+
+12
+00:01:26.698 --> 00:01:34.400
+Server-side analytics calculate mathematical correlations between temperature, humidity, and pollutant spikes.
+
+13
+00:01:34.400 --> 00:01:41.644
+Smart alerts prevent alarm fatigue with 30-minute deduplication, providing clear health advisories.
+
+14
+00:01:41.644 --> 00:01:48.192
+Regulatory audit reports track EPA and national standards with one-click CSV export.
+
+15
+00:01:48.192 --> 00:01:56.785
+AirGuard: Understand your air, protect your environment. Live at airguard-hyperlocal.vercel.app.
+

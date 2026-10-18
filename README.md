@@ -22,11 +22,11 @@
 
 ---
 
-## 📺 Live Platform Walkthrough & Interactive Demo (with Voice Explanation)
+## 📺 Live Platform Walkthrough & Interactive Demo (Voiceover + [CC] Subtitles)
 
-> **Watch & Listen to AirGuard in Action:** Full audio-visual guided walkthrough with synchronized voiceover narration explaining each platform feature, real-time 0–500 EPA AQI circular dial gauge, Google Weather atmospheric forecasts, multi-node IoT hardware registry, interactive micro-zones, automated compliance audits, and daylight/obsidian theme switching.
+> **Watch & Listen to AirGuard in Action:** Full audio-visual guided walkthrough with synchronized voiceover narration and **burned-in Closed Captions (`[CC]`)**, real-time 0–500 EPA AQI circular dial gauge, Google Weather atmospheric forecasts, multi-node IoT hardware registry, interactive micro-zones, automated compliance audits, and daylight/obsidian theme switching.
 
-https://github.com/user-attachments/assets/c6d355dd-48ad-4f01-934d-6a4bb2a0ea82
+https://github.com/user-attachments/assets/bd5b2d45-83a9-475f-878e-ce9e470142d9
 
 <br />
 
@@ -43,15 +43,20 @@ https://github.com/user-attachments/assets/c6d355dd-48ad-4f01-934d-6a4bb2a0ea82
     <a href="https://github.com/harsha895155/IOT-Based-Hyperlocal-Air-Quality-Monitoring-and-alert-System/raw/main/docs/airguard-demo.mp4">
       <img src="https://img.shields.io/badge/💾%20Download%20MP4%20with%20Audio-0284c7?style=for-the-badge" alt="Download MP4" />
     </a>
+    &nbsp;
+    <a href="https://github.com/harsha895155/IOT-Based-Hyperlocal-Air-Quality-Monitoring-and-alert-System/blob/main/docs/captions.vtt">
+      <img src="https://img.shields.io/badge/💬%20Captions%20(WebVTT)-38bdf8?style=for-the-badge" alt="WebVTT Subtitles" />
+    </a>
   </p>
 
   <p align="center">
-    <sub>🎬 <em>Native video player with full interactive controls (<strong>Play/Pause</strong>, <strong>Timeline Seek Scrubber</strong>, <strong>Voice Narration Audio</strong>, and <strong>Fullscreen</strong>) embedded above.</em></sub>
+    <sub>🎬 <em>Native video player with full interactive controls (<strong>Play/Pause</strong>, <strong>Timeline Seek Scrubber</strong>, <strong>Voice Narration Audio</strong>, <strong>[CC] Closed Captions</strong>, and <strong>Fullscreen</strong>) embedded above.</em></sub>
   </p>
 </div>
 
 <details open>
-<summary><strong>🔍 Video Chapter Breakdown & Synchronized Voiceover Script (Click to collapse)</strong></summary>
+<summary><strong>🔍 Video Chapter Breakdown & Closed Captions [CC] Script (Click to collapse)</strong></summary>
+
 
 <br />
 
