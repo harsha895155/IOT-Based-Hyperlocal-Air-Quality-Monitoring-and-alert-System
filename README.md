@@ -26,18 +26,12 @@
 
 > **Watch AirGuard in Action:** Real-time 0–500 EPA AQI circular dial gauge, Google Weather atmospheric forecasts, multi-node IoT hardware registry, interactive micro-zones, automated compliance audits, and full daylight/obsidian theme switching with on-screen guided explanations.
 
+https://github.com/user-attachments/assets/42682190-1afa-4212-b2b9-7430ea732d7b
+
+<br />
+
 <div align="center">
-  <a href="https://github.com/harsha895155/IOT-Based-Hyperlocal-Air-Quality-Monitoring-and-alert-System/raw/main/docs/airguard-demo.mp4" target="_blank" rel="noopener noreferrer" title="Click to open video with full player controls (Seek, Fullscreen, Play/Pause)">
-    <img src="https://raw.githubusercontent.com/harsha895155/IOT-Based-Hyperlocal-Air-Quality-Monitoring-and-alert-System/main/docs/airguard-demo.gif" alt="AirGuard Platform Interactive Demo Walkthrough with Guided On-Screen Subtitles" width="100%" />
-  </a>
-
-  <br /><br />
-
   <p align="center">
-    <a href="https://github.com/harsha895155/IOT-Based-Hyperlocal-Air-Quality-Monitoring-and-alert-System/raw/main/docs/airguard-demo.mp4">
-      <img src="https://img.shields.io/badge/▶%EF%B8%8F%20Play%20Video%20with%20Controllers%20(MP4)-0284c7?style=for-the-badge" alt="Play MP4 with Controllers" />
-    </a>
-    &nbsp;
     <a href="https://airguard-hyperlocal.vercel.app">
       <img src="https://img.shields.io/badge/🚀%20Live%20Web%20App-10b981?style=for-the-badge&logo=vercel" alt="Live Platform" />
     </a>
@@ -45,12 +39,17 @@
     <a href="mailto:airguard396@gmail.com">
       <img src="https://img.shields.io/badge/✉️%20Email%20airguard396%40gmail.com-ea580c?style=for-the-badge&logo=gmail" alt="Email Us" />
     </a>
+    &nbsp;
+    <a href="https://github.com/harsha895155/IOT-Based-Hyperlocal-Air-Quality-Monitoring-and-alert-System/raw/main/docs/airguard-demo.mp4">
+      <img src="https://img.shields.io/badge/💾%20Download%20MP4%20(1.6%20MB)-0284c7?style=for-the-badge" alt="Download MP4" />
+    </a>
   </p>
 
   <p align="center">
-    <sub>🎬 <em>Video plays on loop above. Click <strong>"Play Video with Controllers (MP4)"</strong> or click the video itself to launch the native media player with <strong>Play / Pause</strong>, <strong>Timeline Seek Scrubber</strong>, <strong>Timestamp</strong>, and <strong>Fullscreen</strong>.</em></sub>
+    <sub>🎬 <em>Native video player with full interactive controls (<strong>Play/Pause</strong>, <strong>Timeline Seek Scrubber</strong>, <strong>Timestamp</strong>, and <strong>Fullscreen</strong>) embedded above.</em></sub>
   </p>
 </div>
+
 
 <details open>
 <summary><strong>🔍 Video Chapter Breakdown & Detailed Scene Explanations (Click to collapse)</strong></summary>
