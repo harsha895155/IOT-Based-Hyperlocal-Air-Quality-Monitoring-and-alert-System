@@ -24,16 +24,41 @@
 
 ## 📺 Live Platform Walkthrough & Interactive Demo
 
-> **Watch AirGuard in Action:** Real-time 0–500 EPA AQI circular dial gauge, Google Weather atmospheric forecasts, multi-node IoT hardware registry, interactive micro-zones, automated compliance audits, and full daylight/obsidian theme switching.
+> **Watch AirGuard in Action:** Real-time 0–500 EPA AQI circular dial gauge, Google Weather atmospheric forecasts, multi-node IoT hardware registry, interactive micro-zones, automated compliance audits, and full daylight/obsidian theme switching with on-screen guided explanations.
 
 <div align="center">
   <a href="https://airguard-hyperlocal.vercel.app" target="_blank" rel="noopener noreferrer">
-    <img src="docs/airguard-demo.gif" alt="AirGuard Platform Interactive Demo Walkthrough" width="100%" style="border-radius: 14px; box-shadow: 0 12px 40px rgba(0,0,0,0.25);" />
+    <img src="docs/airguard-demo.gif" alt="AirGuard Platform Interactive Demo Walkthrough with Guided On-Screen Subtitles" width="100%" style="border-radius: 14px; box-shadow: 0 12px 40px rgba(0,0,0,0.25);" />
   </a>
   <p align="center">
-    <sub>⚡ <em>Animated demo walkthrough playing live. Click the preview above to explore the live deployment at <a href="https://airguard-hyperlocal.vercel.app"><strong>airguard-hyperlocal.vercel.app</strong></a></em></sub>
+    <sub>⚡ <em>Full 15-scene guided demo playing live with on-screen technical lower-thirds. Click the animation above to explore the live deployment at <a href="https://airguard-hyperlocal.vercel.app"><strong>airguard-hyperlocal.vercel.app</strong></a></em></sub>
   </p>
 </div>
+
+<details open>
+<summary><strong>🔍 Video Chapter Breakdown & Detailed Scene Explanations (Click to collapse)</strong></summary>
+
+<br />
+
+| Scene | Chapter Badge | On-Screen Feature | In-Depth Engineering & Website Detail |
+| :---: | :--- | :--- | :--- |
+| **01** | `OVERVIEW` | **Hero Banner & Live Metrics** | Showcases sub-500ms round-trip latency, full-duplex Socket.IO streaming, 0–500 EPA standard AQI scale, and 30-minute anti-spam deduplication. |
+| **02** | `HYPERLOCAL SENSING` | **Street-Level vs City Stations** | Explains the hyperlocal problem: city-wide weather stations miss local spikes. Demonstrates ESP32 nodes with automated Wi-Fi reconnect backoff buffers. |
+| **03** | `MODULES DIRECTORY` | **9 Integrated Core Modules** | Navigates the full website directory: Real-Time Dashboard, IoT Hardware Registry, Micro-Zones, Analytics, Historical Telemetry, Smart Alerts, Compliance Audits, Onboarding Wizard, and Diagnostics. |
+| **04** | `IEEE ARCHITECTURE` | **5-Layer End-to-End Pipeline** | Traces real-time data from MQ-135/DHT22 hardware transducers through ESP32 Edge, Express.js Gateway, MongoDB Atlas cloud, and WebSocket broadcasts. |
+| **05** | `OFFICIAL CONTACT` | **Direct Mailbox: `airguard396@gmail.com`** | Highlights dedicated engineering support for university researchers, sensor deployment queries, and IEEE citation requests. |
+| **06** | `INTERACTION` | **1-Click Copy Email & Mailto** | Demonstrates the interactive clipboard copy button with verified `✓ Copied!` toast notification and direct email launch. |
+| **07** | `MODULE 01: DASHBOARD` | **Real-Time 0–500 EPA AQI Dial** | Displays the ambient EPA air quality gauge with live pollutant breakdown: PM2.5, PM10, CO, NO2, SO2, O3, Gas PPM, temperature, and relative humidity. |
+| **08** | `ATMOSPHERIC WEATHER` | **24h Timeline & 7-Day Forecast** | Showcases Google Weather-inspired ambient atmospheric telemetry: hourly timeline curves, 7-day environmental predictions, wind compass, UV index, and solar celestial arcs. |
+| **09** | `DUAL THEMES` | **Daylight Light & Obsidian Dark** | Demonstrates universal CSS custom tokens switching instantaneously between high-contrast Frosted Daylight mode and deep Obsidian Dark preset without page reloads. |
+| **10** | `MODULE 02: HARDWARE` | **IoT Node Registry & Heartbeats** | Live hardware node list displaying active heartbeat tracking, dynamic online/standby/offline derivation based on `lastSeen` timestamps, and packet hex inspection. |
+| **11** | `MODULE 03: GEO-SPATIAL` | **Campus Micro-Zones & Hotspots** | Geo-spatial sensor distribution across campus laboratories and facilities with localized AQI hotspot averages and Google-style search autocomplete. |
+| **12** | `MODULE 04: ANALYTICS` | **MongoDB $group & Correlations** | Server-side aggregation pipelines computing 24-hour distribution spectrums, classification percentage breakups, and Pearson correlation between humidity/temp and pollutant spikes. |
+| **13** | `MODULE 05: SMART ALERTS` | **30-Min Anti-Spam Threshold Alerts** | Intelligent alert engine preventing notification spam by incrementing occurrence counters (`seenCount`) and dispatching health advisories for sensitive groups. |
+| **14** | `MODULE 06: COMPLIANCE` | **Regulatory NAAQS/EPA Audits** | Formal environmental compliance audits measuring NAAQS and EPA air quality standard compliance percentages across 24h, 7d, and 30d with RFC 4180 streaming CSV export. |
+| **15** | `AIRGUARD PLATFORM` | **System Finale & Live Access** | Final summary and live link: [airguard-hyperlocal.vercel.app](https://airguard-hyperlocal.vercel.app) with support email [airguard396@gmail.com](mailto:airguard396@gmail.com). |
+
+</details>
 
 ---
 
