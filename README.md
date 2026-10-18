@@ -22,11 +22,11 @@
 
 ---
 
-## 📺 Live Platform Walkthrough & Interactive Demo
+## 📺 Live Platform Walkthrough & Interactive Demo (with Voice Explanation)
 
-> **Watch AirGuard in Action:** Real-time 0–500 EPA AQI circular dial gauge, Google Weather atmospheric forecasts, multi-node IoT hardware registry, interactive micro-zones, automated compliance audits, and full daylight/obsidian theme switching with on-screen guided explanations.
+> **Watch & Listen to AirGuard in Action:** Full audio-visual guided walkthrough with synchronized voiceover narration explaining each platform feature, real-time 0–500 EPA AQI circular dial gauge, Google Weather atmospheric forecasts, multi-node IoT hardware registry, interactive micro-zones, automated compliance audits, and daylight/obsidian theme switching.
 
-https://github.com/user-attachments/assets/42682190-1afa-4212-b2b9-7430ea732d7b
+https://github.com/user-attachments/assets/c6d355dd-48ad-4f01-934d-6a4bb2a0ea82
 
 <br />
 
@@ -41,38 +41,37 @@ https://github.com/user-attachments/assets/42682190-1afa-4212-b2b9-7430ea732d7b
     </a>
     &nbsp;
     <a href="https://github.com/harsha895155/IOT-Based-Hyperlocal-Air-Quality-Monitoring-and-alert-System/raw/main/docs/airguard-demo.mp4">
-      <img src="https://img.shields.io/badge/💾%20Download%20MP4%20(1.6%20MB)-0284c7?style=for-the-badge" alt="Download MP4" />
+      <img src="https://img.shields.io/badge/💾%20Download%20MP4%20with%20Audio-0284c7?style=for-the-badge" alt="Download MP4" />
     </a>
   </p>
 
   <p align="center">
-    <sub>🎬 <em>Native video player with full interactive controls (<strong>Play/Pause</strong>, <strong>Timeline Seek Scrubber</strong>, <strong>Timestamp</strong>, and <strong>Fullscreen</strong>) embedded above.</em></sub>
+    <sub>🎬 <em>Native video player with full interactive controls (<strong>Play/Pause</strong>, <strong>Timeline Seek Scrubber</strong>, <strong>Voice Narration Audio</strong>, and <strong>Fullscreen</strong>) embedded above.</em></sub>
   </p>
 </div>
 
-
 <details open>
-<summary><strong>🔍 Video Chapter Breakdown & Detailed Scene Explanations (Click to collapse)</strong></summary>
+<summary><strong>🔍 Video Chapter Breakdown & Synchronized Voiceover Script (Click to collapse)</strong></summary>
 
 <br />
 
-| Scene | Chapter Badge | On-Screen Feature | In-Depth Engineering & Website Detail |
+| Scene | Chapter Badge | On-Screen Feature | Synchronized Voiceover Explanation |
 | :---: | :--- | :--- | :--- |
-| **01** | `OVERVIEW` | **Hero Banner & Live Metrics** | Showcases sub-500ms round-trip latency, full-duplex Socket.IO streaming, 0–500 EPA standard AQI scale, and 30-minute anti-spam deduplication. |
-| **02** | `HYPERLOCAL SENSING` | **Street-Level vs City Stations** | Explains the hyperlocal problem: city-wide weather stations miss local spikes. Demonstrates ESP32 nodes with automated Wi-Fi reconnect backoff buffers. |
-| **03** | `MODULES DIRECTORY` | **9 Integrated Core Modules** | Navigates the full website directory: Real-Time Dashboard, IoT Hardware Registry, Micro-Zones, Analytics, Historical Telemetry, Smart Alerts, Compliance Audits, Onboarding Wizard, and Diagnostics. |
-| **04** | `IEEE ARCHITECTURE` | **5-Layer End-to-End Pipeline** | Traces real-time data from MQ-135/DHT22 hardware transducers through ESP32 Edge, Express.js Gateway, MongoDB Atlas cloud, and WebSocket broadcasts. |
-| **05** | `OFFICIAL CONTACT` | **Direct Mailbox: `airguard396@gmail.com`** | Highlights dedicated engineering support for university researchers, sensor deployment queries, and IEEE citation requests. |
-| **06** | `INTERACTION` | **1-Click Copy Email & Mailto** | Demonstrates the interactive clipboard copy button with verified `✓ Copied!` toast notification and direct email launch. |
-| **07** | `MODULE 01: DASHBOARD` | **Real-Time 0–500 EPA AQI Dial** | Displays the ambient EPA air quality gauge with live pollutant breakdown: PM2.5, PM10, CO, NO2, SO2, O3, Gas PPM, temperature, and relative humidity. |
-| **08** | `ATMOSPHERIC WEATHER` | **24h Timeline & 7-Day Forecast** | Showcases Google Weather-inspired ambient atmospheric telemetry: hourly timeline curves, 7-day environmental predictions, wind compass, UV index, and solar celestial arcs. |
-| **09** | `DUAL THEMES` | **Daylight Light & Obsidian Dark** | Demonstrates universal CSS custom tokens switching instantaneously between high-contrast Frosted Daylight mode and deep Obsidian Dark preset without page reloads. |
-| **10** | `MODULE 02: HARDWARE` | **IoT Node Registry & Heartbeats** | Live hardware node list displaying active heartbeat tracking, dynamic online/standby/offline derivation based on `lastSeen` timestamps, and packet hex inspection. |
-| **11** | `MODULE 03: GEO-SPATIAL` | **Campus Micro-Zones & Hotspots** | Geo-spatial sensor distribution across campus laboratories and facilities with localized AQI hotspot averages and Google-style search autocomplete. |
-| **12** | `MODULE 04: ANALYTICS` | **MongoDB $group & Correlations** | Server-side aggregation pipelines computing 24-hour distribution spectrums, classification percentage breakups, and Pearson correlation between humidity/temp and pollutant spikes. |
-| **13** | `MODULE 05: SMART ALERTS` | **30-Min Anti-Spam Threshold Alerts** | Intelligent alert engine preventing notification spam by incrementing occurrence counters (`seenCount`) and dispatching health advisories for sensitive groups. |
-| **14** | `MODULE 06: COMPLIANCE` | **Regulatory NAAQS/EPA Audits** | Formal environmental compliance audits measuring NAAQS and EPA air quality standard compliance percentages across 24h, 7d, and 30d with RFC 4180 streaming CSV export. |
-| **15** | `AIRGUARD PLATFORM` | **System Finale & Live Access** | Final summary and live link: [airguard-hyperlocal.vercel.app](https://airguard-hyperlocal.vercel.app) with support email [airguard396@gmail.com](mailto:airguard396@gmail.com). |
+| **01** | `OVERVIEW` | **Hero Banner & Live Metrics** | *"Welcome to AirGuard, an IoT-based hyperlocal air quality monitoring and intelligent alert system."* |
+| **02** | `HYPERLOCAL SENSING` | **Street-Level vs City Stations** | *"AirGuard delivers street-level detection, capturing micro-climate pollution spikes using ESP32 edge hardware."* |
+| **03** | `MODULES DIRECTORY` | **9 Integrated Core Modules** | *"The platform integrates nine core engineering modules, from live telemetry to automated compliance audits."* |
+| **04** | `IEEE ARCHITECTURE` | **5-Layer End-to-End Pipeline** | *"Built on a five-layer pipeline, connecting hardware sensors through an Express gateway to MongoDB Atlas."* |
+| **05** | `OFFICIAL CONTACT` | **Direct Mailbox: `airguard396@gmail.com`** | *"For research, sensor calibration, or deployment assistance, contact our team directly at airguard396@gmail.com."* |
+| **06** | `INTERACTION` | **1-Click Copy Email & Mailto** | *"An interactive one-click button lets you instantly copy the engineering mailbox with verified feedback."* |
+| **07** | `MODULE 01: DASHBOARD` | **Real-Time 0–500 EPA AQI Dial** | *"Entering the live dashboard, you see a real-time 0 to 500 EPA circular air quality index gauge with instant sub-second telemetry."* |
+| **08** | `ATMOSPHERIC WEATHER` | **24h Timeline & 7-Day Forecast** | *"Comprehensive atmospheric forecasting provides a 24-hour timeline, 7-day weather outlook, wind vectors, and UV index."* |
+| **09** | `DUAL THEMES` | **Daylight Light & Obsidian Dark** | *"Seamless one-click switching between ultra-premium frosted daylight and obsidian dark presets."* |
+| **10** | `MODULE 02: HARDWARE` | **IoT Node Registry & Heartbeats** | *"The hardware registry tracks multi-node IoT sensor heartbeats, battery health, and packet telemetry."* |
+| **11** | `MODULE 03: GEO-SPATIAL` | **Campus Micro-Zones & Hotspots** | *"Spatial micro-zones cluster sensors by campus laboratories, roadways, and sensitive outdoor areas."* |
+| **12** | `MODULE 04: ANALYTICS` | **MongoDB $group & Correlations** | *"Server-side analytics calculate mathematical correlations between temperature, humidity, and pollutant spikes."* |
+| **13** | `MODULE 05: SMART ALERTS` | **30-Min Anti-Spam Alerts** | *"Smart alerts prevent alarm fatigue with 30-minute deduplication, providing clear health advisories."* |
+| **14** | `MODULE 06: COMPLIANCE` | **Regulatory NAAQS/EPA Audits** | *"Regulatory audit reports track EPA and national standards with one-click CSV export."* |
+| **15** | `AIRGUARD PLATFORM` | **System Finale & Live Access** | *"AirGuard: Understand your air, protect your environment. Live at airguard-hyperlocal.vercel.app."* |
 
 </details>
 
