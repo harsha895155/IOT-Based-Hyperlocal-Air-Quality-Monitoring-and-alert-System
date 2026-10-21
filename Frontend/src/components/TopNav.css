@@ -58,6 +58,48 @@
   box-shadow: 0 0 10px rgba(56, 189, 248, 0.15);
 }
 
+.topnav__guest-group {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.topnav__back-welcome-btn {
+  display: inline-flex;
+  align-items: center;
+  gap: 5px;
+  font-size: 0.72rem;
+  font-weight: 600;
+  padding: 4px 10px;
+  border-radius: var(--radius-full);
+  background: var(--surface-raised);
+  border: 1px solid var(--border);
+  color: var(--text-primary);
+  text-decoration: none;
+  transition: all 0.15s ease;
+  cursor: pointer;
+}
+
+.topnav__back-welcome-btn:hover {
+  background: var(--surface-hover);
+  color: var(--accent);
+  border-color: var(--border-active);
+  transform: translateY(-1px);
+}
+
+[data-theme='light'] .topnav__back-welcome-btn {
+  background: #ffffff;
+  border-color: #cbd5e1;
+  color: #0f172a;
+  box-shadow: 0 1px 3px rgba(15, 23, 42, 0.05);
+}
+
+[data-theme='light'] .topnav__back-welcome-btn:hover {
+  background: #f0f9ff;
+  border-color: #0284c7;
+  color: #0284c7;
+}
+
 .topnav__badge-user {
   font-size: 0.68rem;
   font-weight: 700;

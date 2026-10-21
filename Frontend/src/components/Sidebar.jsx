@@ -279,6 +279,9 @@ export default function Sidebar({ isOpen, setIsOpen, isCollapsed = false, unread
                 <NavLink to="/login" className="btn btn--primary btn--sm guest-login-btn" onClick={handleLinkClick}>
                   Sign In / Register
                 </NavLink>
+                <NavLink to="/" className="guest-welcome-btn" onClick={handleLinkClick} title="Return to Welcome Page">
+                  ← Back to Welcome Page
+                </NavLink>
               </div>
             </div>
           )}

@@ -301,3 +301,40 @@
   padding: 6px 10px;
 }
 
+.guest-welcome-btn {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 6px;
+  width: 100%;
+  text-align: center;
+  text-decoration: none;
+  font-size: 0.76rem;
+  font-weight: 600;
+  padding: 6px 10px;
+  border-radius: var(--radius-sm);
+  background: var(--surface-raised);
+  border: 1px solid var(--border);
+  color: var(--text-primary);
+  transition: all 0.2s ease;
+  cursor: pointer;
+}
+
+.guest-welcome-btn:hover {
+  background: var(--surface-hover);
+  color: var(--accent);
+  border-color: var(--border-active);
+}
+
+[data-theme='light'] .guest-welcome-btn {
+  background: #f8fafc;
+  border-color: #cbd5e1;
+  color: #0f172a;
+}
+
+[data-theme='light'] .guest-welcome-btn:hover {
+  background: #f0f9ff;
+  border-color: #0284c7;
+  color: #0284c7;
+}
+

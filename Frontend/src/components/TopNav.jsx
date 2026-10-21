@@ -74,7 +74,16 @@ export default function TopNav({ onToggleSidebar, isSidebarCollapsed = false, co
         <span className="topnav__title">{title}</span>
 
         {isGuest ? (
-          <span className="topnav__badge-guest">GUEST MODE</span>
+          <div className="topnav__guest-group">
+            <span className="topnav__badge-guest">GUEST MODE</span>
+            <Link to="/" className="topnav__back-welcome-btn" title="Return to Welcome Page">
+              <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round">
+                <line x1="19" y1="12" x2="5" y2="12" />
+                <polyline points="12 19 5 12 12 5" />
+              </svg>
+              <span>Welcome Page</span>
+            </Link>
+          </div>
         ) : (
           <span className="topnav__badge-user">{user?.role?.toUpperCase() || 'REGISTERED'}</span>
         )}
