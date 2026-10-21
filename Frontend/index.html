@@ -50,15 +50,20 @@
     <meta name="twitter:image" content="https://airguard-hyperlocal.vercel.app/og-image.png" />
     <meta name="twitter:image:alt" content="AirGuard Hyperlocal Air Quality Monitoring Platform" />
 
-    <!-- Mobile Theme & Web App Presentation -->
-    <meta name="theme-color" content="#0b1120" />
-    <meta name="apple-mobile-web-app-capable" content="yes" />
-    <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent" />
+    <!-- Application Name for Google Search Site Names & PWA -->
+    <meta name="application-name" content="AirGuard" />
     <meta name="apple-mobile-web-app-title" content="AirGuard" />
 
-    <!-- Favicons -->
+    <!-- Favicons for Google Search, Mobile, and Desktop Browsers (Multi-Size & Format) -->
+    <link rel="icon" type="image/x-icon" href="/favicon.ico" />
+    <link rel="shortcut icon" type="image/x-icon" href="/favicon.ico" />
+    <link rel="icon" type="image/png" sizes="48x48" href="/favicon-48x48.png" />
+    <link rel="icon" type="image/png" sizes="96x96" href="/favicon-96x96.png" />
+    <link rel="icon" type="image/png" sizes="192x192" href="/android-chrome-192x192.png" />
+    <link rel="icon" type="image/png" sizes="512x512" href="/android-chrome-512x512.png" />
     <link rel="icon" type="image/svg+xml" href="/favicon.svg" />
-    <link rel="apple-touch-icon" href="/favicon.svg" />
+    <link rel="apple-touch-icon" sizes="180x180" href="/apple-touch-icon.png" />
+    <link rel="manifest" href="/site.webmanifest" />
 
     <!-- Google Search Console Verification Meta Tag -->
     <meta name="google-site-verification" content="UohHEse4nZBdcwRO1Q3ciTuQKkc3QYqYTqyKj4YrztQ" />
@@ -74,49 +79,42 @@
     <!-- Google Identity Services (Sign in with Google) -->
     <script src="https://accounts.google.com/gsi/client" async defer></script>
 
-    <!-- Schema.org JSON-LD Structured Data: WebSite & SoftwareApplication -->
+    <!-- Google Search Preferred Site Name (Schema.org WebSite) -->
     <script type="application/ld+json">
-      {
-        "@context": "https://schema.org",
-        "@graph": [
-          {
-            "@type": "WebSite",
-            "@id": "https://airguard-hyperlocal.vercel.app/#website",
-            "url": "https://airguard-hyperlocal.vercel.app/",
-            "name": "AirGuard",
-            "alternateName": ["AirGuard IoT", "AirGuard Air Quality Monitor"],
-            "description": "IoT-Based Hyperlocal Air Quality Monitoring and Alert System with Cloud Integration",
-            "inLanguage": "en-US",
-            "publisher": {
-              "@type": "Organization",
-              "name": "AirGuard",
-              "url": "https://airguard-hyperlocal.vercel.app/"
-            }
-          },
-          {
-            "@type": "WebApplication",
-            "@id": "https://airguard-hyperlocal.vercel.app/#app",
-            "name": "AirGuard Environmental Platform",
-            "url": "https://airguard-hyperlocal.vercel.app/",
-            "applicationCategory": "HealthApplication, UtilitiesApplication",
-            "operatingSystem": "All modern web browsers",
-            "description": "Real-time hyperlocal air quality index calculation, environmental sensor telemetry visualization, and threshold-based incident alerting platform.",
-            "browserRequirements": "Requires JavaScript. Requires HTML5.",
-            "offers": {
-              "@type": "Offer",
-              "price": "0",
-              "priceCurrency": "USD"
-            },
-            "featureList": [
-              "Real-time EPA 0-500 Air Quality Index calculation",
-              "ESP32 hardware telemetry stream via WebSockets",
-              "Hyperlocal micro-climate weather tracking",
-              "Historical pollution analytics and 24h trends",
-              "Automated health advisories and anti-spam threshold alerts"
-            ]
-          }
-        ]
-      }
+    {
+      "@context": "https://schema.org",
+      "@type": "WebSite",
+      "name": "AirGuard",
+      "alternateName": ["AirGuard Hyperlocal", "AirGuard Air Quality"],
+      "url": "https://airguard-hyperlocal.vercel.app/"
+    }
+    </script>
+
+    <!-- Schema.org WebApplication Structured Data -->
+    <script type="application/ld+json">
+    {
+      "@context": "https://schema.org",
+      "@type": "WebApplication",
+      "@id": "https://airguard-hyperlocal.vercel.app/#app",
+      "name": "AirGuard Environmental Platform",
+      "url": "https://airguard-hyperlocal.vercel.app/",
+      "applicationCategory": "HealthApplication, UtilitiesApplication",
+      "operatingSystem": "All modern web browsers",
+      "description": "Real-time hyperlocal air quality index calculation, environmental sensor telemetry visualization, and threshold-based incident alerting platform.",
+      "browserRequirements": "Requires JavaScript. Requires HTML5.",
+      "offers": {
+        "@type": "Offer",
+        "price": "0",
+        "priceCurrency": "USD"
+      },
+      "featureList": [
+        "Real-time EPA 0-500 Air Quality Index calculation",
+        "ESP32 hardware telemetry stream via WebSockets",
+        "Hyperlocal micro-climate weather tracking",
+        "Historical pollution analytics and 24h trends",
+        "Automated health advisories and anti-spam threshold alerts"
+      ]
+    }
     </script>
   </head>
   <body>

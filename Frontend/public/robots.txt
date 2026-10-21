@@ -16,9 +16,15 @@ Allow: /history
 Allow: /reports
 Allow: /login
 
-# Allow static assets and media
+# Allow static assets, favicons, and metadata
 Allow: /assets/
+Allow: /favicon.ico
 Allow: /favicon.svg
+Allow: /favicon-48x48.png
+Allow: /favicon-96x96.png
+Allow: /apple-touch-icon.png
+Allow: /android-chrome-*.png
+Allow: /site.webmanifest
 Allow: /og-image.png
 
 # Disallow private user accounts, authentication tokens, and hardware provisioning
