@@ -90,32 +90,44 @@
   }
 }
 
-/* 4. Electric Thunderstorm Lightning Bolt */
+/* 4. Electric Thunderstorm Lightning Bolt (Always 100% visible, dynamic crackle & glow) */
 .anim-lightning-bolt {
-  animation: flashLightning 2.2s cubic-bezier(0.16, 1, 0.3, 1) infinite;
-  transform-origin: center;
+  opacity: 1 !important;
+  transform-origin: 13px 16px;
+  animation: flashLightning 2s cubic-bezier(0.2, 0.8, 0.3, 1) infinite;
+  filter: drop-shadow(0 0 3px rgba(245, 158, 11, 0.95)) drop-shadow(0 0 8px rgba(251, 191, 36, 0.7));
 }
 
 @keyframes flashLightning {
   0%, 100% {
-    opacity: 0.35;
-    filter: drop-shadow(0 0 2px rgba(251, 191, 36, 0.3));
-    transform: scale(0.96);
-  }
-  12%, 18% {
     opacity: 1;
-    filter: drop-shadow(0 0 14px #fbbf24) drop-shadow(0 0 24px #f59e0b);
-    transform: scale(1.08);
+    transform: scale(1);
+    filter: drop-shadow(0 0 3px rgba(245, 158, 11, 0.95)) drop-shadow(0 0 8px rgba(251, 191, 36, 0.65));
   }
-  15% {
-    opacity: 0.5;
+  6% {
+    opacity: 1;
+    transform: scale(1.15);
+    filter: drop-shadow(0 0 16px #fbbf24) drop-shadow(0 0 28px #f59e0b) drop-shadow(0 0 36px #ffffff);
+  }
+  10% {
+    opacity: 0.96;
+    transform: scale(1.02);
+    filter: drop-shadow(0 0 6px #fbbf24);
+  }
+  14% {
+    opacity: 1;
+    transform: scale(1.18);
+    filter: drop-shadow(0 0 20px #fbbf24) drop-shadow(0 0 32px #f59e0b) drop-shadow(0 0 42px #ffffff);
   }
   22% {
-    opacity: 0.9;
-    filter: drop-shadow(0 0 10px #fbbf24);
+    opacity: 0.98;
+    transform: scale(1.04);
+    filter: drop-shadow(0 0 8px rgba(245, 158, 11, 0.95));
   }
   30% {
-    opacity: 0.35;
+    opacity: 1;
+    transform: scale(1);
+    filter: drop-shadow(0 0 3px rgba(245, 158, 11, 0.95)) drop-shadow(0 0 8px rgba(251, 191, 36, 0.65));
   }
 }
 

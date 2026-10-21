@@ -90,9 +90,40 @@ export const WeatherIcons = {
   ),
 
   thunderstorm: ({ size = 28, className = '' }) => (
-    <svg width={size} height={size} viewBox="0 0 24 24" fill="none" stroke="#fbbf24" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className={className}>
-      <path className="anim-cloud-float-slow" d="M19 16.9A5 5 0 0 0 18 7h-1.26a8 8 0 1 0-11.62 9" stroke="#64748b" fill="#334155" fillOpacity="0.35" />
-      <polyline className="anim-lightning-bolt" points="13 11 9 17 15 17 11 23" fill="#fbbf24" stroke="#fbbf24" />
+    <svg
+      width={size}
+      height={size}
+      viewBox="0 0 24 24"
+      fill="none"
+      strokeLinecap="round"
+      strokeLinejoin="round"
+      className={`weather-icon-thunderstorm ${className}`}
+    >
+      {/* 1. Storm Cloud with deep atmospheric contrast */}
+      <path
+        className="anim-cloud-float-slow"
+        d="M19 16.9A5 5 0 0 0 18 7h-1.26a8 8 0 1 0-11.62 9"
+        stroke="#475569"
+        strokeWidth="2"
+        fill="#334155"
+        fillOpacity="0.45"
+      />
+      {/* 2. Left & Right Heavy Rain streaks */}
+      <g className="anim-rain-drop anim-rain-drop--d1">
+        <line x1="6.5" y1="16" x2="5.5" y2="20" stroke="#38bdf8" strokeWidth="1.8" strokeLinecap="round" />
+      </g>
+      <g className="anim-rain-drop anim-rain-drop--d3">
+        <line x1="18" y1="16" x2="17" y2="20" stroke="#38bdf8" strokeWidth="1.8" strokeLinecap="round" />
+      </g>
+      {/* 3. Solid, Razor-Sharp Electric Lightning Bolt (ALWAYS 100% visible, NEVER disappearing) */}
+      <polygon
+        className="anim-lightning-bolt"
+        points="13 9.5 8 16 13 16 10.5 23 18.5 14 13.5 14 15 9.5"
+        fill="#f59e0b"
+        stroke="#fbbf24"
+        strokeWidth="1.2"
+        strokeLinejoin="round"
+      />
     </svg>
   ),
 
@@ -200,4 +231,117 @@ export const WeatherIcons = {
   },
 };
 
+// Thunderstorm & Lightning aliases to guarantee no missed icons regardless of API naming
+WeatherIcons.thunder = WeatherIcons.thunderstorm;
+WeatherIcons['thunder-storm'] = WeatherIcons.thunderstorm;
+WeatherIcons.lightning = WeatherIcons.thunderstorm;
+WeatherIcons.storm = WeatherIcons.thunderstorm;
+WeatherIcons.stormy = WeatherIcons.thunderstorm;
+WeatherIcons['severe-thunderstorm'] = WeatherIcons.thunderstorm;
+WeatherIcons['thunderstorm-with-hail'] = WeatherIcons.thunderstorm;
+WeatherIcons.thundershower = WeatherIcons.thunderstorm;
+
+/**
+ * Robust Weather Icon Resolver:
+ * Ensures thunderstorm and other atmospheric conditions are ALWAYS accurately mapped,
+ * preventing any missing thunder or falling back to a cloud/sun when storm conditions exist.
+ */
+export function getWeatherIcon(iconKey, conditionText) {
+  const key = String(iconKey || '').toLowerCase().trim();
+  const cond = String(conditionText || '').toLowerCase().trim();
+
+  // 1. Check for Thunder / Lightning / Storm in key or condition text
+  if (
+    key.includes('thunder') ||
+    key.includes('storm') ||
+    key.includes('lightning') ||
+    cond.includes('thunder') ||
+    cond.includes('storm') ||
+    cond.includes('lightning') ||
+    cond.includes('squall')
+  ) {
+    return WeatherIcons.thunderstorm;
+  }
+
+  // 2. Check for Snow / Sleet / Blizzard / Hail
+  if (
+    key.includes('snow') ||
+    key.includes('hail') ||
+    key.includes('sleet') ||
+    cond.includes('snow') ||
+    cond.includes('hail') ||
+    cond.includes('sleet') ||
+    cond.includes('blizzard') ||
+    cond.includes('flurr') ||
+    cond.includes('ice')
+  ) {
+    return WeatherIcons.snow;
+  }
+
+  // 3. Check for Heavy Rain / Torrential / Violent Showers
+  if (
+    key.includes('heavy') ||
+    key.includes('violent') ||
+    cond.includes('heavy rain') ||
+    cond.includes('torrential') ||
+    cond.includes('violent')
+  ) {
+    return WeatherIcons['heavy-rain'];
+  }
+
+  // 4. Check for Rain / Showers
+  if (
+    key.includes('rain') ||
+    key.includes('shower') ||
+    cond.includes('rain') ||
+    cond.includes('shower')
+  ) {
+    return WeatherIcons.rain;
+  }
+
+  // 5. Check for Drizzle
+  if (key.includes('drizzle') || cond.includes('drizzle')) {
+    return WeatherIcons.drizzle;
+  }
+
+  // 6. Check for Fog / Mist / Haze
+  if (
+    key.includes('fog') ||
+    key.includes('mist') ||
+    key.includes('haze') ||
+    cond.includes('fog') ||
+    cond.includes('mist') ||
+    cond.includes('haze')
+  ) {
+    return WeatherIcons.fog;
+  }
+
+  // 7. Check for Clear / Sunny
+  if (
+    key.includes('clear') ||
+    key.includes('sunny') ||
+    cond.includes('clear') ||
+    cond.includes('sunny')
+  ) {
+    return WeatherIcons.clear;
+  }
+
+  // 8. Check for Overcast / Cloudy
+  if (
+    key.includes('cloud') ||
+    key.includes('overcast') ||
+    cond.includes('cloud') ||
+    cond.includes('overcast')
+  ) {
+    if (key.includes('partly') || cond.includes('partly')) {
+      return WeatherIcons['partly-cloudy'];
+    }
+    return WeatherIcons.cloudy;
+  }
+
+  // 9. Exact dictionary lookup or safe default
+  return WeatherIcons[key] || WeatherIcons['partly-cloudy'];
+}
+
 export default WeatherIcons;
+

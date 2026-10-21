@@ -2,7 +2,7 @@ import React, { useState, useEffect, useRef, useCallback } from 'react';
 import client from '../api/client';
 import { useAuth } from '../context/AuthContext';
 import { useTheme } from '../context/ThemeContext';
-import WeatherIcons from '../components/WeatherIcons';
+import WeatherIcons, { getWeatherIcon } from '../components/WeatherIcons';
 import WeatherHero3DCanvas from '../components/WeatherHero3DCanvas';
 import './LocationsView.css';
 
@@ -334,7 +334,7 @@ export default function LocationsView() {
   const todayForecast = weatherData?.daily?.[0] || {};
   const hourlyList = weatherData?.hourly || [];
   const dailyList = weatherData?.daily || [];
-  const WeatherIconComponent = WeatherIcons[cw.icon] || WeatherIcons['partly-cloudy'];
+  const WeatherIconComponent = getWeatherIcon(cw.icon, cw.condition);
 
   return (
     <div className="location-weather-page">
@@ -662,7 +662,7 @@ export default function LocationsView() {
 
               <div className="loc-hourly-strip">
                 {hourlyList.map((hour, idx) => {
-                  const IconComp = WeatherIcons[hour.icon] || WeatherIcons['partly-cloudy'];
+                  const IconComp = getWeatherIcon(hour.icon, hour.condition);
                   const hourTime = new Date(hour.time).toLocaleTimeString([], { hour: 'numeric', hour12: true });
 
                   return (
@@ -695,7 +695,7 @@ export default function LocationsView() {
 
               <div className="loc-daily-grid">
                 {dailyList.map((day, idx) => {
-                  const IconComp = WeatherIcons[day.icon] || WeatherIcons['partly-cloudy'];
+                  const IconComp = getWeatherIcon(day.icon, day.condition);
                   const dateObj = new Date(day.date);
                   const dayName = idx === 0 ? 'Today' : idx === 1 ? 'Tomorrow' : dateObj.toLocaleDateString([], { weekday: 'short' });
                   const dateFormatted = dateObj.toLocaleDateString([], { month: 'short', day: 'numeric' });

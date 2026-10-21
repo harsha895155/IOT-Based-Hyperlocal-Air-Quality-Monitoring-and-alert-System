@@ -2,7 +2,7 @@ import React, { useState, useMemo, useEffect, useRef } from 'react';
 import { useWeather } from '../hooks/useWeather';
 import { formatTimeAgo } from '../hooks/useReadings';
 import { classifyAQI, healthRecommendation } from '../utils/aqi';
-import WeatherIcons from '../components/WeatherIcons';
+import WeatherIcons, { getWeatherIcon } from '../components/WeatherIcons';
 import TrendChart from '../components/TrendChart';
 import WeatherHero3DCanvas from '../components/WeatherHero3DCanvas';
 import { useTheme } from '../context/ThemeContext';
@@ -207,7 +207,7 @@ export default function Dashboard({ readingsData, onNavigateTab }) {
     return trend || [];
   }, [isDeviceConnected, trend, weatherData?.hourly, cw.aqi]);
 
-  const CurrentWeatherIcon = WeatherIcons[weatherIconType] || WeatherIcons['partly-cloudy'];
+  const CurrentWeatherIcon = getWeatherIcon(weatherIconType, weatherCondition);
 
   return (
     <div className="weather-dashboard">

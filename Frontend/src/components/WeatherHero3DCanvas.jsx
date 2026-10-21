@@ -29,7 +29,15 @@ export default function WeatherHero3DCanvas({
     const c = (cond || '').toLowerCase();
     const ic = (icon || '').toLowerCase();
 
-    if (c.includes('thunder') || ic.includes('thunder') || ic.includes('storm')) {
+    if (
+      c.includes('thunder') ||
+      c.includes('lightning') ||
+      c.includes('storm') ||
+      c.includes('squall') ||
+      ic.includes('thunder') ||
+      ic.includes('lightning') ||
+      ic.includes('storm')
+    ) {
       return 'thunderstorm';
     }
     if (c.includes('snow') || c.includes('flurr') || c.includes('ice') || c.includes('hail') || ic.includes('snow')) {
@@ -296,28 +304,29 @@ export default function WeatherHero3DCanvas({
           rp.mesh.material.opacity = Math.max(0, (1 - rp.life) * 0.4);
         });
 
-        // D. Lightning Trigger across random locations
+        // D. Lightning Trigger across dynamic atmospheric locations
         if (elapsed > nextFlashTime) {
           flashPhase = 1;
-          flashDuration = 0.25;
-          const strikeX = (Math.random() - 0.5) * (frustum.vWidth * 0.7);
+          flashDuration = 0.38; // Rich multi-burst electric strike
+          const strikeX = (Math.random() - 0.5) * (frustum.vWidth * 0.75);
           flashLight.position.x = strikeX;
 
           lightningLine.geometry.dispose();
           lightningLine.geometry = createLightningGeometry(strikeX);
-          nextFlashTime = elapsed + 2.8 + Math.random() * 3.2;
+          nextFlashTime = elapsed + 1.2 + Math.random() * 1.6; // Active, dynamic storm rhythm
         }
 
         if (flashPhase > 0) {
           flashDuration -= delta;
-          const flick = Math.random() > 0.3 ? 1 : 0.15;
+          // Multi-pulse realistic lightning crackle & flicker
+          const flick = (Math.sin(elapsed * 45) > 0 || Math.random() > 0.3) ? 1 : 0.25;
           lightningMat.opacity = flick;
-          flashLight.intensity = flick * 3.5;
+          flashLight.intensity = flick * 4.5;
 
           if (flashDuration <= 0) {
             flashPhase = 0;
             lightningMat.opacity = 0;
-            flashLight.intensity = 0;
+            flashLight.intensity = 0.15; // Soft residual storm cloud ambient illumination
           }
         }
       };
