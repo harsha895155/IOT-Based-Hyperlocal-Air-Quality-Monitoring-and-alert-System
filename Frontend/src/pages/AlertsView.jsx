@@ -2,41 +2,8 @@ import React, { useState, useMemo, useEffect } from 'react';
 import { useAuth } from '../context/AuthContext';
 import { formatTimeAgo } from '../hooks/useReadings';
 import { classifyAQI, healthRecommendation } from '../utils/aqi';
+import { playHighAlertSound } from '../utils/audioAlert';
 import './AlertsView.css';
-
-// Synthesize pleasant double-beep chime using Web Audio API (no external file needed)
-function playAlertChime() {
-  try {
-    const AudioContext = window.AudioContext || window.webkitAudioContext;
-    if (!AudioContext) return;
-    const ctx = new AudioContext();
-    const now = ctx.currentTime;
-
-    const osc1 = ctx.createOscillator();
-    const gain1 = ctx.createGain();
-    osc1.type = 'sine';
-    osc1.frequency.setValueAtTime(880, now); // A5
-    gain1.gain.setValueAtTime(0.15, now);
-    gain1.gain.exponentialRampToValueAtTime(0.001, now + 0.15);
-    osc1.connect(gain1);
-    gain1.connect(ctx.destination);
-    osc1.start(now);
-    osc1.stop(now + 0.15);
-
-    const osc2 = ctx.createOscillator();
-    const gain2 = ctx.createGain();
-    osc2.type = 'sine';
-    osc2.frequency.setValueAtTime(1174.66, now + 0.18); // D6
-    gain2.gain.setValueAtTime(0.15, now + 0.18);
-    gain2.gain.exponentialRampToValueAtTime(0.001, now + 0.35);
-    osc2.connect(gain2);
-    gain2.connect(ctx.destination);
-    osc2.start(now + 0.18);
-    osc2.stop(now + 0.35);
-  } catch (e) {
-    console.warn('Audio chime warning:', e.message);
-  }
-}
 
 export default function AlertsView({
   alerts = [],
@@ -84,10 +51,10 @@ export default function AlertsView({
     setAudioEnabled(next);
     localStorage.setItem('airguard_audio_alerts', String(next));
     if (next) {
-      playAlertChime();
-      showToast('🔊 Audio alert notifications enabled.');
+      playHighAlertSound(true);
+      showToast('🔊 High-decibel emergency audio siren enabled.');
     } else {
-      showToast('🔇 Audio alert notifications muted.');
+      showToast('🔇 Audio alert siren muted.');
     }
   };
 
@@ -224,9 +191,20 @@ export default function AlertsView({
           <button
             className={`audio-toggle-btn ${audioEnabled ? 'is-active' : ''}`}
             onClick={toggleAudio}
-            title={audioEnabled ? 'Mute alert chime' : 'Enable audio alerts'}
+            title={audioEnabled ? 'Mute alert siren' : 'Enable audio siren'}
           >
-            {audioEnabled ? '🔊 Audio Alerts ON' : '🔇 Audio Muted'}
+            {audioEnabled ? '🔊 Audio Siren ON' : '🔇 Audio Muted'}
+          </button>
+          <button
+            className="btn-secondary"
+            onClick={() => {
+              playHighAlertSound(true);
+              showToast('🚨 Playing High-Decibel Emergency Siren...');
+            }}
+            title="Test the high-frequency emergency alarm sound"
+            style={{ borderColor: 'rgba(239, 68, 68, 0.4)', color: '#f87171' }}
+          >
+            🚨 Test Siren
           </button>
           <button className="btn-secondary" onClick={() => setShowRulesConfig(!showRulesConfig)}>
             ⚙️ Alert Rules
