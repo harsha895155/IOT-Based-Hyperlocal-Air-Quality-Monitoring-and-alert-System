@@ -345,6 +345,8 @@
 
 .weather-hero-left {
   flex: 1.2;
+  position: relative;
+  z-index: 2;
 }
 
 .aqi-hero-dial-wrap {
@@ -425,6 +427,8 @@
   align-items: flex-end;
   text-align: right;
   flex: 0.9;
+  position: relative;
+  z-index: 2;
 }
 
 .weather-condition-display {

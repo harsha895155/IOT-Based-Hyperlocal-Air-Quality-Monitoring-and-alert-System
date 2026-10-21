@@ -1,7 +1,9 @@
 import React, { useState, useEffect, useRef, useCallback } from 'react';
 import client from '../api/client';
 import { useAuth } from '../context/AuthContext';
+import { useTheme } from '../context/ThemeContext';
 import WeatherIcons from '../components/WeatherIcons';
+import WeatherHero3DCanvas from '../components/WeatherHero3DCanvas';
 import './LocationsView.css';
 
 // Popular quick-access metropolitan centers
@@ -19,6 +21,7 @@ const POPULAR_CITIES = [
 
 export default function LocationsView() {
   const { user, isGuest } = useAuth();
+  const { resolvedTheme } = useTheme() || {};
 
   // Active searched location state (Defaults to Current Location)
   const [currentLocation, setCurrentLocation] = useState(() => {
@@ -505,6 +508,12 @@ export default function LocationsView() {
           <div className="loc-weather-grid">
             {/* Main Current Conditions Hero */}
             <div className="loc-hero-card">
+              <WeatherHero3DCanvas
+                condition={cw.condition}
+                iconType={cw.icon}
+                isDay={cw.isDay ?? true}
+                theme={resolvedTheme}
+              />
               <div className="loc-hero-top">
                 <div>
                   <div className="loc-hero-place-row">

@@ -4,9 +4,12 @@ import { formatTimeAgo } from '../hooks/useReadings';
 import { classifyAQI, healthRecommendation } from '../utils/aqi';
 import WeatherIcons from '../components/WeatherIcons';
 import TrendChart from '../components/TrendChart';
+import WeatherHero3DCanvas from '../components/WeatherHero3DCanvas';
+import { useTheme } from '../context/ThemeContext';
 import './Dashboard.css';
 
 export default function Dashboard({ readingsData, onNavigateTab }) {
+  const { resolvedTheme } = useTheme() || {};
   const {
     latest,
     trend,
@@ -470,6 +473,14 @@ export default function Dashboard({ readingsData, onNavigateTab }) {
 
       {/* ─── 2. ATMOSPHERIC CURRENT CONDITIONS HERO (GOOGLE WEATHER STYLE) ─── */}
       <div className={`weather-hero-card ${isDay ? 'is-daytime' : 'is-nighttime'}`}>
+        {/* Dynamic 3D Weather Simulation — changes automatically with weather report */}
+        <WeatherHero3DCanvas
+          condition={weatherCondition}
+          iconType={weatherIconType}
+          isDay={isDay}
+          theme={resolvedTheme}
+        />
+
         <div className="weather-hero-left">
           {/* Primary Focus: Real Air Quality Index */}
           <div className="aqi-hero-dial-wrap">
