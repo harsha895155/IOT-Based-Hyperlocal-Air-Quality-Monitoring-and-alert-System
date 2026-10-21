@@ -19,7 +19,7 @@ const PATH_TITLES = {
   '/login': 'Account Access',
 };
 
-export default function TopNav({ onToggleSidebar, connected, unreadAlerts = 0 }) {
+export default function TopNav({ onToggleSidebar, isSidebarCollapsed = false, connected, unreadAlerts = 0 }) {
   const { user, isGuest, logout } = useAuth();
   const { resolvedTheme, toggleTheme } = useTheme();
   const location = useLocation();
@@ -27,6 +27,7 @@ export default function TopNav({ onToggleSidebar, connected, unreadAlerts = 0 })
 
   const [menuOpen, setMenuOpen] = React.useState(false);
   const userMenuRef = React.useRef(null);
+  const isLight = resolvedTheme === 'light';
 
   // Close dropdown on outside click
   React.useEffect(() => {
@@ -60,7 +61,8 @@ export default function TopNav({ onToggleSidebar, connected, unreadAlerts = 0 })
           type="button"
           className="topnav__hamburger"
           onClick={onToggleSidebar}
-          aria-label="Toggle navigation sidebar"
+          title={isSidebarCollapsed ? "Expand sidebar" : "Minimize sidebar"}
+          aria-label={isSidebarCollapsed ? "Expand sidebar" : "Minimize sidebar"}
         >
           <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
             <line x1="3" y1="12" x2="21" y2="12" />
@@ -90,10 +92,10 @@ export default function TopNav({ onToggleSidebar, connected, unreadAlerts = 0 })
           type="button"
           className="topnav__icon-btn"
           onClick={toggleTheme}
-          title={`Switch to ${resolvedTheme === 'dark' ? 'light' : 'dark'} mode`}
+          title={isLight ? 'Switch to Dark mode' : 'Switch to Light mode'}
           aria-label="Toggle color theme"
         >
-          {resolvedTheme === 'dark' ? (
+          {!isLight ? (
             <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
               <circle cx="12" cy="12" r="5" />
               <line x1="12" y1="1" x2="12" y2="3" />

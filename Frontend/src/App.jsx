@@ -59,7 +59,7 @@ import {
 
 import { AuthProvider } from './context/AuthContext';
 import { ThemeProvider, useTheme } from './context/ThemeContext';
-import AirGuard3DCanvas from './components/AirGuard3DCanvas';
+import AirAmbient3DCanvas from './components/AirAmbient3DCanvas';
 import { useReadings } from './hooks/useReadings';
 import './App.css';
 
@@ -69,24 +69,42 @@ import './App.css';
  * Contains responsive Sidebar, TopNav, and routed content via <Outlet />.
  */
 function AppLayout({ readingsData }) {
-  const [sidebarOpen, setSidebarOpen] = useState(false);
+  const [mobileOpen, setMobileOpen] = useState(false);
+  const [isCollapsed, setIsCollapsed] = useState(() => {
+    return localStorage.getItem('airguard_sidebar_collapsed') === 'true';
+  });
   const { connected, unreadAlertsCount } = readingsData;
   const { resolvedTheme } = useTheme() || {};
+  const location = useLocation();
+
+  const handleToggleSidebar = () => {
+    if (window.innerWidth <= 900) {
+      setMobileOpen((prev) => !prev);
+    } else {
+      setIsCollapsed((prev) => {
+        const next = !prev;
+        localStorage.setItem('airguard_sidebar_collapsed', String(next));
+        return next;
+      });
+    }
+  };
 
   return (
-    <div className="app-layout">
-      {/* 3D Atmospheric Background Layer */}
-      <AirGuard3DCanvas theme={resolvedTheme} particleMode="aerosols" />
+    <div className={`app-layout ${isCollapsed ? 'is-collapsed' : ''}`}>
+      {/* Page & Slide Specific 3D Atmospheric Background */}
+      <AirAmbient3DCanvas theme={resolvedTheme} routePath={location.pathname} />
 
       <Sidebar
-        isOpen={sidebarOpen}
-        setIsOpen={setSidebarOpen}
+        isOpen={mobileOpen}
+        setIsOpen={setMobileOpen}
+        isCollapsed={isCollapsed}
         unreadAlerts={unreadAlertsCount}
       />
 
       <div className="app-main">
         <TopNav
-          onToggleSidebar={() => setSidebarOpen((prev) => !prev)}
+          onToggleSidebar={handleToggleSidebar}
+          isSidebarCollapsed={isCollapsed}
           connected={connected}
           unreadAlerts={unreadAlertsCount}
         />

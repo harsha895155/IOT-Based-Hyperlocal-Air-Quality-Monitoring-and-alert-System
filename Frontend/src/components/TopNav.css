@@ -27,12 +27,16 @@
   padding: 8px;
   border-radius: var(--radius-sm);
   color: var(--text-muted);
+  background: transparent;
+  border: 1px solid transparent;
+  cursor: pointer;
   transition: all 0.15s ease;
 }
 
 .topnav__hamburger:hover {
   background: var(--surface-hover);
-  color: var(--text-primary);
+  color: var(--accent);
+  border-color: var(--border-soft);
 }
 
 .topnav__title {
@@ -76,16 +80,27 @@
 .topnav__status-pill {
   display: inline-flex;
   align-items: center;
-  gap: 8px;
-  padding: 5px 14px;
+  gap: 7px;
+  padding: 5px 12px;
   border-radius: var(--radius-full);
   background: var(--surface-raised);
   border: 1px solid var(--border);
-  font-size: 0.72rem;
-  font-family: var(--font-mono);
-  font-weight: 600;
-  letter-spacing: 0.04em;
-  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.2);
+  font-size: 0.74rem;
+  font-family: var(--font-body);
+  font-weight: 700;
+  letter-spacing: 0.06em;
+  text-transform: uppercase;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.12);
+}
+
+[data-theme='light'] .topnav__status-pill.is-online {
+  background: #ecfdf5;
+  border-color: #a7f3d0;
+  box-shadow: 0 1px 3px rgba(16, 185, 129, 0.12);
+}
+
+[data-theme='light'] .topnav__status-pill.is-online .topnav__status-text {
+  color: #047857;
 }
 
 .topnav__status-dot {

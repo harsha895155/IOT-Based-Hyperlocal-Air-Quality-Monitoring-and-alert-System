@@ -110,10 +110,38 @@
   box-shadow: 0 0 10px var(--accent);
 }
 
+[data-theme='light'] .sidebar {
+  background: #ffffff;
+  border-right-color: #e2e8f0;
+}
+
+[data-theme='light'] .sidebar__brand {
+  border-bottom-color: #f1f5f9;
+}
+
+[data-theme='light'] .sidebar__item {
+  color: #475569;
+}
+
+[data-theme='light'] .sidebar__item:hover {
+  background: #f1f5f9;
+  color: #0284c7;
+}
+
 [data-theme='light'] .sidebar__item.is-active {
-  background: #e2ecf5;
-  color: #0e1722;
-  border-color: rgba(2, 132, 199, 0.2);
+  background: linear-gradient(135deg, #0284c7 0%, #0369a1 100%);
+  color: #ffffff !important;
+  border: 1px solid #0284c7;
+  box-shadow: 0 4px 14px rgba(2, 132, 199, 0.28);
+}
+
+[data-theme='light'] .sidebar__item.is-active svg {
+  color: #ffffff !important;
+  opacity: 1;
+}
+
+[data-theme='light'] .sidebar__item.is-active::before {
+  display: none;
 }
 
 .sidebar__item.is-active svg {
@@ -130,6 +158,73 @@
   padding: 2px 8px;
   border-radius: var(--radius-full);
   box-shadow: 0 0 10px rgba(249, 115, 22, 0.4);
+}
+
+/* ─── Desktop Collapsible Sidebar Rail ─── */
+.sidebar.is-collapsed {
+  width: 72px;
+  min-width: 72px;
+}
+
+.sidebar.is-collapsed .sidebar__brand {
+  padding: 18px 0;
+  justify-content: center;
+  gap: 0;
+}
+
+.sidebar.is-collapsed .sidebar__brand-name {
+  display: none;
+}
+
+.sidebar.is-collapsed .sidebar__nav {
+  padding: 14px 8px 24px;
+  gap: 16px;
+  align-items: center;
+}
+
+.sidebar.is-collapsed .sidebar__section {
+  width: 100%;
+  align-items: center;
+  gap: 6px;
+}
+
+.sidebar.is-collapsed .sidebar__section-title {
+  display: none;
+}
+
+.sidebar.is-collapsed .sidebar__item {
+  width: 44px;
+  height: 44px;
+  padding: 0;
+  justify-content: center;
+  border-radius: 10px;
+  margin: 0 auto;
+}
+
+.sidebar.is-collapsed .sidebar__item span:not(.sidebar__badge) {
+  display: none;
+}
+
+.sidebar.is-collapsed .sidebar__item.is-active::before {
+  display: none;
+}
+
+.sidebar.is-collapsed .sidebar__badge {
+  position: absolute;
+  top: 6px;
+  right: 6px;
+  width: 8px;
+  height: 8px;
+  min-width: 8px;
+  padding: 0;
+  border-radius: 50%;
+  font-size: 0;
+  line-height: 0;
+  box-shadow: 0 0 6px rgba(249, 115, 22, 0.7);
+}
+
+.sidebar.is-collapsed .sidebar__guest-panel {
+  display: none;
 }
 
 .sidebar-backdrop {

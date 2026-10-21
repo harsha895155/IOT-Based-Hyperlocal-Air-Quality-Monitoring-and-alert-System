@@ -102,13 +102,13 @@ const Icons = {
   ),
 };
 
-export default function Sidebar({ isOpen, setIsOpen, unreadAlerts = 0 }) {
+export default function Sidebar({ isOpen, setIsOpen, isCollapsed = false, unreadAlerts = 0 }) {
   const { user, isGuest, logout } = useAuth();
   const location = useLocation();
   const navigate = useNavigate();
 
   const handleLinkClick = () => {
-    if (window.innerWidth <= 768 && setIsOpen) {
+    if (window.innerWidth <= 900 && setIsOpen) {
       setIsOpen(false);
     }
   };
@@ -131,8 +131,8 @@ export default function Sidebar({ isOpen, setIsOpen, unreadAlerts = 0 }) {
         />
       )}
 
-      <aside className={`sidebar ${isOpen ? 'is-open' : ''}`}>
-        <NavLink to="/" className="sidebar__brand" onClick={handleLinkClick}>
+      <aside className={`sidebar ${isOpen ? 'is-open' : ''} ${isCollapsed ? 'is-collapsed' : ''}`}>
+        <NavLink to="/" className="sidebar__brand" onClick={handleLinkClick} title="AirGuard Home">
           <AirGuardLogo size={26} />
           <span className="sidebar__brand-name">AirGuard</span>
         </NavLink>
@@ -145,6 +145,7 @@ export default function Sidebar({ isOpen, setIsOpen, unreadAlerts = 0 }) {
               to="/dashboard"
               className={({ isActive }) => `sidebar__item ${isActive ? 'is-active' : ''}`}
               onClick={handleLinkClick}
+              title="Dashboard"
             >
               <Icons.Dashboard />
               <span>Dashboard</span>
@@ -153,6 +154,7 @@ export default function Sidebar({ isOpen, setIsOpen, unreadAlerts = 0 }) {
               to="/devices"
               className={`sidebar__item ${isDevicesActive ? 'is-active' : ''}`}
               onClick={handleLinkClick}
+              title="My Devices"
             >
               <Icons.Devices />
               <span>My Devices</span>
@@ -161,6 +163,7 @@ export default function Sidebar({ isOpen, setIsOpen, unreadAlerts = 0 }) {
               to="/locations"
               className={({ isActive }) => `sidebar__item ${isActive ? 'is-active' : ''}`}
               onClick={handleLinkClick}
+              title="Location Weather"
             >
               <Icons.Locations />
               <span>Location Weather</span>
@@ -174,6 +177,7 @@ export default function Sidebar({ isOpen, setIsOpen, unreadAlerts = 0 }) {
               to="/analytics"
               className={({ isActive }) => `sidebar__item ${isActive ? 'is-active' : ''}`}
               onClick={handleLinkClick}
+              title="Analytics"
             >
               <Icons.Analytics />
               <span>Analytics</span>
@@ -182,6 +186,7 @@ export default function Sidebar({ isOpen, setIsOpen, unreadAlerts = 0 }) {
               to="/history"
               className={({ isActive }) => `sidebar__item ${isActive ? 'is-active' : ''}`}
               onClick={handleLinkClick}
+              title="History"
             >
               <Icons.History />
               <span>History</span>
@@ -195,6 +200,7 @@ export default function Sidebar({ isOpen, setIsOpen, unreadAlerts = 0 }) {
               to="/alerts"
               className={({ isActive }) => `sidebar__item ${isActive ? 'is-active' : ''}`}
               onClick={handleLinkClick}
+              title="Alerts"
             >
               <Icons.Alerts />
               <span>Alerts</span>
@@ -204,6 +210,7 @@ export default function Sidebar({ isOpen, setIsOpen, unreadAlerts = 0 }) {
               to="/reports"
               className={({ isActive }) => `sidebar__item ${isActive ? 'is-active' : ''}`}
               onClick={handleLinkClick}
+              title="Reports"
             >
               <Icons.Reports />
               <span>Reports</span>
@@ -218,6 +225,7 @@ export default function Sidebar({ isOpen, setIsOpen, unreadAlerts = 0 }) {
                 to="/system-health"
                 className={({ isActive }) => `sidebar__item ${isActive ? 'is-active' : ''}`}
                 onClick={handleLinkClick}
+                title="System Health"
               >
                 <Icons.SystemHealth />
                 <span>System Health</span>
@@ -226,6 +234,7 @@ export default function Sidebar({ isOpen, setIsOpen, unreadAlerts = 0 }) {
                 to="/settings"
                 className={({ isActive }) => `sidebar__item ${isActive ? 'is-active' : ''}`}
                 onClick={handleLinkClick}
+                title="Settings"
               >
                 <Icons.Settings />
                 <span>Settings</span>
@@ -234,6 +243,7 @@ export default function Sidebar({ isOpen, setIsOpen, unreadAlerts = 0 }) {
                 to="/help"
                 className={({ isActive }) => `sidebar__item ${isActive ? 'is-active' : ''}`}
                 onClick={handleLinkClick}
+                title="Help & Support"
               >
                 <Icons.HelpSupport />
                 <span>Help & Support</span>
@@ -249,11 +259,12 @@ export default function Sidebar({ isOpen, setIsOpen, unreadAlerts = 0 }) {
                 to="/profile"
                 className={({ isActive }) => `sidebar__item ${isActive ? 'is-active' : ''}`}
                 onClick={handleLinkClick}
+                title="Profile"
               >
                 <Icons.Profile />
                 <span>Profile ({user.name?.split(' ')[0] || 'User'})</span>
               </NavLink>
-              <button type="button" className="sidebar__item" onClick={handleLogout}>
+              <button type="button" className="sidebar__item" onClick={handleLogout} title="Log out">
                 <Icons.Logout />
                 <span>Log out</span>
               </button>
