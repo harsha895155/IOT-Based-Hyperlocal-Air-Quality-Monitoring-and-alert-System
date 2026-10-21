@@ -178,17 +178,15 @@ async function forgotPassword(req, res, next) {
     const user = await User.findOne({ email: cleanEmail });
 
     if (!user) {
-      // Do not disclose whether email exists for user enumeration security
-      return res.json({
-        success: true,
-        message: 'If an account exists with that email, a password reset link has been generated.',
+      return res.status(404).json({
+        error: 'No registered account found with this email address. Please check your email or create an account.',
       });
     }
 
     // Check if account is a Google-only account without local password
     if (user.authProvider === 'google' && !user.password) {
       return res.status(400).json({
-        error: 'This account is linked with Google Sign-In. Please click "Continue with Google" to access your account.',
+        error: 'This account uses Google Sign-In. Please click "Continue with Google" on the login page.',
       });
     }
 
