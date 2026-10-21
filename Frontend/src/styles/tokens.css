@@ -273,7 +273,11 @@
 [data-theme='light'] .current-weather-hero,
 [data-theme='light'] .weather-section-card,
 [data-theme='light'] .environmental-card,
-[data-theme='light'] .metric-card {
+[data-theme='light'] .metric-card,
+[data-theme='light'] .rules-config-card,
+[data-theme='light'] .certification-card,
+[data-theme='light'] .compliance-kpi-card,
+[data-theme='light'] .report-section-card {
   border: 1px solid rgba(2, 132, 199, 0.2) !important;
   background: rgba(255, 255, 255, 0.94) !important;
   backdrop-filter: blur(20px) !important;

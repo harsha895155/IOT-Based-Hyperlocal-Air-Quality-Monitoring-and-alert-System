@@ -3,17 +3,17 @@ import * as THREE from 'three';
 
 /**
  * WeatherHero3DCanvas
- * Dynamic, self-contained 3D WebGL atmospheric weather canvas
- * designed specifically for the Weather Hero Card.
+ * Dynamic, GPU-accelerated 3D WebGL atmospheric weather canvas
+ * that covers 100% of the Weather Hero Card edge-to-edge.
  *
- * Automatically detects and renders realistic, interactive 3D simulations:
- * - 'thunderstorm': Volumetric storm clouds, procedural 3D crackling lightning bolts, and torrential rain with splash ripples.
- * - 'rain' / 'drizzle': Translucent falling raindrop streaks, splash rings, and rain mist.
- * - 'snow': 3D tumbling crystalline snowflakes with Brownian drift and frosty ambient glow.
- * - 'clear-day': Radiant celestial Sun sphere with rotating corona rings, solar flares, and warm golden particles.
- * - 'clear-night': 3D glowing crescent moon, twinkling cosmic starfield, and periodic shooting star.
- * - 'clouds' / 'fog' / 'mist': Volumetric drifting cloud bank with filtered atmospheric light rays.
- * - 'windy': 3D aerodynamic wind streamlines and floating vortex particles.
+ * Dynamically adapts to live weather reports:
+ * - 'thunderstorm': Full-width rolling storm clouds, dynamic procedural lightning flashes, and edge-to-edge torrential rain with splash ripples.
+ * - 'rain' / 'drizzle': Full-width falling translucent rain streaks and expanding ripple impacts.
+ * - 'snow': 3D crystalline snowflakes swirling with Brownian motion across the whole card.
+ * - 'clear-day': Radiant celestial Sun sphere, rotating corona rays, and warm solar dust particles across the entire card.
+ * - 'clear-night': 3D crescent moon, twinkling cosmic starfield, and horizon meteor streaks.
+ * - 'clouds' / 'fog' / 'mist': Volumetric multi-layer clouds undulating and drifting edge-to-edge.
+ * - 'windy': Swooping aerodynamic wind ribbons with high-velocity vortex particles.
  */
 export default function WeatherHero3DCanvas({
   condition = 'Thunderstorm',
@@ -24,7 +24,7 @@ export default function WeatherHero3DCanvas({
   const mountRef = useRef(null);
   const isLight = theme === 'light';
 
-  // 1. Classify Weather Condition into 3D Animation Mode
+  // Classify Weather Condition into 3D Animation Mode
   const classifyMode = (cond, icon, day) => {
     const c = (cond || '').toLowerCase();
     const ic = (icon || '').toLowerCase();
@@ -44,7 +44,6 @@ export default function WeatherHero3DCanvas({
     if (c.includes('wind') || ic.includes('wind')) {
       return 'windy';
     }
-    // Default for cloudy / overcast / fog / mist / partly-cloudy
     return 'clouds';
   };
 
@@ -54,14 +53,30 @@ export default function WeatherHero3DCanvas({
     const container = mountRef.current;
     if (!container) return;
 
-    let width = container.clientWidth || 600;
-    let height = container.clientHeight || 220;
+    let width = container.clientWidth || 900;
+    let height = container.clientHeight || 180;
 
-    // 1. Scene, Camera, Renderer
+    // 1. Scene & Camera Setup
     const scene = new THREE.Scene();
     const camera = new THREE.PerspectiveCamera(45, width / height, 0.1, 1000);
     camera.position.set(0, 0, 75);
 
+    // Compute exact camera frustum bounds in 3D world units
+    const calcFrustum = (w, h) => {
+      const vFov = (camera.fov * Math.PI) / 180;
+      const vHeight = 2 * Math.tan(vFov / 2) * camera.position.z;
+      const vWidth = vHeight * (w / h);
+      return {
+        vWidth,
+        vHeight,
+        halfW: vWidth / 2,
+        halfH: vHeight / 2,
+      };
+    };
+
+    let frustum = calcFrustum(width, height);
+
+    // 2. High-Performance Renderer
     const renderer = new THREE.WebGLRenderer({
       alpha: true,
       antialias: true,
@@ -69,21 +84,21 @@ export default function WeatherHero3DCanvas({
     });
     renderer.setSize(width, height);
     renderer.setPixelRatio(Math.min(window.devicePixelRatio || 1, 2));
-    renderer.setClearColor(0x000000, 0); // Transparent to blend seamlessly into card
+    renderer.setClearColor(0x000000, 0); // Transparent canvas
     container.appendChild(renderer.domElement);
 
     const rootGroup = new THREE.Group();
     scene.add(rootGroup);
 
-    // Dynamic Lighting
-    const ambientLight = new THREE.AmbientLight(0xffffff, isLight ? 0.9 : 0.6);
+    // 3. Dynamic Scene Lighting
+    const ambientLight = new THREE.AmbientLight(0xffffff, isLight ? 0.95 : 0.65);
     scene.add(ambientLight);
 
-    const flashLight = new THREE.PointLight(0x93c5fd, 0, 200);
-    flashLight.position.set(15, 25, 30);
+    const flashLight = new THREE.PointLight(0xa5f3fc, 0, 300);
+    flashLight.position.set(0, 25, 40);
     scene.add(flashLight);
 
-    // Shared radial glow texture helper
+    // Radial glow particle texture helper
     const createCircleTexture = () => {
       const cvs = document.createElement('canvas');
       cvs.width = 64;
@@ -91,8 +106,8 @@ export default function WeatherHero3DCanvas({
       const ctx = cvs.getContext('2d');
       const grad = ctx.createRadialGradient(32, 32, 0, 32, 32, 32);
       grad.addColorStop(0, 'rgba(255, 255, 255, 1)');
-      grad.addColorStop(0.35, 'rgba(255, 255, 255, 0.8)');
-      grad.addColorStop(0.8, 'rgba(255, 255, 255, 0.15)');
+      grad.addColorStop(0.35, 'rgba(255, 255, 255, 0.85)');
+      grad.addColorStop(0.75, 'rgba(255, 255, 255, 0.18)');
       grad.addColorStop(1, 'rgba(255, 255, 255, 0)');
       ctx.fillStyle = grad;
       ctx.fillRect(0, 0, 64, 64);
@@ -100,96 +115,111 @@ export default function WeatherHero3DCanvas({
     };
     const circleTexture = createCircleTexture();
 
-    // ─── MODE-SPECIFIC OBJECTS & RUNTIME HOOKS ───
     let updateFn = null;
 
     // ══════════════════════════════════════════════════════════════════════════
-    // A. THUNDERSTORM MODE (Dark Volumetric Clouds + Flashing Lightning + Torrential Rain)
+    // A. THUNDERSTORM: FULL-WIDTH ROLLING CLOUDS + CRACKLING LIGHTNING + RAIN
     // ══════════════════════════════════════════════════════════════════════════
     if (weatherMode === 'thunderstorm') {
-      // 1. Rolling 3D Storm Clouds
+      // 1. Edge-to-edge rolling storm clouds spanning the entire card width
       const cloudPuffs = [];
-      const cloudGeo = new THREE.DodecahedronGeometry(8, 1);
+      const cloudGeo = new THREE.DodecahedronGeometry(11, 1);
       const cloudMat = new THREE.MeshStandardMaterial({
-        color: isLight ? 0x94a3b8 : 0x1e293b,
-        roughness: 0.9,
-        metalness: 0.1,
+        color: isLight ? 0x93c5fd : 0x1e293b,
+        roughness: 0.95,
+        metalness: 0.05,
         transparent: true,
-        opacity: isLight ? 0.45 : 0.55,
+        opacity: isLight ? 0.24 : 0.45,
       });
 
-      for (let i = 0; i < 9; i++) {
+      const puffCount = Math.max(24, Math.round(frustum.vWidth / 14));
+      const startX = -frustum.halfW - 25;
+      const stepX = (frustum.vWidth + 50) / puffCount;
+
+      for (let i = 0; i < puffCount; i++) {
         const puff = new THREE.Mesh(cloudGeo, cloudMat);
-        puff.position.set(-45 + i * 11 + (Math.random() - 0.5) * 8, 18 + (Math.random() - 0.5) * 6, -10 + (Math.random() - 0.5) * 8);
-        const s = 1.2 + Math.random() * 0.9;
-        puff.scale.set(s * 1.5, s * 0.9, s);
+        const px = startX + i * stepX + (Math.random() - 0.5) * 12;
+        const py = frustum.halfH - 2 + (Math.random() - 0.5) * 8;
+        const pz = -12 + (Math.random() - 0.5) * 14;
+        puff.position.set(px, py, pz);
+
+        const s = 1.3 + Math.random() * 1.1;
+        puff.scale.set(s * 1.7, s * 0.9, s);
         rootGroup.add(puff);
-        cloudPuffs.push({ mesh: puff, speed: 0.005 + Math.random() * 0.005 });
+        cloudPuffs.push({
+          mesh: puff,
+          speed: 0.012 + Math.random() * 0.014,
+        });
       }
 
-      // 2. Torrential Falling Rain Streaks
-      const rainCount = 180;
+      // 2. Edge-to-Edge Torrential Rain Streaks
+      const rainCount = Math.max(260, Math.round(frustum.vWidth * 1.6));
       const rainGeo = new THREE.BufferGeometry();
-      const rainPositions = new Float32Array(rainCount * 6); // 2 points per line segment
+      const rainPositions = new Float32Array(rainCount * 6);
       const rainSpeeds = new Float32Array(rainCount);
 
       for (let i = 0; i < rainCount; i++) {
-        const x = (Math.random() - 0.5) * 130;
-        const y = (Math.random() - 0.5) * 60;
-        const z = (Math.random() - 0.5) * 30;
-        const len = 3.5 + Math.random() * 2.5;
+        const x = (Math.random() - 0.5) * (frustum.vWidth + 40);
+        const y = (Math.random() - 0.5) * (frustum.vHeight + 20);
+        const z = (Math.random() - 0.5) * 25;
+        const len = 3.8 + Math.random() * 3.2;
 
         const idx = i * 6;
         rainPositions[idx] = x;
         rainPositions[idx + 1] = y;
         rainPositions[idx + 2] = z;
-        // End point slightly angled with wind
-        rainPositions[idx + 3] = x - 0.9;
+        // Angled slightly with wind drift
+        rainPositions[idx + 3] = x - 0.8;
         rainPositions[idx + 4] = y - len;
         rainPositions[idx + 5] = z;
 
-        rainSpeeds[i] = 1.2 + Math.random() * 0.8;
+        rainSpeeds[i] = 1.4 + Math.random() * 0.9;
       }
       rainGeo.setAttribute('position', new THREE.BufferAttribute(rainPositions, 3));
 
       const rainMat = new THREE.LineBasicMaterial({
         color: isLight ? 0x0284c7 : 0x7dd3fc,
         transparent: true,
-        opacity: isLight ? 0.35 : 0.45,
+        opacity: isLight ? 0.32 : 0.45,
       });
       const rainLines = new THREE.LineSegments(rainGeo, rainMat);
       rootGroup.add(rainLines);
 
-      // 3. Splash Ripples at bottom
+      // 3. Ground Splash Ripples across full card width
       const ripples = [];
-      const rippleGeo = new THREE.RingGeometry(0.3, 1.8, 16);
+      const rippleGeo = new THREE.RingGeometry(0.4, 2.2, 16);
       const rippleMat = new THREE.MeshBasicMaterial({
         color: isLight ? 0x0284c7 : 0x38bdf8,
         transparent: true,
         opacity: 0,
         side: THREE.DoubleSide,
       });
-      for (let r = 0; r < 6; r++) {
+
+      const rippleCount = 14;
+      for (let r = 0; r < rippleCount; r++) {
         const rip = new THREE.Mesh(rippleGeo, rippleMat.clone());
         rip.rotation.x = Math.PI / 2.3;
-        rip.position.set((Math.random() - 0.5) * 100, -22 + (Math.random() - 0.5) * 4, (Math.random() - 0.5) * 20);
+        const rx = (Math.random() - 0.5) * (frustum.vWidth * 0.92);
+        const ry = -frustum.halfH + 3 + (Math.random() - 0.5) * 4;
+        const rz = (Math.random() - 0.5) * 18;
+        rip.position.set(rx, ry, rz);
         rootGroup.add(rip);
-        ripples.push({ mesh: rip, scale: 0.2, life: Math.random() });
+        ripples.push({ mesh: rip, life: Math.random() });
       }
 
-      // 4. Procedural 3D Lightning Bolt
-      const createLightningGeometry = () => {
+      // 4. Procedural 3D Lightning Bolt across full width
+      const createLightningGeometry = (strikeX) => {
         const pts = [];
-        let curr = new THREE.Vector3(12 + (Math.random() - 0.5) * 16, 26, 5);
+        let curr = new THREE.Vector3(strikeX, frustum.halfH + 8, 4);
         pts.push(curr.clone());
-        const targetY = -22;
+        const targetY = -frustum.halfH;
 
         while (curr.y > targetY) {
-          const stepY = 3.5 + Math.random() * 4;
+          const stepY = 4 + Math.random() * 5;
           const next = new THREE.Vector3(
-            curr.x + (Math.random() - 0.5) * 5.5,
+            curr.x + (Math.random() - 0.5) * 7.5,
             Math.max(targetY, curr.y - stepY),
-            curr.z + (Math.random() - 0.5) * 3
+            curr.z + (Math.random() - 0.5) * 4
           );
           pts.push(next.clone());
           curr = next;
@@ -203,67 +233,75 @@ export default function WeatherHero3DCanvas({
         transparent: true,
         opacity: 0,
       });
-      const lightningLine = new THREE.Line(createLightningGeometry(), lightningMat);
+      const lightningLine = new THREE.Line(createLightningGeometry(0), lightningMat);
       rootGroup.add(lightningLine);
 
-      // Lightning timing state
-      let nextFlashTime = 1.5;
+      // Flash sequence timing
+      let nextFlashTime = 1.2;
       let flashPhase = 0;
       let flashDuration = 0;
 
       updateFn = (elapsed, delta) => {
-        // A. Rain motion
+        // A. Rain motion across full width
         const pos = rainLines.geometry.attributes.position.array;
+        const bottomLimit = -frustum.halfH - 8;
+        const topSpawn = frustum.halfH + 8;
+        const boundX = frustum.halfW + 20;
+
         for (let i = 0; i < rainCount; i++) {
           const idx = i * 6;
           const speed = rainSpeeds[i];
           pos[idx + 1] -= speed;
           pos[idx + 4] -= speed;
-          pos[idx] -= speed * 0.14;
-          pos[idx + 3] -= speed * 0.14;
+          pos[idx] -= speed * 0.12;
+          pos[idx + 3] -= speed * 0.12;
 
-          if (pos[idx + 1] < -26) {
-            pos[idx + 1] = 26;
-            pos[idx + 4] = 26 - 4;
-            pos[idx] = (Math.random() - 0.5) * 120;
-            pos[idx + 3] = pos[idx] - 0.9;
+          if (pos[idx + 1] < bottomLimit) {
+            pos[idx + 1] = topSpawn;
+            pos[idx + 4] = topSpawn - 4.5;
+            pos[idx] = (Math.random() - 0.5) * (frustum.vWidth + 40);
+            pos[idx + 3] = pos[idx] - 0.8;
           }
         }
         rainLines.geometry.attributes.position.needsUpdate = true;
 
-        // B. Cloud drift
+        // B. Cloud drift across entire width
         cloudPuffs.forEach(({ mesh, speed }) => {
           mesh.position.x += speed;
-          if (mesh.position.x > 55) mesh.position.x = -55;
+          if (mesh.position.x > boundX) {
+            mesh.position.x = -boundX;
+          }
         });
 
-        // C. Splash ripples
+        // C. Splash ripples across full width
         ripples.forEach((rp) => {
-          rp.life += delta * 1.8;
+          rp.life += delta * 1.6;
           if (rp.life > 1) {
             rp.life = 0;
-            rp.mesh.position.x = (Math.random() - 0.5) * 100;
-            rp.mesh.position.z = (Math.random() - 0.5) * 20;
+            rp.mesh.position.x = (Math.random() - 0.5) * (frustum.vWidth * 0.92);
           }
-          const s = 0.2 + rp.life * 1.6;
+          const s = 0.2 + rp.life * 1.8;
           rp.mesh.scale.set(s, s, s);
-          rp.mesh.material.opacity = Math.max(0, (1 - rp.life) * 0.45);
+          rp.mesh.material.opacity = Math.max(0, (1 - rp.life) * 0.4);
         });
 
-        // D. Lightning Trigger
+        // D. Lightning Trigger across random locations
         if (elapsed > nextFlashTime) {
           flashPhase = 1;
-          flashDuration = 0.28;
+          flashDuration = 0.25;
+          const strikeX = (Math.random() - 0.5) * (frustum.vWidth * 0.7);
+          flashLight.position.x = strikeX;
+
           lightningLine.geometry.dispose();
-          lightningLine.geometry = createLightningGeometry();
-          nextFlashTime = elapsed + 3.0 + Math.random() * 3.5;
+          lightningLine.geometry = createLightningGeometry(strikeX);
+          nextFlashTime = elapsed + 2.8 + Math.random() * 3.2;
         }
 
         if (flashPhase > 0) {
           flashDuration -= delta;
-          const flick = Math.random() > 0.35 ? 1 : 0.15;
+          const flick = Math.random() > 0.3 ? 1 : 0.15;
           lightningMat.opacity = flick;
-          flashLight.intensity = flick * 2.8;
+          flashLight.intensity = flick * 3.5;
 
           if (flashDuration <= 0) {
             flashPhase = 0;
@@ -275,19 +313,19 @@ export default function WeatherHero3DCanvas({
     }
 
     // ══════════════════════════════════════════════════════════════════════════
-    // B. RAIN / DRIZZLE MODE (Translucent Rain Streaks + Puddle Ripples + Soft Mist)
+    // B. RAIN / DRIZZLE: FULL-WIDTH PRECIPITATION & MIST RIPPLES
     // ══════════════════════════════════════════════════════════════════════════
     else if (weatherMode === 'rain') {
-      const dropCount = 160;
+      const dropCount = Math.max(220, Math.round(frustum.vWidth * 1.4));
       const rainGeo = new THREE.BufferGeometry();
       const rainPositions = new Float32Array(dropCount * 6);
       const rainSpeeds = new Float32Array(dropCount);
 
       for (let i = 0; i < dropCount; i++) {
-        const x = (Math.random() - 0.5) * 130;
-        const y = (Math.random() - 0.5) * 60;
+        const x = (Math.random() - 0.5) * (frustum.vWidth + 30);
+        const y = (Math.random() - 0.5) * (frustum.vHeight + 15);
         const z = (Math.random() - 0.5) * 25;
-        const len = 2.8 + Math.random() * 2.0;
+        const len = 3.0 + Math.random() * 2.4;
 
         const idx = i * 6;
         rainPositions[idx] = x;
@@ -297,22 +335,22 @@ export default function WeatherHero3DCanvas({
         rainPositions[idx + 4] = y - len;
         rainPositions[idx + 5] = z;
 
-        rainSpeeds[i] = 0.8 + Math.random() * 0.6;
+        rainSpeeds[i] = 0.9 + Math.random() * 0.7;
       }
       rainGeo.setAttribute('position', new THREE.BufferAttribute(rainPositions, 3));
 
       const rainMat = new THREE.LineBasicMaterial({
         color: isLight ? 0x0284c7 : 0x38bdf8,
         transparent: true,
-        opacity: isLight ? 0.32 : 0.42,
+        opacity: isLight ? 0.3 : 0.42,
       });
       const rainLines = new THREE.LineSegments(rainGeo, rainMat);
       rootGroup.add(rainLines);
 
-      // Rain puddle ripples
+      // Full-width puddles
       const ripples = [];
-      const ripGeo = new THREE.RingGeometry(0.3, 1.6, 16);
-      for (let r = 0; r < 7; r++) {
+      const ripGeo = new THREE.RingGeometry(0.3, 1.8, 16);
+      for (let r = 0; r < 12; r++) {
         const rip = new THREE.Mesh(
           ripGeo,
           new THREE.MeshBasicMaterial({
@@ -323,23 +361,26 @@ export default function WeatherHero3DCanvas({
           })
         );
         rip.rotation.x = Math.PI / 2.3;
-        rip.position.set((Math.random() - 0.5) * 110, -22, (Math.random() - 0.5) * 20);
+        rip.position.set((Math.random() - 0.5) * (frustum.vWidth * 0.9), -frustum.halfH + 2, (Math.random() - 0.5) * 20);
         rootGroup.add(rip);
         ripples.push({ mesh: rip, life: Math.random() });
       }
 
       updateFn = (elapsed, delta) => {
         const pos = rainLines.geometry.attributes.position.array;
+        const bottomLimit = -frustum.halfH - 6;
+        const topSpawn = frustum.halfH + 6;
+
         for (let i = 0; i < dropCount; i++) {
           const idx = i * 6;
           const speed = rainSpeeds[i];
           pos[idx + 1] -= speed;
           pos[idx + 4] -= speed;
 
-          if (pos[idx + 1] < -25) {
-            pos[idx + 1] = 25;
-            pos[idx + 4] = 25 - 3;
-            pos[idx] = (Math.random() - 0.5) * 130;
+          if (pos[idx + 1] < bottomLimit) {
+            pos[idx + 1] = topSpawn;
+            pos[idx + 4] = topSpawn - 3.5;
+            pos[idx] = (Math.random() - 0.5) * (frustum.vWidth + 30);
             pos[idx + 3] = pos[idx] - 0.4;
           }
         }
@@ -349,9 +390,9 @@ export default function WeatherHero3DCanvas({
           rp.life += delta * 1.5;
           if (rp.life > 1) {
             rp.life = 0;
-            rp.mesh.position.x = (Math.random() - 0.5) * 110;
+            rp.mesh.position.x = (Math.random() - 0.5) * (frustum.vWidth * 0.9);
           }
-          const s = 0.2 + rp.life * 1.4;
+          const s = 0.2 + rp.life * 1.5;
           rp.mesh.scale.set(s, s, s);
           rp.mesh.material.opacity = Math.max(0, (1 - rp.life) * 0.35);
         });
@@ -359,30 +400,28 @@ export default function WeatherHero3DCanvas({
     }
 
     // ══════════════════════════════════════════════════════════════════════════
-    // C. SNOW MODE (3D Tumbling Hexagonal Flakes + Brownian Floating Drift)
+    // C. SNOW: FULL-WIDTH BROWNIAN CRYSTALLINE SNOWFLAKES
     // ══════════════════════════════════════════════════════════════════════════
     else if (weatherMode === 'snow') {
-      const flakeCount = 130;
+      const flakeCount = Math.max(180, Math.round(frustum.vWidth * 1.2));
       const flakeGeo = new THREE.BufferGeometry();
       const flakePos = new Float32Array(flakeCount * 3);
-      const flakeScales = new Float32Array(flakeCount);
       const flakeOffsets = new Float32Array(flakeCount);
 
       for (let i = 0; i < flakeCount; i++) {
-        flakePos[i * 3] = (Math.random() - 0.5) * 130;
-        flakePos[i * 3 + 1] = (Math.random() - 0.5) * 60;
+        flakePos[i * 3] = (Math.random() - 0.5) * (frustum.vWidth + 30);
+        flakePos[i * 3 + 1] = (Math.random() - 0.5) * (frustum.vHeight + 15);
         flakePos[i * 3 + 2] = (Math.random() - 0.5) * 30;
-        flakeScales[i] = 1.4 + Math.random() * 2.2;
         flakeOffsets[i] = Math.random() * Math.PI * 2;
       }
       flakeGeo.setAttribute('position', new THREE.BufferAttribute(flakePos, 3));
 
       const flakeMat = new THREE.PointsMaterial({
-        size: 3.2,
+        size: 3.5,
         map: circleTexture,
         transparent: true,
-        opacity: isLight ? 0.65 : 0.8,
-        color: isLight ? 0x38bdf8 : 0xffffff,
+        opacity: isLight ? 0.6 : 0.8,
+        color: isLight ? 0x0284c7 : 0xffffff,
         depthWrite: false,
       });
       const snowPoints = new THREE.Points(flakeGeo, flakeMat);
@@ -390,14 +429,17 @@ export default function WeatherHero3DCanvas({
 
       updateFn = (elapsed) => {
         const pos = snowPoints.geometry.attributes.position.array;
+        const bottomLimit = -frustum.halfH - 6;
+        const topSpawn = frustum.halfH + 6;
+
         for (let i = 0; i < flakeCount; i++) {
           const idx = i * 3;
-          pos[idx + 1] -= 0.25; // Gentle downward snowfall
-          pos[idx] += Math.sin(elapsed * 1.2 + flakeOffsets[i]) * 0.12; // Swirling side sway
+          pos[idx + 1] -= 0.28;
+          pos[idx] += Math.sin(elapsed * 1.4 + flakeOffsets[i]) * 0.15;
 
-          if (pos[idx + 1] < -25) {
-            pos[idx + 1] = 25;
-            pos[idx] = (Math.random() - 0.5) * 130;
+          if (pos[idx + 1] < bottomLimit) {
+            pos[idx + 1] = topSpawn;
+            pos[idx] = (Math.random() - 0.5) * (frustum.vWidth + 30);
           }
         }
         snowPoints.geometry.attributes.position.needsUpdate = true;
@@ -405,57 +447,56 @@ export default function WeatherHero3DCanvas({
     }
 
     // ══════════════════════════════════════════════════════════════════════════
-    // D. CLEAR DAY / SUNNY MODE (Radiant 3D Sun, Rotating Corona, Warm Flare Dust)
+    // D. CLEAR DAY: CELESTIAL SUN & EDGE-TO-EDGE WARM SOLAR DUST
     // ══════════════════════════════════════════════════════════════════════════
     else if (weatherMode === 'clear-day') {
       const sunGroup = new THREE.Group();
-      sunGroup.position.set(38, 8, -5);
+      sunGroup.position.set(frustum.halfW * 0.65, frustum.halfH * 0.25, -6);
       rootGroup.add(sunGroup);
 
-      // 1. Core Glowing Sun Sphere
-      const sunSphereGeo = new THREE.SphereGeometry(7, 24, 24);
-      const sunSphereMat = new THREE.MeshBasicMaterial({
-        color: 0xfbbf24,
-      });
-      const sunCore = new THREE.Mesh(sunSphereGeo, sunSphereMat);
+      const sunCore = new THREE.Mesh(
+        new THREE.SphereGeometry(8.5, 24, 24),
+        new THREE.MeshBasicMaterial({ color: 0xfbbf24 })
+      );
       sunGroup.add(sunCore);
 
-      // 2. Multi-layer Radiant Corona Rings
-      const ringGeo1 = new THREE.RingGeometry(8, 12, 32);
-      const ringMat1 = new THREE.MeshBasicMaterial({
-        color: 0xf59e0b,
-        transparent: true,
-        opacity: isLight ? 0.28 : 0.4,
-        side: THREE.DoubleSide,
-      });
-      const corona1 = new THREE.Mesh(ringGeo1, ringMat1);
+      const corona1 = new THREE.Mesh(
+        new THREE.RingGeometry(9.5, 14, 32),
+        new THREE.MeshBasicMaterial({
+          color: 0xf59e0b,
+          transparent: true,
+          opacity: isLight ? 0.25 : 0.38,
+          side: THREE.DoubleSide,
+        })
+      );
       sunGroup.add(corona1);
 
-      const ringGeo2 = new THREE.RingGeometry(12.5, 17, 32);
-      const ringMat2 = new THREE.MeshBasicMaterial({
-        color: 0xfb923c,
-        transparent: true,
-        opacity: isLight ? 0.16 : 0.22,
-        side: THREE.DoubleSide,
-      });
-      const corona2 = new THREE.Mesh(ringGeo2, ringMat2);
+      const corona2 = new THREE.Mesh(
+        new THREE.RingGeometry(15, 21, 32),
+        new THREE.MeshBasicMaterial({
+          color: 0xfb923c,
+          transparent: true,
+          opacity: isLight ? 0.15 : 0.2,
+          side: THREE.DoubleSide,
+        })
+      );
       sunGroup.add(corona2);
 
-      // 3. Floating warm solar dust particles
-      const dustCount = 60;
+      // Edge-to-edge floating warm golden dust
+      const dustCount = Math.max(90, Math.round(frustum.vWidth * 0.6));
       const dustGeo = new THREE.BufferGeometry();
       const dustPos = new Float32Array(dustCount * 3);
       for (let i = 0; i < dustCount; i++) {
-        dustPos[i * 3] = (Math.random() - 0.5) * 110;
-        dustPos[i * 3 + 1] = (Math.random() - 0.5) * 55;
-        dustPos[i * 3 + 2] = (Math.random() - 0.5) * 20;
+        dustPos[i * 3] = (Math.random() - 0.5) * (frustum.vWidth + 20);
+        dustPos[i * 3 + 1] = (Math.random() - 0.5) * (frustum.vHeight + 10);
+        dustPos[i * 3 + 2] = (Math.random() - 0.5) * 25;
       }
       dustGeo.setAttribute('position', new THREE.BufferAttribute(dustPos, 3));
       const dustMat = new THREE.PointsMaterial({
         size: 3.5,
         map: circleTexture,
         transparent: true,
-        opacity: isLight ? 0.35 : 0.5,
+        opacity: isLight ? 0.32 : 0.48,
         color: 0xfbbf24,
         depthWrite: false,
       });
@@ -463,63 +504,63 @@ export default function WeatherHero3DCanvas({
       rootGroup.add(dustPoints);
 
       updateFn = (elapsed) => {
-        corona1.rotation.z = elapsed * 0.15;
-        corona2.rotation.z = -elapsed * 0.1;
+        corona1.rotation.z = elapsed * 0.12;
+        corona2.rotation.z = -elapsed * 0.08;
         const pulse = Math.sin(elapsed * 2.0) * 0.08;
         sunCore.scale.set(1 + pulse, 1 + pulse, 1 + pulse);
 
-        // Slow warm upward dust float
         const pos = dustPoints.geometry.attributes.position.array;
+        const topLimit = frustum.halfH + 6;
         for (let i = 0; i < dustCount; i++) {
-          pos[i * 3 + 1] += 0.06;
-          if (pos[i * 3 + 1] > 26) pos[i * 3 + 1] = -26;
+          pos[i * 3 + 1] += 0.07;
+          if (pos[i * 3 + 1] > topLimit) pos[i * 3 + 1] = -frustum.halfH - 6;
         }
         dustPoints.geometry.attributes.position.needsUpdate = true;
       };
     }
 
     // ══════════════════════════════════════════════════════════════════════════
-    // E. CLEAR NIGHT MODE (3D Crescent Moon + Orbiting Starfield + Meteor)
+    // E. CLEAR NIGHT: LUMINOUS MOON & FULL-WIDTH COSMIC STARFIELD
     // ══════════════════════════════════════════════════════════════════════════
     else if (weatherMode === 'clear-night') {
       const moonGroup = new THREE.Group();
-      moonGroup.position.set(40, 10, -5);
+      moonGroup.position.set(frustum.halfW * 0.65, frustum.halfH * 0.25, -6);
       rootGroup.add(moonGroup);
 
-      // Luminous 3D Moon
-      const moonGeo = new THREE.SphereGeometry(6.5, 24, 24);
-      const moonMat = new THREE.MeshStandardMaterial({
-        color: 0xe2e8f0,
-        roughness: 0.8,
-        emissive: 0x94a3b8,
-        emissiveIntensity: 0.3,
-      });
-      const moon = new THREE.Mesh(moonGeo, moonMat);
+      const moon = new THREE.Mesh(
+        new THREE.SphereGeometry(7.5, 24, 24),
+        new THREE.MeshStandardMaterial({
+          color: 0xe2e8f0,
+          roughness: 0.8,
+          emissive: 0x94a3b8,
+          emissiveIntensity: 0.3,
+        })
+      );
       moonGroup.add(moon);
 
-      // Moon halo glow
-      const haloGeo = new THREE.RingGeometry(7.2, 11, 32);
-      const haloMat = new THREE.MeshBasicMaterial({
-        color: 0x38bdf8,
-        transparent: true,
-        opacity: 0.25,
-        side: THREE.DoubleSide,
-      });
-      const halo = new THREE.Mesh(haloGeo, haloMat);
+      const halo = new THREE.Mesh(
+        new THREE.RingGeometry(8.5, 13, 32),
+        new THREE.MeshBasicMaterial({
+          color: 0x38bdf8,
+          transparent: true,
+          opacity: 0.22,
+          side: THREE.DoubleSide,
+        })
+      );
       moonGroup.add(halo);
 
-      // Twinkling Starfield
-      const starCount = 100;
+      // Starfield across full card
+      const starCount = Math.max(130, Math.round(frustum.vWidth * 0.8));
       const starGeo = new THREE.BufferGeometry();
       const starPos = new Float32Array(starCount * 3);
       for (let i = 0; i < starCount; i++) {
-        starPos[i * 3] = (Math.random() - 0.5) * 130;
-        starPos[i * 3 + 1] = (Math.random() - 0.5) * 60;
+        starPos[i * 3] = (Math.random() - 0.5) * (frustum.vWidth + 20);
+        starPos[i * 3 + 1] = (Math.random() - 0.5) * (frustum.vHeight + 10);
         starPos[i * 3 + 2] = -15 + (Math.random() - 0.5) * 15;
       }
       starGeo.setAttribute('position', new THREE.BufferAttribute(starPos, 3));
       const starMat = new THREE.PointsMaterial({
-        size: 2.5,
+        size: 2.8,
         map: circleTexture,
         transparent: true,
         opacity: 0.75,
@@ -530,48 +571,54 @@ export default function WeatherHero3DCanvas({
       rootGroup.add(stars);
 
       updateFn = (elapsed) => {
-        halo.rotation.z = elapsed * 0.08;
+        halo.rotation.z = elapsed * 0.06;
         const pulse = (Math.sin(elapsed * 1.5) + 1) / 2;
-        halo.material.opacity = 0.18 + pulse * 0.12;
+        halo.material.opacity = 0.15 + pulse * 0.12;
       };
     }
 
     // ══════════════════════════════════════════════════════════════════════════
-    // F. CLOUDY / OVERCAST / FOG / WINDY MODE (Volumetric Drifting Clouds + Crepuscular Rays)
+    // F. CLOUDY / OVERCAST / FOG / WINDY: FULL-WIDTH VOLUMETRIC DRIFT & WIND
     // ══════════════════════════════════════════════════════════════════════════
     else {
       const cloudPuffs = [];
-      const puffGeo = new THREE.DodecahedronGeometry(7, 1);
+      const puffGeo = new THREE.DodecahedronGeometry(10, 1);
       const puffMat = new THREE.MeshStandardMaterial({
-        color: isLight ? 0xbfdbfe : (isDay ? 0x334155 : 0x1e293b),
-        roughness: 0.9,
-        metalness: 0.1,
+        color: isLight ? 0xbae6fd : (isDay ? 0x334155 : 0x1e293b),
+        roughness: 0.95,
+        metalness: 0.05,
         transparent: true,
-        opacity: isLight ? 0.45 : 0.5,
+        opacity: isLight ? 0.22 : 0.45,
       });
 
-      for (let i = 0; i < 8; i++) {
+      const puffCount = Math.max(20, Math.round(frustum.vWidth / 15));
+      const startX = -frustum.halfW - 20;
+      const stepX = (frustum.vWidth + 40) / puffCount;
+
+      for (let i = 0; i < puffCount; i++) {
         const puff = new THREE.Mesh(puffGeo, puffMat);
-        const x = -40 + i * 12 + (Math.random() - 0.5) * 6;
-        const y = 8 + (Math.random() - 0.5) * 8;
-        const z = -5 + (Math.random() - 0.5) * 10;
-        puff.position.set(x, y, z);
-        const s = 1.2 + Math.random() * 0.8;
-        puff.scale.set(s * 1.6, s, s);
+        const px = startX + i * stepX + (Math.random() - 0.5) * 10;
+        const py = frustum.halfH * 0.35 + (Math.random() - 0.5) * 10;
+        const pz = -6 + (Math.random() - 0.5) * 12;
+        puff.position.set(px, py, pz);
+
+        const s = 1.3 + Math.random() * 1.0;
+        puff.scale.set(s * 1.8, s, s);
         rootGroup.add(puff);
         cloudPuffs.push({ mesh: puff, speed: 0.02 + Math.random() * 0.02 });
       }
 
-      // Streamlined wind ribbons
+      // Streamlined wind ribbons across entire width
       const ribbons = [];
+      const boundX = frustum.halfW + 15;
       for (let r = 0; r < 3; r++) {
         const pts = [];
-        const baseY = -10 + r * 10;
-        for (let x = -60; x <= 60; x += 10) {
-          pts.push(new THREE.Vector3(x, baseY + Math.sin(x * 0.08 + r) * 3, -2));
+        const baseY = -frustum.halfH * 0.3 + r * 10;
+        for (let x = -boundX; x <= boundX; x += 15) {
+          pts.push(new THREE.Vector3(x, baseY + Math.sin(x * 0.06 + r) * 4, -2));
         }
         const curve = new THREE.CatmullRomCurve3(pts);
-        const tubeGeo = new THREE.TubeGeometry(curve, 32, 0.35, 6, false);
+        const tubeGeo = new THREE.TubeGeometry(curve, 48, 0.4, 6, false);
         const tubeMat = new THREE.MeshBasicMaterial({
           color: isLight ? 0x0284c7 : 0x38bdf8,
           transparent: true,
@@ -585,16 +632,16 @@ export default function WeatherHero3DCanvas({
       updateFn = (elapsed) => {
         cloudPuffs.forEach(({ mesh, speed }) => {
           mesh.position.x += speed;
-          if (mesh.position.x > 60) mesh.position.x = -60;
+          if (mesh.position.x > boundX) mesh.position.x = -boundX;
         });
 
         ribbons.forEach(({ mesh, offset }) => {
-          mesh.position.y = Math.sin(elapsed * 1.2 + offset) * 1.2;
+          mesh.position.y = Math.sin(elapsed * 1.2 + offset) * 1.4;
         });
       };
     }
 
-    // ─── 4. MOUSE PARALLAX RESPONSE ───
+    // ─── 4. SMOOTH MOUSE PARALLAX TILT ───
     let mouseX = 0;
     let mouseY = 0;
     let targetX = 0;
@@ -618,7 +665,6 @@ export default function WeatherHero3DCanvas({
       const elapsed = clock.getElapsedTime();
       const delta = clock.getDelta();
 
-      // Smooth parallax tilt
       mouseX += (targetX - mouseX) * 0.05;
       mouseY += (targetY - mouseY) * 0.05;
       rootGroup.rotation.y = mouseX * 0.04;
@@ -633,7 +679,7 @@ export default function WeatherHero3DCanvas({
 
     animate();
 
-    // ─── 6. RESIZE OBSERVER (Responsive to card size & sidebar toggle) ───
+    // ─── 6. RESIZE OBSERVER (Full responsiveness on card or sidebar resize) ───
     const ro = new ResizeObserver((entries) => {
       for (let entry of entries) {
         const cr = entry.contentRect;
@@ -643,6 +689,7 @@ export default function WeatherHero3DCanvas({
           camera.aspect = width / height;
           camera.updateProjectionMatrix();
           renderer.setSize(width, height);
+          frustum = calcFrustum(width, height);
         }
       }
     });
