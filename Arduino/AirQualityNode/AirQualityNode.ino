@@ -97,11 +97,15 @@ void handleSerialCommands() {
           Serial.print(".");
         }
         if (WiFi.status() == WL_CONNECTED) {
+          network.saveWiFiCredentials(newSsid, newPass);
           Serial.printf("\n{\"status\":\"PROVISIONED\",\"ip\":\"%s\"}\n", WiFi.localIP().toString().c_str());
         } else {
           Serial.println("\n{\"status\":\"WIFI_FAILED\",\"error\":\"Authentication timeout\"}");
         }
       }
+    } else if (input.indexOf("HOTSPOT") >= 0) {
+      Serial.println("{\"status\":\"HOTSPOT_ACTIVE\",\"ssid\":\"AirGuard-Setup\"}");
+      network.startCaptivePortal(180000UL);
     }
   }
 }
