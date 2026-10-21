@@ -111,6 +111,9 @@ export default function LoginView() {
         setSuccessMsg(res.message || `Password reset link has been dispatched to ${email}.`);
         setForgotEmailSent(true);
       } else if (mode === 'reset') {
+        if (!resetToken) {
+          throw new Error('Reset link is missing or expired. Please use the reset link sent to your registered email.');
+        }
         if (newPassword !== confirmPassword) {
           throw new Error('New passwords do not match.');
         }
@@ -393,23 +396,21 @@ export default function LoginView() {
                   </div>
                 )}
 
-                {/* RESET MODE: Token + New Password */}
+                {/* RESET MODE: Account Email + New Password */}
                 {mode === 'reset' && (
                   <>
                     <div className="login-field">
                       <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '6px' }}>
-                        <label className="login-label" style={{ marginBottom: 0 }}>Reset Token</label>
-                        {searchParams.get('token') && (
-                          <span className="login-token-badge">✓ Loaded from email link</span>
-                        )}
+                        <label className="login-label" style={{ marginBottom: 0 }}>Account Email</label>
+                        <span className="login-token-badge">✓ Verified Account</span>
                       </div>
                       <input
-                        type="text"
+                        type="email"
                         className="login-input"
-                        placeholder="Paste your reset token"
-                        value={resetToken}
-                        onChange={(e) => setResetToken(e.target.value)}
-                        required
+                        value={email || 'Registered User'}
+                        readOnly
+                        disabled
+                        style={{ cursor: 'not-allowed', opacity: 0.9, background: 'rgba(255, 255, 255, 0.05)' }}
                       />
                     </div>
 
