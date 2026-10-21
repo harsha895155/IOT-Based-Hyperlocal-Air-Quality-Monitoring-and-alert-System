@@ -2,7 +2,15 @@ import React, { useState, useMemo, useEffect } from 'react';
 import { useAuth } from '../context/AuthContext';
 import { formatTimeAgo } from '../hooks/useReadings';
 import { classifyAQI, healthRecommendation } from '../utils/aqi';
-import { playHighAlertSound } from '../utils/audioAlert';
+import {
+  SOUND_PROFILES,
+  getSelectedSound,
+  setSelectedSound,
+  getSoundVolume,
+  setSoundVolume,
+  playSoundProfile,
+  playHighAlertSound,
+} from '../utils/audioAlert';
 import './AlertsView.css';
 
 export default function AlertsView({
@@ -22,6 +30,8 @@ export default function AlertsView({
   const [audioEnabled, setAudioEnabled] = useState(() => {
     return localStorage.getItem('airguard_audio_alerts') === 'true';
   });
+  const [currentSound, setCurrentSound] = useState(() => getSelectedSound());
+  const [currentVolume, setCurrentVolume] = useState(() => getSoundVolume());
   const [showRulesConfig, setShowRulesConfig] = useState(false);
   const [toastMessage, setToastMessage] = useState(null);
   const [operatorNotes, setOperatorNotes] = useState(() => {
@@ -51,11 +61,24 @@ export default function AlertsView({
     setAudioEnabled(next);
     localStorage.setItem('airguard_audio_alerts', String(next));
     if (next) {
-      playHighAlertSound(true);
+      playSoundProfile(currentSound, true, currentVolume);
       showToast('🔊 High-decibel emergency audio siren enabled.');
     } else {
       showToast('🔇 Audio alert siren muted.');
     }
+  };
+
+  const handleSoundChange = (newSound) => {
+    setCurrentSound(newSound);
+    setSelectedSound(newSound);
+    playSoundProfile(newSound, true, currentVolume);
+    const profile = SOUND_PROFILES.find((p) => p.id === newSound);
+    showToast(`🔊 Alarm Sound changed to: ${profile?.name || newSound}`);
+  };
+
+  const handleVolumeChange = (newVol) => {
+    setCurrentVolume(newVol);
+    setSoundVolume(newVol);
   };
 
   const handleSaveRules = (e) => {
@@ -193,21 +216,52 @@ export default function AlertsView({
             onClick={toggleAudio}
             title={audioEnabled ? 'Mute alert siren' : 'Enable audio siren'}
           >
-            {audioEnabled ? '🔊 Audio Siren ON' : '🔇 Audio Muted'}
+            {audioEnabled ? '🔊 Siren ON' : '🔇 Muted'}
           </button>
+
+          {/* Quick Sound Selector */}
+          <div style={{ display: 'inline-flex', alignItems: 'center' }}>
+            <select
+              value={currentSound}
+              onChange={(e) => handleSoundChange(e.target.value)}
+              title="Change Alert Sound Profile"
+              style={{
+                background: 'rgba(255, 255, 255, 0.06)',
+                border: '1px solid rgba(56, 189, 248, 0.4)',
+                borderRadius: '8px',
+                color: '#38bdf8',
+                fontWeight: 600,
+                padding: '7px 10px',
+                fontSize: '0.8rem',
+                cursor: 'pointer',
+              }}
+            >
+              {SOUND_PROFILES.map((p) => (
+                <option key={p.id} value={p.id} style={{ background: '#0f172a', color: '#f1f5f9' }}>
+                  {p.icon} {p.name}
+                </option>
+              ))}
+            </select>
+          </div>
+
           <button
             className="btn-secondary"
             onClick={() => {
-              playHighAlertSound(true);
-              showToast('🚨 Playing High-Decibel Emergency Siren...');
+              playSoundProfile(currentSound, true, currentVolume);
+              const p = SOUND_PROFILES.find((s) => s.id === currentSound);
+              showToast(`🚨 Playing: ${p?.name || currentSound} (Volume: ${Math.round(currentVolume * 100)}%)`);
             }}
-            title="Test the high-frequency emergency alarm sound"
+            title="Test the currently selected alarm sound"
             style={{ borderColor: 'rgba(239, 68, 68, 0.4)', color: '#f87171' }}
           >
             🚨 Test Siren
           </button>
-          <button className="btn-secondary" onClick={() => setShowRulesConfig(!showRulesConfig)}>
-            ⚙️ Alert Rules
+          <button 
+            className={`btn-secondary ${showRulesConfig ? 'active' : ''}`} 
+            onClick={() => setShowRulesConfig(!showRulesConfig)}
+            title="Configure Sound Volume & Pollution Trigger Rules"
+          >
+            ⚙️ Sound & Rules
           </button>
           <button className="btn-secondary" onClick={handleExportCSV}>
             ⬇ Export (.csv)
@@ -338,6 +392,74 @@ export default function AlertsView({
             <button type="submit" className="btn-primary" style={{ padding: '6px 16px', fontSize: '0.8rem' }}>
               Save Trigger Rules
             </button>
+          </div>
+
+          {/* Audio Alarm Sound Profile & Volume Controls */}
+          <div style={{ marginTop: '18px', paddingTop: '16px', borderTop: '1px solid rgba(255, 255, 255, 0.08)' }}>
+            <div style={{ fontSize: '0.82rem', fontWeight: 700, color: '#38bdf8', marginBottom: '12px', display: 'flex', alignItems: 'center', gap: '6px' }}>
+              <span>🔊</span> Emergency Alarm Sound & High Volume Settings
+            </div>
+
+            <div className="rules-inputs-grid">
+              <div className="rules-field">
+                <label className="rules-label">Alarm Sound Profile</label>
+                <select
+                  className="rules-input"
+                  value={currentSound}
+                  onChange={(e) => handleSoundChange(e.target.value)}
+                  style={{ cursor: 'pointer' }}
+                >
+                  {SOUND_PROFILES.map((p) => (
+                    <option key={p.id} value={p.id}>
+                      {p.icon} {p.name}
+                    </option>
+                  ))}
+                </select>
+                <span className="fs-xs text-muted">
+                  {SOUND_PROFILES.find((p) => p.id === currentSound)?.description}
+                </span>
+              </div>
+
+              <div className="rules-field">
+                <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
+                  <label className="rules-label">Alarm Volume</label>
+                  <span style={{ fontSize: '0.78rem', color: '#00d2b4', fontWeight: 700 }}>
+                    {Math.round(currentVolume * 100)}% {currentVolume >= 0.8 ? '(Loud / High)' : ''}
+                  </span>
+                </div>
+                <input
+                  type="range"
+                  min="0.15"
+                  max="1.0"
+                  step="0.05"
+                  value={currentVolume}
+                  onChange={(e) => handleVolumeChange(Number(e.target.value))}
+                  style={{ cursor: 'pointer', accentColor: '#00d2b4', marginTop: '6px', height: '6px' }}
+                />
+                <span className="fs-xs text-muted">Slide to 80%–100% for maximum loud alert</span>
+              </div>
+
+              <div className="rules-field" style={{ justifyContent: 'center' }}>
+                <label className="rules-label">Sound Test & Preview</label>
+                <button
+                  type="button"
+                  className="btn-secondary"
+                  onClick={() => playSoundProfile(currentSound, true, currentVolume)}
+                  style={{
+                    padding: '8px 14px',
+                    fontSize: '0.82rem',
+                    borderColor: 'rgba(239, 68, 68, 0.4)',
+                    color: '#f87171',
+                    display: 'inline-flex',
+                    alignItems: 'center',
+                    gap: '6px',
+                  }}
+                >
+                  ▶ Test Current Sound ({SOUND_PROFILES.find((p) => p.id === currentSound)?.name.split(' ')[0]})
+                </button>
+                <span className="fs-xs text-muted">Tests chosen sound at selected volume</span>
+              </div>
+            </div>
           </div>
         </form>
       )}
