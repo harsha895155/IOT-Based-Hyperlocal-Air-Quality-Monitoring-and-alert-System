@@ -1,7 +1,9 @@
 const Reading = require('../models/Reading');
 const Alert = require('../models/Alert');
+const User = require('../models/User');
 const { Device } = require('../models/Device');
 const { classifyAQI, requiresAlert, healthRecommendation } = require('../utils/aqi');
+const { sendAirQualityAlertEmail } = require('../services/emailService');
 
 // 30-minute alert deduplication window for continuous conditions
 const ALERT_DEDUPLICATION_WINDOW_MS = 30 * 60 * 1000;
@@ -67,10 +69,14 @@ async function createReading(req, res, next) {
     device.latestReading = reading._id;
     await device.save();
 
-    // 3. Alert deduplication & occurrence counting (R7)
+    // 3. Alert deduplication & multi-channel dispatching with CAP-v1.2 Protocols (R7)
     let alert = null;
     if (requiresAlert(airQuality)) {
       const windowStart = new Date(Date.now() - ALERT_DEDUPLICATION_WINDOW_MS);
+
+      // Map severity per ITU-T X.1303 CAP protocol
+      const severity = airQuality > 300 ? 'Extreme' : airQuality > 200 ? 'Severe' : airQuality > 100 ? 'Warning' : 'Notice';
+      const headline = `${category} Air Quality (AQI ${airQuality}) at ${device.name || device.location}`;
 
       // Find an active (unacknowledged) alert for this device & category within the deduplication window
       const existingAlert = await Alert.findOne({
@@ -80,14 +86,19 @@ async function createReading(req, res, next) {
         createdAt: { $gte: windowStart },
       }).sort({ createdAt: -1 });
 
+      let isNewAlert = false;
+
       if (existingAlert) {
         existingAlert.seenCount = (existingAlert.seenCount || 1) + 1;
         existingAlert.lastSeen = now;
         existingAlert.airQuality = airQuality;
         existingAlert.reading = reading._id;
+        existingAlert.severity = severity;
+        existingAlert.headline = headline;
         await existingAlert.save();
         alert = existingAlert;
       } else {
+        isNewAlert = true;
         alert = await Alert.create({
           deviceId: device.deviceId,
           location: device.location || 'GIST Campus',
@@ -98,13 +109,78 @@ async function createReading(req, res, next) {
           seenCount: 1,
           lastSeen: now,
           acknowledged: false,
+          severity,
+          headline,
+          urgency: 'Immediate',
+          certainty: 'Observed',
+          protocol: 'CAP-v1.2',
+          coordinates: {
+            lat: device.coordinates?.lat || null,
+            lng: device.coordinates?.lng || null,
+          },
+          channelsDelivered: ['websocket'],
         });
       }
 
-      // Real-time push for alert
+      // Real-time push for alert (WebSocket Protocol with Scoped Rooms)
       const io = req.app.get('io');
       if (io) {
         io.emit('alert', alert);
+        if (device.userId) {
+          io.to(`user_${device.userId}`).emit('alert', alert);
+        }
+        io.to(`device_${device.deviceId}`).emit('alert', alert);
+      }
+
+      // Multi-channel dispatch (SMTP Email Protocol) on new exceedance or severe spike
+      if (isNewAlert && device.userId) {
+        User.findById(device.userId)
+          .select('email name preferences')
+          .then((owner) => {
+            if (owner && owner.email && owner.preferences?.emailAlerts !== false) {
+              const userThreshold = owner.preferences?.aqiWarnThreshold || 100;
+              if (airQuality >= userThreshold) {
+                sendAirQualityAlertEmail({
+                  to: owner.email,
+                  name: owner.name,
+                  deviceName: device.name,
+                  location: device.location,
+                  aqi: airQuality,
+                  category,
+                  gasPPM: reading.gasPPM,
+                  temperature: reading.temperature,
+                  humidity: reading.humidity,
+                  message: alert.message,
+                  severity,
+                })
+                  .then(() => {
+                    Alert.findByIdAndUpdate(alert._id, { $addToSet: { channelsDelivered: 'email' } }).catch(() => {});
+                  })
+                  .catch((mailErr) => {
+                    console.error('[Alert Engine] Async email dispatch notice:', mailErr.message);
+                  });
+              }
+            }
+          })
+          .catch((uErr) => console.warn('[Alert Engine] User lookup notice:', uErr.message));
+      }
+
+      // Webhook dispatch if configured in environment (REST Protocol)
+      if (isNewAlert && process.env.ALERT_WEBHOOK_URL) {
+        fetch(process.env.ALERT_WEBHOOK_URL, {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({
+            event: 'AIR_QUALITY_ALERT',
+            protocol: 'CAP-v1.2',
+            timestamp: now.toISOString(),
+            alert,
+          }),
+        })
+          .then(() => {
+            Alert.findByIdAndUpdate(alert._id, { $addToSet: { channelsDelivered: 'webhook' } }).catch(() => {});
+          })
+          .catch(() => {});
       }
     }
 

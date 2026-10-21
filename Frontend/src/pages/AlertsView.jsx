@@ -517,6 +517,16 @@ export default function AlertsView({
                     <span className="meta-pill">
                       🔄 seen {seenCount}×
                     </span>
+                    {alert.severity && (
+                      <span className="meta-pill" style={{ borderColor: 'rgba(239, 68, 68, 0.4)', color: isHazardous ? '#f87171' : isCritical ? '#fb923c' : '#38bdf8' }}>
+                        🛡️ CAP: {alert.severity}
+                      </span>
+                    )}
+                    {Array.isArray(alert.channelsDelivered) && alert.channelsDelivered.length > 0 && (
+                      <span className="meta-pill" title="Protocols & channels used for alert dispatch">
+                        📡 Delivered: {alert.channelsDelivered.map((c) => (c === 'websocket' ? 'WebSocket' : c === 'email' ? 'SMTP' : c)).join(', ')}
+                      </span>
+                    )}
                     {alert.lastSeen && alert.createdAt !== alert.lastSeen && (
                       <span className="meta-pill">
                         First logged: {new Date(alert.createdAt).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })}

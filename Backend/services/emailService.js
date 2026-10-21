@@ -369,6 +369,123 @@ Official Mailbox: ${senderEmail}
   }
 }
 
+/**
+ * Dispatches a high-priority environmental exceedance email alert to a device owner.
+ * Follows industry emergency alerting formatting (color-coded, actionable recommendations).
+ */
+async function sendAirQualityAlertEmail({ to, name, deviceName, location, aqi, category, gasPPM, temperature, humidity, message, severity }) {
+  const senderEmail = process.env.EMAIL_FROM || process.env.EMAIL_USER || 'airguard396@gmail.com';
+  const from = `"AirGuard Alert System" <${senderEmail}>`;
+
+  const isExtreme = aqi > 300 || severity === 'Extreme';
+  const isSevere = aqi > 200 || severity === 'Severe';
+  const badgeColor = isExtreme ? '#b91c1c' : isSevere ? '#c2410c' : '#d97706';
+  const badgeText = isExtreme ? 'HAZARDOUS AIR QUALITY' : isSevere ? 'VERY UNHEALTHY' : 'UNHEALTHY AIR';
+
+  const subject = `🚨 [${badgeText}] AQI ${aqi} Alert at ${deviceName || location}`;
+  const appUrl = (process.env.APP_URL || 'https://airguard-hyperlocal.vercel.app').replace(/\/$/, '');
+
+  const htmlContent = `
+    <!DOCTYPE html>
+    <html>
+    <head>
+      <meta charset="utf-8">
+      <meta name="viewport" content="width=device-width, initial-scale=1.0">
+      <title>AirGuard Environmental Alert</title>
+      <style>
+        body { font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif; background-color: #0b1120; color: #f8fafc; margin: 0; padding: 0; }
+        .container { max-width: 600px; margin: 24px auto; background: #0f172a; border: 1px solid rgba(239, 68, 68, 0.35); border-radius: 16px; overflow: hidden; box-shadow: 0 20px 40px rgba(0, 0, 0, 0.6); }
+        .banner { background: ${badgeColor}; padding: 24px; text-align: center; }
+        .banner h1 { color: #ffffff; font-size: 22px; margin: 0 0 6px 0; font-weight: 800; letter-spacing: 0.04em; }
+        .banner p { color: rgba(255, 255, 255, 0.9); margin: 0; font-size: 13px; font-weight: 600; text-transform: uppercase; }
+        .content { padding: 28px 24px; }
+        .metric-card { background: rgba(15, 23, 42, 0.8); border: 1px solid rgba(255, 255, 255, 0.1); border-radius: 14px; padding: 18px; margin: 18px 0; text-align: center; }
+        .metric-val { font-size: 48px; font-weight: 800; color: ${badgeColor}; line-height: 1; margin-bottom: 6px; }
+        .metric-lbl { font-size: 12px; font-weight: 700; color: #94a3b8; text-transform: uppercase; letter-spacing: 0.08em; }
+        .grid { display: table; width: 100%; margin: 16px 0; }
+        .grid-col { display: table-cell; width: 33.3%; text-align: center; padding: 10px; background: rgba(255, 255, 255, 0.03); border-radius: 10px; }
+        .advisory { background: rgba(239, 68, 68, 0.08); border-left: 4px solid ${badgeColor}; padding: 14px 16px; border-radius: 0 10px 10px 0; margin: 20px 0; font-size: 14px; line-height: 1.5; color: #fecaca; }
+        .btn { display: inline-block; background: linear-gradient(135deg, #0284c7 0%, #00d2b4 100%); color: #ffffff !important; padding: 14px 28px; border-radius: 10px; text-decoration: none; font-weight: 700; font-size: 15px; margin-top: 14px; }
+        .footer { padding: 18px; text-align: center; font-size: 12px; color: #64748b; border-top: 1px solid rgba(255, 255, 255, 0.06); }
+      </style>
+    </head>
+    <body>
+      <div class="container">
+        <div class="banner">
+          <h1>🚨 ${badgeText}</h1>
+          <p>Station: ${deviceName || 'AirGuard Sensing Node'} &bull; ${location || 'Monitored Facility'}</p>
+        </div>
+        <div class="content">
+          <p style="font-size: 15px; color: #e2e8f0; margin-top: 0;">
+            Hello <strong>${name || 'Resident'}</strong>, an air quality threshold exceedance was recorded by your physical AirGuard monitoring station.
+          </p>
+          <div class="metric-card">
+            <div class="metric-val">${aqi}</div>
+            <div class="metric-lbl">Air Quality Index (${category})</div>
+          </div>
+          <div class="grid">
+            <div class="grid-col">
+              <strong style="color:#f8fafc; font-size: 16px;">${gasPPM != null ? gasPPM + ' ppm' : 'N/A'}</strong><br>
+              <span style="font-size: 11px; color: #94a3b8;">GAS POLLUTION</span>
+            </div>
+            <div class="grid-col" style="border-left: 4px solid #0f172a; border-right: 4px solid #0f172a;">
+              <strong style="color:#f8fafc; font-size: 16px;">${temperature != null ? temperature + '°C' : 'N/A'}</strong><br>
+              <span style="font-size: 11px; color: #94a3b8;">TEMPERATURE</span>
+            </div>
+            <div class="grid-col">
+              <strong style="color:#f8fafc; font-size: 16px;">${humidity != null ? humidity + '%' : 'N/A'}</strong><br>
+              <span style="font-size: 11px; color: #94a3b8;">HUMIDITY</span>
+            </div>
+          </div>
+          <div class="advisory">
+            <strong>⚠️ Health Advisory:</strong><br>
+            ${message || 'Elevated pollutant concentrations detected. Sensitive individuals and children should stay indoors with windows closed.'}
+          </div>
+          <div style="text-align: center; margin: 24px 0 10px;">
+            <a href="${appUrl}/dashboard" class="btn">View Live Telemetry Dashboard →</a>
+          </div>
+        </div>
+        <div class="footer">
+          AirGuard Hyperlocal Air Quality Intelligence &bull; Standardized CAP v1.2 Telemetry
+        </div>
+      </div>
+    </body>
+    </html>
+  `;
+
+  const textContent = `🚨 [${badgeText}] AirGuard Alert: AQI ${aqi} (${category}) detected at ${deviceName || location}. Advisory: ${message}. View dashboard: ${appUrl}/dashboard`;
+
+  const mailPayload = {
+    from,
+    to,
+    subject,
+    text: textContent,
+    html: htmlContent,
+    headers: {
+      'X-Priority': '1',
+      'X-MSMail-Priority': 'High',
+      'Importance': 'High',
+    },
+  };
+
+  // Try direct SMTP first
+  const transporter = getTransporter();
+  if (transporter) {
+    try {
+      const info = await transporter.sendMail(mailPayload);
+      console.log(`[AlertService] ✅ Alert email dispatched to ${to} (Message ID: ${info.messageId})`);
+      return { success: true, delivered: true, messageId: info.messageId };
+    } catch (smtpErr) {
+      console.warn(`[AlertService] Direct SMTP failed (${smtpErr.message}). Trying HTTPS relay...`);
+    }
+  }
+
+  // Fallback over Vercel HTTPS relay
+  return await trySendViaVercelRelay(mailPayload);
+}
+
 module.exports = {
   sendPasswordResetEmail,
+  sendAirQualityAlertEmail,
 };
+

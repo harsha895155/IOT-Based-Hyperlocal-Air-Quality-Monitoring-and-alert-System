@@ -256,6 +256,43 @@ export function useReadings() {
     const onAlert = (alert) => {
       setConnected(true);
       setAlerts((prev) => [alert, ...prev.filter((a) => a._id !== alert._id)].slice(0, 100));
+
+      // 1. Synthesize audio chime via Web Audio API
+      try {
+        if (localStorage.getItem('airguard_audio_alerts') !== 'false') {
+          const AudioContext = window.AudioContext || window.webkitAudioContext;
+          if (AudioContext) {
+            const ctx = new AudioContext();
+            const now = ctx.currentTime;
+            const osc = ctx.createOscillator();
+            const gain = ctx.createGain();
+            osc.type = 'sine';
+            osc.frequency.setValueAtTime(880, now);
+            osc.frequency.setValueAtTime(1174.66, now + 0.15);
+            gain.gain.setValueAtTime(0.12, now);
+            gain.gain.exponentialRampToValueAtTime(0.001, now + 0.35);
+            osc.connect(gain);
+            gain.connect(ctx.destination);
+            osc.start(now);
+            osc.stop(now + 0.35);
+          }
+        }
+      } catch (e) {}
+
+      // 2. Dispatch native OS desktop notification (W3C Web Notification API)
+      try {
+        if (typeof window !== 'undefined' && 'Notification' in window) {
+          if (Notification.permission === 'granted') {
+            new Notification(`🚨 AirGuard: ${alert.category || 'Air Quality Alert'} (AQI ${alert.airQuality})`, {
+              body: `${alert.location || alert.deviceId}: ${alert.message || 'Pollution threshold exceeded.'}`,
+              icon: '/favicon.ico',
+              tag: `airguard-alert-${alert._id || alert.deviceId}`,
+            });
+          } else if (Notification.permission === 'default') {
+            Notification.requestPermission().catch(() => {});
+          }
+        }
+      } catch (e) {}
     };
 
     const onDeviceDeleted = ({ deviceId: deletedId }) => {

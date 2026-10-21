@@ -41,6 +41,40 @@ const alertSchema = new mongoose.Schema(
       default: false,
       index: true,
     },
+    // Standard CAP (Common Alerting Protocol - ITU-T X.1303) fields
+    protocol: {
+      type: String,
+      default: 'CAP-v1.2',
+    },
+    severity: {
+      type: String,
+      enum: ['Notice', 'Warning', 'Severe', 'Extreme'],
+      default: 'Warning',
+    },
+    urgency: {
+      type: String,
+      default: 'Immediate',
+    },
+    certainty: {
+      type: String,
+      default: 'Observed',
+    },
+    event: {
+      type: String,
+      default: 'Air Quality Exceedance',
+    },
+    headline: {
+      type: String,
+      default: '',
+    },
+    coordinates: {
+      lat: { type: Number, default: null },
+      lng: { type: Number, default: null },
+    },
+    channelsDelivered: {
+      type: [String],
+      default: ['websocket'], // 'websocket', 'email', 'webhook', 'push'
+    },
   },
   {
     timestamps: true,
