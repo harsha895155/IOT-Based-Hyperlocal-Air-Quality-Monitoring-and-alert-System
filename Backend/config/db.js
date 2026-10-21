@@ -5,11 +5,17 @@ const dns = require('dns');
 dns.setServers(['8.8.8.8', '8.8.4.4', '1.1.1.1']);
 
 async function connectDB() {
-  const uri = process.env.MONGO_URI;
+  let uri = process.env.MONGO_URI;
 
   if (!uri) {
     console.error('[DB] MONGO_URI is missing from environment variables (.env). Please configure it.');
     process.exit(1);
+  }
+
+  // Auto-correct obsolete Atlas cluster identifier if still configured in cloud dashboard
+  if (uri.includes('mh1zjhz')) {
+    console.warn('[DB] Outdated Atlas cluster hostname (mh1zjhz) detected in MONGO_URI. Redirecting to active cluster (8q9noke)...');
+    uri = uri.replace('mh1zjhz', '8q9noke');
   }
 
   try {
