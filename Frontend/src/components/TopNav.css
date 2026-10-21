@@ -392,8 +392,9 @@
 
 /* ─── Light Mode TopNav Polish ─── */
 [data-theme='light'] .topnav {
-  background: rgba(255, 255, 255, 0.92);
-  border-bottom-color: #e2e8f0;
+  background: rgba(255, 255, 255, 0.94);
+  border-bottom: 1px solid rgba(148, 163, 184, 0.4);
+  box-shadow: 0 1px 0 0 rgba(16, 185, 129, 0.18), 0 3px 16px rgba(139, 92, 246, 0.08);
 }
 
 [data-theme='light'] .topnav__user-chip {

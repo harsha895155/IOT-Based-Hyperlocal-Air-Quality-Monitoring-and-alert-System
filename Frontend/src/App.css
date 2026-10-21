@@ -6,6 +6,29 @@
   background: var(--bg-gradient, var(--bg));
 }
 
+[data-theme='light'] .app-layout {
+  background:
+    radial-gradient(circle at 12% 15%, rgba(16, 185, 129, 0.18) 0%, transparent 45%),
+    radial-gradient(circle at 88% 18%, rgba(139, 92, 246, 0.18) 0%, transparent 50%),
+    radial-gradient(circle at 45% 85%, rgba(16, 185, 129, 0.14) 0%, transparent 55%),
+    radial-gradient(circle at 82% 82%, rgba(139, 92, 246, 0.16) 0%, transparent 50%),
+    linear-gradient(180deg, #f8fafc 0%, #f1f5f9 100%);
+  background-size: 140% 140%;
+  animation: ambientBgShift 24s ease-in-out infinite alternate;
+}
+
+@keyframes ambientBgShift {
+  0% {
+    background-position: 0% 0%;
+  }
+  50% {
+    background-position: 100% 50%;
+  }
+  100% {
+    background-position: 50% 100%;
+  }
+}
+
 .app-main {
   flex: 1;
   display: flex;
@@ -24,4 +47,5 @@
   position: relative;
   z-index: 1;
 }
+
 
