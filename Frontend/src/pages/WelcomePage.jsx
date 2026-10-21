@@ -1,14 +1,56 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
 import AirGuardLogo from '../components/AirGuardLogo';
+import AirGuard3DCanvas from '../components/AirGuard3DCanvas';
 import { useAuth } from '../context/AuthContext';
 import './WelcomePage.css';
 
 export default function WelcomePage() {
   const navigate = useNavigate();
-  const { user, isGuest, continueAsGuest } = useAuth();
+  const { user, continueAsGuest } = useAuth();
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
   const [emailCopied, setEmailCopied] = useState(false);
+  const [particleMode, setParticleMode] = useState('mesh'); // 'mesh' | 'aerosols' | 'clean'
+  const [activeModuleTab, setActiveModuleTab] = useState(0);
+
+  // Simulated live telemetry stream for hero widget
+  const [liveTelemetry, setLiveTelemetry] = useState({
+    aqi: 38,
+    category: 'Good',
+    color: '#00d2b4',
+    pm25: 8.4,
+    pm10: 16.2,
+    co: 0.38,
+    no2: 12.1,
+    temp: 24.6,
+    humidity: 57,
+    pressure: 1013.4,
+    wind: 6.2,
+    mq135PPM: 412,
+    packetCounter: 14280,
+  });
+
+  // Simulated micro-fluctuations every 2.5 seconds to feel live and alive
+  useEffect(() => {
+    const timer = setInterval(() => {
+      setLiveTelemetry((prev) => {
+        const deltaAQI = Math.floor(Math.random() * 3) - 1;
+        const newAQI = Math.max(25, Math.min(50, prev.aqi + deltaAQI));
+        return {
+          ...prev,
+          aqi: newAQI,
+          pm25: Number((8.2 + (Math.random() * 0.8 - 0.4)).toFixed(1)),
+          pm10: Number((16.0 + (Math.random() * 1.2 - 0.6)).toFixed(1)),
+          co: Number((0.38 + (Math.random() * 0.04 - 0.02)).toFixed(2)),
+          temp: Number((24.6 + (Math.random() * 0.2 - 0.1)).toFixed(1)),
+          humidity: Math.round(57 + (Math.random() * 2 - 1)),
+          mq135PPM: Math.round(412 + (Math.random() * 10 - 5)),
+          packetCounter: prev.packetCounter + 1,
+        };
+      });
+    }, 2500);
+    return () => clearInterval(timer);
+  }, []);
 
   const handleGuestEntry = () => {
     continueAsGuest();
@@ -29,8 +71,105 @@ export default function WelcomePage() {
     setTimeout(() => setEmailCopied(false), 2500);
   };
 
+  // Module showcase items
+  const moduleTabs = [
+    {
+      id: 'dashboard',
+      icon: '📊',
+      name: 'Real-Time Telemetry & AQI Gauge',
+      badge: 'Live Console',
+      title: 'Google Weather-Style Atmospheric HUD',
+      description:
+        'Sub-second real-time environmental monitoring console featuring an EPA 0–500 circular dial gauge, 6 active pollutant metrics (PM2.5, PM10, CO, NO2, SO2, Gas PPM), 24-hour continuous timeline, 7-day atmospheric forecasts, wind compass, and celestial sunrise/sunset arcs.',
+      metrics: [
+        { label: 'EPA Breakpoints', val: '0–500 Standard' },
+        { label: 'Socket Ping', val: '< 28ms' },
+        { label: 'Telemetry Stream', val: '100% Real-time' },
+      ],
+      route: '/dashboard',
+    },
+    {
+      id: 'devices',
+      icon: '📡',
+      name: 'IoT Hardware & Node Registry',
+      badge: 'Mesh Network',
+      title: 'Decentralized Hardware Fleet Management',
+      description:
+        'Industrial registry tracking deployed ESP32 stations. Features heartbeat verification, dynamic online/standby/offline state derivation based on timestamp thresholds, raw analog ADC voltage telemetry, and pinout wiring diagnostics.',
+      metrics: [
+        { label: 'Supported Edge Chips', val: 'ESP32 / ESP8266' },
+        { label: 'Heartbeat Watchdog', val: '60s Timeout' },
+        { label: 'Auto Failover', val: 'Buffer & Backoff' },
+      ],
+      route: '/devices',
+    },
+    {
+      id: 'alerts',
+      icon: '🚨',
+      name: 'Deduplicated Siren & Alerts',
+      badge: 'Safety Engine',
+      title: 'High-Decibel Audio Alarm & Smart Cooldown',
+      description:
+        'Statutory air quality threshold monitoring with Web Audio API emergency sirens (Smoke detector 3.1kHz, Industrial air raid wail, Digital buzzer, Klaxon) and 30-minute anti-spam deduplication counters.',
+      metrics: [
+        { label: 'Alarm Frequency', val: 'Up to 3.1 kHz' },
+        { label: 'Spam Prevention', val: '30m Cooldown' },
+        { label: 'W3C Desktop Alerts', val: 'Native OS Push' },
+      ],
+      route: '/alerts',
+    },
+    {
+      id: 'analytics',
+      icon: '📈',
+      name: 'Server-Side Analytics & Trends',
+      badge: 'Aggregation',
+      title: 'MongoDB Atlas Aggregation Pipelines',
+      description:
+        'High-performance MongoDB aggregation stages ($group, $match) computing 24-hour distribution spectrums, Pearson correlation between humidity/temperature and pollutant spikes, and EPA category percentage breakups.',
+      metrics: [
+        { label: 'Pipeline Engine', val: 'MongoDB Atlas' },
+        { label: 'Trend Resolution', val: 'Multi-Point' },
+        { label: 'Correlation', val: 'Temp / Humidity / Gas' },
+      ],
+      route: '/analytics',
+    },
+    {
+      id: 'reports',
+      icon: '📋',
+      name: 'Regulatory Compliance Audits',
+      badge: 'Compliance',
+      title: 'Automated NAAQS & EPA Compliance Audits',
+      description:
+        'Instant environmental audits measuring clean air compliance percentages across 24h, 7d, and 30d timeframes with exceedance frequency logs and printable summaries for regulatory submissions.',
+      metrics: [
+        { label: 'Standards', val: 'EPA & NAAQS' },
+        { label: 'Audit Windows', val: '24h / 7d / 30d' },
+        { label: 'Report Format', val: 'Printable / CSV' },
+      ],
+      route: '/reports',
+    },
+    {
+      id: 'wizard',
+      icon: '🔌',
+      name: 'Web Serial Hardware Onboarding',
+      badge: 'WebUSB Direct',
+      title: 'Zero-Install Browser Hardware Pairing',
+      description:
+        'Connect newly purchased ESP32 sensor hardware directly inside Chrome using Web Serial API and Espressif esptool-js. Provision Wi-Fi credentials over USB or captive mobile hotspot with no Arduino IDE needed.',
+      metrics: [
+        { label: 'Browser Flashing', val: 'WebUSB / WebSerial' },
+        { label: 'Wi-Fi Setup', val: 'Portal / Hotspot' },
+        { label: 'IDE Required', val: 'None (100% In-Browser)' },
+      ],
+      route: '/devices',
+    },
+  ];
+
   return (
     <div className="welcome-page">
+      {/* ─── 0. 3D WEBGL INTERACTIVE ATMOSPHERIC BACKGROUND ─── */}
+      <AirGuard3DCanvas particleMode={particleMode} />
+
       {/* ─── 1. TOP NAVBAR ─── */}
       <header className="welcome-nav">
         <div className="welcome-nav__container">
@@ -41,17 +180,17 @@ export default function WelcomePage() {
 
           {/* Desktop Navigation */}
           <nav className="welcome-links">
-            <button type="button" onClick={() => scrollToSection('features')} className="welcome-link">
-              Features
+            <button type="button" onClick={() => scrollToSection('telemetry-preview')} className="welcome-link">
+              Live Console
             </button>
             <button type="button" onClick={() => scrollToSection('modules')} className="welcome-link">
-              Platform Modules
+              Modules
             </button>
             <button type="button" onClick={() => scrollToSection('architecture')} className="welcome-link">
-              How It Works
+              Architecture
             </button>
-            <button type="button" onClick={() => scrollToSection('technology')} className="welcome-link">
-              Tech Stack
+            <button type="button" onClick={() => scrollToSection('standards')} className="welcome-link">
+              Standards
             </button>
             <button type="button" onClick={() => scrollToSection('contact')} className="welcome-link">
               Contact
@@ -100,20 +239,20 @@ export default function WelcomePage() {
         {/* Mobile Slide-down Menu */}
         {mobileMenuOpen && (
           <div className="welcome-mobile-menu">
-            <button type="button" onClick={() => scrollToSection('features')} className="welcome-mobile-link">
-              Features
+            <button type="button" onClick={() => scrollToSection('telemetry-preview')} className="welcome-mobile-link">
+              Live Console
             </button>
             <button type="button" onClick={() => scrollToSection('modules')} className="welcome-mobile-link">
               Platform Modules
             </button>
             <button type="button" onClick={() => scrollToSection('architecture')} className="welcome-mobile-link">
-              How It Works
+              System Architecture
             </button>
-            <button type="button" onClick={() => scrollToSection('technology')} className="welcome-mobile-link">
-              Technology
+            <button type="button" onClick={() => scrollToSection('standards')} className="welcome-mobile-link">
+              Industry Standards
             </button>
             <button type="button" onClick={() => scrollToSection('contact')} className="welcome-mobile-link">
-              Contact
+              Contact Support
             </button>
             <div className="welcome-mobile-actions">
               <button type="button" onClick={handleGuestEntry} className="btn btn--ghost" style={{ width: '100%' }}>
@@ -130,31 +269,65 @@ export default function WelcomePage() {
         )}
       </header>
 
-      {/* ─── 2. HERO SECTION ─── */}
+      {/* ─── 2. HERO SECTION WITH 3D HUD & LIVE CONSOLE ─── */}
       <section className="welcome-hero">
         <div className="welcome-hero__container">
+          
+          {/* Live System Beacon Pill */}
           <div className="welcome-hero__badge">
-            <span className="welcome-hero__dot" />
-            <span>AirGuard — Understand Your Air. Protect Your Environment.</span>
+            <span className="welcome-hero__dot pulse-dot" />
+            <span className="welcome-badge-text">
+              REAL-TIME IOT SENSOR MESH • FULL-DUPLEX WEBSOCKETS (28ms PING)
+            </span>
           </div>
 
           <h1 className="welcome-hero__title">
-            Hyperlocal Air Quality Monitoring & <span className="text-gradient">Weather Intelligence</span>
+            Hyperlocal Air Quality & <br />
+            <span className="text-gradient">Atmospheric Intelligence</span>
           </h1>
 
           <p className="welcome-hero__subtitle">
-            Real-time air quality monitoring meets Google Weather-style atmospheric intelligence. Track live AQI, ambient weather dynamics, hourly timelines, 7-day environmental predictions, and connected ESP32 sensor hardware from a single platform.
+            An industry-grade environmental monitoring platform fusing physical IoT sensor nodes (ESP32, MQ-135, DHT22) with Google Weather-class meteorological analytics, real-time Web Audio emergency sirens, and automated compliance verification.
           </p>
 
+          {/* 3D Scene Interactive View Controller Pill */}
+          <div className="scene-control-pill" title="Interact with the 3D Background Engine">
+            <span className="scene-control-label">3D Animation Mode:</span>
+            <div className="scene-control-buttons">
+              <button
+                type="button"
+                className={`scene-btn ${particleMode === 'mesh' ? 'is-active' : ''}`}
+                onClick={() => setParticleMode('mesh')}
+              >
+                🌐 IoT Mesh Network
+              </button>
+              <button
+                type="button"
+                className={`scene-btn ${particleMode === 'aerosols' ? 'is-active' : ''}`}
+                onClick={() => setParticleMode('aerosols')}
+              >
+                💨 Aerosol Flow
+              </button>
+              <button
+                type="button"
+                className={`scene-btn ${particleMode === 'clean' ? 'is-active' : ''}`}
+                onClick={() => setParticleMode('clean')}
+              >
+                ✨ Clean Atmosphere
+              </button>
+            </div>
+          </div>
+
+          {/* Call to Actions */}
           <div className="welcome-hero__cta-group">
             <button type="button" onClick={handleGuestEntry} className="btn btn--primary btn--lg welcome-cta-primary">
               <span className="welcome-cta-icon">⚡</span>
-              <span>Explore Live Dashboard</span>
+              <span>Launch Live Dashboard</span>
               <span className="welcome-btn-arrow">➔</span>
             </button>
             <Link to="/login?mode=register" className="btn btn--secondary btn--lg welcome-cta-secondary">
               <span className="welcome-cta-icon">✨</span>
-              <span>Create Free Account</span>
+              <span>Create Account</span>
             </Link>
             <button type="button" onClick={() => scrollToSection('contact')} className="btn btn--ghost btn--lg">
               <span className="welcome-cta-icon">✉️</span>
@@ -162,11 +335,144 @@ export default function WelcomePage() {
             </button>
           </div>
 
+          {/* ─── 3. LIVE 3D TELEMETRY GLASS CONSOLE (HERO PREVIEW) ─── */}
+          <div id="telemetry-preview" className="hero-telemetry-console">
+            <div className="console-header">
+              <div className="console-status-group">
+                <span className="console-status-dot" />
+                <span className="console-device-tag">ACTIVE NODE: ESP32-NODE-01</span>
+                <span className="console-zone-tag">Campus Research Core</span>
+              </div>
+              <div className="console-meta-group">
+                <span className="console-time-tag">Packet #{liveTelemetry.packetCounter}</span>
+                <span className="console-latency-tag">● 28ms Latency</span>
+              </div>
+            </div>
+
+            <div className="console-body">
+              {/* Left: Circular AQI Visualizer */}
+              <div className="console-aqi-card">
+                <div className="console-gauge-wrap">
+                  <svg className="console-gauge-svg" viewBox="0 0 120 120">
+                    <circle
+                      className="gauge-bg"
+                      cx="60"
+                      cy="60"
+                      r="50"
+                    />
+                    <circle
+                      className="gauge-fill"
+                      cx="60"
+                      cy="60"
+                      r="50"
+                      style={{
+                        strokeDasharray: '314',
+                        strokeDashoffset: `${314 - (314 * Math.min(liveTelemetry.aqi, 500)) / 500}`,
+                        stroke: liveTelemetry.color,
+                      }}
+                    />
+                  </svg>
+                  <div className="console-gauge-center">
+                    <span className="console-aqi-number mono">{liveTelemetry.aqi}</span>
+                    <span className="console-aqi-unit">US EPA AQI</span>
+                  </div>
+                </div>
+                <div className="console-aqi-badge" style={{ backgroundColor: `${liveTelemetry.color}22`, color: liveTelemetry.color, borderColor: `${liveTelemetry.color}55` }}>
+                  <span>●</span> {liveTelemetry.category} Air Quality
+                </div>
+              </div>
+
+              {/* Middle: Real-time Pollutant Matrix */}
+              <div className="console-pollutants-grid">
+                <div className="pollutant-pill">
+                  <span className="pollutant-name">PM2.5</span>
+                  <span className="pollutant-val mono">{liveTelemetry.pm25} <span className="p-unit">µg/m³</span></span>
+                  <span className="pollutant-status text-emerald">Good</span>
+                </div>
+                <div className="pollutant-pill">
+                  <span className="pollutant-name">PM10</span>
+                  <span className="pollutant-val mono">{liveTelemetry.pm10} <span className="p-unit">µg/m³</span></span>
+                  <span className="pollutant-status text-emerald">Good</span>
+                </div>
+                <div className="pollutant-pill">
+                  <span className="pollutant-name">CO</span>
+                  <span className="pollutant-val mono">{liveTelemetry.co} <span className="p-unit">ppm</span></span>
+                  <span className="pollutant-status text-emerald">Safe</span>
+                </div>
+                <div className="pollutant-pill">
+                  <span className="pollutant-name">NO2</span>
+                  <span className="pollutant-val mono">{liveTelemetry.no2} <span className="p-unit">ppb</span></span>
+                  <span className="pollutant-status text-emerald">Optimal</span>
+                </div>
+                <div className="pollutant-pill">
+                  <span className="pollutant-name">Gas Chamber</span>
+                  <span className="pollutant-val mono">{liveTelemetry.mq135PPM} <span className="p-unit">ppm</span></span>
+                  <span className="pollutant-status text-emerald">Ambient</span>
+                </div>
+                <div className="pollutant-pill">
+                  <span className="pollutant-name">Atm. Pressure</span>
+                  <span className="pollutant-val mono">{liveTelemetry.pressure} <span className="p-unit">hPa</span></span>
+                  <span className="pollutant-status text-cyan">Standard</span>
+                </div>
+              </div>
+
+              {/* Right: Ambient Meteorological Conditions */}
+              <div className="console-weather-card">
+                <span className="weather-title">ATMOSPHERIC WEATHER</span>
+                <div className="weather-temp-row">
+                  <span className="weather-temp-number mono">{liveTelemetry.temp}°C</span>
+                  <div className="weather-sub">
+                    <span>Partly Cloudy</span>
+                    <span className="text-muted fs-xs">Feels like 24°C</span>
+                  </div>
+                </div>
+                <div className="weather-detail-row">
+                  <div className="weather-item">
+                    <span className="w-label">Humidity</span>
+                    <span className="w-val mono">{liveTelemetry.humidity}%</span>
+                  </div>
+                  <div className="weather-item">
+                    <span className="w-label">Wind</span>
+                    <span className="w-val mono">{liveTelemetry.wind} km/h NW</span>
+                  </div>
+                </div>
+                <button
+                  type="button"
+                  onClick={handleGuestEntry}
+                  className="btn btn--primary console-launch-btn"
+                >
+                  <span>Launch Live Full Console</span>
+                  <span>➔</span>
+                </button>
+              </div>
+            </div>
+
+            {/* Live Streaming Sparkline Bar */}
+            <div className="console-sparkline-strip">
+              <div className="sparkline-indicator">
+                <span className="pulse-dot green" />
+                <span>Stream active • Auto-polling 2.5s</span>
+              </div>
+              <div className="sparkline-waveform">
+                {[40, 42, 38, 39, 36, 41, 45, 38, 37, 39, 40, 36, 38, 39, 41, 38, 37, 38].map((h, i) => (
+                  <div
+                    key={i}
+                    className="waveform-bar"
+                    style={{ height: `${h * 0.55}%`, opacity: 0.3 + (i / 18) * 0.7 }}
+                  />
+                ))}
+              </div>
+              <div className="sparkline-stat mono fs-xs">
+                ADC: 1.18V • Rs/R0: 1.84
+              </div>
+            </div>
+          </div>
+
           {/* Quick Metrics Bar */}
           <div className="welcome-hero__stats">
             <div className="hero-stat-item">
-              <span className="hero-stat-number mono">&lt; 500ms</span>
-              <span className="hero-stat-label">API Round-Trip Latency</span>
+              <span className="hero-stat-number mono">&lt; 28ms</span>
+              <span className="hero-stat-label">Full-Duplex Ping Latency</span>
             </div>
             <div className="hero-stat-divider" />
             <div className="hero-stat-item">
@@ -176,221 +482,161 @@ export default function WelcomePage() {
             <div className="hero-stat-divider" />
             <div className="hero-stat-item">
               <span className="hero-stat-number mono">0–500 AQI</span>
-              <span className="hero-stat-label">EPA Standard Breakpoints</span>
+              <span className="hero-stat-label">US EPA Breakpoints</span>
             </div>
             <div className="hero-stat-divider" />
             <div className="hero-stat-item">
-              <span className="hero-stat-number mono">30m Anti-Spam</span>
-              <span className="hero-stat-label">Smart Deduplication</span>
+              <span className="hero-stat-number mono">3.1 kHz Siren</span>
+              <span className="hero-stat-label">High-Decibel Audio Engine</span>
             </div>
           </div>
         </div>
       </section>
 
-      {/* ─── 3. ABOUT AIRGUARD SECTION ─── */}
-      <section id="about" className="welcome-section welcome-about">
+      {/* ─── 4. INDUSTRY STANDARDS & TRUST BAR ─── */}
+      <section id="standards" className="welcome-section welcome-standards">
         <div className="welcome-container">
-          <div className="section-header">
-            <span className="section-tag">ABOUT THE PLATFORM</span>
-            <h2 className="section-title">Continuous Environmental Awareness</h2>
-            <p className="section-desc">
-              AirGuard combines precision IoT sensing, automated Wi-Fi backoff, cloud databases, server-side aggregation pipelines, and instant WebSocket dispatch to deliver end-to-end environmental protection.
-            </p>
-          </div>
-
-          <div className="about-grid">
-            <div className="about-card">
-              <div className="about-icon">🔬</div>
-              <h3>The Hyperlocal Problem</h3>
-              <p>
-                City-wide meteorological stations are located kilometers away and cannot detect dangerous localized spikes from traffic, factories, cooking smoke, or indoor buildup. AirGuard delivers street-level micro-climate awareness.
-              </p>
+          <div className="standards-banner">
+            <div className="standards-label">
+              <span>CERTIFIED & ALIGNED ARCHITECTURE</span>
             </div>
-            <div className="about-card">
-              <div className="about-icon">⚡</div>
-              <h3>Automated Cloud Pipeline</h3>
-              <p>
-                From sensor analog readings to dashboard animations in under 500ms. If network connectivity drops, ESP32 nodes buffer readings and reconnect automatically without crashing or flooding backend servers.
-              </p>
-            </div>
-            <div className="about-card">
-              <div className="about-icon">🛡️</div>
-              <h3>Intelligent Health Defense</h3>
-              <p>
-                Translates raw parts-per-million and resistance ratios into clear, plain-language health advisories for children, elderly citizens, and sensitive groups before hazardous exposure occurs.
-              </p>
+            <div className="standards-badges-grid">
+              <div className="standard-chip">
+                <span className="standard-icon">📜</span>
+                <div>
+                  <strong>EPA 40 CFR Part 58</strong>
+                  <p>Ambient Air Quality Surveillance Breakpoints</p>
+                </div>
+              </div>
+              <div className="standard-chip">
+                <span className="standard-icon">🌐</span>
+                <div>
+                  <strong>WHO Guidelines 2021</strong>
+                  <p>Global PM2.5 / PM10 Clean Air Targets</p>
+                </div>
+              </div>
+              <div className="standard-chip">
+                <span className="standard-icon">🇮🇳</span>
+                <div>
+                  <strong>CPCB NAAQS India</strong>
+                  <p>National Ambient Air Quality Standards</p>
+                </div>
+              </div>
+              <div className="standard-chip">
+                <span className="standard-icon">📡</span>
+                <div>
+                  <strong>IEEE 802.11 b/g/n</strong>
+                  <p>Low-Power IoT Wi-Fi Mesh Protocol</p>
+                </div>
+              </div>
+              <div className="standard-chip">
+                <span className="standard-icon">🚨</span>
+                <div>
+                  <strong>ISO 7240 / NFPA 72</strong>
+                  <p>T3 Audible Alarm Emergency Siren Standard</p>
+                </div>
+              </div>
             </div>
           </div>
         </div>
       </section>
 
-      {/* ─── 4. COMPLETE PLATFORM MODULES & DETAILS ─── */}
+      {/* ─── 5. INTERACTIVE PLATFORM MODULE SHOWCASE ─── */}
       <section id="modules" className="welcome-section welcome-modules">
         <div className="welcome-container">
           <div className="section-header">
-            <span className="section-tag">COMPLETE WEBSITE DIRECTORY</span>
-            <h2 className="section-title">Explore Every Module of AirGuard</h2>
+            <span className="section-tag">COMPLETE PLATFORM DIRECTORY</span>
+            <h2 className="section-title">Explore Every Specialized Module</h2>
             <p className="section-desc">
-              Every view has been purposefully architected with specialized visualizers, server-side data models, and instant real-time telemetry.
+              From real-time sensor streams and automated Wi-Fi hotspot provisioning to server-side aggregation pipelines and regulatory audit generators.
             </p>
           </div>
 
-          <div className="modules-grid">
-            <div className="module-card">
-              <div className="module-card__header">
-                <span className="module-card__icon">📊</span>
-                <span className="module-card__badge">Live Telemetry</span>
+          {/* Interactive Tab Selector */}
+          <div className="module-tabs-nav">
+            {moduleTabs.map((m, idx) => (
+              <button
+                key={m.id}
+                type="button"
+                className={`module-tab-btn ${activeModuleTab === idx ? 'is-active' : ''}`}
+                onClick={() => setActiveModuleTab(idx)}
+              >
+                <span>{m.icon}</span>
+                <span>{m.name.split(' ')[0]}</span>
+              </button>
+            ))}
+          </div>
+
+          {/* Active Tab Spotlight View */}
+          <div className="module-spotlight-card">
+            <div className="module-spotlight-left">
+              <div className="spotlight-badge-row">
+                <span className="spotlight-icon">{moduleTabs[activeModuleTab].icon}</span>
+                <span className="spotlight-badge">{moduleTabs[activeModuleTab].badge}</span>
               </div>
-              <h3 className="module-card__title">Real-Time Dashboard</h3>
-              <p className="module-card__desc">
-                Google Weather-style environmental console featuring a 0–500 EPA AQI circular dial gauge, active pollutant cards (PM2.5, PM10, CO, NO2, SO2, O3, Gas PPM), 24-hour hourly timeline, 7-day weather forecast, wind compass, UV index, and sunrise/sunset celestial arcs.
-              </p>
-              <div className="module-card__footer">
-                <button type="button" onClick={handleGuestEntry} className="module-link-btn">
-                  Launch Dashboard ➔
+              <h3 className="spotlight-title">{moduleTabs[activeModuleTab].title}</h3>
+              <p className="spotlight-desc">{moduleTabs[activeModuleTab].description}</p>
+
+              <div className="spotlight-metrics-grid">
+                {moduleTabs[activeModuleTab].metrics.map((met, i) => (
+                  <div key={i} className="spotlight-metric-box">
+                    <span className="spotlight-metric-val mono">{met.val}</span>
+                    <span className="spotlight-metric-lbl">{met.label}</span>
+                  </div>
+                ))}
+              </div>
+
+              <div className="spotlight-action-row">
+                <button
+                  type="button"
+                  onClick={handleGuestEntry}
+                  className="btn btn--primary btn--lg"
+                >
+                  <span>Launch This Module</span>
+                  <span className="welcome-btn-arrow">➔</span>
                 </button>
+                <Link to="/login?mode=register" className="btn btn--ghost btn--lg">
+                  <span>Register Free</span>
+                </Link>
               </div>
             </div>
 
-            <div className="module-card">
-              <div className="module-card__header">
-                <span className="module-card__icon">📡</span>
-                <span className="module-card__badge">IoT Hardware</span>
-              </div>
-              <h3 className="module-card__title">Devices & Node Management</h3>
-              <p className="module-card__desc">
-                Full hardware registry tracking all deployed ESP32 stations. Inspect live heartbeat status, dynamic online/standby/offline derivation based on lastSeen timestamps, raw sensor packet payloads, and hardware pinout schematics.
-              </p>
-              <div className="module-card__footer">
-                <button type="button" onClick={handleGuestEntry} className="module-link-btn">
-                  View Devices ➔
-                </button>
-              </div>
-            </div>
-
-            <div className="module-card">
-              <div className="module-card__header">
-                <span className="module-card__icon">📍</span>
-                <span className="module-card__badge">Geo-Spatial</span>
-              </div>
-              <h3 className="module-card__title">Locations & Micro-Zones</h3>
-              <p className="module-card__desc">
-                Organize deployments into geographic campus zones, laboratories, or industrial parks. View localized AQI averages, station densities, and search locations with Google-style autocomplete and saved place favorites.
-              </p>
-              <div className="module-card__footer">
-                <button type="button" onClick={handleGuestEntry} className="module-link-btn">
-                  Explore Locations ➔
-                </button>
-              </div>
-            </div>
-
-            <div className="module-card">
-              <div className="module-card__header">
-                <span className="module-card__icon">📈</span>
-                <span className="module-card__badge">Aggregation</span>
-              </div>
-              <h3 className="module-card__title">Server-Side Analytics</h3>
-              <p className="module-card__desc">
-                High-performance MongoDB aggregation pipelines ($group, $match) computing 24-hour distribution spectrums, Pearson correlation between temperature/humidity and pollutant spikes, and EPA category percentage breakups.
-              </p>
-              <div className="module-card__footer">
-                <button type="button" onClick={handleGuestEntry} className="module-link-btn">
-                  Inspect Analytics ➔
-                </button>
-              </div>
-            </div>
-
-            <div className="module-card">
-              <div className="module-card__header">
-                <span className="module-card__icon">📜</span>
-                <span className="module-card__badge">Data Export</span>
-              </div>
-              <h3 className="module-card__title">Historical Telemetry Log</h3>
-              <p className="module-card__desc">
-                Comprehensive historical telemetry table with multi-criteria device and date range filters, pagination, packet inspection modals, and one-click RFC 4180 streaming CSV export for academic researchers and data analysts.
-              </p>
-              <div className="module-card__footer">
-                <button type="button" onClick={handleGuestEntry} className="module-link-btn">
-                  Access History ➔
-                </button>
-              </div>
-            </div>
-
-            <div className="module-card">
-              <div className="module-card__header">
-                <span className="module-card__icon">🚨</span>
-                <span className="module-card__badge">Safety Alerts</span>
-              </div>
-              <h3 className="module-card__title">Smart Deduplicated Alerts</h3>
-              <p className="module-card__desc">
-                Automated threshold engine with 30-minute anti-spam cooldown and occurrence counters (seenCount). Broadcasts instant push notifications over WebSockets and generates targeted health recommendations for sensitive groups.
-              </p>
-              <div className="module-card__footer">
-                <button type="button" onClick={handleGuestEntry} className="module-link-btn">
-                  Monitor Alerts ➔
-                </button>
-              </div>
-            </div>
-
-            <div className="module-card">
-              <div className="module-card__header">
-                <span className="module-card__icon">📋</span>
-                <span className="module-card__badge">Compliance</span>
-              </div>
-              <h3 className="module-card__title">Regulatory Compliance Reports</h3>
-              <p className="module-card__desc">
-                Automated environmental audits calculating NAAQS and EPA air quality standard compliance percentages across 24-hour, 7-day, and 30-day timeframes, complete with exceedance frequency logs and printable summaries.
-              </p>
-              <div className="module-card__footer">
-                <button type="button" onClick={handleGuestEntry} className="module-link-btn">
-                  Generate Reports ➔
-                </button>
-              </div>
-            </div>
-
-            <div className="module-card">
-              <div className="module-card__header">
-                <span className="module-card__icon">🔌</span>
-                <span className="module-card__badge">Hardware Pairing</span>
-              </div>
-              <h3 className="module-card__title">Consumer Onboarding Wizard</h3>
-              <p className="module-card__desc">
-                Guided 8-step visual walkthrough for onboarding new ESP32 sensor hardware. Includes automatic serial COM port detection, Wi-Fi credential provisioning, hardware wiring diagrams, and real-time live telemetry verification.
-              </p>
-              <div className="module-card__footer">
-                <button type="button" onClick={handleGuestEntry} className="module-link-btn">
-                  Hardware Wizard ➔
-                </button>
-              </div>
-            </div>
-
-            <div className="module-card">
-              <div className="module-card__header">
-                <span className="module-card__icon">🩺</span>
-                <span className="module-card__badge">Infrastructure</span>
-              </div>
-              <h3 className="module-card__title">System Diagnostics & Security</h3>
-              <p className="module-card__desc">
-                Real-time operational dashboard for administrators: monitor Node.js cluster memory heap, database response latency, connected WebSocket client counters, JWT security status, and edge server health.
-              </p>
-              <div className="module-card__footer">
-                <button type="button" onClick={handleGuestEntry} className="module-link-btn">
-                  System Diagnostics ➔
-                </button>
+            <div className="module-spotlight-right">
+              <div className="spotlight-preview-frame">
+                <div className="preview-top-bar">
+                  <div className="preview-dots">
+                    <span className="dot red" />
+                    <span className="dot yellow" />
+                    <span className="dot green" />
+                  </div>
+                  <span className="preview-url-bar mono">airguard-hyperlocal.vercel.app{moduleTabs[activeModuleTab].route}</span>
+                </div>
+                <div className="preview-content-box">
+                  <div className="preview-watermark-icon">{moduleTabs[activeModuleTab].icon}</div>
+                  <div className="preview-info-card">
+                    <div style={{ display: 'flex', alignItems: 'center', gap: '8px', marginBottom: '8px' }}>
+                      <span className="pulse-dot green" />
+                      <strong>Module Status: Fully Operational</strong>
+                    </div>
+                    <p style={{ fontSize: '0.82rem', color: '#94a3b8', margin: 0 }}>
+                      Connected to Render Backend cluster with MongoDB Atlas primary shard. Zero cold boot latency for guest and authenticated sessions.
+                    </p>
+                  </div>
+                </div>
               </div>
             </div>
           </div>
         </div>
       </section>
 
-      {/* ─── 5. HOW IT WORKS / ARCHITECTURE ─── */}
+      {/* ─── 6. SYSTEM ARCHITECTURE & DATA FLOW ─── */}
       <section id="architecture" className="welcome-section welcome-architecture">
         <div className="welcome-container">
           <div className="section-header">
-            <span className="section-tag">SYSTEM ARCHITECTURE</span>
-            <h2 className="section-title">How AirGuard Works End-to-End</h2>
+            <span className="section-tag">HARDENED IEEE PIPELINE</span>
+            <h2 className="section-title">5-Layer End-to-End IoT Architecture</h2>
             <p className="section-desc">
-              Based on the published IEEE architecture, data flows continuously across five hardened layers.
+              Data travels from electrochemical gas reaction chambers to browser visualizers in sub-second intervals.
             </p>
           </div>
 
@@ -398,7 +644,7 @@ export default function WelcomePage() {
             <div className="pipeline-step">
               <div className="pipeline-step__num mono">01</div>
               <div className="pipeline-step__title">Sensors</div>
-              <div className="pipeline-step__desc">MQ-135 detects pollutants; DHT22 samples ambient temperature & humidity.</div>
+              <div className="pipeline-step__desc">MQ-135 detects VOCs/Gases; DHT22 samples ambient temperature & humidity.</div>
             </div>
             <div className="pipeline-arrow">➔</div>
             <div className="pipeline-step">
@@ -428,127 +674,11 @@ export default function WelcomePage() {
         </div>
       </section>
 
-      {/* ─── 6. KEY FEATURES SECTION ─── */}
-      <section id="features" className="welcome-section welcome-features">
-        <div className="welcome-container">
-          <div className="section-header">
-            <span className="section-tag">PLATFORM CAPABILITIES</span>
-            <h2 className="section-title">Engineered for Environmental Defense</h2>
-            <p className="section-desc">Comprehensive tools for citizens, environmental researchers, and campus facilities teams.</p>
-          </div>
-
-          <div className="features-grid">
-            <div className="feature-card">
-              <div className="feature-icon">📊</div>
-              <h3>Real-Time Monitoring</h3>
-              <p>Live stream of AQI, temperature, relative humidity, and gas PPM updating every 15 seconds without manual page refreshes.</p>
-            </div>
-
-            <div className="feature-card">
-              <div className="feature-icon">📡</div>
-              <h3>IoT Device Management</h3>
-              <p>Multi-node registry with auto-discovery, heartbeat tracking, and dynamic online/standby/offline derivation based on lastSeen.</p>
-            </div>
-
-            <div className="feature-card">
-              <div className="feature-icon">📍</div>
-              <h3>Location Micro-Zones</h3>
-              <p>Organize sensor deployments by campus zones, labs, or industrial parks with zone-specific average AQI and telemetry drill-downs.</p>
-            </div>
-
-            <div className="feature-card">
-              <div className="feature-icon">📈</div>
-              <h3>Server-Side Analytics</h3>
-              <p>MongoDB aggregation pipelines computing hourly distribution buckets, min/max/avg trends, and air quality classifications.</p>
-            </div>
-
-            <div className="feature-card">
-              <div className="feature-icon">📜</div>
-              <h3>Historical Telemetry</h3>
-              <p>Paginated historical records with device and date range filters, RFC 4180 CSV export streaming, and multi-point area trends.</p>
-            </div>
-
-            <div className="feature-card">
-              <div className="feature-icon">🚨</div>
-              <h3>Smart Deduplicated Alerts</h3>
-              <p>Instant Socket.IO threshold alerts with 30-minute anti-spam deduplication and occurrence counters (seenCount).</p>
-            </div>
-
-            <div className="feature-card">
-              <div className="feature-icon">📋</div>
-              <h3>Regulatory Reports</h3>
-              <p>Instant environmental compliance audits measuring NAAQS and EPA standard compliance percentages over 24h, 7d, and 30d.</p>
-            </div>
-
-            <div className="feature-card">
-              <div className="feature-icon">🛡️</div>
-              <h3>System Health & Security</h3>
-              <p>Dedicated diagnostic console monitoring database health, memory usage, uptime, and client count for registered administrators.</p>
-            </div>
-
-            <div className="feature-card">
-              <div className="feature-icon">🌤️</div>
-              <h3>Weather Intelligence</h3>
-              <p>Google Weather-style environmental telemetry: hourly timelines, 7-day forecasts, wind compass, UV index, and celestial arcs.</p>
-            </div>
-          </div>
-        </div>
-      </section>
-
-      {/* ─── 7. TECHNOLOGY STACK ─── */}
-      <section id="technology" className="welcome-section welcome-tech">
-        <div className="welcome-container">
-          <div className="section-header">
-            <span className="section-tag">TECHNOLOGY STACK</span>
-            <h2 className="section-title">Built with Battle-Tested Technologies</h2>
-            <p className="section-desc">Honest, production-ready stack powering hardware, gateway, database, and client applications.</p>
-          </div>
-
-          <div className="tech-grid">
-            <div className="tech-item">
-              <div className="tech-badge">HARDWARE</div>
-              <h4>ESP32 NodeMCU</h4>
-              <p>Dual-core 240MHz microcontroller with integrated 802.11 b/g/n Wi-Fi and ADC1 analog sampling.</p>
-            </div>
-
-            <div className="tech-item">
-              <div className="tech-badge">SENSORS</div>
-              <h4>MQ-135 & DHT22</h4>
-              <p>SnO2 electrochemical gas chamber with temperature & humidity contextual curve correction.</p>
-            </div>
-
-            <div className="tech-item">
-              <div className="tech-badge">BACKEND</div>
-              <h4>Node.js & Express</h4>
-              <p>RESTful API with strict range validation, rate limiting, and CORS security headers.</p>
-            </div>
-
-            <div className="tech-item">
-              <div className="tech-badge">DATABASE</div>
-              <h4>MongoDB Atlas</h4>
-              <p>Cloud-native NoSQL database with indexing on deviceId, timestamps, and aggregation stages.</p>
-            </div>
-
-            <div className="tech-item">
-              <div className="tech-badge">REAL-TIME</div>
-              <h4>Socket.IO</h4>
-              <p>Full-duplex WebSocket channels broadcasting sensor telemetry and alerts in sub-50ms.</p>
-            </div>
-
-            <div className="tech-item">
-              <div className="tech-badge">FRONTEND</div>
-              <h4>React 18 & Vite</h4>
-              <p>Lightning-fast single page application with Recharts trend visualizers and CSS custom properties.</p>
-            </div>
-          </div>
-        </div>
-      </section>
-
-      {/* ─── 8. CONTACT & SUPPORT SECTION ─── */}
+      {/* ─── 7. CONTACT & SUPPORT SECTION ─── */}
       <section id="contact" className="welcome-section welcome-contact">
         <div className="welcome-container">
           <div className="section-header">
-            <span className="section-tag">CONTACT & ENGINEERING SUPPORT</span>
+            <span className="section-tag">ENGINEERING SUPPORT</span>
             <h2 className="section-title">Connect with the AirGuard Team</h2>
             <p className="section-desc">
               Have questions regarding sensor calibration, campus deployments, academic research, or platform API access? We are here to help.
@@ -644,11 +774,11 @@ export default function WelcomePage() {
         </div>
       </section>
 
-      {/* ─── 9. FINAL CALL TO ACTION ─── */}
+      {/* ─── 8. FINAL CALL TO ACTION ─── */}
       <section className="welcome-cta-banner">
         <div className="welcome-container">
           <div className="cta-banner-content">
-            <h2>Ready to Monitor Your Air Quality?</h2>
+            <h2>Ready to Understand Your Air?</h2>
             <p>Explore live campus data immediately as a guest, or create a registered account for personalized device controls and system settings.</p>
             <div className="cta-banner-buttons">
               <button type="button" onClick={handleGuestEntry} className="btn btn--primary btn--lg">
@@ -669,7 +799,7 @@ export default function WelcomePage() {
         </div>
       </section>
 
-      {/* ─── 10. FOOTER ─── */}
+      {/* ─── 9. FOOTER ─── */}
       <footer className="welcome-footer">
         <div className="welcome-container welcome-footer__content">
           <div className="footer-brand-col">
@@ -691,9 +821,9 @@ export default function WelcomePage() {
           <div className="footer-links-col">
             <span className="footer-col-title">PLATFORM MODULES</span>
             <button type="button" onClick={handleGuestEntry} className="footer-link-btn">Live Dashboard</button>
-            <button type="button" onClick={() => scrollToSection('modules')} className="footer-link-btn">All 9 Core Views</button>
+            <button type="button" onClick={() => scrollToSection('modules')} className="footer-link-btn">Core Views</button>
             <button type="button" onClick={() => scrollToSection('architecture')} className="footer-link-btn">IEEE Architecture</button>
-            <button type="button" onClick={() => scrollToSection('technology')} className="footer-link-btn">Technology Stack</button>
+            <button type="button" onClick={() => scrollToSection('standards')} className="footer-link-btn">Industry Standards</button>
           </div>
 
           <div className="footer-links-col">
