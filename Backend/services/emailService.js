@@ -25,7 +25,13 @@ function getTransporter() {
   // Gmail configuration for airguard396@gmail.com
   if (emailPass) {
     return nodemailer.createTransport({
-      service: 'gmail',
+      host: 'smtp.gmail.com',
+      port: 465,
+      secure: true,
+      family: 4, // Enforce IPv4 on cloud hosts (avoids IPv6 connection hang on Render/Docker)
+      connectionTimeout: 8000,
+      greetingTimeout: 5000,
+      socketTimeout: 10000,
       auth: {
         user: emailUser,
         pass: emailPass,
@@ -250,20 +256,60 @@ Official Mailbox: ${senderEmail}
     };
   }
 
-  const info = await transporter.sendMail({
+  const mailPayload = {
     from,
     to,
     subject,
     text: textContent,
     html: htmlContent,
-  });
-
-  console.log(`[EmailService] ✅ Password reset email successfully dispatched to ${to} (Message ID: ${info.messageId})`);
-  return {
-    success: true,
-    delivered: true,
-    messageId: info.messageId,
   };
+
+  try {
+    const info = await transporter.sendMail(mailPayload);
+    console.log(`[EmailService] ✅ Password reset email successfully dispatched to ${to} (Message ID: ${info.messageId})`);
+    return {
+      success: true,
+      delivered: true,
+      messageId: info.messageId,
+    };
+  } catch (primaryErr) {
+    console.warn(`[EmailService] ⚠️ Primary SMTP delivery failed (${primaryErr.message}). Attempting port 587 fallback...`);
+    try {
+      const emailUser = (process.env.EMAIL_USER || process.env.SMTP_USER || 'airguard396@gmail.com').trim();
+      const rawPass = process.env.EMAIL_PASS || process.env.GMAIL_APP_PASSWORD || process.env.SMTP_PASS || '';
+      const emailPass = rawPass.replace(/\s+/g, '').trim();
+
+      const fallbackTransporter = nodemailer.createTransport({
+        host: 'smtp.gmail.com',
+        port: 587,
+        secure: false,
+        requireTLS: true,
+        family: 4,
+        connectionTimeout: 8000,
+        greetingTimeout: 5000,
+        socketTimeout: 10000,
+        auth: {
+          user: emailUser,
+          pass: emailPass,
+        },
+      });
+
+      const fallbackInfo = await fallbackTransporter.sendMail(mailPayload);
+      console.log(`[EmailService] ✅ Password reset email dispatched via port 587 to ${to} (Message ID: ${fallbackInfo.messageId})`);
+      return {
+        success: true,
+        delivered: true,
+        messageId: fallbackInfo.messageId,
+      };
+    } catch (fallbackErr) {
+      console.error(`[EmailService] ❌ Both SMTP ports failed to send to ${to}:`, fallbackErr.message);
+      return {
+        success: false,
+        delivered: false,
+        error: fallbackErr.message,
+      };
+    }
+  }
 }
 
 module.exports = {

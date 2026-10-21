@@ -207,11 +207,14 @@ async function forgotPassword(req, res, next) {
     const resetUrl = `${clientOrigin}/login?token=${rawResetToken}&email=${encodeURIComponent(user.email)}`;
 
     // Dispatch branded email via website mail (airguard396@gmail.com)
-    await sendPasswordResetEmail({
+    // Runs cleanly in background with fallback so HTTP response completes in milliseconds without freezing UI
+    sendPasswordResetEmail({
       to: user.email,
       name: user.name,
       resetToken: rawResetToken,
       resetUrl,
+    }).catch((emailErr) => {
+      console.error('[Auth] Password reset email dispatch failed:', emailErr.message);
     });
 
     res.json({
