@@ -287,17 +287,6 @@ export default function LoginView() {
                 >
                   {loading ? 'Resending...' : '🔄 Resend Email'}
                 </button>
-
-                <button
-                  type="button"
-                  className="btn btn--ghost login-manual-token-btn"
-                  onClick={() => {
-                    setForgotEmailSent(false);
-                    setMode('reset');
-                  }}
-                >
-                  🔑 Have a Reset Token? Enter Manually
-                </button>
               </div>
             </div>
           ) : (
