@@ -756,3 +756,36 @@
     grid-template-columns: 1fr;
   }
 }
+
+/* ─── Light Mode Profile Polish ─── */
+[data-theme='light'] .profile-hero-card {
+  background: linear-gradient(135deg, #ffffff 0%, #f0f9ff 50%, #f0fdf4 100%);
+  border-color: #e2e8f0;
+  box-shadow: 0 1px 3px rgba(15, 23, 42, 0.04);
+}
+
+[data-theme='light'] .profile-card {
+  background: #ffffff;
+  border-color: #e2e8f0;
+}
+
+[data-theme='light'] .profile-input {
+  background: #ffffff;
+  border-color: #cbd5e1;
+  color: #0f172a;
+}
+
+[data-theme='light'] .profile-input:disabled {
+  background: #f8fafc;
+  color: #64748b;
+}
+
+[data-theme='light'] .profile-session-item {
+  background: #f8fafc;
+  border-color: #e2e8f0;
+}
+
+[data-theme='light'] .profile-empty-state {
+  color: #64748b;
+}
+

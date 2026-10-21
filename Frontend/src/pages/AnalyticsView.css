@@ -332,3 +332,31 @@
   color: var(--text-muted);
   line-height: 1.4;
 }
+
+/* ─── Light Mode Analytics Polish ─── */
+[data-theme='light'] .analytics-controls-bar {
+  background: #ffffff;
+  border-color: #e2e8f0;
+}
+
+[data-theme='light'] .analytics-select {
+  background: #ffffff;
+  border-color: #cbd5e1;
+  color: #0f172a;
+}
+
+[data-theme='light'] .correlation-badge {
+  background: rgba(13, 148, 136, 0.1);
+  color: #0f766e;
+  border-color: rgba(13, 148, 136, 0.25);
+}
+
+[data-theme='light'] .cat-bar-track {
+  background: #e2e8f0;
+}
+
+[data-theme='light'] .diurnal-insight-box {
+  background: #f8fafc;
+  border-color: #e2e8f0;
+}
+

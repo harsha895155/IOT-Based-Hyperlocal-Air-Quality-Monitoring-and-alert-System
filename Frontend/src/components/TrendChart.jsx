@@ -56,55 +56,25 @@ export default function TrendChart({ data }) {
         </div>
 
         {/* View Mode Switcher */}
-        <div style={{ display: 'inline-flex', background: 'rgba(0,0,0,0.3)', padding: '2px', borderRadius: '6px', border: '1px solid var(--border-soft)' }}>
+        <div className="trend-chart__switcher">
           <button
             type="button"
+            className={`trend-chart__btn ${viewMode === 'dual' ? 'is-active' : ''}`}
             onClick={() => setViewMode('dual')}
-            style={{
-              background: viewMode === 'dual' ? 'var(--surface-raised)' : 'transparent',
-              color: viewMode === 'dual' ? 'var(--accent)' : 'var(--text-muted)',
-              border: 'none',
-              padding: '4px 10px',
-              fontSize: '0.75rem',
-              fontWeight: 600,
-              borderRadius: '4px',
-              cursor: 'pointer',
-              transition: 'all 0.15s ease',
-            }}
           >
             Dual (Fig. 4)
           </button>
           <button
             type="button"
+            className={`trend-chart__btn ${viewMode === 'aqi' ? 'is-active' : ''}`}
             onClick={() => setViewMode('aqi')}
-            style={{
-              background: viewMode === 'aqi' ? 'var(--surface-raised)' : 'transparent',
-              color: viewMode === 'aqi' ? 'var(--accent)' : 'var(--text-muted)',
-              border: 'none',
-              padding: '4px 10px',
-              fontSize: '0.75rem',
-              fontWeight: 600,
-              borderRadius: '4px',
-              cursor: 'pointer',
-              transition: 'all 0.15s ease',
-            }}
           >
             AQI
           </button>
           <button
             type="button"
+            className={`trend-chart__btn ${viewMode === 'temperature' ? 'is-active' : ''}`}
             onClick={() => setViewMode('temperature')}
-            style={{
-              background: viewMode === 'temperature' ? 'var(--surface-raised)' : 'transparent',
-              color: viewMode === 'temperature' ? '#f59e0b' : 'var(--text-muted)',
-              border: 'none',
-              padding: '4px 10px',
-              fontSize: '0.75rem',
-              fontWeight: 600,
-              borderRadius: '4px',
-              cursor: 'pointer',
-              transition: 'all 0.15s ease',
-            }}
           >
             Temp (°C)
           </button>

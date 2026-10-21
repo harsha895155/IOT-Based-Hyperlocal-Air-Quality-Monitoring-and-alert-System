@@ -867,7 +867,7 @@
 .loc-big-spinner {
   width: 44px;
   height: 44px;
-  border: 3px solid rgba(255, 255, 255, 0.15);
+  border: 3px solid var(--border-medium, rgba(255, 255, 255, 0.15));
   border-top-color: #38bdf8;
   border-radius: 50%;
   margin: 0 auto 18px;
@@ -884,13 +884,13 @@
 .loc-empty-search-state h3 {
   font-size: 1.3rem;
   font-weight: 700;
-  color: #f8fafc;
+  color: var(--text-primary);
   margin: 0 0 8px 0;
 }
 
 .loc-loading-card p,
 .loc-empty-search-state p {
-  color: #94a3b8;
+  color: var(--text-muted);
   max-width: 460px;
   margin: 0 auto;
   font-size: 0.9rem;
@@ -904,7 +904,7 @@
 .loc-error-banner {
   background: rgba(239, 68, 68, 0.12);
   border: 1px solid rgba(239, 68, 68, 0.3);
-  color: #fca5a5;
+  color: #dc2626;
   border-radius: 12px;
   padding: 12px 18px;
   margin-bottom: 20px;
@@ -912,4 +912,78 @@
   align-items: center;
   gap: 10px;
   font-size: 0.88rem;
+}
+
+/* ─── Light Mode Locations Polish ─── */
+[data-theme='light'] .loc-search-card {
+  background: #ffffff;
+  border-color: #e2e8f0;
+}
+
+[data-theme='light'] .loc-search-bar {
+  background: #ffffff;
+  border-color: #cbd5e1;
+}
+
+[data-theme='light'] .loc-search-input {
+  color: #0f172a;
+}
+
+[data-theme='light'] .loc-search-input::placeholder {
+  color: #94a3b8;
+}
+
+[data-theme='light'] .loc-autocomplete-dropdown {
+  background: #ffffff;
+  border-color: #cbd5e1;
+  box-shadow: 0 16px 36px -6px rgba(15, 23, 42, 0.12);
+}
+
+[data-theme='light'] .loc-autocomplete-item {
+  color: #0f172a;
+  border-bottom-color: #f1f5f9;
+}
+
+[data-theme='light'] .loc-autocomplete-item:hover {
+  background: #f1f5f9;
+}
+
+[data-theme='light'] .loc-quick-chip {
+  background: #ffffff;
+  border-color: #cbd5e1;
+  color: #475569;
+}
+
+[data-theme='light'] .loc-quick-chip:hover,
+[data-theme='light'] .loc-quick-chip.is-active {
+  background: #f0f9ff;
+  border-color: #0284c7;
+  color: #0284c7;
+}
+
+[data-theme='light'] .loc-daily-card {
+  background: #ffffff;
+  border-color: #e2e8f0;
+}
+
+[data-theme='light'] .loc-daily-card:hover {
+  border-color: #0284c7;
+  box-shadow: 0 4px 14px -2px rgba(15, 23, 42, 0.06);
+}
+
+[data-theme='light'] .loc-btn-gps {
+  background: #ffffff;
+  border-color: #cbd5e1;
+  color: #0f172a;
+}
+
+[data-theme='light'] .loc-btn-gps:hover {
+  background: #f8fafc;
+  border-color: #0284c7;
+  color: #0284c7;
+}
+
+[data-theme='light'] .loc-disclaimer-box {
+  background: #ffffff;
+  border-color: #e2e8f0;
 }

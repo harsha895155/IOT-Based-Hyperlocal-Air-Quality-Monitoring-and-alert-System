@@ -144,7 +144,7 @@
   top: calc(100% + 6px);
   left: 0;
   right: 0;
-  background: rgba(15, 23, 42, 0.95);
+  background: var(--surface-overlay, var(--bg-card));
   border: 1px solid var(--border);
   border-radius: 12px;
   box-shadow: var(--shadow-dropdown);
@@ -234,7 +234,7 @@
   top: calc(100% + 6px);
   right: 0;
   width: 260px;
-  background: rgba(15, 23, 42, 0.95);
+  background: var(--surface-overlay, var(--bg-card));
   border: 1px solid var(--border);
   border-radius: 12px;
   box-shadow: var(--shadow-dropdown);
@@ -949,4 +949,57 @@
     width: 100%;
     margin-top: 6px;
   }
+}
+
+/* ─── Light Mode Dashboard Polish ─── */
+[data-theme='light'] .weather-alert-pill {
+  background: #f8fafc;
+  border-color: #e2e8f0;
+}
+
+[data-theme='light'] .search-results-dropdown,
+[data-theme='light'] .device-dropdown-menu {
+  background: #ffffff;
+  border-color: #cbd5e1;
+  box-shadow: 0 16px 36px -6px rgba(15, 23, 42, 0.12), 0 0 0 1px rgba(226, 232, 240, 0.9);
+}
+
+[data-theme='light'] .search-result-item:hover,
+[data-theme='light'] .device-dropdown-item:hover {
+  background: #f1f5f9;
+}
+
+[data-theme='light'] .device-dropdown-header {
+  color: #64748b;
+  border-bottom-color: #e2e8f0;
+}
+
+[data-theme='light'] .location-search-input-wrap {
+  background: #ffffff;
+  border-color: #cbd5e1;
+}
+
+[data-theme='light'] .device-selector-btn,
+[data-theme='light'] .weather-gps-btn {
+  background: #ffffff;
+  border-color: #cbd5e1;
+  color: #0f172a;
+  box-shadow: 0 1px 3px rgba(15, 23, 42, 0.04);
+}
+
+[data-theme='light'] .device-selector-btn:hover,
+[data-theme='light'] .weather-gps-btn:hover {
+  background: #f8fafc;
+  border-color: #0284c7;
+  color: #0284c7;
+}
+
+[data-theme='light'] .hourly-forecast-pill {
+  background: #ffffff;
+  border-color: #e2e8f0;
+}
+
+[data-theme='light'] .hourly-forecast-pill.is-current {
+  background: #f0fdf4;
+  border-color: #10b981;
 }

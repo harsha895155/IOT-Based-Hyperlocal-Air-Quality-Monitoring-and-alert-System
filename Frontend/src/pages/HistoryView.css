@@ -307,3 +307,61 @@
   font-family: var(--font-mono, monospace);
   color: var(--text-primary);
 }
+
+/* ─── Light Mode History Polish ─── */
+[data-theme='light'] .history-filter-card {
+  background: #ffffff;
+  border-color: #e2e8f0;
+}
+
+[data-theme='light'] .history-select,
+[data-theme='light'] .history-input {
+  background: #ffffff;
+  border-color: #cbd5e1;
+  color: #0f172a;
+}
+
+[data-theme='light'] .station-chip {
+  background: #f1f5f9;
+  border-color: #e2e8f0;
+  color: #334155;
+}
+
+[data-theme='light'] .history-pagination-bar {
+  background: #f8fafc;
+  border-top-color: #e2e8f0;
+}
+
+[data-theme='light'] .page-btn {
+  background: #ffffff;
+  border-color: #cbd5e1;
+  color: #0f172a;
+}
+
+[data-theme='light'] .page-btn:hover:not(:disabled) {
+  background: #0284c7;
+  border-color: #0284c7;
+  color: #ffffff;
+}
+
+[data-theme='light'] .page-btn.is-active {
+  background: #0284c7;
+  border-color: #0284c7;
+  color: #ffffff;
+}
+
+[data-theme='light'] .history-modal-backdrop {
+  background: rgba(15, 23, 42, 0.45);
+}
+
+[data-theme='light'] .history-modal {
+  background: #ffffff;
+  border-color: #cbd5e1;
+  box-shadow: 0 20px 50px rgba(15, 23, 42, 0.15);
+}
+
+[data-theme='light'] .inspect-item {
+  background: #f8fafc;
+  border-color: #e2e8f0;
+}
+

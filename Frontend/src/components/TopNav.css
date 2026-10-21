@@ -388,3 +388,57 @@
     display: none;
   }
 }
+
+/* ─── Light Mode TopNav Polish ─── */
+[data-theme='light'] .topnav {
+  background: rgba(255, 255, 255, 0.92);
+  border-bottom-color: #e2e8f0;
+}
+
+[data-theme='light'] .topnav__user-chip {
+  background: #ffffff;
+  border-color: #cbd5e1;
+  color: #0f172a;
+}
+
+[data-theme='light'] .topnav__user-chip:hover {
+  background: #f8fafc;
+  border-color: #0284c7;
+}
+
+[data-theme='light'] .topnav__icon-btn {
+  color: #475569;
+}
+
+[data-theme='light'] .topnav__icon-btn:hover {
+  background: #f1f5f9;
+  color: #0f172a;
+}
+
+[data-theme='light'] .topnav__dropdown {
+  background: #ffffff;
+  border-color: #cbd5e1;
+  box-shadow: 0 16px 36px -6px rgba(15, 23, 42, 0.12), 0 0 0 1px rgba(226, 232, 240, 0.9);
+}
+
+[data-theme='light'] .topnav__dropdown-name {
+  color: #0f172a;
+}
+
+[data-theme='light'] .topnav__dropdown-email {
+  color: #64748b;
+}
+
+[data-theme='light'] .topnav__dropdown-divider {
+  background: #e2e8f0;
+}
+
+[data-theme='light'] .topnav__dropdown-item {
+  color: #334155;
+}
+
+[data-theme='light'] .topnav__dropdown-item:hover {
+  background: #f1f5f9;
+  color: #0284c7;
+}
+

@@ -177,87 +177,87 @@
 }
 
 /* ═════════════════════════════════════════════════════════════════════
-   Luminous Ceramic Daylight Mode (Ultra-Crisp, High-Contrast Light Theme)
+   AirGuard — Executive SaaS Daylight Theme (Ceramic Glassmorphism)
    ═════════════════════════════════════════════════════════════════════ */
 [data-theme='light'] {
-  /* Surfaces - Clean, Crisp Frosted Daylight */
+  /* Surfaces - Soft, Layered Off-White & Ceramic Daylight */
   --bg: #f8fafc;
-  --bg-gradient: radial-gradient(circle at 50% -10%, rgba(2, 132, 199, 0.14) 0%, transparent 60%),
-                 radial-gradient(circle at 90% 90%, rgba(99, 102, 241, 0.08) 0%, transparent 50%),
+  --bg-gradient: radial-gradient(circle at 50% -10%, rgba(2, 132, 199, 0.08) 0%, transparent 60%),
+                 radial-gradient(circle at 90% 90%, rgba(13, 148, 136, 0.06) 0%, transparent 50%),
                  linear-gradient(180deg, #f8fafc 0%, #f1f5f9 100%);
   --bg-sidebar: #ffffff;
   --surface: #ffffff;
   --surface-raised: #f8fafc;
   --surface-hover: #f1f5f9;
-  --surface-glass: rgba(255, 255, 255, 0.96);
+  --surface-glass: rgba(255, 255, 255, 0.88);
   --surface-overlay: rgba(255, 255, 255, 0.96);
 
-  /* Card & Surface Tokens - Distinct Pure White Cards with Vibrant Accented Borders */
+  /* Card & Surface Tokens - Crisp Layered White Surfaces with Subtle Glass Borders */
   --bg-card: #ffffff;
   --bg-surface: #f8fafc;
   --card-sub-bg: #f8fafc;
-  --table-header-bg: #f1f5f9;
-  --table-row-hover: rgba(2, 132, 199, 0.06);
+  --table-header-bg: #f8fafc;
+  --table-row-hover: #f0f9ff;
 
-  /* Hero Atmospheric Card - Luminous Sky Glow Gradient for Daylight */
-  --hero-card-bg-day: linear-gradient(135deg, #e0f2fe 0%, #e0e7ff 50%, #f0fdf4 100%);
+  /* Atmospheric Hero Card - Layered Sky Azure to Emerald Daylight Gradient */
+  --hero-card-bg-day: linear-gradient(135deg, #e0f2fe 0%, #f0fdf4 100%);
   --hero-card-bg-night: linear-gradient(135deg, #f1f5f9 0%, #e2e8f0 100%);
   --hero-card-text: #0f172a;
-  --hero-card-sub: #334155;
+  --hero-card-sub: #475569;
   --dial-bg: #ffffff;
   --current-mode-bg: linear-gradient(90deg, #e0f2fe 0%, #eff6ff 100%);
 
-  /* High-Contrast, Razor-Sharp Visible Borders with Azure/Sky Hue */
-  --border: #cbd5e1;
-  --border-soft: #e2e8f0;
-  --border-subtle: #cbd5e1;
-  --border-medium: #94a3b8;
+  /* Hairline Translucent Glass Borders */
+  --border: #e2e8f0;
+  --border-soft: #f1f5f9;
+  --border-subtle: #e2e8f0;
+  --border-medium: #cbd5e1;
   --border-active: #0284c7;
-  --border-glow: rgba(2, 132, 199, 0.35);
-  --border-card: rgba(2, 132, 199, 0.28);
+  --border-glow: rgba(2, 132, 199, 0.2);
+  --border-card: rgba(226, 232, 240, 0.9);
 
-  /* High-Contrast Typography */
+  /* Typography - High Contrast Slate Hierarchy (WCAG AAA Compliant) */
   --text-primary: #0f172a;
-  --text-muted: #334155;
-  --text-faint: #475569;
+  --text-muted: #475569;
+  --text-faint: #64748b;
   --text-inverse: #ffffff;
 
-  /* Radiant Sky Blue Brand Accents */
+  /* Environmental SaaS Accent Palette (Calm Sky Blue & Sophisticated Emerald/Teal) */
   --accent: #0284c7;
-  --accent-gradient: linear-gradient(135deg, #0284c7 0%, #2563eb 100%);
+  --accent-gradient: linear-gradient(135deg, #0284c7 0%, #0d9488 100%);
   --accent-hover: #0369a1;
-  --accent-soft: rgba(2, 132, 199, 0.12);
-  --accent-glow: 0 0 16px rgba(2, 132, 199, 0.25);
+  --accent-soft: rgba(2, 132, 199, 0.08);
+  --accent-glow: 0 0 16px rgba(2, 132, 199, 0.2);
 
   /* Action Buttons */
-  --btn-primary-bg: linear-gradient(135deg, #0284c7 0%, #2563eb 100%);
-  --btn-primary-hover: linear-gradient(135deg, #0369a1 0%, #1d4ed8 100%);
+  --btn-primary-bg: linear-gradient(135deg, #0284c7 0%, #0369a1 100%);
+  --btn-primary-hover: linear-gradient(135deg, #0369a1 0%, #075985 100%);
   --btn-primary-text: #ffffff;
-  --btn-shadow: 0 4px 14px rgba(2, 132, 199, 0.25);
+  --btn-shadow: 0 2px 8px rgba(2, 132, 199, 0.25);
 
   /* Badges */
-  --badge-guest-bg: rgba(2, 132, 199, 0.12);
+  --badge-guest-bg: #f0f9ff;
   --badge-guest-text: #0284c7;
-  --badge-guest-border: rgba(2, 132, 199, 0.35);
+  --badge-guest-border: #bae6fd;
 
   --badge-alert-bg: #ea580c;
   --badge-alert-text: #ffffff;
 
-  /* Status Colors with Clean Contrast */
+  /* Status Colors */
   --status-online: #059669;
-  --status-online-glow: 0 0 10px rgba(5, 150, 105, 0.4);
+  --status-online-glow: 0 0 8px rgba(5, 150, 105, 0.3);
   --status-offline: #64748b;
   --status-warning: #d97706;
   --status-danger: #dc2626;
 
-  /* Ultra-Crisp Daylight Card Shadows with Outline Depth */
-  --shadow-card: 0 1px 3px rgba(15, 23, 42, 0.05), 0 8px 24px -4px rgba(2, 132, 199, 0.1), 0 0 0 1px rgba(2, 132, 199, 0.16);
-  --shadow-card-hover: 0 14px 34px -4px rgba(15, 23, 42, 0.12), 0 0 0 1.5px rgba(2, 132, 199, 0.4), 0 0 20px rgba(2, 132, 199, 0.18);
-  --shadow-dropdown: 0 16px 36px rgba(15, 23, 42, 0.14), 0 0 0 1.5px rgba(2, 132, 199, 0.25);
+  /* Diffused Soft Elevation Shadows (Apple & Stripe SaaS Style) */
+  --shadow-card: 0 1px 3px rgba(15, 23, 42, 0.04), 0 4px 14px -2px rgba(15, 23, 42, 0.04), 0 0 0 1px rgba(226, 232, 240, 0.9);
+  --shadow-card-hover: 0 8px 24px -4px rgba(15, 23, 42, 0.08), 0 0 0 1px rgba(2, 132, 199, 0.3);
+  --shadow-dropdown: 0 16px 36px -6px rgba(15, 23, 42, 0.12), 0 0 0 1px rgba(226, 232, 240, 0.9);
 }
 
 /* ═════════════════════════════════════════════════════════════════════
-   Universal Light Mode Clarity Enhancements (Ensures 100% Visibility)
+   Universal Light Mode Clarity Enhancements Across ALL Pages
    ═════════════════════════════════════════════════════════════════════ */
 [data-theme='light'] .card,
 [data-theme='light'] .weather-card,
@@ -277,53 +277,75 @@
 [data-theme='light'] .rules-config-card,
 [data-theme='light'] .certification-card,
 [data-theme='light'] .compliance-kpi-card,
-[data-theme='light'] .report-section-card {
-  border: 1px solid rgba(2, 132, 199, 0.2) !important;
-  background: rgba(255, 255, 255, 0.94) !important;
-  backdrop-filter: blur(20px) !important;
-  -webkit-backdrop-filter: blur(20px) !important;
-  box-shadow: 0 4px 20px -2px rgba(15, 23, 42, 0.04), 0 1px 3px rgba(15, 23, 42, 0.03), inset 0 1px 0 rgba(255, 255, 255, 0.98) !important;
+[data-theme='light'] .report-section-card,
+[data-theme='light'] .analytics-chart-card,
+[data-theme='light'] .correlation-card,
+[data-theme='light'] .devices-kpi-card,
+[data-theme='light'] .history-kpi-card,
+[data-theme='light'] .analytics-kpi-card,
+[data-theme='light'] .devices-controls-card,
+[data-theme='light'] .analytics-controls-bar,
+[data-theme='light'] .report-controls-bar,
+[data-theme='light'] .settings-card,
+[data-theme='light'] .health-master-bar,
+[data-theme='light'] .service-card,
+[data-theme='light'] .faq-card,
+[data-theme='light'] .device-card-item,
+[data-theme='light'] .devices-table-card,
+[data-theme='light'] .history-table-card,
+[data-theme='light'] .alerts-kpi-card,
+[data-theme='light'] .export-suite-card {
+  border: 1px solid rgba(226, 232, 240, 0.9) !important;
+  background: #ffffff !important;
+  box-shadow: 0 1px 3px rgba(15, 23, 42, 0.04), 0 4px 14px -2px rgba(15, 23, 42, 0.04) !important;
+  color: #0f172a !important;
 }
 
 [data-theme='light'] .card:hover,
 [data-theme='light'] .stat-card:hover,
 [data-theme='light'] .device-card:hover,
-[data-theme='light'] .location-card:hover {
-  border-color: rgba(2, 132, 199, 0.6) !important;
-  background: rgba(255, 255, 255, 0.96) !important;
-  box-shadow: 0 10px 30px -4px rgba(2, 132, 199, 0.2), 0 0 0 1.5px #0284c7, inset 0 1px 0 #ffffff !important;
+[data-theme='light'] .location-card:hover,
+[data-theme='light'] .device-card-item:hover,
+[data-theme='light'] .analytics-kpi-card:hover,
+[data-theme='light'] .devices-kpi-card:hover,
+[data-theme='light'] .history-kpi-card:hover {
+  border-color: rgba(2, 132, 199, 0.35) !important;
+  box-shadow: 0 8px 24px -4px rgba(15, 23, 42, 0.08) !important;
+  transform: translateY(-2px);
 }
 
 [data-theme='light'] input,
 [data-theme='light'] select,
 [data-theme='light'] textarea {
-  border: 1.5px solid #cbd5e1 !important;
+  border: 1px solid #cbd5e1 !important;
   background-color: #ffffff !important;
   color: #0f172a !important;
+  border-radius: 8px !important;
 }
 
 [data-theme='light'] input:focus,
 [data-theme='light'] select:focus,
 [data-theme='light'] textarea:focus {
   border-color: #0284c7 !important;
-  box-shadow: 0 0 0 3px rgba(2, 132, 199, 0.25) !important;
+  box-shadow: 0 0 0 3px rgba(2, 132, 199, 0.15) !important;
 }
 
 [data-theme='light'] .btn--secondary,
 [data-theme='light'] .btn-secondary,
 [data-theme='light'] .btn--ghost,
 [data-theme='light'] .btn-ghost {
-  border: 1.5px solid #cbd5e1 !important;
+  border: 1px solid #cbd5e1 !important;
   background-color: #ffffff !important;
   color: #0f172a !important;
+  box-shadow: 0 1px 2px rgba(15, 23, 42, 0.04) !important;
 }
 
 [data-theme='light'] .btn--secondary:hover,
 [data-theme='light'] .btn-secondary:hover,
 [data-theme='light'] .btn--ghost:hover,
 [data-theme='light'] .btn-ghost:hover {
-  border-color: #0284c7 !important;
-  background-color: #f0f9ff !important;
+  border-color: #94a3b8 !important;
+  background-color: #f8fafc !important;
   color: #0284c7 !important;
 }
 
@@ -331,4 +353,21 @@
 [data-theme='light'] .divider {
   border-color: #e2e8f0 !important;
   background-color: #e2e8f0 !important;
+}
+
+/* Dense Data Table Polish for Light Theme */
+[data-theme='light'] table th {
+  background: #f8fafc !important;
+  color: #475569 !important;
+  border-bottom: 1.5px solid #e2e8f0 !important;
+  font-weight: 700 !important;
+}
+
+[data-theme='light'] table td {
+  border-bottom: 1px solid #f1f5f9 !important;
+  color: #0f172a !important;
+}
+
+[data-theme='light'] table tr:hover td {
+  background: #f0f9ff !important;
 }

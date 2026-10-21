@@ -301,3 +301,45 @@
     padding: 20px 16px 40px;
   }
 }
+
+/* ─── Light Mode System Health Polish ─── */
+[data-theme='light'] .health-master-bar {
+  background: #ffffff;
+  border-color: #e2e8f0;
+  box-shadow: 0 1px 3px rgba(15, 23, 42, 0.04);
+}
+
+[data-theme='light'] .health-latency-chip {
+  background: #f0f9ff;
+  border-color: #bae6fd;
+  color: #0284c7;
+}
+
+[data-theme='light'] .health-infra-card {
+  background: #ffffff;
+  border-color: #e2e8f0;
+}
+
+[data-theme='light'] .health-infra-label {
+  color: #64748b;
+}
+
+[data-theme='light'] .health-bench-card {
+  background: #ffffff;
+  border-color: #e2e8f0;
+}
+
+[data-theme='light'] .health-bench-desc {
+  color: #64748b;
+}
+
+[data-theme='light'] .health-bench-result {
+  background: #f0f9ff;
+  border-color: #bae6fd;
+  color: #0284c7;
+}
+
+[data-theme='light'] .health-terminal-box {
+  border-color: #cbd5e1;
+}
+

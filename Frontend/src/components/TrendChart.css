@@ -57,3 +57,74 @@
   margin-left: auto;
   color: var(--text-primary);
 }
+
+/* ─── Mode Switcher Strip ─── */
+.trend-chart__switcher {
+  display: inline-flex;
+  background: var(--surface-raised, rgba(0, 0, 0, 0.25));
+  padding: 3px;
+  border-radius: 8px;
+  border: 1px solid var(--border-soft);
+  gap: 2px;
+}
+
+.trend-chart__btn {
+  background: transparent;
+  color: var(--text-muted);
+  border: none;
+  padding: 4px 10px;
+  font-size: 0.75rem;
+  font-weight: 600;
+  border-radius: 6px;
+  cursor: pointer;
+  transition: all 0.15s ease;
+}
+
+.trend-chart__btn:hover {
+  color: var(--text-primary);
+}
+
+.trend-chart__btn.is-active {
+  background: var(--accent);
+  color: #ffffff;
+  box-shadow: 0 1px 4px rgba(2, 132, 199, 0.3);
+}
+
+/* ─── Light Mode Overrides ─── */
+[data-theme='light'] .trend-chart {
+  background: #ffffff !important;
+  border: 1px solid rgba(226, 232, 240, 0.9) !important;
+  box-shadow: 0 1px 3px rgba(15, 23, 42, 0.04), 0 4px 14px -2px rgba(15, 23, 42, 0.04) !important;
+}
+
+[data-theme='light'] .trend-chart__switcher {
+  background: #f1f5f9;
+  border-color: #e2e8f0;
+}
+
+[data-theme='light'] .trend-chart__btn {
+  color: #475569;
+}
+
+[data-theme='light'] .trend-chart__btn:hover {
+  color: #0f172a;
+}
+
+[data-theme='light'] .trend-chart__btn.is-active {
+  background: #0284c7;
+  color: #ffffff;
+}
+
+[data-theme='light'] .trend-tooltip {
+  background: #ffffff;
+  border: 1px solid #e2e8f0;
+  box-shadow: 0 8px 24px rgba(15, 23, 42, 0.08);
+}
+
+[data-theme='light'] .trend-tooltip__time {
+  color: #64748b;
+}
+
+[data-theme='light'] .trend-tooltip__value {
+  color: #0f172a;
+}

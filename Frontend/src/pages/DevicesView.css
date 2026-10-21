@@ -341,5 +341,58 @@
 .device-modal-val {
   font-size: 0.95rem;
   font-weight: 600;
-  color: var(--text-primary, #f8fafc);
+  color: var(--text-primary);
+}
+
+/* ─── Light Mode Devices Polish ─── */
+[data-theme='light'] .devices-controls-card {
+  background: #ffffff;
+  border-color: #e2e8f0;
+}
+
+[data-theme='light'] .devices-search-box {
+  background: #ffffff;
+  border-color: #cbd5e1;
+}
+
+[data-theme='light'] .devices-select {
+  background: #ffffff;
+  border-color: #cbd5e1;
+  color: #0f172a;
+}
+
+[data-theme='light'] .device-stat-strip {
+  background: #f8fafc;
+  border-color: #e2e8f0;
+}
+
+[data-theme='light'] .device-icon-box {
+  background: rgba(13, 148, 136, 0.1);
+  color: #0d9488;
+}
+
+[data-theme='light'] .signal-pill {
+  background: rgba(2, 132, 199, 0.1);
+  color: #0284c7;
+}
+
+[data-theme='light'] .hardware-pill {
+  background: #f1f5f9;
+  color: #475569;
+  border-color: #e2e8f0;
+}
+
+[data-theme='light'] .device-modal-backdrop {
+  background: rgba(15, 23, 42, 0.45);
+}
+
+[data-theme='light'] .device-modal {
+  background: #ffffff;
+  border-color: #cbd5e1;
+  box-shadow: 0 20px 50px rgba(15, 23, 42, 0.15);
+}
+
+[data-theme='light'] .device-modal-item {
+  background: #f8fafc;
+  border-color: #e2e8f0;
 }

@@ -595,3 +595,77 @@
     border-radius: 12px;
   }
 }
+
+/* ─── Light Mode Authentication Polish ─── */
+[data-theme='light'] .login-hero {
+  background: linear-gradient(135deg, #f0f9ff 0%, #f0fdf4 100%);
+  border-right-color: #e2e8f0;
+}
+
+[data-theme='light'] .login-hero__brand-name,
+[data-theme='light'] .login-hero__title {
+  color: #0f172a;
+}
+
+[data-theme='light'] .login-hero__desc {
+  color: #475569;
+}
+
+[data-theme='light'] .login-form-pane {
+  background: #f8fafc;
+}
+
+[data-theme='light'] .login-form-container {
+  background: #ffffff;
+  border-color: #e2e8f0;
+  box-shadow: 0 10px 30px rgba(15, 23, 42, 0.06);
+}
+
+[data-theme='light'] .login-input {
+  background: #ffffff;
+  border-color: #cbd5e1;
+  color: #0f172a;
+}
+
+[data-theme='light'] .login-input:focus {
+  border-color: #0284c7;
+  background: #ffffff;
+  box-shadow: 0 0 0 3px rgba(2, 132, 199, 0.15);
+}
+
+[data-theme='light'] .login-password-toggle {
+  color: #64748b;
+}
+
+[data-theme='light'] .login-password-toggle:hover {
+  color: #0f172a;
+}
+
+[data-theme='light'] .login-alert--error {
+  background: #fef2f2;
+  border-color: #fecaca;
+  color: #dc2626;
+}
+
+[data-theme='light'] .login-alert--info {
+  background: #fffbeb;
+  border-color: #fde68a;
+  color: #b45309;
+}
+
+[data-theme='light'] .login-manual-token-btn {
+  border-color: #cbd5e1;
+  color: #475569;
+}
+
+[data-theme='light'] .login-manual-token-btn:hover {
+  background: #f1f5f9;
+  color: #0f172a;
+}
+
+[data-theme='light'] .login-token-badge {
+  background: #ecfdf5;
+  border-color: #a7f3d0;
+  color: #047857;
+}
+
