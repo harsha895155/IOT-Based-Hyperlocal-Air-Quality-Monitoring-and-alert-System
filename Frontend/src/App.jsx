@@ -60,6 +60,7 @@ import {
 import { AuthProvider } from './context/AuthContext';
 import { ThemeProvider, useTheme } from './context/ThemeContext';
 import AirAmbient3DCanvas from './components/AirAmbient3DCanvas';
+import DangerAlarmFlash from './components/DangerAlarmFlash';
 import { useReadings } from './hooks/useReadings';
 import './App.css';
 
@@ -242,9 +243,11 @@ export default function App() {
       <ThemeProvider>
         <BrowserRouter>
           <ScrollToTop />
+          <DangerAlarmFlash />
           <AppRoutes />
         </BrowserRouter>
       </ThemeProvider>
     </AuthProvider>
   );
 }
+

@@ -61,6 +61,17 @@ export function setSoundVolume(val) {
   }
 }
 
+let activeAudioContext = null;
+
+export function stopCurrentSound() {
+  if (activeAudioContext) {
+    try {
+      activeAudioContext.close().catch(() => {});
+    } catch (e) {}
+    activeAudioContext = null;
+  }
+}
+
 /**
  * Synthesizes and plays the specified sound profile using Web Audio API.
  */
@@ -73,7 +84,12 @@ export function playSoundProfile(soundId = null, force = false, customVolume = n
     const AudioContextClass = window.AudioContext || window.webkitAudioContext;
     if (!AudioContextClass) return;
 
+    // Stop any existing sound before starting new
+    stopCurrentSound();
+
     const ctx = new AudioContextClass();
+    activeAudioContext = ctx;
+
     if (ctx.state === 'suspended') {
       ctx.resume().catch(() => {});
     }
@@ -219,9 +235,25 @@ export function playSoundProfile(soundId = null, force = false, customVolume = n
       }
     }
 
+    // Trigger full-website red light flashing danger mode
+    if (typeof window !== 'undefined') {
+      window.dispatchEvent(
+        new CustomEvent('airguard:danger-siren-trigger', {
+          detail: {
+            duration: maxDuration,
+            soundId: profile,
+            title: 'HAZARDOUS THRESHOLD DETECTED — EMERGENCY SIREN ACTIVE',
+          },
+        })
+      );
+    }
+
     // Close audio context after sound finishes
     setTimeout(() => {
       ctx.close().catch(() => {});
+      if (activeAudioContext === ctx) {
+        activeAudioContext = null;
+      }
     }, (maxDuration + 0.3) * 1000);
   } catch (err) {
     console.warn('[AudioAlert] Non-fatal audio synthesizer warning:', err);

@@ -1003,3 +1003,190 @@
   background: #f0fdf4;
   border-color: #10b981;
 }
+
+/* ═════════════════════════════════════════════════════════════════════
+   Dynamic Animated Environmental Metrics & Hardware Telemetry
+   ═════════════════════════════════════════════════════════════════════ */
+
+/* 1. Pollutant Cards Interactive Shimmer & Live Telemetry Stream */
+.pollutant-card {
+  position: relative;
+  overflow: hidden;
+  transition: transform 0.25s cubic-bezier(0.16, 1, 0.3, 1), box-shadow 0.25s ease, border-color 0.25s ease;
+}
+
+.pollutant-card:hover {
+  transform: translateY(-4px);
+  border-color: var(--accent);
+  box-shadow: 0 10px 24px -6px rgba(0, 0, 0, 0.2);
+}
+
+.pollutant-card::after {
+  content: '';
+  position: absolute;
+  top: 0;
+  left: -120%;
+  width: 60%;
+  height: 100%;
+  background: linear-gradient(90deg, transparent, rgba(56, 189, 248, 0.07), transparent);
+  animation: teleShimmer 4.5s ease-in-out infinite;
+  pointer-events: none;
+}
+
+@keyframes teleShimmer {
+  0% { left: -120%; }
+  40%, 100% { left: 180%; }
+}
+
+.pollutant-live-bar {
+  width: 100%;
+  height: 3px;
+  background: rgba(56, 189, 248, 0.12);
+  border-radius: 999px;
+  margin-top: 8px;
+  overflow: hidden;
+  position: relative;
+}
+
+.pollutant-live-bar-fill {
+  height: 100%;
+  background: linear-gradient(90deg, #38bdf8 0%, #10b981 100%);
+  border-radius: 999px;
+  animation: liveBarFlow 2.8s ease-in-out infinite alternate;
+}
+
+@keyframes liveBarFlow {
+  0% { width: 35%; opacity: 0.6; }
+  50% { width: 75%; opacity: 0.95; }
+  100% { width: 50%; opacity: 0.7; }
+}
+
+/* ESP32 Radar Scan Ping */
+.sensor-radar-wrap {
+  position: relative;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.sensor-radar-ping {
+  position: absolute;
+  width: 16px;
+  height: 16px;
+  border-radius: 50%;
+  border: 1.5px solid #f59e0b;
+  animation: radarPingPulse 2s cubic-bezier(0, 0, 0.2, 1) infinite;
+  pointer-events: none;
+}
+
+@keyframes radarPingPulse {
+  0% { transform: scale(0.6); opacity: 1; }
+  100% { transform: scale(2.4); opacity: 0; }
+}
+
+/* 2. Wind Compass & Dynamic Streamers */
+.wind-gust-indicator {
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+  color: #38bdf8;
+  animation: windGustDrift 2.2s ease-in-out infinite alternate;
+}
+
+@keyframes windGustDrift {
+  0% { transform: translateX(0); opacity: 0.7; }
+  100% { transform: translateX(4px); opacity: 1; }
+}
+
+/* 3. Humidity & Dew Point Liquid Wave Bar */
+.humidity-liquid-bar {
+  width: 100%;
+  height: 7px;
+  background: rgba(56, 189, 248, 0.12);
+  border-radius: 999px;
+  overflow: hidden;
+  position: relative;
+  margin-top: 10px;
+}
+
+.humidity-liquid-fill {
+  height: 100%;
+  border-radius: 999px;
+  background: linear-gradient(90deg, #38bdf8 0%, #0284c7 100%);
+  position: relative;
+  transition: width 0.8s cubic-bezier(0.16, 1, 0.3, 1);
+  animation: liquidGlow 3s infinite alternate ease-in-out;
+}
+
+@keyframes liquidGlow {
+  0% { filter: brightness(0.95); }
+  100% { filter: brightness(1.2) drop-shadow(0 0 4px rgba(56, 189, 248, 0.6)); }
+}
+
+/* 4. UV Index Dynamic Risk Meter */
+.uv-meter-bar {
+  width: 100%;
+  height: 7px;
+  background: rgba(255, 255, 255, 0.08);
+  border-radius: 999px;
+  overflow: hidden;
+  position: relative;
+  margin-top: 10px;
+}
+
+[data-theme='light'] .uv-meter-bar {
+  background: #e2e8f0;
+}
+
+.uv-meter-fill {
+  height: 100%;
+  border-radius: 999px;
+  transition: width 0.8s cubic-bezier(0.16, 1, 0.3, 1);
+  animation: uvAuraPulse 2.5s infinite alternate ease-in-out;
+}
+
+@keyframes uvAuraPulse {
+  0% { filter: brightness(1); }
+  100% { filter: brightness(1.2) drop-shadow(0 0 6px rgba(245, 158, 11, 0.5)); }
+}
+
+/* 5. Surface Pressure Isobaric Radar Wave */
+.pressure-pulse-wrap {
+  position: relative;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.pressure-isobar-ring {
+  position: absolute;
+  width: 24px;
+  height: 24px;
+  border-radius: 50%;
+  border: 1px dashed rgba(56, 189, 248, 0.4);
+  pointer-events: none;
+  animation: pressureExpand 3.2s cubic-bezier(0.2, 0.8, 0.2, 1) infinite;
+}
+
+.pressure-isobar-ring--2 {
+  animation-delay: 1.6s;
+}
+
+@keyframes pressureExpand {
+  0% { transform: scale(0.6); opacity: 0.8; }
+  100% { transform: scale(2.2); opacity: 0; }
+}
+
+/* 6. Environmental Metric Card Hover Micro-Interactions */
+.env-metric-card {
+  position: relative;
+  overflow: hidden;
+  transition: transform 0.25s cubic-bezier(0.16, 1, 0.3, 1), box-shadow 0.25s ease, border-color 0.25s ease;
+}
+
+.env-metric-card:hover {
+  transform: translateY(-4px);
+  border-color: var(--accent);
+  box-shadow: 0 12px 28px -6px rgba(2, 132, 199, 0.2);
+}
+

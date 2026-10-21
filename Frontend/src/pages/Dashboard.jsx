@@ -557,6 +557,7 @@ export default function Dashboard({ readingsData, onNavigateTab }) {
             <div className="pol-sub">
               {isDeviceConnected ? 'Calibrated Baseline: R0 = 76.63 kΩ' : 'Fine respirable atmospheric particulate'}
             </div>
+            <div className="pollutant-live-bar"><div className="pollutant-live-bar-fill" /></div>
           </div>
 
           {/* Temperature DHT22 / Weather */}
@@ -574,6 +575,7 @@ export default function Dashboard({ readingsData, onNavigateTab }) {
             <div className="pol-sub">
               {isDeviceConnected ? 'High accuracy capacitive sensor' : 'Current regional weather temperature'}
             </div>
+            <div className="pollutant-live-bar"><div className="pollutant-live-bar-fill" /></div>
           </div>
 
           {/* Humidity DHT22 / Weather */}
@@ -589,6 +591,7 @@ export default function Dashboard({ readingsData, onNavigateTab }) {
               <span className="pol-unit">% RH</span>
             </div>
             <div className="pol-sub">Relative moisture saturation</div>
+            <div className="pollutant-live-bar"><div className="pollutant-live-bar-fill" /></div>
           </div>
 
           {/* Estimated CO */}
@@ -606,6 +609,7 @@ export default function Dashboard({ readingsData, onNavigateTab }) {
               <span className="pol-unit">ppm (est.)</span>
             </div>
             <div className="pol-sub">WHO safe 8h exposure limit: 9 ppm</div>
+            <div className="pollutant-live-bar"><div className="pollutant-live-bar-fill" /></div>
           </div>
 
           {/* Estimated CO2 Eq / PM10 */}
@@ -625,13 +629,20 @@ export default function Dashboard({ readingsData, onNavigateTab }) {
             <div className="pol-sub">
               {isDeviceConnected ? 'Typical fresh air baseline: 400-500 ppm' : 'Inhalable coarse particulate threshold'}
             </div>
+            <div className="pollutant-live-bar"><div className="pollutant-live-bar-fill" /></div>
           </div>
 
           {/* Hardware Connection Card */}
           <div className={`pollutant-card ${isDeviceConnected ? 'is-active-sensor' : 'is-unsupported'}`}>
             <div className="pol-top">
               <span className="pol-name">{isDeviceConnected ? `Hardware Node (${currentDevice?.id})` : 'AirGuard ESP32 Sensor'}</span>
-              <span className={`pol-tag ${isDeviceConnected ? 'text-online' : 'text-faint'}`}>
+              <span className={`pol-tag ${isDeviceConnected ? 'text-online' : 'text-faint'}`} style={{ display: 'inline-flex', alignItems: 'center', gap: '6px' }}>
+                {!isDeviceConnected && (
+                  <span className="sensor-radar-wrap">
+                    <span className="sensor-radar-ping" />
+                    <span style={{ width: 6, height: 6, borderRadius: '50%', background: '#f59e0b', display: 'inline-block' }} />
+                  </span>
+                )}
                 {isDeviceConnected ? 'Online' : 'Not Connected'}
               </span>
             </div>
@@ -645,6 +656,7 @@ export default function Dashboard({ readingsData, onNavigateTab }) {
                 ? `Transmitting via ${currentDevice?.type || 'ESP32'}`
                 : 'Click "+ Connect Device" to link hardware'}
             </div>
+            <div className="pollutant-live-bar"><div className="pollutant-live-bar-fill" /></div>
           </div>
         </div>
       </div>
@@ -664,7 +676,9 @@ export default function Dashboard({ readingsData, onNavigateTab }) {
             <div>
               <div className="env-metric-num mono">{cw.windSpeedKmh ?? '—'} <span className="unit">km/h</span></div>
               <div className="env-metric-sub">Direction: <strong>{cw.windDirectionCompass || 'N/A'}</strong> ({cw.windDirectionDeg || 0}°)</div>
-              <div className="env-metric-foot text-faint fs-xs">Gusts up to {cw.windGustsKmh ?? 0} km/h</div>
+              <div className="env-metric-foot text-faint fs-xs">
+                <span className="wind-gust-indicator">💨 Gusts up to {cw.windGustsKmh ?? 0} km/h</span>
+              </div>
             </div>
           </div>
         </div>
@@ -677,7 +691,13 @@ export default function Dashboard({ readingsData, onNavigateTab }) {
           </div>
           <div className="env-metric-content">
             <div className="env-metric-num mono">{sensorHumidity ?? cw.humidity ?? '—'} <span className="unit">%</span></div>
-            <div className="env-metric-sub">The dew point is {cw.dewPoint != null ? `${cw.dewPoint}°C` : 'N/A'} right now.</div>
+            <div className="humidity-liquid-bar">
+              <div
+                className="humidity-liquid-fill"
+                style={{ width: `${Math.min(100, Math.max(8, sensorHumidity ?? cw.humidity ?? 50))}%` }}
+              />
+            </div>
+            <div className="env-metric-sub" style={{ marginTop: '8px' }}>The dew point is {cw.dewPoint != null ? `${cw.dewPoint}°C` : 'N/A'} right now.</div>
             <div className="env-metric-foot text-faint fs-xs">
               Comfort Level: {(sensorHumidity ?? cw.humidity ?? 50) > 70 ? 'High Humidity' : (sensorHumidity ?? cw.humidity ?? 50) < 30 ? 'Dry' : 'Comfortable'}
             </div>
@@ -692,7 +712,16 @@ export default function Dashboard({ readingsData, onNavigateTab }) {
           </div>
           <div className="env-metric-content">
             <div className="env-metric-num mono">{cw.uvIndex != null ? cw.uvIndex : (todayForecast.uvMax ?? 0)}</div>
-            <div className="env-metric-sub">
+            <div className="uv-meter-bar">
+              <div
+                className="uv-meter-fill"
+                style={{
+                  width: `${Math.min(100, Math.max(8, ((cw.uvIndex || 0) / 11) * 100))}%`,
+                  backgroundColor: (cw.uvIndex || 0) <= 2 ? '#10b981' : (cw.uvIndex || 0) <= 5 ? '#f59e0b' : (cw.uvIndex || 0) <= 7 ? '#f97316' : '#ef4444'
+                }}
+              />
+            </div>
+            <div className="env-metric-sub" style={{ marginTop: '8px' }}>
               {(cw.uvIndex || 0) <= 2 ? 'Low risk' : (cw.uvIndex || 0) <= 5 ? 'Moderate' : (cw.uvIndex || 0) <= 7 ? 'High' : 'Very High'}
             </div>
             <div className="env-metric-foot text-faint fs-xs">
@@ -705,7 +734,11 @@ export default function Dashboard({ readingsData, onNavigateTab }) {
         <div className="card env-metric-card">
           <div className="env-metric-header">
             <span className="env-metric-title">SURFACE PRESSURE & VISIBILITY</span>
-            <span style={{ fontSize: '1.1rem' }}>🧭</span>
+            <div className="pressure-pulse-wrap">
+              <div className="pressure-isobar-ring" />
+              <div className="pressure-isobar-ring pressure-isobar-ring--2" />
+              <span style={{ fontSize: '1.1rem' }}>🧭</span>
+            </div>
           </div>
           <div className="env-metric-content">
             <div className="env-metric-num mono">{cw.pressureHpa ?? 1012} <span className="unit">hPa</span></div>
