@@ -43,6 +43,49 @@ function getTransporter() {
 }
 
 /**
+ * Dispatches email via Vercel Serverless Function over HTTPS (port 443).
+ * This completely bypasses Render Free Tier's outbound SMTP port blocking (ports 25, 465, 587).
+ */
+async function trySendViaVercelRelay({ to, subject, html, text }) {
+  const vercelAppUrl = process.env.APP_URL || 'https://airguard-hyperlocal.vercel.app';
+  const relayEndpoint = `${vercelAppUrl.replace(/\/$/, '')}/api/send-reset-email`;
+
+  try {
+    const controller = new AbortController();
+    const timeout = setTimeout(() => controller.abort(), 12000);
+
+    const res = await fetch(relayEndpoint, {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+      },
+      body: JSON.stringify({
+        secret: 'AirGuardRelaySecret2026',
+        to,
+        subject,
+        html,
+        text,
+      }),
+      signal: controller.signal,
+    });
+    clearTimeout(timeout);
+
+    if (res.ok) {
+      const data = await res.json();
+      console.log(`[EmailService] ✅ Email dispatched via Vercel Relay over HTTPS to ${to} (MessageId: ${data.messageId})`);
+      return { success: true, delivered: true, messageId: data.messageId, via: 'vercel-relay' };
+    } else {
+      const errText = await res.text();
+      console.warn(`[EmailService] ⚠️ Vercel Relay responded with HTTP ${res.status}: ${errText}. Falling back to direct SMTP...`);
+    }
+  } catch (relayErr) {
+    console.warn(`[EmailService] ⚠️ Vercel Relay unreachable (${relayErr.message}). Falling back to direct SMTP...`);
+  }
+
+  return null;
+}
+
+/**
  * Sends a branded password reset email to the user.
  * 
  * @param {Object} options
@@ -240,6 +283,20 @@ If you did not request this reset, please ignore this email.
 Official Mailbox: ${senderEmail}
   `.trim();
 
+  // 1. Primary Attempt: Relay via Vercel Serverless Function over HTTPS (port 443)
+  // This bypasses cloud provider SMTP port blocks (such as Render free tier)
+  const relayResult = await trySendViaVercelRelay({
+    to,
+    subject,
+    html: htmlContent,
+    text: textContent,
+  });
+
+  if (relayResult && relayResult.success) {
+    return relayResult;
+  }
+
+  // 2. Secondary Attempt: Direct Nodemailer SMTP
   const transporter = getTransporter();
 
   if (!transporter) {
