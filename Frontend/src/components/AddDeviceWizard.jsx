@@ -2,6 +2,7 @@ import React, { useState, useEffect, useRef, useCallback } from 'react';
 import client from '../api/client';
 import { getSocket } from '../api/socket';
 import { classifyAQI } from '../utils/aqi';
+import { ESPLoader, Transport } from 'esptool-js';
 import './AddDeviceWizard.css';
 
 const STEPS = [
@@ -55,6 +56,12 @@ export default function AddDeviceWizard({ isOpen, onClose, onDeviceAdded, onNavi
   const [wifiScanNotice, setWifiScanNotice] = useState(null);
   const serialWriterRef = useRef(null);
   const serialReaderRef = useRef(null);
+
+  // In-Browser 1-Click ESP32 Flasher State
+  const [flashing, setFlashing] = useState(false);
+  const [flashProgress, setFlashProgress] = useState(0);
+  const [flashStatus, setFlashStatus] = useState('');
+  const [flashError, setFlashError] = useState(null);
 
   // Provisioning & Verification State
   const [provisioningStatus, setProvisioningStatus] = useState({
@@ -273,6 +280,134 @@ export default function AddDeviceWizard({ isOpen, onClose, onDeviceAdded, onNavi
       }
       setSerialConnected(false);
       setSerialConnecting(false);
+    }
+  };
+
+  // Step 1B: In-Browser 1-Click Firmware Flasher (esptool-js Web Serial)
+  const handleOneClickFlash = async () => {
+    if (!isSerialSupported) {
+      setFlashError('In-browser flashing requires Google Chrome or Microsoft Edge on a desktop computer (PC/Mac/Linux).');
+      return;
+    }
+
+    setFlashing(true);
+    setFlashProgress(0);
+    setFlashStatus('Requesting ESP32 device port...');
+    setFlashError(null);
+
+    // Clean up any ongoing serial reader/writer
+    try {
+      if (serialReaderRef.current) {
+        await serialReaderRef.current.cancel();
+        serialReaderRef.current = null;
+      }
+      if (serialWriterRef.current) {
+        serialWriterRef.current = null;
+      }
+      if (serialPort && serialPort.readable) {
+        await serialPort.close();
+        setSerialPort(null);
+      }
+    } catch (e) {
+      console.warn('Port release warning before flashing:', e);
+    }
+
+    let transportInstance = null;
+    try {
+      const port = await navigator.serial.requestPort({});
+      transportInstance = new Transport(port, true);
+
+      setFlashStatus('Connecting to ESP32 bootloader (hold BOOT button if needed)...');
+      setFlashProgress(5);
+
+      const espLoader = new ESPLoader({
+        transport: transportInstance,
+        baudrate: 460800,
+        romBaudrate: 115200,
+        terminal: {
+          clean: () => {},
+          writeLine: (txt) => console.log('[ESP32-Flasher]', txt),
+          write: (txt) => console.log('[ESP32-Flasher]', txt),
+        },
+      });
+
+      const chip = await espLoader.main();
+      setFlashStatus(`Detected ${chip || 'ESP32'}. Fetching AirGuard firmware binary...`);
+      setFlashProgress(15);
+
+      const resp = await fetch('/firmware/AirGuard_ESP32_AllInOne.bin');
+      if (!resp.ok) {
+        throw new Error(`Failed to load firmware binary from web server (HTTP ${resp.status})`);
+      }
+      const arrayBuf = await resp.arrayBuffer();
+      const fileData = new Uint8Array(arrayBuf);
+      setFlashProgress(25);
+
+      setFlashStatus(`Writing ${(fileData.length / 1024).toFixed(0)} KB firmware directly into flash at 0x0000...`);
+
+      await espLoader.writeFlash({
+        fileArray: [{ data: fileData, address: 0x0 }],
+        flashSize: 'keep',
+        flashMode: 'keep',
+        flashFreq: 'keep',
+        eraseAll: false,
+        compress: true,
+        reportProgress: (fileIndex, written, total) => {
+          const pct = Math.min(96, 25 + Math.round((written / total) * 71));
+          setFlashProgress(pct);
+          setFlashStatus(`Flashing: ${Math.round((written / total) * 100)}% (${(written / 1024).toFixed(0)} KB / ${(total / 1024).toFixed(0)} KB)`);
+        },
+      });
+
+      setFlashProgress(98);
+      setFlashStatus('Firmware written! Restarting ESP32 chip...');
+
+      try {
+        await espLoader.after('hard_reset');
+      } catch (rstErr) {
+        console.warn('Post-flash chip reset note:', rstErr);
+      }
+
+      try {
+        await transportInstance.disconnect();
+      } catch (dcErr) {
+        console.warn('Disconnect note:', dcErr);
+      }
+
+      setFlashProgress(100);
+      setFlashStatus('Firmware Flashed Successfully! Node is running AirGuard OS.');
+
+      // Mark hardware as successfully detected and ready
+      const defaultId = formData.deviceId || 'esp32-node-01';
+      setDetectedHardware({
+        device: 'AirGuard ESP32 Sensing Node',
+        hardwareId: defaultId,
+        mac: 'Flashed via WebUSB',
+        chip: chip || 'ESP32',
+        revision: 1,
+        firmware: '2.2.0',
+        connection: 'Web Flashed (Complete)',
+        status: 'Flashed & Operational',
+      });
+      setFormData((f) => ({
+        ...f,
+        deviceId: defaultId,
+        name: f.name || 'Primary AirGuard Station',
+      }));
+      setSerialConnected(true);
+      checkDeviceIdAvailability(defaultId);
+    } catch (err) {
+      console.error('Flashing failed:', err);
+      if (err.name === 'NotFoundError') {
+        setFlashError('ESP32 device selection was cancelled. Click "Flash Firmware" when ready.');
+      } else {
+        setFlashError(`Flashing error: ${err.message || err}. (If connection timed out, hold the "BOOT" button on the ESP32 board for 2 seconds while clicking Connect).`);
+      }
+      try {
+        if (transportInstance) await transportInstance.disconnect();
+      } catch (e) {}
+    } finally {
+      setFlashing(false);
     }
   };
 
@@ -707,99 +842,167 @@ export default function AddDeviceWizard({ isOpen, onClose, onDeviceAdded, onNavi
                   )}
                 </div>
               ) : (
-                <div style={{ textAlign: 'center', margin: '20px 0' }}>
+                <div style={{ textAlign: 'center', margin: '14px 0' }}>
                   {isSerialSupported ? (
                     <div>
-                      {serialConnecting ? (
-                        <div style={{ display: 'inline-flex', alignItems: 'center', gap: '10px', flexWrap: 'wrap', justifyContent: 'center' }}>
+                      {/* 1-Click Browser Firmware Flasher (Zero local files needed) */}
+                      <div className="wizard-flasher-card">
+                        <div className="flasher-badge">⚡ Recommended for Any Laptop</div>
+                        <h4 className="flasher-heading">
+                          <span>🔥</span> Flash Blank ESP32 Directly from Browser
+                        </h4>
+                        <p className="flasher-desc">
+                          No Arduino IDE, code, or local folders needed. Anyone on any laptop can plug in a brand-new ESP32 chip via USB and burn the official AirGuard firmware in 1 click over WebUSB.
+                        </p>
+
+                        <div className="flasher-actions-row">
+                          <button
+                            type="button"
+                            className="wizard-btn-flash"
+                            onClick={handleOneClickFlash}
+                            disabled={flashing || serialConnecting}
+                          >
+                            {flashing ? '⏳ Flashing Firmware onto ESP32...' : '⚡ 1-Click Flash Firmware'}
+                          </button>
+                          <a
+                            href="/firmware/AirGuard_ESP32_AllInOne.bin"
+                            download="AirGuard_ESP32_AllInOne.bin"
+                            className="wizard-btn-download-bin"
+                            title="Download raw all-in-one compiled firmware binary"
+                          >
+                            💾 Download .bin
+                          </a>
+                        </div>
+
+                        {flashing && (
+                          <div className="flasher-progress-container">
+                            <div className="flasher-progress-track">
+                              <div
+                                className="flasher-progress-fill"
+                                style={{ width: `${flashProgress}%` }}
+                              />
+                            </div>
+                            <div className="flasher-progress-status">
+                              <span>{flashStatus}</span>
+                              <strong>{flashProgress}%</strong>
+                            </div>
+                          </div>
+                        )}
+
+                        {flashError && (
+                          <div
+                            style={{
+                              color: '#f87171',
+                              background: 'rgba(239, 68, 68, 0.12)',
+                              border: '1px solid rgba(239, 68, 68, 0.3)',
+                              borderRadius: '8px',
+                              padding: '10px 14px',
+                              marginTop: '12px',
+                              fontSize: '0.84rem',
+                              textAlign: 'left',
+                            }}
+                          >
+                            ⚠️ {flashError}
+                          </div>
+                        )}
+                      </div>
+
+                      <div className="wizard-divider-text">OR CONNECT AN ALREADY-FLASHED DEVICE</div>
+
+                      {/* Connect Pre-Flashed Node */}
+                      <div style={{ marginTop: '12px' }}>
+                        {serialConnecting ? (
+                          <div style={{ display: 'inline-flex', alignItems: 'center', gap: '10px', flexWrap: 'wrap', justifyContent: 'center' }}>
+                            <button
+                              type="button"
+                              className="wizard-btn-primary"
+                              disabled
+                              style={{ padding: '12px 22px', fontSize: '0.92rem', width: 'auto', display: 'inline-flex' }}
+                            >
+                              ⏳ Accessing Serial Port...
+                            </button>
+                            <button
+                              type="button"
+                              className="wizard-btn-secondary"
+                              onClick={() => setSerialConnecting(false)}
+                              style={{ padding: '12px 18px', fontSize: '0.86rem' }}
+                            >
+                              Cancel
+                            </button>
+                          </div>
+                        ) : (
                           <button
                             type="button"
                             className="wizard-btn-primary"
-                            disabled
-                            style={{ padding: '14px 24px', fontSize: '1rem', width: 'auto', display: 'inline-flex' }}
+                            onClick={handleConnectUsb}
+                            disabled={flashing}
+                            style={{ padding: '12px 24px', fontSize: '0.92rem', width: 'auto', display: 'inline-flex' }}
                           >
-                            ⏳ Accessing Serial Port...
+                            🔌 Connect Already-Flashed Device
                           </button>
+                        )}
+                        <p style={{ fontSize: '0.8rem', color: '#94a3b8', marginTop: '10px', marginBottom: '14px' }}>
+                          {serialConnecting
+                            ? 'Select your connected ESP32 COM port in the browser prompt above.'
+                            : 'If your ESP32 already runs AirGuard firmware, click above to verify and configure Wi-Fi.'}
+                        </p>
+
+                        {serialError && (
+                          <div
+                            style={{
+                              color: '#f87171',
+                              background: 'rgba(239, 68, 68, 0.12)',
+                              border: '1px solid rgba(239, 68, 68, 0.3)',
+                              borderRadius: '8px',
+                              padding: '10px 14px',
+                              margin: '12px auto 16px',
+                              fontSize: '0.84rem',
+                              maxWidth: '480px',
+                              textAlign: 'left',
+                            }}
+                          >
+                            ⚠️ {serialError}
+                          </div>
+                        )}
+
+                        <div style={{ paddingTop: '10px', borderTop: '1px solid rgba(255, 255, 255, 0.08)' }}>
                           <button
                             type="button"
-                            className="wizard-btn-secondary"
-                            onClick={() => setSerialConnecting(false)}
-                            style={{ padding: '14px 20px', fontSize: '0.88rem' }}
+                            style={{
+                              background: 'rgba(56, 189, 248, 0.08)',
+                              border: '1px solid rgba(56, 189, 248, 0.25)',
+                              color: '#38bdf8',
+                              borderRadius: '8px',
+                              padding: '8px 16px',
+                              fontSize: '0.84rem',
+                              cursor: 'pointer',
+                              display: 'inline-flex',
+                              alignItems: 'center',
+                              gap: '6px',
+                            }}
+                            onClick={() => {
+                              const defaultId = formData.deviceId || 'esp32-node-01';
+                              setDetectedHardware({
+                                device: 'AirGuard ESP32 Sensing Node',
+                                hardwareId: defaultId,
+                                mac: 'Wi-Fi Standalone',
+                                chip: 'ESP32',
+                                revision: 1,
+                                firmware: '2.2.0',
+                                connection: 'Pre-flashed / Cloud Mode',
+                                status: 'Configured',
+                              });
+                              setFormData((f) => ({
+                                ...f,
+                                deviceId: defaultId,
+                                name: f.name || 'Primary AirGuard Station',
+                              }));
+                              setSerialConnected(true);
+                            }}
                           >
-                            Cancel
+                            ⚡ Skip USB detection & register device directly →
                           </button>
                         </div>
-                      ) : (
-                        <button
-                          type="button"
-                          className="wizard-btn-primary"
-                          onClick={handleConnectUsb}
-                          style={{ padding: '14px 28px', fontSize: '1rem', width: 'auto', display: 'inline-flex' }}
-                        >
-                          🔌 Connect AirGuard Device
-                        </button>
-                      )}
-                      <p style={{ fontSize: '0.82rem', color: '#94a3b8', marginTop: '12px', marginBottom: '14px' }}>
-                        {serialConnecting
-                          ? 'Select your connected ESP32 COM port in the browser popup above (or click Cancel to retry).'
-                          : 'Your browser will prompt you to select the connected ESP32 USB COM port.'}
-                      </p>
-
-                      {serialError && (
-                        <div
-                          style={{
-                            color: '#f87171',
-                            background: 'rgba(239, 68, 68, 0.12)',
-                            border: '1px solid rgba(239, 68, 68, 0.3)',
-                            borderRadius: '8px',
-                            padding: '10px 14px',
-                            margin: '12px auto 16px',
-                            fontSize: '0.84rem',
-                            maxWidth: '480px',
-                            textAlign: 'left',
-                          }}
-                        >
-                          ⚠️ {serialError}
-                        </div>
-                      )}
-
-                      <div style={{ paddingTop: '10px', borderTop: '1px solid rgba(255, 255, 255, 0.08)' }}>
-                        <button
-                          type="button"
-                          style={{
-                            background: 'rgba(56, 189, 248, 0.08)',
-                            border: '1px solid rgba(56, 189, 248, 0.25)',
-                            color: '#38bdf8',
-                            borderRadius: '8px',
-                            padding: '8px 16px',
-                            fontSize: '0.84rem',
-                            cursor: 'pointer',
-                            display: 'inline-flex',
-                            alignItems: 'center',
-                            gap: '6px',
-                          }}
-                          onClick={() => {
-                            const defaultId = formData.deviceId || 'esp32-node-01';
-                            setDetectedHardware({
-                              device: 'AirGuard ESP32 Sensing Node',
-                              hardwareId: defaultId,
-                              mac: 'Wi-Fi Standalone',
-                              chip: 'ESP32',
-                              revision: 1,
-                              firmware: '2.2.0',
-                              connection: 'Pre-flashed / Cloud Mode',
-                              status: 'Configured',
-                            });
-                            setFormData((f) => ({
-                              ...f,
-                              deviceId: defaultId,
-                              name: f.name || 'Primary AirGuard Station',
-                            }));
-                            setSerialConnected(true);
-                          }}
-                        >
-                          ⚡ Already flashed via Arduino IDE? Skip USB detection & register directly →
-                        </button>
                       </div>
                     </div>
                   ) : (
