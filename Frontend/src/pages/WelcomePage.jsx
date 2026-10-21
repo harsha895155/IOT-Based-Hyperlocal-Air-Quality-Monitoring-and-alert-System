@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useMemo } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
 import AirGuardLogo from '../components/AirGuardLogo';
 import AirGuard3DCanvas from '../components/AirGuard3DCanvas';
@@ -14,6 +14,12 @@ export default function WelcomePage() {
   const [emailCopied, setEmailCopied] = useState(false);
   const [particleMode, setParticleMode] = useState('mesh'); // 'mesh' | 'aerosols' | 'clean'
   const [activeModuleTab, setActiveModuleTab] = useState(0);
+
+  // Hero Console Interactive Mode: 'telemetry' | 'formula' | 'tour'
+  const [heroConsoleMode, setHeroConsoleMode] = useState('telemetry');
+  const [calcPm25, setCalcPm25] = useState(8.4);
+  const [tourStep, setTourStep] = useState(0);
+  const [tourAutoPlay, setTourAutoPlay] = useState(false);
 
   // Simulated live telemetry stream for hero widget
   const [liveTelemetry, setLiveTelemetry] = useState({
@@ -72,6 +78,83 @@ export default function WelcomePage() {
     setEmailCopied(true);
     setTimeout(() => setEmailCopied(false), 2500);
   };
+
+  // Dynamic EPA Piecewise AQI calculation engine
+  const calculatedEPA = useMemo(() => {
+    const c = Math.max(0, Number(calcPm25));
+    let bpLo = 0, bpHi = 12.0, iLo = 0, iHi = 50, cat = 'Good', color = '#10b981';
+    if (c <= 12.0) {
+      bpLo = 0.0; bpHi = 12.0; iLo = 0; iHi = 50; cat = 'Good'; color = '#10b981';
+    } else if (c <= 35.4) {
+      bpLo = 12.1; bpHi = 35.4; iLo = 51; iHi = 100; cat = 'Moderate'; color = '#f59e0b';
+    } else if (c <= 55.4) {
+      bpLo = 35.5; bpHi = 55.4; iLo = 101; iHi = 150; cat = 'Unhealthy (Sensitive)'; color = '#f97316';
+    } else if (c <= 150.4) {
+      bpLo = 55.5; bpHi = 150.4; iLo = 151; iHi = 200; cat = 'Unhealthy'; color = '#ef4444';
+    } else if (c <= 250.4) {
+      bpLo = 150.5; bpHi = 250.4; iLo = 201; iHi = 300; cat = 'Very Unhealthy'; color = '#a855f7';
+    } else {
+      bpLo = 250.5; bpHi = 500.4; iLo = 301; iHi = 500; cat = 'Hazardous'; color = '#881337';
+    }
+    const aqi = Math.round(((iHi - iLo) / (bpHi - bpLo)) * (c - bpLo) + iLo);
+    return { aqi: Math.min(500, Math.max(0, aqi)), bpLo, bpHi, iLo, iHi, cat, color, c };
+  }, [calcPm25]);
+
+  // Video tour auto-play timer
+  useEffect(() => {
+    if (!tourAutoPlay) return;
+    const timer = setInterval(() => {
+      setTourStep((prev) => (prev + 1) % 4);
+    }, 4500);
+    return () => clearInterval(timer);
+  }, [tourAutoPlay]);
+
+  const TOUR_STEPS = [
+    {
+      step: 1,
+      badge: 'Hardware Power & Wiring',
+      title: '1. Wire Sensors & Connect USB',
+      icon: '🔌',
+      description:
+        'Connect the MQ-135 Gas Chamber to Pin 34 (ADC1) and the DHT22 Temperature & Humidity sensor to Pin 4. Power the ESP32 NodeMCU using standard Micro-USB or any 5V USB wall adapter.',
+      detail: 'Internal SnO2 electrochemical heater warms up to establish baseline zero-point resistance.',
+      action: 'Next: Wi-Fi Setup',
+      iconBg: '#0284c7',
+    },
+    {
+      step: 2,
+      badge: 'Zero-Install In-Browser',
+      title: '2. Wire-Free Wi-Fi Provisioning',
+      icon: '📶',
+      description:
+        'No Arduino IDE needed! Either connect Web Serial directly in Google Chrome over USB, OR connect to the device hotspot "AirGuard-Setup" from your mobile phone and input your Wi-Fi password.',
+      detail: 'ESP32 verifies handshake with local router and saves credentials permanently into flash memory.',
+      action: 'Next: Cloud Ingestion',
+      iconBg: '#059669',
+    },
+    {
+      step: 3,
+      badge: 'Sub-Second Cloud Gateway',
+      title: '3. Automated Cloud Telemetry Ingestion',
+      icon: '☁️',
+      description:
+        'Every 15s, the ESP32 samples analog voltages, applies DHT22 temperature & humidity compensation curves, and transmits authenticated JSON packets to the Node.js Express REST API and MongoDB Atlas.',
+      detail: 'MongoDB executes $group aggregation pipelines and archives historical telemetry logs.',
+      action: 'Next: Live Alerts',
+      iconBg: '#8b5cf6',
+    },
+    {
+      step: 4,
+      badge: 'Sub-28ms Latency',
+      title: '4. Live WebSocket Dashboard & Alarms',
+      icon: '🚨',
+      description:
+        'Socket.IO broadcasts incoming data to connected browser dashboards in under 28ms. If pollution thresholds breach safe limits, the Web Audio siren immediately triggers high-decibel alarms.',
+      detail: 'Audible emergency siren (3.1 kHz) + native OS desktop push alerts with 30m anti-spam cooldown.',
+      action: 'Restart Walkthrough',
+      iconBg: '#ef4444',
+    },
+  ];
 
   // Module showcase items
   const moduleTabs = [
@@ -383,109 +466,329 @@ export default function WelcomePage() {
               </div>
             </div>
 
-            <div className="console-body">
-              {/* Left: Circular AQI Visualizer */}
-              <div className="console-aqi-card">
-                <div className="console-gauge-wrap">
-                  <svg className="console-gauge-svg" viewBox="0 0 120 120">
-                    <circle
-                      className="gauge-bg"
-                      cx="60"
-                      cy="60"
-                      r="50"
-                    />
-                    <circle
-                      className="gauge-fill"
-                      cx="60"
-                      cy="60"
-                      r="50"
-                      style={{
-                        strokeDasharray: '314',
-                        strokeDashoffset: `${314 - (314 * Math.min(liveTelemetry.aqi, 500)) / 500}`,
-                        stroke: liveTelemetry.color,
-                      }}
-                    />
-                  </svg>
-                  <div className="console-gauge-center">
-                    <span className="console-aqi-number mono">{liveTelemetry.aqi}</span>
-                    <span className="console-aqi-unit">US EPA AQI</span>
-                  </div>
-                </div>
-                <div className="console-aqi-badge" style={{ backgroundColor: `${liveTelemetry.color}22`, color: liveTelemetry.color, borderColor: `${liveTelemetry.color}55` }}>
-                  <span>●</span> {liveTelemetry.category} Air Quality
-                </div>
-              </div>
-
-              {/* Middle: Real-time Pollutant Matrix */}
-              <div className="console-pollutants-grid">
-                <div className="pollutant-pill">
-                  <span className="pollutant-name">PM2.5</span>
-                  <span className="pollutant-val mono">{liveTelemetry.pm25} <span className="p-unit">µg/m³</span></span>
-                  <span className="pollutant-status text-emerald">Good</span>
-                </div>
-                <div className="pollutant-pill">
-                  <span className="pollutant-name">PM10</span>
-                  <span className="pollutant-val mono">{liveTelemetry.pm10} <span className="p-unit">µg/m³</span></span>
-                  <span className="pollutant-status text-emerald">Good</span>
-                </div>
-                <div className="pollutant-pill">
-                  <span className="pollutant-name">CO</span>
-                  <span className="pollutant-val mono">{liveTelemetry.co} <span className="p-unit">ppm</span></span>
-                  <span className="pollutant-status text-emerald">Safe</span>
-                </div>
-                <div className="pollutant-pill">
-                  <span className="pollutant-name">NO2</span>
-                  <span className="pollutant-val mono">{liveTelemetry.no2} <span className="p-unit">ppb</span></span>
-                  <span className="pollutant-status text-emerald">Optimal</span>
-                </div>
-                <div className="pollutant-pill">
-                  <span className="pollutant-name">Gas Chamber</span>
-                  <span className="pollutant-val mono">{liveTelemetry.mq135PPM} <span className="p-unit">ppm</span></span>
-                  <span className="pollutant-status text-emerald">Ambient</span>
-                </div>
-                <div className="pollutant-pill">
-                  <span className="pollutant-name">Atm. Pressure</span>
-                  <span className="pollutant-val mono">{liveTelemetry.pressure} <span className="p-unit">hPa</span></span>
-                  <span className="pollutant-status text-cyan">Standard</span>
-                </div>
-              </div>
-
-              {/* Right: Ambient Meteorological Conditions */}
-              <div className="console-weather-card">
-                <span className="weather-title">ATMOSPHERIC WEATHER</span>
-                <div className="weather-temp-row">
-                  <span className="weather-temp-number mono">{liveTelemetry.temp}°C</span>
-                  <div className="weather-sub">
-                    <span>Partly Cloudy</span>
-                    <span className="text-muted fs-xs">Feels like 24°C</span>
-                  </div>
-                </div>
-                <div className="weather-detail-row">
-                  <div className="weather-item">
-                    <span className="w-label">Humidity</span>
-                    <span className="w-val mono">{liveTelemetry.humidity}%</span>
-                  </div>
-                  <div className="weather-item">
-                    <span className="w-label">Wind</span>
-                    <span className="w-val mono">{liveTelemetry.wind} km/h NW</span>
-                  </div>
-                </div>
-                <button
-                  type="button"
-                  onClick={handleGuestEntry}
-                  className="btn btn--primary console-launch-btn"
-                >
-                  <span>Launch Live Full Console</span>
-                  <span>➔</span>
-                </button>
-              </div>
+            {/* Mode Switcher Tabs */}
+            <div className="console-mode-tabs">
+              <button
+                type="button"
+                className={`console-mode-btn ${heroConsoleMode === 'telemetry' ? 'is-active' : ''}`}
+                onClick={() => setHeroConsoleMode('telemetry')}
+              >
+                📊 Live Telemetry HUD
+              </button>
+              <button
+                type="button"
+                className={`console-mode-btn ${heroConsoleMode === 'formula' ? 'is-active' : ''}`}
+                onClick={() => setHeroConsoleMode('formula')}
+              >
+                📐 How AQI Is Calculated
+              </button>
+              <button
+                type="button"
+                className={`console-mode-btn ${heroConsoleMode === 'tour' ? 'is-active' : ''}`}
+                onClick={() => setHeroConsoleMode('tour')}
+              >
+                🎥 How to Connect & Platform Tour
+              </button>
             </div>
+
+            {/* TAB 1: LIVE TELEMETRY HUD */}
+            {heroConsoleMode === 'telemetry' && (
+              <div className="console-body">
+                {/* Left: Circular AQI Visualizer */}
+                <div className="console-aqi-card">
+                  <div className="console-gauge-wrap">
+                    <svg className="console-gauge-svg" viewBox="0 0 120 120">
+                      <circle className="gauge-bg" cx="60" cy="60" r="50" />
+                      <circle
+                        className="gauge-fill"
+                        cx="60"
+                        cy="60"
+                        r="50"
+                        style={{
+                          strokeDasharray: '314',
+                          strokeDashoffset: `${314 - (314 * Math.min(liveTelemetry.aqi, 500)) / 500}`,
+                          stroke: liveTelemetry.color,
+                        }}
+                      />
+                    </svg>
+                    <div className="console-gauge-center">
+                      <span className="console-aqi-number mono">{liveTelemetry.aqi}</span>
+                      <span className="console-aqi-unit">US EPA AQI</span>
+                    </div>
+                  </div>
+                  <div className="console-aqi-badge" style={{ backgroundColor: `${liveTelemetry.color}22`, color: liveTelemetry.color, borderColor: `${liveTelemetry.color}55` }}>
+                    <span>●</span> {liveTelemetry.category} Air Quality
+                  </div>
+                </div>
+
+                {/* Middle: Real-time Pollutant Matrix */}
+                <div className="console-pollutants-grid">
+                  <div className="pollutant-pill">
+                    <span className="pollutant-name">PM2.5</span>
+                    <span className="pollutant-val mono">{liveTelemetry.pm25} <span className="p-unit">µg/m³</span></span>
+                    <span className="pollutant-status text-emerald">Good</span>
+                  </div>
+                  <div className="pollutant-pill">
+                    <span className="pollutant-name">PM10</span>
+                    <span className="pollutant-val mono">{liveTelemetry.pm10} <span className="p-unit">µg/m³</span></span>
+                    <span className="pollutant-status text-emerald">Good</span>
+                  </div>
+                  <div className="pollutant-pill">
+                    <span className="pollutant-name">CO</span>
+                    <span className="pollutant-val mono">{liveTelemetry.co} <span className="p-unit">ppm</span></span>
+                    <span className="pollutant-status text-emerald">Safe</span>
+                  </div>
+                  <div className="pollutant-pill">
+                    <span className="pollutant-name">NO2</span>
+                    <span className="pollutant-val mono">{liveTelemetry.no2} <span className="p-unit">ppb</span></span>
+                    <span className="pollutant-status text-emerald">Optimal</span>
+                  </div>
+                  <div className="pollutant-pill">
+                    <span className="pollutant-name">Gas Chamber</span>
+                    <span className="pollutant-val mono">{liveTelemetry.mq135PPM} <span className="p-unit">ppm</span></span>
+                    <span className="pollutant-status text-emerald">Ambient</span>
+                  </div>
+                  <div className="pollutant-pill">
+                    <span className="pollutant-name">Atm. Pressure</span>
+                    <span className="pollutant-val mono">{liveTelemetry.pressure} <span className="p-unit">hPa</span></span>
+                    <span className="pollutant-status text-cyan">Standard</span>
+                  </div>
+                </div>
+
+                {/* Right: Ambient Meteorological Conditions */}
+                <div className="console-weather-card">
+                  <span className="weather-title">ATMOSPHERIC WEATHER</span>
+                  <div className="weather-temp-row">
+                    <span className="weather-temp-number mono">{liveTelemetry.temp}°C</span>
+                    <div className="weather-sub">
+                      <span>Partly Cloudy</span>
+                      <span className="text-muted fs-xs">Feels like 24°C</span>
+                    </div>
+                  </div>
+                  <div className="weather-detail-row">
+                    <div className="weather-item">
+                      <span className="w-label">Humidity</span>
+                      <span className="w-val mono">{liveTelemetry.humidity}%</span>
+                    </div>
+                    <div className="weather-item">
+                      <span className="w-label">Wind</span>
+                      <span className="w-val mono">{liveTelemetry.wind} km/h NW</span>
+                    </div>
+                  </div>
+                  <button
+                    type="button"
+                    onClick={handleGuestEntry}
+                    className="btn btn--primary console-launch-btn"
+                  >
+                    <span>Launch Live Full Console</span>
+                    <span>➔</span>
+                  </button>
+                </div>
+              </div>
+            )}
+
+            {/* TAB 2: HOW AQI IS CALCULATED (INTERACTIVE MATHEMATICAL ENGINE) */}
+            {heroConsoleMode === 'formula' && (
+              <div className="console-formula-view">
+                {/* Left: Real-Time Calculated Gauge */}
+                <div className="formula-gauge-col">
+                  <div className="console-gauge-wrap">
+                    <svg className="console-gauge-svg" viewBox="0 0 120 120">
+                      <circle className="gauge-bg" cx="60" cy="60" r="50" />
+                      <circle
+                        className="gauge-fill"
+                        cx="60"
+                        cy="60"
+                        r="50"
+                        style={{
+                          strokeDasharray: '314',
+                          strokeDashoffset: `${314 - (314 * Math.min(calculatedEPA.aqi, 500)) / 500}`,
+                          stroke: calculatedEPA.color,
+                        }}
+                      />
+                    </svg>
+                    <div className="console-gauge-center">
+                      <span className="console-aqi-number mono">{calculatedEPA.aqi}</span>
+                      <span className="console-aqi-unit">CALCULATED AQI</span>
+                    </div>
+                  </div>
+                  <div className="console-aqi-badge" style={{ backgroundColor: `${calculatedEPA.color}22`, color: calculatedEPA.color, borderColor: `${calculatedEPA.color}55` }}>
+                    <span>●</span> {calculatedEPA.cat}
+                  </div>
+                  <span className="fs-xs text-muted" style={{ textAlign: 'center' }}>
+                    Active Tier: {calculatedEPA.bpLo}–{calculatedEPA.bpHi} µg/m³
+                  </span>
+                </div>
+
+                {/* Center: Live Mathematical Equation & Substitution */}
+                <div className="formula-math-col">
+                  <div className="formula-title-row">
+                    <span className="formula-tag">EPA STANDARD PIECEWISE LINEAR EQUATION</span>
+                    <span className="formula-citation">40 CFR Part 58 Appendix G</span>
+                  </div>
+
+                  <div className="formula-equation-box mono">
+                    <div className="math-row">
+                      <span className="var-result">AQI</span> = 
+                      <span className="fraction">
+                        <span className="num">(I_hi - I_lo)</span>
+                        <span className="den">(BP_hi - BP_lo)</span>
+                      </span>
+                      × (C_p - BP_lo) + I_lo
+                    </div>
+
+                    <div className="math-substitution-row">
+                      = <span className="fraction">
+                        <span className="num">({calculatedEPA.iHi} - {calculatedEPA.iLo})</span>
+                        <span className="den">({calculatedEPA.bpHi} - {calculatedEPA.bpLo})</span>
+                      </span>
+                      × ({calcPm25} - {calculatedEPA.bpLo}) + {calculatedEPA.iLo} = <strong style={{ color: calculatedEPA.color, fontSize: '1.15rem' }}>{calculatedEPA.aqi}</strong>
+                    </div>
+                  </div>
+
+                  {/* Electrochemical Gas Equation */}
+                  <div className="formula-sub-equation">
+                    <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
+                      <strong style={{ fontSize: '0.78rem', color: '#0284c7' }}>SnO2 Electrochemical Sensor Conversion (MQ-135):</strong>
+                      <span className="fs-xs text-muted">DHT22 Temp & Humidity Compensated</span>
+                    </div>
+                    <p className="mono fs-xs" style={{ margin: '4px 0 0 0', color: 'var(--text-secondary)' }}>
+                      R_s = ((V_in - V_out) / V_out) × R_L  |  R_s(corr) = R_s × [1.0 + 0.005(T - 20) - 0.002(H - 55)]
+                    </p>
+                  </div>
+                </div>
+
+                {/* Right: Interactive Concentration Slider */}
+                <div className="formula-slider-col">
+                  <div className="slider-header-row">
+                    <span className="slider-lbl">TEST POLLUTANT:</span>
+                    <span className="slider-val mono" style={{ color: calculatedEPA.color, fontWeight: 700 }}>
+                      {calcPm25} µg/m³
+                    </span>
+                  </div>
+
+                  <input
+                    type="range"
+                    min="0"
+                    max="200"
+                    step="0.5"
+                    value={calcPm25}
+                    onChange={(e) => setCalcPm25(Number(e.target.value))}
+                    className="formula-range-slider"
+                    style={{ accentColor: calculatedEPA.color, width: '100%', cursor: 'pointer' }}
+                  />
+
+                  <div className="slider-quick-buttons">
+                    <button type="button" onClick={() => setCalcPm25(8.4)} className="quick-conc-btn">Clean (8.4)</button>
+                    <button type="button" onClick={() => setCalcPm25(25.0)} className="quick-conc-btn">Moderate (25)</button>
+                    <button type="button" onClick={() => setCalcPm25(65.0)} className="quick-conc-btn">Unhealthy (65)</button>
+                    <button type="button" onClick={() => setCalcPm25(160.0)} className="quick-conc-btn">Severe (160)</button>
+                  </div>
+
+                  <span className="fs-xs text-muted" style={{ display: 'block', marginTop: '6px' }}>
+                    Drag slider to see the EPA formula recalculate in real-time.
+                  </span>
+                </div>
+              </div>
+            )}
+
+            {/* TAB 3: HOW TO CONNECT & PLATFORM TOUR (VIDEO-STYLE WALKTHROUGH) */}
+            {heroConsoleMode === 'tour' && (
+              <div className="console-tour-view">
+                {/* Step Tabs Indicator */}
+                <div className="tour-steps-nav">
+                  {TOUR_STEPS.map((s, idx) => (
+                    <button
+                      key={s.step}
+                      type="button"
+                      className={`tour-step-tab ${tourStep === idx ? 'is-active' : ''}`}
+                      onClick={() => setTourStep(idx)}
+                    >
+                      <span className="tour-step-icon">{s.icon}</span>
+                      <div className="tour-step-tab-meta">
+                        <span className="tour-step-num">STEP {s.step}</span>
+                        <span className="tour-step-tab-title">{s.title.split('. ')[1]}</span>
+                      </div>
+                    </button>
+                  ))}
+                </div>
+
+                {/* Active Step Presentation Card */}
+                <div className="tour-presentation-card">
+                  <div className="tour-card-visual" style={{ borderColor: TOUR_STEPS[tourStep].iconBg }}>
+                    <div className="tour-visual-icon" style={{ backgroundColor: `${TOUR_STEPS[tourStep].iconBg}22`, color: TOUR_STEPS[tourStep].iconBg }}>
+                      {TOUR_STEPS[tourStep].icon}
+                    </div>
+                    <div className="tour-visual-pulse-ring" style={{ borderColor: TOUR_STEPS[tourStep].iconBg }} />
+                  </div>
+
+                  <div className="tour-card-body">
+                    <div className="tour-pill-row">
+                      <span className="tour-badge-pill" style={{ color: TOUR_STEPS[tourStep].iconBg, borderColor: `${TOUR_STEPS[tourStep].iconBg}55` }}>
+                        {TOUR_STEPS[tourStep].badge}
+                      </span>
+                      <span className="tour-step-counter">Step {tourStep + 1} of 4</span>
+                    </div>
+
+                    <h3 className="tour-step-title">{TOUR_STEPS[tourStep].title}</h3>
+                    <p className="tour-step-desc">{TOUR_STEPS[tourStep].description}</p>
+
+                    <div className="tour-highlight-box">
+                      <strong>⚡ Technical Check:</strong> {TOUR_STEPS[tourStep].detail}
+                    </div>
+                  </div>
+                </div>
+
+                {/* Video-style Navigation & Controls Bar */}
+                <div className="tour-controls-row">
+                  <div className="tour-play-controls">
+                    <button
+                      type="button"
+                      className="tour-ctrl-btn"
+                      onClick={() => setTourStep((prev) => (prev > 0 ? prev - 1 : TOUR_STEPS.length - 1))}
+                      title="Previous Step"
+                    >
+                      ⏮ Previous
+                    </button>
+
+                    <button
+                      type="button"
+                      className={`tour-ctrl-btn ${tourAutoPlay ? 'is-playing' : ''}`}
+                      onClick={() => setTourAutoPlay(!tourAutoPlay)}
+                      title={tourAutoPlay ? 'Pause Auto-Play' : 'Auto-Play Walkthrough'}
+                    >
+                      {tourAutoPlay ? '⏸ Pause Auto-Play' : '▶ Auto-Play Walkthrough'}
+                    </button>
+
+                    <button
+                      type="button"
+                      className="tour-ctrl-btn"
+                      onClick={() => setTourStep((prev) => (prev + 1) % TOUR_STEPS.length)}
+                      title="Next Step"
+                    >
+                      Next Step ⏭
+                    </button>
+                  </div>
+
+                  <div className="tour-action-group">
+                    <Link to="/devices" className="btn btn--primary" style={{ padding: '7px 16px', fontSize: '0.82rem' }}>
+                      <span>Launch Hardware Wizard</span>
+                      <span>➔</span>
+                    </Link>
+                  </div>
+                </div>
+              </div>
+            )}
 
             {/* Live Streaming Sparkline Bar */}
             <div className="console-sparkline-strip">
               <div className="sparkline-indicator">
                 <span className="pulse-dot green" />
-                <span>Stream active • Auto-polling 2.5s</span>
+                <span>
+                  {heroConsoleMode === 'telemetry' && 'Stream active • Auto-polling 2.5s'}
+                  {heroConsoleMode === 'formula' && `EPA Piecewise Engine • Testing ${calcPm25} µg/m³`}
+                  {heroConsoleMode === 'tour' && `Interactive Setup Walkthrough • Step ${tourStep + 1} of 4`}
+                </span>
               </div>
               <div className="sparkline-waveform">
                 {[40, 42, 38, 39, 36, 41, 45, 38, 37, 39, 40, 36, 38, 39, 41, 38, 37, 38].map((h, i) => (
@@ -497,7 +800,9 @@ export default function WelcomePage() {
                 ))}
               </div>
               <div className="sparkline-stat mono fs-xs">
-                ADC: 1.18V • Rs/R0: 1.84
+                {heroConsoleMode === 'telemetry' && 'ADC: 1.18V • Rs/R0: 1.84'}
+                {heroConsoleMode === 'formula' && `AQI: ${calculatedEPA.aqi} (${calculatedEPA.cat})`}
+                {heroConsoleMode === 'tour' && (tourAutoPlay ? '▶ Auto-Playing (4.5s)' : '⏸ Manual Walkthrough')}
               </div>
             </div>
           </div>
