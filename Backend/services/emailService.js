@@ -5,8 +5,9 @@ const nodemailer = require('nodemailer');
  * Supports Gmail (airguard396@gmail.com) via Google App Passwords, or any standard SMTP service.
  */
 function getTransporter() {
-  const emailUser = process.env.EMAIL_USER || process.env.SMTP_USER || 'airguard396@gmail.com';
-  const emailPass = process.env.EMAIL_PASS || process.env.GMAIL_APP_PASSWORD || process.env.SMTP_PASS;
+  const emailUser = (process.env.EMAIL_USER || process.env.SMTP_USER || 'airguard396@gmail.com').trim();
+  const rawPass = process.env.EMAIL_PASS || process.env.GMAIL_APP_PASSWORD || process.env.SMTP_PASS || '';
+  const emailPass = rawPass.replace(/\s+/g, '').trim();
 
   // Custom SMTP configuration
   if (process.env.SMTP_HOST && emailUser && emailPass) {
