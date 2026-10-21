@@ -2,6 +2,7 @@ import React, { useState, useEffect, useMemo } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
 import AirGuardLogo from '../components/AirGuardLogo';
 import AirGuard3DCanvas from '../components/AirGuard3DCanvas';
+import ESP32Node3DViewer from '../components/ESP32Node3DViewer';
 import { useAuth } from '../context/AuthContext';
 import { useTheme } from '../context/ThemeContext';
 import './WelcomePage.css';
@@ -487,7 +488,14 @@ export default function WelcomePage() {
                 className={`console-mode-btn ${heroConsoleMode === 'tour' ? 'is-active' : ''}`}
                 onClick={() => setHeroConsoleMode('tour')}
               >
-                🎥 How to Connect & Platform Tour
+                🎥 How to Connect & Tour
+              </button>
+              <button
+                type="button"
+                className={`console-mode-btn ${heroConsoleMode === 'node3d' ? 'is-active' : ''}`}
+                onClick={() => setHeroConsoleMode('node3d')}
+              >
+                🛸 Interactive 3D Node
               </button>
             </div>
 
@@ -780,6 +788,17 @@ export default function WelcomePage() {
               </div>
             )}
 
+            {/* TAB 4: INTERACTIVE 3D ESP32 HARDWARE NODE */}
+            {heroConsoleMode === 'node3d' && (
+              <div className="console-node3d-view">
+                <ESP32Node3DViewer
+                  theme={resolvedTheme}
+                  height={340}
+                  aqiTier={liveTelemetry.aqi > 150 ? 'unhealthy' : liveTelemetry.aqi > 50 ? 'moderate' : 'good'}
+                />
+              </div>
+            )}
+
             {/* Live Streaming Sparkline Bar */}
             <div className="console-sparkline-strip">
               <div className="sparkline-indicator">
@@ -788,6 +807,7 @@ export default function WelcomePage() {
                   {heroConsoleMode === 'telemetry' && 'Stream active • Auto-polling 2.5s'}
                   {heroConsoleMode === 'formula' && `EPA Piecewise Engine • Testing ${calcPm25} µg/m³`}
                   {heroConsoleMode === 'tour' && `Interactive Setup Walkthrough • Step ${tourStep + 1} of 4`}
+                  {heroConsoleMode === 'node3d' && 'Physical ESP32-WROOM-32 Twin • Interactive 3D Canvas'}
                 </span>
               </div>
               <div className="sparkline-waveform">
@@ -803,6 +823,7 @@ export default function WelcomePage() {
                 {heroConsoleMode === 'telemetry' && 'ADC: 1.18V • Rs/R0: 1.84'}
                 {heroConsoleMode === 'formula' && `AQI: ${calculatedEPA.aqi} (${calculatedEPA.cat})`}
                 {heroConsoleMode === 'tour' && (tourAutoPlay ? '▶ Auto-Playing (4.5s)' : '⏸ Manual Walkthrough')}
+                {heroConsoleMode === 'node3d' && 'Drag to Rotate 360° • WebGL Accelerated'}
               </div>
             </div>
           </div>
@@ -1008,6 +1029,52 @@ export default function WelcomePage() {
               <div className="pipeline-step__num mono">05</div>
               <div className="pipeline-step__title">Socket.IO & Web</div>
               <div className="pipeline-step__desc">Broadcasts telemetry in real time to connected browser dashboards without reloading.</div>
+            </div>
+          </div>
+
+          {/* Interactive 3D Hardware Node Showcase */}
+          <div className="architecture-3d-card">
+            <div className="arch-3d-left">
+              <span className="arch-badge">PHYSICAL HARDWARE SPECIFICATION</span>
+              <h3 className="arch-title">ESP32-WROOM-32 Edge Station</h3>
+              <p className="arch-desc">
+                High-precision edge IoT station fusing multi-gas electrochemical sensing, digital psychrometric compensation, and zero-cable captive portal Wi-Fi provisioning.
+              </p>
+
+              <div className="arch-specs-list">
+                <div className="arch-spec-item">
+                  <span className="arch-spec-icon">⚡</span>
+                  <div>
+                    <strong>Dual-Core Xtensa LX6 @ 240MHz</strong>
+                    <p>Sub-millisecond ADC sampling & onboard baseline drift compensation</p>
+                  </div>
+                </div>
+                <div className="arch-spec-item">
+                  <span className="arch-spec-icon">🧪</span>
+                  <div>
+                    <strong>MQ-135 Electrochemical Gas Chamber</strong>
+                    <p>Internal SnO2 ceramic heater detecting CO, CO2, NH3, and Benzene</p>
+                  </div>
+                </div>
+                <div className="arch-spec-item">
+                  <span className="arch-spec-icon">🌡️</span>
+                  <div>
+                    <strong>DHT22 Precision Psychrometric Array</strong>
+                    <p>±0.5°C Temperature & ±2% RH compensation telemetry</p>
+                  </div>
+                </div>
+                <div className="arch-spec-item">
+                  <span className="arch-spec-icon">📡</span>
+                  <div>
+                    <strong>2.4GHz IEEE 802.11 b/g/n Wi-Fi Mesh</strong>
+                    <p>Automatic failover hotspot broadcast & captive mobile onboarding</p>
+                  </div>
+                </div>
+              </div>
+            </div>
+
+            <div className="arch-3d-right">
+              <ESP32Node3DViewer theme={resolvedTheme} height={360} aqiTier="good" />
             </div>
           </div>
         </div>

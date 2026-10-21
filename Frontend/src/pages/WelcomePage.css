@@ -997,6 +997,169 @@
   color: #ef4444;
 }
 
+/* ─── TAB 4: INTERACTIVE 3D ESP32 HARDWARE NODE ─── */
+.console-node3d-view {
+  padding: 16px 20px;
+  position: relative;
+}
+
+.esp32-node-3d-container {
+  position: relative;
+  width: 100%;
+  border-radius: 16px;
+  overflow: hidden;
+  background: radial-gradient(circle at 50% 50%, rgba(2, 132, 199, 0.08) 0%, rgba(10, 18, 38, 0.8) 100%);
+  border: 1px solid rgba(56, 189, 248, 0.2);
+}
+
+.node-3d-hud-overlay {
+  position: absolute;
+  inset: 0;
+  display: flex;
+  flex-direction: column;
+  justify-content: space-between;
+  padding: 14px;
+  pointer-events: none;
+}
+
+.node-3d-header-badge {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  background: rgba(15, 23, 42, 0.85);
+  border: 1px solid rgba(56, 189, 248, 0.3);
+  padding: 5px 12px;
+  border-radius: 999px;
+  width: fit-content;
+  backdrop-filter: blur(8px);
+}
+
+.node-3d-fps {
+  font-size: 0.7rem;
+  color: #10b981;
+  font-weight: 600;
+  margin-left: 6px;
+}
+
+.node-3d-pinout-tags {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 6px;
+  pointer-events: auto;
+}
+
+.pin-tag {
+  background: rgba(15, 23, 42, 0.8);
+  border: 1px solid rgba(255, 255, 255, 0.12);
+  color: #cbd5e1;
+  font-size: 0.72rem;
+  font-family: monospace;
+  padding: 4px 10px;
+  border-radius: 6px;
+  cursor: pointer;
+  transition: all 0.2s ease;
+  backdrop-filter: blur(8px);
+}
+
+.pin-tag:hover,
+.pin-tag.is-active {
+  background: rgba(56, 189, 248, 0.2);
+  border-color: #38bdf8;
+  color: #38bdf8;
+  box-shadow: 0 0 10px rgba(56, 189, 248, 0.25);
+}
+
+.node-3d-controls-bar {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  flex-wrap: wrap;
+  gap: 10px;
+  background: rgba(15, 23, 42, 0.85);
+  border: 1px solid rgba(255, 255, 255, 0.08);
+  padding: 8px 14px;
+  border-radius: 12px;
+  pointer-events: auto;
+  backdrop-filter: blur(12px);
+}
+
+.node-3d-state-buttons {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+}
+
+.state-label {
+  font-size: 0.72rem;
+  color: #94a3b8;
+  font-weight: 600;
+  margin-right: 4px;
+}
+
+.sim-btn {
+  font-size: 0.72rem;
+  font-weight: 700;
+  padding: 4px 10px;
+  border-radius: 6px;
+  border: 1px solid transparent;
+  cursor: pointer;
+  transition: all 0.2s ease;
+}
+
+.sim-btn.good {
+  background: rgba(16, 185, 129, 0.12);
+  color: #10b981;
+  border-color: rgba(16, 185, 129, 0.3);
+}
+
+.sim-btn.good.is-selected {
+  background: #10b981;
+  color: #ffffff;
+  box-shadow: 0 0 12px rgba(16, 185, 129, 0.4);
+}
+
+.sim-btn.mod {
+  background: rgba(245, 158, 11, 0.12);
+  color: #f59e0b;
+  border-color: rgba(245, 158, 11, 0.3);
+}
+
+.sim-btn.mod.is-selected {
+  background: #f59e0b;
+  color: #ffffff;
+  box-shadow: 0 0 12px rgba(245, 158, 11, 0.4);
+}
+
+.sim-btn.danger {
+  background: rgba(239, 68, 68, 0.12);
+  color: #ef4444;
+  border-color: rgba(239, 68, 68, 0.3);
+}
+
+.sim-btn.danger.is-selected {
+  background: #ef4444;
+  color: #ffffff;
+  box-shadow: 0 0 12px rgba(239, 68, 68, 0.4);
+}
+
+.rotate-toggle-btn {
+  background: rgba(255, 255, 255, 0.08);
+  border: 1px solid rgba(255, 255, 255, 0.14);
+  color: #cbd5e1;
+  font-size: 0.75rem;
+  font-weight: 600;
+  padding: 4px 12px;
+  border-radius: 6px;
+  cursor: pointer;
+  transition: all 0.2s ease;
+}
+
+.rotate-toggle-btn:hover {
+  background: rgba(56, 189, 248, 0.2);
+  color: #38bdf8;
+  border-color: #38bdf8;
+}
+
 /* Sparkline Waveform Strip */
 .console-sparkline-strip {
   display: flex;
@@ -1418,6 +1581,99 @@
   flex-shrink: 0;
 }
 
+/* ─── 6B. Interactive 3D Architecture Hardware Showcase ─── */
+.architecture-3d-card {
+  margin-top: 36px;
+  display: grid;
+  grid-template-columns: 1.15fr 1fr;
+  gap: 32px;
+  background: rgba(10, 18, 38, 0.75);
+  border: 1px solid rgba(56, 189, 248, 0.25);
+  border-radius: 22px;
+  padding: 36px;
+  backdrop-filter: blur(24px);
+  -webkit-backdrop-filter: blur(24px);
+  box-shadow: 0 20px 50px rgba(0, 0, 0, 0.45);
+  align-items: center;
+}
+
+.arch-3d-left {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+}
+
+.arch-badge {
+  font-size: 0.72rem;
+  font-weight: 800;
+  letter-spacing: 0.08em;
+  color: #38bdf8;
+  text-transform: uppercase;
+}
+
+.arch-title {
+  font-size: 1.9rem;
+  font-weight: 800;
+  color: #ffffff;
+  margin: 0;
+  line-height: 1.2;
+}
+
+.arch-desc {
+  font-size: 0.95rem;
+  color: #cbd5e1;
+  line-height: 1.6;
+  margin: 0 0 12px 0;
+}
+
+.arch-specs-list {
+  display: grid;
+  grid-template-columns: 1fr;
+  gap: 12px;
+}
+
+.arch-spec-item {
+  display: flex;
+  align-items: flex-start;
+  gap: 12px;
+  background: rgba(255, 255, 255, 0.035);
+  border: 1px solid rgba(255, 255, 255, 0.07);
+  border-radius: 12px;
+  padding: 12px 16px;
+  transition: transform 0.2s ease, border-color 0.2s ease;
+}
+
+.arch-spec-item:hover {
+  transform: translateX(4px);
+  border-color: rgba(56, 189, 248, 0.3);
+  background: rgba(56, 189, 248, 0.05);
+}
+
+.arch-spec-icon {
+  font-size: 1.4rem;
+  line-height: 1;
+}
+
+.arch-spec-item strong {
+  font-size: 0.88rem;
+  color: #f1f5f9;
+  display: block;
+  margin-bottom: 2px;
+}
+
+.arch-spec-item p {
+  font-size: 0.78rem;
+  color: #94a3b8;
+  margin: 0;
+  line-height: 1.4;
+}
+
+.arch-3d-right {
+  position: relative;
+  border-radius: 18px;
+  overflow: hidden;
+}
+
 /* ─── 7. Contact Section ─── */
 .welcome-contact {
   padding: 70px 24px;
@@ -1692,6 +1948,11 @@
     grid-template-columns: 1fr;
     padding: 28px;
   }
+  .architecture-3d-card {
+    grid-template-columns: 1fr;
+    gap: 24px;
+    padding: 24px;
+  }
   .contact-main-card {
     grid-template-columns: 1fr;
     padding: 28px;
@@ -1743,7 +2004,10 @@
    Welcome Page — Luminous Ceramic Daylight Theme (High Contrast & Visible Borders)
    ═════════════════════════════════════════════════════════════════════ */
 [data-theme='light'] .welcome-page {
-  background: radial-gradient(circle at 50% 10%, rgba(2, 132, 199, 0.12) 0%, #f8fafc 45%, #f1f5f9 100%) !important;
+  background: radial-gradient(ellipse at 20% 0%, rgba(2, 132, 199, 0.16) 0%, transparent 45%),
+              radial-gradient(ellipse at 80% 10%, rgba(99, 102, 241, 0.13) 0%, transparent 45%),
+              radial-gradient(circle at 50% 50%, rgba(16, 185, 129, 0.09) 0%, transparent 55%),
+              linear-gradient(180deg, #f0f7ff 0%, #f8fafc 35%, #edf5fc 100%) !important;
   color: #0f172a !important;
 }
 
@@ -2077,6 +2341,54 @@
   color: #b91c1c !important;
 }
 
+/* 3D Hardware Node in Light Mode */
+[data-theme='light'] .esp32-node-3d-container {
+  background: radial-gradient(circle at 50% 50%, rgba(2, 132, 199, 0.12) 0%, #f0f7ff 100%) !important;
+  border: 1.5px solid rgba(2, 132, 199, 0.35) !important;
+  box-shadow: 0 8px 25px rgba(2, 132, 199, 0.1) !important;
+}
+
+[data-theme='light'] .node-3d-header-badge {
+  background: rgba(255, 255, 255, 0.94) !important;
+  border: 1.5px solid rgba(2, 132, 199, 0.3) !important;
+  color: #0f172a !important;
+}
+
+[data-theme='light'] .pin-tag {
+  background: rgba(255, 255, 255, 0.92) !important;
+  border: 1.5px solid #cbd5e1 !important;
+  color: #1e293b !important;
+}
+
+[data-theme='light'] .pin-tag:hover,
+[data-theme='light'] .pin-tag.is-active {
+  background: #e0f2fe !important;
+  border-color: #0284c7 !important;
+  color: #0284c7 !important;
+  box-shadow: 0 0 10px rgba(2, 132, 199, 0.2) !important;
+}
+
+[data-theme='light'] .node-3d-controls-bar {
+  background: rgba(255, 255, 255, 0.94) !important;
+  border: 1.5px solid rgba(2, 132, 199, 0.25) !important;
+}
+
+[data-theme='light'] .state-label {
+  color: #475569 !important;
+}
+
+[data-theme='light'] .rotate-toggle-btn {
+  background: #ffffff !important;
+  border: 1.5px solid #cbd5e1 !important;
+  color: #1e293b !important;
+}
+
+[data-theme='light'] .rotate-toggle-btn:hover {
+  background: #e0f2fe !important;
+  color: #0284c7 !important;
+  border-color: #0284c7 !important;
+}
+
 [data-theme='light'] .console-sparkline-strip {
   background: #f8fafc !important;
   border-top: 1.5px solid rgba(2, 132, 199, 0.16) !important;
@@ -2249,6 +2561,44 @@
 
 [data-theme='light'] .pipeline-arrow {
   color: #0284c7 !important;
+}
+
+/* 3D Hardware Node Architecture in Light Mode */
+[data-theme='light'] .architecture-3d-card {
+  background: rgba(255, 255, 255, 0.94) !important;
+  border: 1.5px solid rgba(2, 132, 199, 0.32) !important;
+  box-shadow: 0 20px 48px rgba(15, 23, 42, 0.08), 0 0 20px rgba(2, 132, 199, 0.1) !important;
+}
+
+[data-theme='light'] .arch-badge {
+  color: #0284c7 !important;
+}
+
+[data-theme='light'] .arch-title {
+  color: #0f172a !important;
+}
+
+[data-theme='light'] .arch-desc {
+  color: #334155 !important;
+}
+
+[data-theme='light'] .arch-spec-item {
+  background: #ffffff !important;
+  border: 1.5px solid rgba(2, 132, 199, 0.22) !important;
+  box-shadow: 0 2px 8px rgba(15, 23, 42, 0.04) !important;
+}
+
+[data-theme='light'] .arch-spec-item:hover {
+  background: #f0f9ff !important;
+  border-color: #0284c7 !important;
+}
+
+[data-theme='light'] .arch-spec-item strong {
+  color: #0f172a !important;
+}
+
+[data-theme='light'] .arch-spec-item p {
+  color: #475569 !important;
 }
 
 /* Contact Section in Light Mode */

@@ -2,7 +2,8 @@
   display: flex;
   min-height: 100vh;
   width: 100%;
-  background: var(--bg);
+  position: relative;
+  background: var(--bg-gradient, var(--bg));
 }
 
 .app-main {
@@ -13,9 +14,14 @@
   height: 100vh;
   overflow-y: auto;
   scroll-behavior: smooth;
+  position: relative;
+  z-index: 1;
 }
 
 .app-content {
   flex: 1;
   min-height: 0;
+  position: relative;
+  z-index: 1;
 }
+

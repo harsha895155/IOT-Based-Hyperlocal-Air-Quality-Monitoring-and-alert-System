@@ -271,17 +271,20 @@
 [data-theme='light'] .alerts-table-card,
 [data-theme='light'] .hourly-forecast-pill,
 [data-theme='light'] .current-weather-hero {
-  border: 1.5px solid rgba(2, 132, 199, 0.25) !important;
-  background-color: #ffffff !important;
-  box-shadow: 0 4px 16px rgba(15, 23, 42, 0.05), 0 1px 3px rgba(15, 23, 42, 0.04) !important;
+  border: 1.5px solid rgba(2, 132, 199, 0.3) !important;
+  background: rgba(255, 255, 255, 0.88) !important;
+  backdrop-filter: blur(20px) !important;
+  -webkit-backdrop-filter: blur(20px) !important;
+  box-shadow: 0 4px 20px -2px rgba(15, 23, 42, 0.05), 0 12px 32px -4px rgba(2, 132, 199, 0.12), inset 0 1px 0 rgba(255, 255, 255, 0.95) !important;
 }
 
 [data-theme='light'] .card:hover,
 [data-theme='light'] .stat-card:hover,
 [data-theme='light'] .device-card:hover,
 [data-theme='light'] .location-card:hover {
-  border-color: rgba(2, 132, 199, 0.5) !important;
-  box-shadow: 0 10px 28px -4px rgba(2, 132, 199, 0.18), 0 0 0 1.5px #0284c7 !important;
+  border-color: rgba(2, 132, 199, 0.6) !important;
+  background: rgba(255, 255, 255, 0.96) !important;
+  box-shadow: 0 10px 30px -4px rgba(2, 132, 199, 0.2), 0 0 0 1.5px #0284c7, inset 0 1px 0 #ffffff !important;
 }
 
 [data-theme='light'] input,

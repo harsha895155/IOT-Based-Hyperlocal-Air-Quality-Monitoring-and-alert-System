@@ -58,7 +58,8 @@ import {
 } from './pages/OtherViews';
 
 import { AuthProvider } from './context/AuthContext';
-import { ThemeProvider } from './context/ThemeContext';
+import { ThemeProvider, useTheme } from './context/ThemeContext';
+import AirGuard3DCanvas from './components/AirGuard3DCanvas';
 import { useReadings } from './hooks/useReadings';
 import './App.css';
 
@@ -70,9 +71,13 @@ import './App.css';
 function AppLayout({ readingsData }) {
   const [sidebarOpen, setSidebarOpen] = useState(false);
   const { connected, unreadAlertsCount } = readingsData;
+  const { resolvedTheme } = useTheme() || {};
 
   return (
     <div className="app-layout">
+      {/* 3D Atmospheric Background Layer */}
+      <AirGuard3DCanvas theme={resolvedTheme} particleMode="aerosols" />
+
       <Sidebar
         isOpen={sidebarOpen}
         setIsOpen={setSidebarOpen}
