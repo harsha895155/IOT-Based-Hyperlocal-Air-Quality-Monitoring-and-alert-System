@@ -437,6 +437,142 @@
   color: var(--accent-hover, #0284c7);
 }
 
+/* ─── EMAIL SENT CONFIRMATION CARD ─── */
+.login-email-sent-card {
+  background: var(--surface-raised, rgba(15, 23, 42, 0.65));
+  border: 1px solid var(--border-soft, rgba(56, 189, 248, 0.2));
+  border-radius: 14px;
+  padding: 24px 20px;
+  margin-bottom: 20px;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  text-align: center;
+  box-shadow: 0 10px 30px rgba(0, 0, 0, 0.25);
+  animation: fadeIn 0.3s ease;
+}
+
+@keyframes fadeIn {
+  from { opacity: 0; transform: translateY(6px); }
+  to { opacity: 1; transform: translateY(0); }
+}
+
+.login-email-sent-icon-wrapper {
+  width: 64px;
+  height: 64px;
+  border-radius: 50%;
+  background: linear-gradient(135deg, rgba(14, 165, 233, 0.15), rgba(56, 189, 248, 0.05));
+  border: 1px solid rgba(56, 189, 248, 0.3);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  color: var(--accent, #38bdf8);
+  margin-bottom: 14px;
+  box-shadow: 0 0 20px rgba(14, 165, 233, 0.2);
+}
+
+.login-email-sent-heading {
+  font-size: 1.25rem;
+  font-weight: 700;
+  color: var(--text-primary, #ffffff);
+  margin: 0 0 6px 0;
+  letter-spacing: -0.01em;
+}
+
+.login-email-sent-text {
+  font-size: 0.9rem;
+  color: var(--text-secondary, #94a3b8);
+  margin: 0 0 10px 0;
+}
+
+.login-email-sent-recipient {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  background: rgba(14, 165, 233, 0.1);
+  border: 1px solid rgba(56, 189, 248, 0.25);
+  padding: 8px 14px;
+  border-radius: 8px;
+  font-size: 0.95rem;
+  color: #38bdf8;
+  margin-bottom: 16px;
+  word-break: break-all;
+}
+
+.login-email-sent-instructions {
+  background: rgba(0, 0, 0, 0.2);
+  border-radius: 8px;
+  padding: 12px 14px;
+  margin-bottom: 20px;
+  text-align: left;
+  width: 100%;
+  font-size: 0.85rem;
+  color: var(--text-muted, #cbd5e1);
+  line-height: 1.5;
+}
+
+.login-email-sent-instructions p {
+  margin: 4px 0;
+}
+
+.login-email-sent-instructions code {
+  color: #7dd3fc;
+  font-family: monospace;
+}
+
+.login-email-sent-actions {
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+  width: 100%;
+}
+
+.login-resend-btn {
+  width: 100%;
+  padding: 10px 16px;
+  font-size: 0.9rem;
+  border: 1px solid var(--accent, #0ea5e9);
+  color: var(--accent, #38bdf8);
+  background: transparent;
+  border-radius: 8px;
+  cursor: pointer;
+  font-weight: 600;
+  transition: all 0.2s ease;
+}
+
+.login-resend-btn:hover:not(:disabled) {
+  background: rgba(14, 165, 233, 0.15);
+  border-color: #38bdf8;
+}
+
+.login-manual-token-btn {
+  width: 100%;
+  padding: 9px 16px;
+  font-size: 0.85rem;
+  color: var(--text-secondary, #94a3b8);
+  background: transparent;
+  border: 1px dashed var(--border-soft, rgba(255, 255, 255, 0.15));
+  border-radius: 8px;
+  cursor: pointer;
+  transition: all 0.2s ease;
+}
+
+.login-manual-token-btn:hover {
+  background: var(--surface-hover, rgba(255, 255, 255, 0.05));
+  color: var(--text-primary, #ffffff);
+}
+
+/* Token badge for reset mode */
+.login-token-badge {
+  font-size: 0.75rem;
+  font-weight: 600;
+  color: #34d399;
+  background: rgba(52, 211, 153, 0.12);
+  border: 1px solid rgba(52, 211, 153, 0.25);
+  padding: 2px 8px;
+  border-radius: 12px;
+}
+
 /* Responsive adjustments */
 @media (max-width: 900px) {
   .login-layout {

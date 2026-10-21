@@ -19,11 +19,12 @@ export default function LoginView() {
 
   const [showPassword, setShowPassword] = useState(false);
   const [name, setName] = useState('');
-  const [email, setEmail] = useState('');
+  const [email, setEmail] = useState(() => searchParams.get('email') || '');
   const [password, setPassword] = useState('');
   const [newPassword, setNewPassword] = useState('');
   const [confirmPassword, setConfirmPassword] = useState('');
   const [resetToken, setResetToken] = useState(() => searchParams.get('token') || '');
+  const [forgotEmailSent, setForgotEmailSent] = useState(false);
   const [rememberMe, setRememberMe] = useState(true);
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState('');
@@ -78,6 +79,19 @@ export default function LoginView() {
     }
   }, [navigate, redirectDest, loginWithGoogle]);
 
+  // Synchronize URL parameters if user navigated via email reset link
+  useEffect(() => {
+    const tokenParam = searchParams.get('token');
+    if (tokenParam) {
+      setResetToken(tokenParam);
+      setMode('reset');
+    }
+    const emailParam = searchParams.get('email');
+    if (emailParam) {
+      setEmail(emailParam);
+    }
+  }, [searchParams]);
+
   const handleSubmit = async (e) => {
     e.preventDefault();
     setError('');
@@ -94,11 +108,8 @@ export default function LoginView() {
         navigate(redirectDest, { replace: true });
       } else if (mode === 'forgot') {
         const res = await forgotPassword(email);
-        setSuccessMsg(res.message || 'Password reset instructions have been generated.');
-        if (res.resetToken) {
-          setResetToken(res.resetToken);
-          setMode('reset');
-        }
+        setSuccessMsg(res.message || `Password reset link has been dispatched to ${email}.`);
+        setForgotEmailSent(true);
       } else if (mode === 'reset') {
         if (newPassword !== confirmPassword) {
           throw new Error('New passwords do not match.');
@@ -217,204 +228,272 @@ export default function LoginView() {
             <h2 className="login-form-title">
               {mode === 'register' && 'Create Your Account'}
               {mode === 'login' && 'Welcome Back'}
-              {mode === 'forgot' && 'Reset Your Password'}
+              {mode === 'forgot' && (forgotEmailSent ? 'Check Your Inbox' : 'Reset Your Password')}
               {mode === 'reset' && 'Set New Password'}
             </h2>
             <p className="login-form-subtitle">
               {mode === 'register' && 'Join AirGuard to configure alert thresholds, download reports, and manage devices.'}
               {mode === 'login' && 'Enter your credentials to access system health, diagnostics, and settings.'}
-              {mode === 'forgot' && 'Enter your registered email address to receive password recovery instructions.'}
+              {mode === 'forgot' && (forgotEmailSent ? 'A password reset link was dispatched from airguard396@gmail.com.' : 'Enter your registered email address to receive password recovery instructions.')}
               {mode === 'reset' && 'Choose a strong new password for your AirGuard account.'}
             </p>
           </div>
 
           {error && <div className="login-alert login-alert--error">{error}</div>}
-          {successMsg && <div className="login-alert login-alert--info">✓ {successMsg}</div>}
+          {successMsg && !forgotEmailSent && <div className="login-alert login-alert--info">✓ {successMsg}</div>}
 
-          {/* GOOGLE SIGN IN BUTTON (on Login / Register views) */}
-          {(mode === 'login' || mode === 'register') && (
-            <div style={{ marginBottom: '18px' }}>
-              <button
-                type="button"
-                className="login-google-btn"
-                onClick={handleGoogleClick}
-                disabled={loading}
-              >
-                <svg width="18" height="18" viewBox="0 0 24 24">
-                  <path
-                    fill="#4285F4"
-                    d="M22.56 12.25c0-.78-.07-1.53-.2-2.25H12v4.26h5.92c-.26 1.37-1.04 2.53-2.21 3.31v2.77h3.57c2.08-1.92 3.28-4.74 3.28-8.09z"
-                  />
-                  <path
-                    fill="#34A853"
-                    d="M12 23c2.97 0 5.46-.98 7.28-2.66l-3.57-2.77c-.98.66-2.23 1.06-3.71 1.06-2.86 0-5.29-1.93-6.16-4.53H2.18v2.84C3.99 20.53 7.7 23 12 23z"
-                  />
-                  <path
-                    fill="#FBBC05"
-                    d="M5.84 14.09c-.22-.66-.35-1.36-.35-2.09s.13-1.43.35-2.09V7.06H2.18C1.43 8.55 1 10.22 1 12s.43 3.45 1.18 4.94l2.85-2.22.81-.63z"
-                  />
-                  <path
-                    fill="#EA4335"
-                    d="M12 5.38c1.62 0 3.06.56 4.21 1.64l3.15-3.15C17.45 2.09 14.97 1 12 1 7.7 1 3.99 3.47 2.18 7.06l3.66 2.84c.87-2.6 3.3-4.52 6.16-4.52z"
-                  />
+          {/* FORGOT PASSWORD CONFIRMATION CARD */}
+          {mode === 'forgot' && forgotEmailSent ? (
+            <div className="login-email-sent-card">
+              <div className="login-email-sent-icon-wrapper">
+                <svg width="44" height="44" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round">
+                  <rect x="2" y="4" width="20" height="16" rx="3" />
+                  <path d="m22 7-8.97 5.7a1.94 1.94 0 0 1-2.06 0L2 7" />
                 </svg>
-                <span>Continue with Google</span>
-              </button>
-
-              <div className="login-divider">
-                <span>OR SIGN IN WITH EMAIL</span>
               </div>
-            </div>
-          )}
 
-          <form onSubmit={handleSubmit} className="login-form">
-            {/* REGISTER: Name */}
-            {mode === 'register' && (
-              <div className="login-field">
-                <label className="login-label">Full Name</label>
-                <input
-                  type="text"
-                  className="login-input"
-                  placeholder="e.g. Harsha Vardhan"
-                  value={name}
-                  onChange={(e) => setName(e.target.value)}
-                  required
-                />
+              <h3 className="login-email-sent-heading">Verification Email Sent</h3>
+              <p className="login-email-sent-text">
+                We sent a secure password recovery link to:
+              </p>
+              <div className="login-email-sent-recipient">
+                <span>📧</span> <strong>{email}</strong>
               </div>
-            )}
 
-            {/* EMAIL (login, register, forgot) */}
-            {mode !== 'reset' && (
-              <div className="login-field">
-                <label className="login-label">Email Address</label>
-                <input
-                  type="email"
-                  className="login-input"
-                  placeholder="user@example.com"
-                  value={email}
-                  onChange={(e) => setEmail(e.target.value)}
-                  required
-                />
+              <div className="login-email-sent-instructions">
+                <p>1. Open the email sent from <strong>AirGuard Support</strong> (<code>airguard396@gmail.com</code>).</p>
+                <p>2. Click the <strong>"Reset AirGuard Password"</strong> button inside.</p>
+                <p>3. If you do not see it within 2 minutes, check your <em>Spam / Junk</em> folder.</p>
               </div>
-            )}
 
-            {/* PASSWORD (login, register) */}
-            {(mode === 'login' || mode === 'register') && (
-              <div className="login-field">
-                <label className="login-label">Password</label>
-                <div className="login-password-wrapper">
-                  <input
-                    type={showPassword ? 'text' : 'password'}
-                    className="login-input"
-                    placeholder="••••••••••••"
-                    value={password}
-                    onChange={(e) => setPassword(e.target.value)}
-                    required
-                  />
-                  <button
-                    type="button"
-                    className="login-password-toggle"
-                    onClick={() => setShowPassword(!showPassword)}
-                    aria-label="Toggle password visibility"
-                  >
-                    {showPassword ? (
-                      <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
-                        <path d="M17.94 17.94A10.07 10.07 0 0 1 12 20c-7 0-11-8-11-8a18.45 18.45 0 0 1 5.06-5.94M9.9 4.24A9.12 9.12 0 0 1 12 4c7 0 11 8 11 8a18.5 18.5 0 0 1-2.16 3.19m-6.72-1.07a3 3 0 1 1-4.24-4.24" />
-                        <line x1="1" y1="1" x2="23" y2="23" />
-                      </svg>
-                    ) : (
-                      <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
-                        <path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z" />
-                        <circle cx="12" cy="12" r="3" />
-                      </svg>
-                    )}
-                  </button>
-                </div>
-              </div>
-            )}
-
-            {/* RESET MODE: Token + New Password */}
-            {mode === 'reset' && (
-              <>
-                <div className="login-field">
-                  <label className="login-label">Reset Token</label>
-                  <input
-                    type="text"
-                    className="login-input"
-                    placeholder="Paste your reset token"
-                    value={resetToken}
-                    onChange={(e) => setResetToken(e.target.value)}
-                    required
-                  />
-                </div>
-
-                <div className="login-field">
-                  <label className="login-label">New Password</label>
-                  <input
-                    type="password"
-                    className="login-input"
-                    placeholder="At least 6 characters"
-                    value={newPassword}
-                    onChange={(e) => setNewPassword(e.target.value)}
-                    required
-                    minLength={6}
-                  />
-                </div>
-
-                <div className="login-field">
-                  <label className="login-label">Confirm New Password</label>
-                  <input
-                    type="password"
-                    className="login-input"
-                    placeholder="Re-type new password"
-                    value={confirmPassword}
-                    onChange={(e) => setConfirmPassword(e.target.value)}
-                    required
-                    minLength={6}
-                  />
-                </div>
-              </>
-            )}
-
-            {/* REMEMBER ME + FORGOT PASSWORD LINK */}
-            {mode === 'login' && (
-              <div className="login-options">
-                <label className="login-remember">
-                  <input
-                    type="checkbox"
-                    checked={rememberMe}
-                    onChange={(e) => setRememberMe(e.target.checked)}
-                  />
-                  <span>Remember this device</span>
-                </label>
+              <div className="login-email-sent-actions">
+                <button
+                  type="button"
+                  className="btn btn--outline login-resend-btn"
+                  onClick={async () => {
+                    setError('');
+                    setSuccessMsg('');
+                    setLoading(true);
+                    try {
+                      const res = await forgotPassword(email);
+                      setSuccessMsg(res.message || `Password reset link re-sent to ${email}.`);
+                    } catch (err) {
+                      setError(err.message || 'Failed to resend reset email.');
+                    } finally {
+                      setLoading(false);
+                    }
+                  }}
+                  disabled={loading}
+                >
+                  {loading ? 'Resending...' : '🔄 Resend Email'}
+                </button>
 
                 <button
                   type="button"
-                  className="login-forgot-link"
+                  className="btn btn--ghost login-manual-token-btn"
                   onClick={() => {
-                    setError('');
-                    setSuccessMsg('');
-                    setMode('forgot');
+                    setForgotEmailSent(false);
+                    setMode('reset');
                   }}
                 >
-                  Forgot password?
+                  🔑 Have a Reset Token? Enter Manually
                 </button>
               </div>
-            )}
+            </div>
+          ) : (
+            <>
+              {/* GOOGLE SIGN IN BUTTON (on Login / Register views) */}
+              {(mode === 'login' || mode === 'register') && (
+                <div style={{ marginBottom: '18px' }}>
+                  <button
+                    type="button"
+                    className="login-google-btn"
+                    onClick={handleGoogleClick}
+                    disabled={loading}
+                  >
+                    <svg width="18" height="18" viewBox="0 0 24 24">
+                      <path
+                        fill="#4285F4"
+                        d="M22.56 12.25c0-.78-.07-1.53-.2-2.25H12v4.26h5.92c-.26 1.37-1.04 2.53-2.21 3.31v2.77h3.57c2.08-1.92 3.28-4.74 3.28-8.09z"
+                      />
+                      <path
+                        fill="#34A853"
+                        d="M12 23c2.97 0 5.46-.98 7.28-2.66l-3.57-2.77c-.98.66-2.23 1.06-3.71 1.06-2.86 0-5.29-1.93-6.16-4.53H2.18v2.84C3.99 20.53 7.7 23 12 23z"
+                      />
+                      <path
+                        fill="#FBBC05"
+                        d="M5.84 14.09c-.22-.66-.35-1.36-.35-2.09s.13-1.43.35-2.09V7.06H2.18C1.43 8.55 1 10.22 1 12s.43 3.45 1.18 4.94l2.85-2.22.81-.63z"
+                      />
+                      <path
+                        fill="#EA4335"
+                        d="M12 5.38c1.62 0 3.06.56 4.21 1.64l3.15-3.15C17.45 2.09 14.97 1 12 1 7.7 1 3.99 3.47 2.18 7.06l3.66 2.84c.87-2.6 3.3-4.52 6.16-4.52z"
+                      />
+                    </svg>
+                    <span>Continue with Google</span>
+                  </button>
 
-            {/* ACTION BUTTON */}
-            <button type="submit" className="btn btn--primary login-submit-btn" disabled={loading}>
-              {loading
-                ? 'Processing...'
-                : mode === 'register'
-                ? 'Create Account'
-                : mode === 'login'
-                ? 'Sign In'
-                : mode === 'forgot'
-                ? 'Generate Reset Link'
-                : 'Update Password & Sign In'}
-            </button>
-          </form>
+                  <div className="login-divider">
+                    <span>OR SIGN IN WITH EMAIL</span>
+                  </div>
+                </div>
+              )}
+
+              <form onSubmit={handleSubmit} className="login-form">
+                {/* REGISTER: Name */}
+                {mode === 'register' && (
+                  <div className="login-field">
+                    <label className="login-label">Full Name</label>
+                    <input
+                      type="text"
+                      className="login-input"
+                      placeholder="e.g. Harsha Vardhan"
+                      value={name}
+                      onChange={(e) => setName(e.target.value)}
+                      required
+                    />
+                  </div>
+                )}
+
+                {/* EMAIL (login, register, forgot) */}
+                {mode !== 'reset' && (
+                  <div className="login-field">
+                    <label className="login-label">Email Address</label>
+                    <input
+                      type="email"
+                      className="login-input"
+                      placeholder="user@example.com"
+                      value={email}
+                      onChange={(e) => setEmail(e.target.value)}
+                      required
+                    />
+                  </div>
+                )}
+
+                {/* PASSWORD (login, register) */}
+                {(mode === 'login' || mode === 'register') && (
+                  <div className="login-field">
+                    <label className="login-label">Password</label>
+                    <div className="login-password-wrapper">
+                      <input
+                        type={showPassword ? 'text' : 'password'}
+                        className="login-input"
+                        placeholder="••••••••••••"
+                        value={password}
+                        onChange={(e) => setPassword(e.target.value)}
+                        required
+                      />
+                      <button
+                        type="button"
+                        className="login-password-toggle"
+                        onClick={() => setShowPassword(!showPassword)}
+                        aria-label="Toggle password visibility"
+                      >
+                        {showPassword ? (
+                          <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
+                            <path d="M17.94 17.94A10.07 10.07 0 0 1 12 20c-7 0-11-8-11-8a18.45 18.45 0 0 1 5.06-5.94M9.9 4.24A9.12 9.12 0 0 1 12 4c7 0 11 8 11 8a18.5 18.5 0 0 1-2.16 3.19m-6.72-1.07a3 3 0 1 1-4.24-4.24" />
+                            <line x1="1" y1="1" x2="23" y2="23" />
+                          </svg>
+                        ) : (
+                          <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
+                            <path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z" />
+                            <circle cx="12" cy="12" r="3" />
+                          </svg>
+                        )}
+                      </button>
+                    </div>
+                  </div>
+                )}
+
+                {/* RESET MODE: Token + New Password */}
+                {mode === 'reset' && (
+                  <>
+                    <div className="login-field">
+                      <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '6px' }}>
+                        <label className="login-label" style={{ marginBottom: 0 }}>Reset Token</label>
+                        {searchParams.get('token') && (
+                          <span className="login-token-badge">✓ Loaded from email link</span>
+                        )}
+                      </div>
+                      <input
+                        type="text"
+                        className="login-input"
+                        placeholder="Paste your reset token"
+                        value={resetToken}
+                        onChange={(e) => setResetToken(e.target.value)}
+                        required
+                      />
+                    </div>
+
+                    <div className="login-field">
+                      <label className="login-label">New Password</label>
+                      <input
+                        type="password"
+                        className="login-input"
+                        placeholder="At least 6 characters"
+                        value={newPassword}
+                        onChange={(e) => setNewPassword(e.target.value)}
+                        required
+                        minLength={6}
+                      />
+                    </div>
+
+                    <div className="login-field">
+                      <label className="login-label">Confirm New Password</label>
+                      <input
+                        type="password"
+                        className="login-input"
+                        placeholder="Re-type new password"
+                        value={confirmPassword}
+                        onChange={(e) => setConfirmPassword(e.target.value)}
+                        required
+                        minLength={6}
+                      />
+                    </div>
+                  </>
+                )}
+
+                {/* REMEMBER ME + FORGOT PASSWORD LINK */}
+                {mode === 'login' && (
+                  <div className="login-options">
+                    <label className="login-remember">
+                      <input
+                        type="checkbox"
+                        checked={rememberMe}
+                        onChange={(e) => setRememberMe(e.target.checked)}
+                      />
+                      <span>Remember this device</span>
+                    </label>
+
+                    <button
+                      type="button"
+                      className="login-forgot-link"
+                      onClick={() => {
+                        setError('');
+                        setSuccessMsg('');
+                        setForgotEmailSent(false);
+                        setMode('forgot');
+                      }}
+                    >
+                      Forgot password?
+                    </button>
+                  </div>
+                )}
+
+                {/* ACTION BUTTON */}
+                <button type="submit" className="btn btn--primary login-submit-btn" disabled={loading}>
+                  {loading
+                    ? 'Processing...'
+                    : mode === 'register'
+                    ? 'Create Account'
+                    : mode === 'login'
+                    ? 'Sign In'
+                    : mode === 'forgot'
+                    ? 'Send Password Reset Link'
+                    : 'Update Password & Sign In'}
+                </button>
+              </form>
+            </>
+          )}
 
           {/* BACK TO LOGIN FOR FORGOT/RESET */}
           {(mode === 'forgot' || mode === 'reset') && (
@@ -425,6 +504,7 @@ export default function LoginView() {
                 onClick={() => {
                   setError('');
                   setSuccessMsg('');
+                  setForgotEmailSent(false);
                   setMode('login');
                 }}
               >

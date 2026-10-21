@@ -1,5 +1,6 @@
 const jwt = require('jsonwebtoken');
 const User = require('../models/User');
+const { sendPasswordResetEmail } = require('../services/emailService');
 
 function generateToken(id) {
   return jwt.sign({ id }, process.env.JWT_SECRET || 'airguard_default_secret_key_2026', {
@@ -201,10 +202,21 @@ async function forgotPassword(req, res, next) {
     user.resetPasswordExpires = Date.now() + 3600000;
     await user.save();
 
+    // Construct secure 1-click reset URL
+    const clientOrigin = req.get('origin') || process.env.APP_URL || 'https://airguard-hyperlocal.vercel.app';
+    const resetUrl = `${clientOrigin}/login?token=${rawResetToken}&email=${encodeURIComponent(user.email)}`;
+
+    // Dispatch branded email via website mail (airguard396@gmail.com)
+    await sendPasswordResetEmail({
+      to: user.email,
+      name: user.name,
+      resetToken: rawResetToken,
+      resetUrl,
+    });
+
     res.json({
       success: true,
-      message: 'Password reset token generated successfully.',
-      resetToken: rawResetToken, // Provided for web client to proceed directly with reset
+      message: `A password reset link has been sent to ${user.email}. Please check your inbox (and spam folder) to reset your password.`,
     });
   } catch (err) {
     next(err);
