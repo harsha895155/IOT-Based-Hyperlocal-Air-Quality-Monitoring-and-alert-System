@@ -95,9 +95,10 @@
 }
 
 [data-theme='light'] .topnav__back-welcome-btn:hover {
-  background: #f0f9ff;
-  border-color: #0284c7;
-  color: #0284c7;
+  background: #f0fdf4;
+  border-color: #10b981;
+  color: #059669;
+  box-shadow: 0 0 10px rgba(16, 185, 129, 0.25);
 }
 
 .topnav__badge-user {
@@ -403,7 +404,8 @@
 
 [data-theme='light'] .topnav__user-chip:hover {
   background: #f8fafc;
-  border-color: #0284c7;
+  border-color: #10b981;
+  box-shadow: 0 0 12px rgba(139, 92, 246, 0.2);
 }
 
 [data-theme='light'] .topnav__icon-btn {
@@ -412,13 +414,13 @@
 
 [data-theme='light'] .topnav__icon-btn:hover {
   background: #f1f5f9;
-  color: #0f172a;
+  color: #059669;
 }
 
 [data-theme='light'] .topnav__dropdown {
   background: #ffffff;
   border-color: #cbd5e1;
-  box-shadow: 0 16px 36px -6px rgba(15, 23, 42, 0.12), 0 0 0 1px rgba(226, 232, 240, 0.9);
+  box-shadow: 0 16px 36px -6px rgba(15, 23, 42, 0.12), 0 0 0 1px rgba(16, 185, 129, 0.25);
 }
 
 [data-theme='light'] .topnav__dropdown-name {
@@ -438,7 +440,8 @@
 }
 
 [data-theme='light'] .topnav__dropdown-item:hover {
-  background: #f1f5f9;
-  color: #0284c7;
+  background: #f0fdf4;
+  color: #059669;
 }
+
 

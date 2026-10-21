@@ -990,8 +990,9 @@
 [data-theme='light'] .device-selector-btn:hover,
 [data-theme='light'] .weather-gps-btn:hover {
   background: #f8fafc;
-  border-color: #0284c7;
-  color: #0284c7;
+  border-color: #10b981;
+  color: #059669;
+  box-shadow: 0 0 12px rgba(16, 185, 129, 0.25);
 }
 
 [data-theme='light'] .hourly-forecast-pill {
@@ -1002,6 +1003,11 @@
 [data-theme='light'] .hourly-forecast-pill.is-current {
   background: #f0fdf4;
   border-color: #10b981;
+  box-shadow: 0 0 10px rgba(16, 185, 129, 0.2);
+}
+
+[data-theme='light'] .pollutant-live-bar-fill {
+  background: linear-gradient(90deg, #10b981 0%, #8b5cf6 100%);
 }
 
 /* ═════════════════════════════════════════════════════════════════════

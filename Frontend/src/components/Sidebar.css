@@ -124,15 +124,19 @@
 }
 
 [data-theme='light'] .sidebar__item:hover {
-  background: #f1f5f9;
-  color: #0284c7;
+  background: #f0fdf4;
+  color: #059669;
+}
+
+[data-theme='light'] .sidebar__item:hover svg {
+  color: #10b981;
 }
 
 [data-theme='light'] .sidebar__item.is-active {
-  background: linear-gradient(135deg, #0284c7 0%, #0369a1 100%);
+  background: linear-gradient(135deg, #059669 0%, #7c3aed 100%);
   color: #ffffff !important;
-  border: 1px solid #0284c7;
-  box-shadow: 0 4px 14px rgba(2, 132, 199, 0.28);
+  border: 1px solid #10b981;
+  box-shadow: 0 4px 14px rgba(16, 185, 129, 0.35), 0 0 12px rgba(124, 58, 237, 0.25);
 }
 
 [data-theme='light'] .sidebar__item.is-active svg {

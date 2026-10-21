@@ -91,8 +91,19 @@ export default function WeatherHero3DCanvas({
     scene.add(rootGroup);
 
     // 3. Dynamic Scene Lighting
-    const ambientLight = new THREE.AmbientLight(0xffffff, isLight ? 0.95 : 0.65);
+    const ambientLight = new THREE.AmbientLight(0xffffff, isLight ? 0.92 : 0.65);
     scene.add(ambientLight);
+
+    if (isLight) {
+      // Subtle Cyberpunk Neon Electric Emerald & Violet pearlescent rim lighting
+      const emeraldRim = new THREE.DirectionalLight(0x10b981, 0.45);
+      emeraldRim.position.set(-60, 40, 35);
+      scene.add(emeraldRim);
+
+      const violetRim = new THREE.DirectionalLight(0x8b5cf6, 0.4);
+      violetRim.position.set(60, -25, 35);
+      scene.add(violetRim);
+    }
 
     const flashLight = new THREE.PointLight(0xa5f3fc, 0, 300);
     flashLight.position.set(0, 25, 40);
