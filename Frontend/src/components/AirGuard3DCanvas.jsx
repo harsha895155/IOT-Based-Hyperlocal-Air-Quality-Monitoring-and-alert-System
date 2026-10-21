@@ -1,9 +1,11 @@
 import React, { useEffect, useRef, useState } from 'react';
 import * as THREE from 'three';
 
-export default function AirGuard3DCanvas({ particleMode = 'atmospheric' }) {
+export default function AirGuard3DCanvas({ particleMode = 'atmospheric', theme = 'obsidian' }) {
   const mountRef = useRef(null);
   const [webglSupported, setWebglSupported] = useState(true);
+
+  const isLight = theme === 'light';
 
   useEffect(() => {
     const container = mountRef.current;
@@ -28,7 +30,7 @@ export default function AirGuard3DCanvas({ particleMode = 'atmospheric' }) {
 
     // 1. Scene, Camera, Renderer
     const scene = new THREE.Scene();
-    scene.fog = new THREE.FogExp2(0x060913, 0.0018);
+    scene.fog = new THREE.FogExp2(isLight ? 0xf1f5f9 : 0x060913, isLight ? 0.0012 : 0.0018);
 
     const camera = new THREE.PerspectiveCamera(60, width / height, 0.1, 1000);
     camera.position.z = 120;
@@ -45,14 +47,14 @@ export default function AirGuard3DCanvas({ particleMode = 'atmospheric' }) {
     container.appendChild(renderer.domElement);
 
     // 2. Lighting
-    const ambientLight = new THREE.AmbientLight(0x38bdf8, 0.7);
+    const ambientLight = new THREE.AmbientLight(isLight ? 0x0284c7 : 0x38bdf8, isLight ? 1.5 : 0.7);
     scene.add(ambientLight);
 
-    const pointLight = new THREE.PointLight(0x00d2b4, 2.5, 300);
+    const pointLight = new THREE.PointLight(isLight ? 0x0284c7 : 0x00d2b4, isLight ? 3.0 : 2.5, 300);
     pointLight.position.set(50, 50, 80);
     scene.add(pointLight);
 
-    const secondaryLight = new THREE.PointLight(0x818cf8, 2, 250);
+    const secondaryLight = new THREE.PointLight(isLight ? 0x4f46e5 : 0x818cf8, 2, 250);
     secondaryLight.position.set(-60, -30, 60);
     scene.add(secondaryLight);
 
@@ -64,10 +66,10 @@ export default function AirGuard3DCanvas({ particleMode = 'atmospheric' }) {
     const globeRadius = 45;
     const globeGeometry = new THREE.IcosahedronGeometry(globeRadius, 4);
     const globeWireMaterial = new THREE.MeshBasicMaterial({
-      color: 0x0ea5e9,
+      color: isLight ? 0x0284c7 : 0x0ea5e9,
       wireframe: true,
       transparent: true,
-      opacity: 0.12,
+      opacity: isLight ? 0.35 : 0.12,
     });
     const globeMesh = new THREE.Mesh(globeGeometry, globeWireMaterial);
     globeGroup.add(globeMesh);
@@ -75,10 +77,10 @@ export default function AirGuard3DCanvas({ particleMode = 'atmospheric' }) {
     // Outer atmospheric halo shell
     const haloGeometry = new THREE.SphereGeometry(globeRadius * 1.08, 32, 32);
     const haloMaterial = new THREE.MeshBasicMaterial({
-      color: 0x00d2b4,
+      color: isLight ? 0x059669 : 0x00d2b4,
       wireframe: true,
       transparent: true,
-      opacity: 0.05,
+      opacity: isLight ? 0.18 : 0.05,
     });
     const haloMesh = new THREE.Mesh(haloGeometry, haloMaterial);
     globeGroup.add(haloMesh);
@@ -90,9 +92,9 @@ export default function AirGuard3DCanvas({ particleMode = 'atmospheric' }) {
     const beaconGroup = new THREE.Group();
     globeGroup.add(beaconGroup);
 
-    const beaconGeo = new THREE.SphereGeometry(1.0, 12, 12);
-    const beaconMat = new THREE.MeshBasicMaterial({ color: 0x38bdf8 });
-    const alertBeaconMat = new THREE.MeshBasicMaterial({ color: 0xf59e0b });
+    const beaconGeo = new THREE.SphereGeometry(1.2, 12, 12);
+    const beaconMat = new THREE.MeshBasicMaterial({ color: isLight ? 0x0284c7 : 0x38bdf8 });
+    const alertBeaconMat = new THREE.MeshBasicMaterial({ color: isLight ? 0xd97706 : 0xf59e0b });
 
     for (let i = 0; i < beaconCount; i++) {
       // Golden spiral distribution on sphere surface
@@ -108,11 +110,11 @@ export default function AirGuard3DCanvas({ particleMode = 'atmospheric' }) {
       beaconPoints.push(new THREE.Vector3(x, y, z));
 
       // Pulsing wave ring around beacon
-      const ringGeo = new THREE.RingGeometry(1.2, 1.8, 16);
+      const ringGeo = new THREE.RingGeometry(1.4, 2.2, 16);
       const ringMat = new THREE.MeshBasicMaterial({
-        color: i % 7 === 0 ? 0xf59e0b : 0x00d2b4,
+        color: i % 7 === 0 ? (isLight ? 0xd97706 : 0xf59e0b) : (isLight ? 0x0284c7 : 0x00d2b4),
         transparent: true,
-        opacity: 0.7,
+        opacity: isLight ? 0.85 : 0.7,
         side: THREE.DoubleSide,
       });
       const ring = new THREE.Mesh(ringGeo, ringMat);
@@ -138,28 +140,27 @@ export default function AirGuard3DCanvas({ particleMode = 'atmospheric' }) {
     const lineGeo = new THREE.BufferGeometry();
     lineGeo.setAttribute('position', new THREE.Float32BufferAttribute(lineCoords, 3));
     const lineMat = new THREE.LineBasicMaterial({
-      color: 0x38bdf8,
+      color: isLight ? 0x0284c7 : 0x38bdf8,
       transparent: true,
-      opacity: 0.22,
+      opacity: isLight ? 0.45 : 0.22,
     });
     const networkLines = new THREE.LineSegments(lineGeo, lineMat);
     beaconGroup.add(networkLines);
 
-    // 6. 3D Atmospheric Air Quality Particles (Aerosols & Wind Vector Flow)
+    // 6. 3D Atmospheric Air Quality Particles
     const particleCount = 1400;
     const particleGeo = new THREE.BufferGeometry();
     const particlePositions = new Float32Array(particleCount * 3);
     const particleColors = new Float32Array(particleCount * 3);
     const particleSpeeds = new Float32Array(particleCount * 3);
 
-    const cyan = new THREE.Color(0x38bdf8);
-    const emerald = new THREE.Color(0x00d2b4);
-    const violet = new THREE.Color(0x818cf8);
-    const amber = new THREE.Color(0xf59e0b);
+    const cyan = isLight ? new THREE.Color(0x0284c7) : new THREE.Color(0x38bdf8);
+    const emerald = isLight ? new THREE.Color(0x059669) : new THREE.Color(0x00d2b4);
+    const violet = isLight ? new THREE.Color(0x4f46e5) : new THREE.Color(0x818cf8);
+    const amber = isLight ? new THREE.Color(0xd97706) : new THREE.Color(0xf59e0b);
 
     for (let i = 0; i < particleCount; i++) {
       const idx = i * 3;
-      // Spread across deep 3D volume
       const r = 50 + Math.random() * 110;
       const th = Math.random() * Math.PI * 2;
       const ph = (Math.random() - 0.5) * Math.PI;
@@ -172,7 +173,6 @@ export default function AirGuard3DCanvas({ particleMode = 'atmospheric' }) {
       particleSpeeds[idx + 1] = (Math.random() - 0.5) * 0.12;
       particleSpeeds[idx + 2] = (Math.random() - 0.5) * 0.15;
 
-      // Color distribution: mostly clean air cyan & emerald, with subtle atmospheric gradients
       const randColor = Math.random();
       const col = randColor > 0.6 ? emerald : randColor > 0.2 ? cyan : randColor > 0.05 ? violet : amber;
       particleColors[idx] = col.r;
@@ -183,17 +183,24 @@ export default function AirGuard3DCanvas({ particleMode = 'atmospheric' }) {
     particleGeo.setAttribute('position', new THREE.BufferAttribute(particlePositions, 3));
     particleGeo.setAttribute('color', new THREE.BufferAttribute(particleColors, 3));
 
-    // Create a circular glowing particle texture in memory
+    // Circular glowing particle texture
     const createParticleTexture = () => {
       const pCanvas = document.createElement('canvas');
       pCanvas.width = 64;
       pCanvas.height = 64;
       const ctx = pCanvas.getContext('2d');
       const gradient = ctx.createRadialGradient(32, 32, 0, 32, 32, 32);
-      gradient.addColorStop(0, 'rgba(255,255,255,1)');
-      gradient.addColorStop(0.2, 'rgba(56,189,248,0.8)');
-      gradient.addColorStop(0.6, 'rgba(0,210,180,0.3)');
-      gradient.addColorStop(1, 'rgba(0,0,0,0)');
+      if (isLight) {
+        gradient.addColorStop(0, 'rgba(2,132,199,1)');
+        gradient.addColorStop(0.3, 'rgba(5,150,105,0.85)');
+        gradient.addColorStop(0.7, 'rgba(79,70,229,0.3)');
+        gradient.addColorStop(1, 'rgba(0,0,0,0)');
+      } else {
+        gradient.addColorStop(0, 'rgba(255,255,255,1)');
+        gradient.addColorStop(0.2, 'rgba(56,189,248,0.8)');
+        gradient.addColorStop(0.6, 'rgba(0,210,180,0.3)');
+        gradient.addColorStop(1, 'rgba(0,0,0,0)');
+      }
       ctx.fillStyle = gradient;
       ctx.fillRect(0, 0, 64, 64);
       const texture = new THREE.CanvasTexture(pCanvas);
@@ -201,12 +208,12 @@ export default function AirGuard3DCanvas({ particleMode = 'atmospheric' }) {
     };
 
     const particleMaterial = new THREE.PointsMaterial({
-      size: 2.8,
+      size: isLight ? 3.4 : 2.8,
       vertexColors: true,
       map: createParticleTexture(),
       transparent: true,
-      opacity: 0.75,
-      blending: THREE.AdditiveBlending,
+      opacity: isLight ? 0.9 : 0.75,
+      blending: isLight ? THREE.NormalBlending : THREE.AdditiveBlending,
       depthWrite: false,
     });
 
@@ -257,7 +264,7 @@ export default function AirGuard3DCanvas({ particleMode = 'atmospheric' }) {
       beaconRings.forEach(({ ring, phase }) => {
         const pulse = (Math.sin(elapsedTime * 3 + phase) + 1) / 2;
         ring.scale.set(1 + pulse * 1.5, 1 + pulse * 1.5, 1);
-        ring.material.opacity = Math.max(0, 0.8 - pulse * 0.7);
+        ring.material.opacity = Math.max(0, (isLight ? 0.9 : 0.8) - pulse * 0.7);
       });
 
       // Flowing atmospheric particles simulation
@@ -329,7 +336,7 @@ export default function AirGuard3DCanvas({ particleMode = 'atmospheric' }) {
       particleMaterial.dispose();
       renderer.dispose();
     };
-  }, [particleMode]);
+  }, [particleMode, isLight]);
 
   return (
     <div
@@ -351,7 +358,9 @@ export default function AirGuard3DCanvas({ particleMode = 'atmospheric' }) {
           style={{
             position: 'absolute',
             inset: 0,
-            background: 'radial-gradient(ellipse at 50% 30%, rgba(56, 189, 248, 0.12) 0%, rgba(10, 15, 29, 0) 70%)',
+            background: isLight
+              ? 'radial-gradient(ellipse at 50% 30%, rgba(2, 132, 199, 0.15) 0%, rgba(248, 250, 252, 0) 70%)'
+              : 'radial-gradient(ellipse at 50% 30%, rgba(56, 189, 248, 0.12) 0%, rgba(10, 15, 29, 0) 70%)',
           }}
         />
       )}

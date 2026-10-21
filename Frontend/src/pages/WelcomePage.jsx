@@ -3,11 +3,13 @@ import { Link, useNavigate } from 'react-router-dom';
 import AirGuardLogo from '../components/AirGuardLogo';
 import AirGuard3DCanvas from '../components/AirGuard3DCanvas';
 import { useAuth } from '../context/AuthContext';
+import { useTheme } from '../context/ThemeContext';
 import './WelcomePage.css';
 
 export default function WelcomePage() {
   const navigate = useNavigate();
   const { user, continueAsGuest } = useAuth();
+  const { resolvedTheme, toggleTheme } = useTheme() || {};
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
   const [emailCopied, setEmailCopied] = useState(false);
   const [particleMode, setParticleMode] = useState('mesh'); // 'mesh' | 'aerosols' | 'clean'
@@ -168,7 +170,7 @@ export default function WelcomePage() {
   return (
     <div className="welcome-page">
       {/* ─── 0. 3D WEBGL INTERACTIVE ATMOSPHERIC BACKGROUND ─── */}
-      <AirGuard3DCanvas particleMode={particleMode} />
+      <AirGuard3DCanvas particleMode={particleMode} theme={resolvedTheme} />
 
       {/* ─── 1. TOP NAVBAR ─── */}
       <header className="welcome-nav">
@@ -198,6 +200,30 @@ export default function WelcomePage() {
           </nav>
 
           <div className="welcome-actions">
+            {/* Theme Toggle Button */}
+            <button
+              type="button"
+              className="welcome-theme-toggle"
+              onClick={toggleTheme}
+              title={`Switch to ${resolvedTheme === 'light' ? 'Obsidian Dark' : 'Ceramic Light'} mode`}
+              style={{
+                background: resolvedTheme === 'light' ? 'rgba(2, 132, 199, 0.1)' : 'rgba(56, 189, 248, 0.1)',
+                border: resolvedTheme === 'light' ? '1.5px solid rgba(2, 132, 199, 0.35)' : '1px solid rgba(56, 189, 248, 0.3)',
+                borderRadius: '8px',
+                padding: '7px 11px',
+                cursor: 'pointer',
+                display: 'inline-flex',
+                alignItems: 'center',
+                gap: '6px',
+                fontSize: '0.85rem',
+                fontWeight: 600,
+                color: resolvedTheme === 'light' ? '#0284c7' : '#38bdf8',
+                transition: 'all 0.2s ease',
+              }}
+            >
+              <span>{resolvedTheme === 'light' ? '🌙 Dark' : '☀️ Light'}</span>
+            </button>
+
             {user ? (
               <Link to="/dashboard" className="btn btn--primary welcome-btn">
                 <span>Dashboard</span>
@@ -255,6 +281,14 @@ export default function WelcomePage() {
               Contact Support
             </button>
             <div className="welcome-mobile-actions">
+              <button
+                type="button"
+                className="btn btn--ghost"
+                onClick={toggleTheme}
+                style={{ width: '100%', display: 'flex', justifyContent: 'center', gap: '8px' }}
+              >
+                <span>{resolvedTheme === 'light' ? '🌙 Switch to Dark Mode' : '☀️ Switch to Light Mode'}</span>
+              </button>
               <button type="button" onClick={handleGuestEntry} className="btn btn--ghost" style={{ width: '100%' }}>
                 Explore as Guest
               </button>

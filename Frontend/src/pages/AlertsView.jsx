@@ -226,10 +226,10 @@ export default function AlertsView({
               onChange={(e) => handleSoundChange(e.target.value)}
               title="Change Alert Sound Profile"
               style={{
-                background: 'rgba(255, 255, 255, 0.06)',
-                border: '1px solid rgba(56, 189, 248, 0.4)',
+                background: 'var(--surface-raised)',
+                border: '1.5px solid var(--border-active, #0284c7)',
                 borderRadius: '8px',
-                color: '#38bdf8',
+                color: 'var(--accent, #0284c7)',
                 fontWeight: 600,
                 padding: '7px 10px',
                 fontSize: '0.8rem',
@@ -237,7 +237,7 @@ export default function AlertsView({
               }}
             >
               {SOUND_PROFILES.map((p) => (
-                <option key={p.id} value={p.id} style={{ background: '#0f172a', color: '#f1f5f9' }}>
+                <option key={p.id} value={p.id} style={{ background: 'var(--bg-card, #0f172a)', color: 'var(--text-primary, #f1f5f9)' }}>
                   {p.icon} {p.name}
                 </option>
               ))}
@@ -395,8 +395,8 @@ export default function AlertsView({
           </div>
 
           {/* Audio Alarm Sound Profile & Volume Controls */}
-          <div style={{ marginTop: '18px', paddingTop: '16px', borderTop: '1px solid rgba(255, 255, 255, 0.08)' }}>
-            <div style={{ fontSize: '0.82rem', fontWeight: 700, color: '#38bdf8', marginBottom: '12px', display: 'flex', alignItems: 'center', gap: '6px' }}>
+          <div style={{ marginTop: '18px', paddingTop: '16px', borderTop: '1px solid var(--border-soft)' }}>
+            <div style={{ fontSize: '0.82rem', fontWeight: 700, color: 'var(--accent, #0284c7)', marginBottom: '12px', display: 'flex', alignItems: 'center', gap: '6px' }}>
               <span>🔊</span> Emergency Alarm Sound & High Volume Settings
             </div>
 
