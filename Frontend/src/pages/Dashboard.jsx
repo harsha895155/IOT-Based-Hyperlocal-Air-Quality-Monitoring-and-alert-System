@@ -247,73 +247,75 @@ export default function Dashboard({ readingsData, onNavigateTab }) {
         </div>
 
         <div className="weather-topbar__actions">
-          {/* Location Search Bar with Autocomplete */}
-          <div className="location-search-box" ref={searchRef}>
-            <div className="location-search-input-wrap">
-              <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
-                <circle cx="11" cy="11" r="8" />
-                <line x1="21" y1="21" x2="16.65" y2="16.65" />
-              </svg>
-              <input
-                type="text"
-                placeholder="Search city, district, or coordinates..."
-                value={searchQuery}
-                onChange={handleSearchChange}
-                onFocus={() => searchResults.length > 0 && setSearchDropdownOpen(true)}
-              />
-              {searching && <span className="search-spinner" />}
+          {/* Row 1 on mobile: Search Bar + GPS Button */}
+          <div className="weather-topbar__search-row">
+            <div className="location-search-box" ref={searchRef}>
+              <div className="location-search-input-wrap">
+                <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
+                  <circle cx="11" cy="11" r="8" />
+                  <line x1="21" y1="21" x2="16.65" y2="16.65" />
+                </svg>
+                <input
+                  type="text"
+                  placeholder="Search city, district, or coordinates..."
+                  value={searchQuery}
+                  onChange={handleSearchChange}
+                  onFocus={() => searchResults.length > 0 && setSearchDropdownOpen(true)}
+                />
+                {searching && <span className="search-spinner" />}
+              </div>
+
+              {searchDropdownOpen && searchResults.length > 0 && (
+                <div className="search-results-dropdown">
+                  {searchResults.map((res, i) => (
+                    <button
+                      key={`${res.name}-${i}`}
+                      type="button"
+                      className="search-result-item"
+                      onClick={() => handleSelectSearchResult(res)}
+                    >
+                      <span className="search-result-name">{res.name}</span>
+                      <span className="search-result-admin">{res.admin1 ? `${res.admin1}, ` : ''}{res.country}</span>
+                    </button>
+                  ))}
+                </div>
+              )}
             </div>
 
-            {searchDropdownOpen && searchResults.length > 0 && (
-              <div className="search-results-dropdown">
-                {searchResults.map((res, i) => (
-                  <button
-                    key={`${res.name}-${i}`}
-                    type="button"
-                    className="search-result-item"
-                    onClick={() => handleSelectSearchResult(res)}
-                  >
-                    <span className="search-result-name">{res.name}</span>
-                    <span className="search-result-admin">{res.admin1 ? `${res.admin1}, ` : ''}{res.country}</span>
-                  </button>
-                ))}
-              </div>
-            )}
+            {/* GPS Button */}
+            <button
+              type="button"
+              className={`btn-icon-glass ${isLiveLocation ? 'is-active-gps' : ''}`}
+              title="Track My Live Location (GPS Permission)"
+              style={
+                isLiveLocation
+                  ? {
+                      borderColor: '#10b981',
+                      color: '#10b981',
+                      background: 'rgba(16, 185, 129, 0.15)',
+                      boxShadow: '0 0 10px rgba(16, 185, 129, 0.25)',
+                    }
+                  : {}
+              }
+              onClick={() => {
+                setCustomSearchedLocation(null);
+                useCurrentLocation(true);
+              }}
+            >
+              <svg
+                width="18"
+                height="18"
+                viewBox="0 0 24 24"
+                fill={isLiveLocation ? '#10b981' : 'none'}
+                stroke="currentColor"
+                strokeWidth="2"
+              >
+                <polygon points="3 11 22 2 13 21 11 13 3 11" />
+              </svg>
+            </button>
           </div>
 
-          {/* GPS Button */}
-          <button
-            type="button"
-            className={`btn-icon-glass ${isLiveLocation ? 'is-active-gps' : ''}`}
-            title="Track My Live Location (GPS Permission)"
-            style={
-              isLiveLocation
-                ? {
-                    borderColor: '#10b981',
-                    color: '#10b981',
-                    background: 'rgba(16, 185, 129, 0.15)',
-                    boxShadow: '0 0 10px rgba(16, 185, 129, 0.25)',
-                  }
-                : {}
-            }
-            onClick={() => {
-              setCustomSearchedLocation(null);
-              useCurrentLocation(true);
-            }}
-          >
-            <svg
-              width="18"
-              height="18"
-              viewBox="0 0 24 24"
-              fill={isLiveLocation ? '#10b981' : 'none'}
-              stroke="currentColor"
-              strokeWidth="2"
-            >
-              <polygon points="3 11 22 2 13 21 11 13 3 11" />
-            </svg>
-          </button>
-
-          {/* Device Station Picker */}
+          {/* Row 2 on mobile: Device Station Picker */}
           <div className="device-quick-picker">
             <button
               type="button"
@@ -431,30 +433,14 @@ export default function Dashboard({ readingsData, onNavigateTab }) {
 
       {/* ─── Informative Banner when in Current Location Mode ─── */}
       {!isDeviceConnected && (
-        <div
-          style={{
-            display: 'flex',
-            alignItems: 'center',
-            justifyContent: 'space-between',
-            flexWrap: 'wrap',
-            gap: '12px',
-            background: 'var(--current-mode-bg)',
-            border: '1px solid var(--border-active)',
-            borderRadius: '12px',
-            padding: '12px 18px',
-            marginBottom: '18px',
-            color: 'var(--text-primary)',
-            fontSize: '0.88rem',
-            boxShadow: 'var(--shadow-card)',
-          }}
-        >
-          <div style={{ display: 'flex', alignItems: 'center', gap: '10px' }}>
-            <span style={{ fontSize: '1.2rem' }}>📍</span>
-            <div>
+        <div className="dashboard-current-mode-banner">
+          <div className="current-mode-info">
+            <span className="current-mode-icon">📍</span>
+            <div className="current-mode-text">
               <strong style={{ color: 'var(--accent)' }}>Current Place Mode:</strong>{' '}
               {devices.length === 0
-                ? 'No AirGuard IoT device connected yet. Displaying live weather, temperature, humidity, and ambient air quality for '
-                : 'Device is offline or not connected. Displaying real-time weather and air quality for '}
+                ? 'No AirGuard IoT device connected yet. Displaying live weather & ambient air quality for '
+                : 'Device offline. Displaying real-time weather & air quality for '}
               <span style={{ fontWeight: 600, color: 'var(--text-primary)' }}>
                 {displayPlaceName}
               </span>.
@@ -462,8 +448,7 @@ export default function Dashboard({ readingsData, onNavigateTab }) {
           </div>
           <button
             type="button"
-            className="btn-primary btn-sm"
-            style={{ padding: '6px 14px', fontSize: '0.8rem', whiteSpace: 'nowrap' }}
+            className="btn-primary btn-sm current-mode-connect-btn"
             onClick={() => onNavigateTab ? onNavigateTab('devices') : null}
           >
             + Connect Device

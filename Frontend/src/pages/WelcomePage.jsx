@@ -317,13 +317,13 @@ export default function WelcomePage() {
               </Link>
             ) : (
               <>
-                <button type="button" onClick={handleGuestEntry} className="btn btn--ghost welcome-btn">
+                <button type="button" onClick={handleGuestEntry} className="btn btn--ghost welcome-btn welcome-btn--guest">
                   <span>Explore as Guest</span>
                 </button>
-                <Link to="/login" className="btn btn--ghost welcome-btn">
+                <Link to="/login" className="btn btn--ghost welcome-btn welcome-btn--signin">
                   <span>Sign In</span>
                 </Link>
-                <Link to="/login?mode=register" className="btn btn--primary welcome-btn">
+                <Link to="/login?mode=register" className="btn btn--primary welcome-btn welcome-btn--getstarted">
                   <span>Get Started</span>
                   <span className="welcome-btn-arrow">➔</span>
                 </Link>

@@ -863,30 +863,135 @@
 
 @media (max-width: 768px) {
   .location-weather-page {
-    padding: 18px 16px 48px;
+    padding: 10px 12px 32px !important;
+    overflow-x: hidden;
+  }
+
+  .loc-header {
+    flex-direction: column;
+    align-items: stretch;
+    gap: 12px;
+    margin-bottom: 14px;
+  }
+
+  .loc-title {
+    font-size: clamp(1.3rem, 4.5vw, 1.75rem) !important;
+    margin-bottom: 4px;
+    word-break: break-word;
+  }
+
+  .loc-subtitle {
+    font-size: 0.82rem !important;
+    line-height: 1.45;
+  }
+
+  .loc-badge-row {
+    flex-wrap: wrap;
+    gap: 6px;
+    margin-bottom: 6px;
+  }
+
+  .loc-service-pill,
+  .loc-scope-pill {
+    font-size: 0.65rem;
+    padding: 3px 8px;
+  }
+
+  .loc-disclaimer-box {
+    max-width: 100%;
+    padding: 10px 12px;
+    font-size: 0.75rem;
+  }
+
+  .loc-search-card {
+    padding: 10px 12px;
+    margin-bottom: 14px;
   }
 
   .loc-search-bar-wrap {
     flex-direction: column;
+    gap: 8px;
+    width: 100%;
+  }
+
+  .loc-search-input-box {
+    width: 100%;
+    min-width: 0;
   }
 
   .loc-autocomplete-dropdown {
     right: 0;
+    left: 0;
+    width: 100%;
   }
 
   .loc-btn-gps {
     width: 100%;
+    height: 38px;
     justify-content: center;
   }
 
-  .loc-daily-card {
-    grid-template-columns: 1fr 1fr;
-    gap: 12px;
+  .loc-weather-grid {
+    display: flex !important;
+    flex-direction: column !important;
+    gap: 12px !important;
+    margin-bottom: 16px;
+    width: 100% !important;
   }
 
-  .loc-daily-temp-col {
-    grid-column: span 2;
-    justify-content: space-between;
+  .loc-hero-card {
+    padding: 16px 14px;
+    border-radius: 14px;
+    width: 100%;
+    box-sizing: border-box;
+  }
+
+  .loc-hero-place {
+    font-size: clamp(1.2rem, 4vw, 1.55rem);
+  }
+
+  .loc-hero-temp {
+    font-size: clamp(2.4rem, 7vw, 3rem);
+  }
+
+  .loc-metrics-grid {
+    display: grid !important;
+    grid-template-columns: repeat(2, minmax(0, 1fr)) !important;
+    gap: 8px !important;
+    width: 100% !important;
+    box-sizing: border-box;
+  }
+
+  .loc-metric-card {
+    padding: 10px 8px !important;
+    border-radius: 10px !important;
+    min-width: 0;
+  }
+
+  .loc-m-val {
+    font-size: 1.15rem !important;
+  }
+
+  .loc-m-label {
+    font-size: 0.65rem !important;
+  }
+
+  .loc-daily-card {
+    padding: 12px 10px;
+    border-radius: 12px;
+  }
+
+  .loc-daily-grid {
+    display: flex;
+    flex-direction: column;
+    gap: 8px;
+  }
+
+  .loc-daily-row {
+    flex-direction: column;
+    align-items: stretch;
+    padding: 8px 10px;
+    gap: 4px;
   }
 }
 

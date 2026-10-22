@@ -1954,10 +1954,25 @@
     display: block;
   }
   .welcome-nav__container {
-    padding: 10px 16px;
+    padding: 8px 12px;
   }
   .welcome-brand__text {
-    font-size: 1.15rem;
+    font-size: 1.05rem;
+  }
+  .welcome-actions {
+    gap: 6px;
+  }
+  .welcome-btn--guest,
+  .welcome-btn--getstarted {
+    display: none !important;
+  }
+  .welcome-theme-toggle {
+    padding: 5px 8px !important;
+    font-size: 0.76rem !important;
+  }
+  .welcome-btn {
+    padding: 6px 12px !important;
+    font-size: 0.78rem !important;
   }
   .welcome-hero {
     padding: 24px 14px 36px;
@@ -1997,6 +2012,16 @@
   }
   .console-header {
     padding: 10px 12px;
+  }
+  .console-body {
+    padding: 12px 10px !important;
+  }
+  .console-gauge-wrap {
+    width: 86px !important;
+    height: 86px !important;
+  }
+  .console-aqi-number {
+    font-size: 1.65rem !important;
   }
   .console-pollutants-grid {
     grid-template-columns: repeat(2, minmax(0, 1fr)) !important;

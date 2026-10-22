@@ -90,6 +90,48 @@
   flex-wrap: wrap;
 }
 
+.weather-topbar__search-row {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+}
+
+.dashboard-current-mode-banner {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+  background: var(--current-mode-bg);
+  border: 1px solid var(--border-active);
+  border-radius: 12px;
+  padding: 10px 16px;
+  margin-bottom: 14px;
+  color: var(--text-primary);
+  font-size: 0.84rem;
+  box-shadow: var(--shadow-card);
+}
+
+.current-mode-info {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+}
+
+.current-mode-icon {
+  font-size: 1.15rem;
+}
+
+.current-mode-text {
+  line-height: 1.4;
+}
+
+.current-mode-connect-btn {
+  padding: 6px 14px;
+  font-size: 0.8rem;
+  white-space: nowrap;
+  flex-shrink: 0;
+}
+
 /* Location Search Input with Autocomplete */
 .location-search-box {
   position: relative;
@@ -962,6 +1004,62 @@
   .weather-dashboard {
     padding: 10px 12px 24px;
     gap: 12px;
+  }
+
+  .weather-topbar {
+    gap: 8px !important;
+    width: 100% !important;
+  }
+
+  .weather-topbar__actions {
+    display: flex !important;
+    flex-direction: column !important;
+    align-items: stretch !important;
+    gap: 8px !important;
+    width: 100% !important;
+  }
+
+  .weather-topbar__search-row {
+    display: flex !important;
+    align-items: center !important;
+    gap: 8px !important;
+    width: 100% !important;
+  }
+
+  .location-search-box {
+    flex: 1 !important;
+    width: auto !important;
+    min-width: 0 !important;
+  }
+
+  .device-quick-picker {
+    width: 100% !important;
+  }
+
+  .device-quick-picker .btn-glass-dropdown {
+    width: 100% !important;
+    justify-content: space-between !important;
+    height: 38px !important;
+    padding: 6px 14px !important;
+    font-size: 0.8rem !important;
+  }
+
+  .dashboard-current-mode-banner {
+    padding: 8px 10px !important;
+    font-size: 0.74rem !important;
+    gap: 6px !important;
+    margin-bottom: 8px !important;
+    border-radius: 10px !important;
+    flex-wrap: nowrap !important;
+  }
+
+  .current-mode-icon {
+    font-size: 0.95rem !important;
+  }
+
+  .current-mode-connect-btn {
+    padding: 4px 8px !important;
+    font-size: 0.7rem !important;
   }
 
   .weather-location-title {
