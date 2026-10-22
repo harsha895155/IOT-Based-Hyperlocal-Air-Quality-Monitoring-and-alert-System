@@ -480,12 +480,12 @@ export default function LoginView() {
                   {loading
                     ? 'Processing...'
                     : mode === 'register'
-                    ? 'Create Account'
-                    : mode === 'login'
-                    ? 'Sign In'
-                    : mode === 'forgot'
-                    ? 'Send Password Reset Link'
-                    : 'Update Password & Sign In'}
+                      ? 'Create Account'
+                      : mode === 'login'
+                        ? 'Sign In'
+                        : mode === 'forgot'
+                          ? 'Send Password Reset Link'
+                          : 'Update Password & Sign In'}
                 </button>
               </form>
             </>

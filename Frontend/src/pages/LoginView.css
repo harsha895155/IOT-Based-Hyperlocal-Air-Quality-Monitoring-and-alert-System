@@ -35,7 +35,7 @@
   pointer-events: none;
   z-index: 1;
   overflow: hidden;
-  opacity: 0.95;
+  opacity: 0.92;
 }
 
 .login-3d-canvas-wrap canvas {
@@ -471,8 +471,15 @@
 }
 
 @keyframes fadeIn {
-  from { opacity: 0; transform: translateY(6px); }
-  to { opacity: 1; transform: translateY(0); }
+  from {
+    opacity: 0;
+    transform: translateY(6px);
+  }
+
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
 }
 
 .login-email-sent-icon-wrapper {
@@ -686,4 +693,3 @@
   border-color: #a7f3d0;
   color: #047857;
 }
-

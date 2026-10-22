@@ -29,7 +29,7 @@
   pointer-events: none;
   z-index: 0;
   overflow: hidden;
-  opacity: 0.50;
+  opacity: 0.88;
 }
 
 .sidebar-3d-bg canvas {
@@ -450,4 +450,3 @@
   border-color: #0284c7;
   color: #0284c7;
 }
-
