@@ -380,13 +380,46 @@
   transform: translateX(3px);
 }
 
-@media (max-width: 600px) {
+@media (max-width: 680px) {
   .topnav {
-    padding: 0 16px;
+    padding: 0 12px;
   }
   .topnav__badge-guest,
   .topnav__badge-user {
     display: none;
+  }
+  .topnav__back-welcome-btn span {
+    display: none;
+  }
+  .topnav__title {
+    font-size: 0.95rem;
+    max-width: 140px;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+  }
+  .topnav__status-pill {
+    padding: 3px 6px;
+  }
+  .topnav__status-text {
+    display: none;
+  }
+  .topnav__user-name {
+    display: none;
+  }
+}
+
+@media (max-width: 360px) {
+  .topnav {
+    padding: 0 8px;
+    gap: 4px;
+  }
+  .topnav__title {
+    font-size: 0.88rem;
+    max-width: 100px;
+  }
+  .topnav__hamburger {
+    padding: 6px;
   }
 }
 

@@ -905,7 +905,7 @@
   color: var(--text-primary);
 }
 
-/* ─── RESPONSIVE BEHAVIOR ─── */
+/* ─── RESPONSIVE BEHAVIOR (Mobile, Tablet, Desktop) ─── */
 @media (max-width: 1024px) {
   .weather-bottom-row {
     grid-template-columns: 1fr;
@@ -913,11 +913,16 @@
 }
 
 @media (max-width: 820px) {
+  .weather-dashboard {
+    padding: 16px 18px 32px;
+    gap: 18px;
+  }
+
   .weather-hero-card {
     flex-direction: column;
     align-items: flex-start;
     padding: 24px 20px;
-    gap: 24px;
+    gap: 20px;
   }
 
   .weather-hero-right {
@@ -925,12 +930,13 @@
     text-align: left;
     width: 100%;
     border-top: 1px solid var(--border-soft);
-    padding-top: 20px;
+    padding-top: 18px;
   }
 
   .weather-topbar {
     flex-direction: column;
     align-items: stretch;
+    gap: 12px;
   }
 
   .weather-topbar__actions {
@@ -939,6 +945,7 @@
 
   .location-search-box {
     flex: 1;
+    min-width: 0;
   }
 
   .daily-forecast-row {
@@ -948,6 +955,137 @@
   .daily-temp-bar-col {
     width: 100%;
     margin-top: 6px;
+  }
+}
+
+@media (max-width: 640px) {
+  .weather-dashboard {
+    padding: 12px 14px 24px;
+    gap: 14px;
+  }
+
+  .weather-location-title {
+    font-size: 1.45rem;
+  }
+
+  .weather-hero-card {
+    padding: 18px 16px;
+    border-radius: 16px;
+    gap: 16px;
+  }
+
+  .aqi-hero-dial-wrap {
+    gap: 14px;
+    align-items: center;
+  }
+
+  .aqi-hero-dial {
+    width: 96px;
+    height: 96px;
+  }
+
+  .aqi-hero-num {
+    font-size: 2.1rem;
+  }
+
+  .aqi-hero-category {
+    font-size: 1.2rem;
+  }
+
+  .weather-temp-num {
+    font-size: 2.6rem;
+  }
+
+  /* Compact 2-Column Pollutant Cards Grid */
+  .pollutants-grid {
+    grid-template-columns: repeat(2, minmax(0, 1fr)) !important;
+    gap: 10px !important;
+  }
+
+  .pollutant-card {
+    padding: 12px 10px !important;
+  }
+
+  .pol-val {
+    font-size: 1.25rem !important;
+  }
+
+  .pol-sub {
+    font-size: 0.68rem !important;
+  }
+
+  /* Single Column Environmental Details */
+  .environmental-details-grid {
+    grid-template-columns: 1fr !important;
+    gap: 12px !important;
+  }
+
+  .env-metric-card {
+    padding: 16px 14px !important;
+  }
+
+  /* Stack Daily Forecast Row on Mobile */
+  .daily-forecast-row {
+    flex-direction: column;
+    align-items: flex-start;
+    padding: 10px 12px;
+    gap: 6px;
+  }
+
+  .daily-day-col {
+    width: 100%;
+    flex-direction: row;
+    justify-content: space-between;
+  }
+
+  .daily-condition-col {
+    width: 100%;
+    justify-content: space-between;
+  }
+
+  .daily-temp-bar-col {
+    width: 100%;
+  }
+}
+
+@media (max-width: 360px) {
+  .weather-dashboard {
+    padding: 8px 8px 20px;
+    gap: 10px;
+  }
+
+  .weather-location-title {
+    font-size: 1.25rem;
+  }
+
+  .aqi-hero-dial {
+    width: 86px;
+    height: 86px;
+  }
+
+  .aqi-hero-num {
+    font-size: 1.85rem;
+  }
+
+  .weather-temp-num {
+    font-size: 2.2rem;
+  }
+
+  .pollutants-grid {
+    grid-template-columns: repeat(2, minmax(0, 1fr)) !important;
+    gap: 6px !important;
+  }
+
+  .pollutant-card {
+    padding: 10px 8px !important;
+  }
+
+  .pol-name {
+    font-size: 0.72rem !important;
+  }
+
+  .pol-val {
+    font-size: 1.1rem !important;
   }
 }
 

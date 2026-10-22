@@ -200,3 +200,166 @@ a:hover {
     transition-duration: 0.01ms !important;
   }
 }
+
+/* ═════════════════════════════════════════════════════════════════════
+   MASTER RESPONSIVE VIEWPORT ENGINE (320px to 1920px)
+   Eliminates unnecessary whitespace, oversized cards, and horizontal overflow.
+   ═════════════════════════════════════════════════════════════════════ */
+
+/* Universal View Containers */
+.page-container,
+.devices-page,
+.alerts-view,
+.analytics-view,
+.history-view,
+.reports-view,
+.system-health-view,
+.settings-view,
+.profile-view,
+.help-support-view,
+.locations-view,
+.device-detail-container {
+  width: 100%;
+  max-width: 1600px;
+  margin: 0 auto;
+  box-sizing: border-box;
+  min-width: 0;
+}
+
+/* Tablet Portrait & Small Laptops (<= 960px) */
+@media (max-width: 960px) {
+  .devices-page,
+  .alerts-view,
+  .analytics-view,
+  .history-view,
+  .reports-view,
+  .system-health-view,
+  .settings-view,
+  .profile-view,
+  .help-support-view,
+  .locations-view,
+  .device-detail-container {
+    padding: 18px 20px 48px !important;
+  }
+}
+
+/* Modern Mobile Phones (<= 640px) */
+@media (max-width: 640px) {
+  .devices-page,
+  .alerts-view,
+  .analytics-view,
+  .history-view,
+  .reports-view,
+  .system-health-view,
+  .settings-view,
+  .profile-view,
+  .help-support-view,
+  .locations-view,
+  .device-detail-container {
+    padding: 12px 14px 32px !important;
+  }
+
+  /* Compact 2-Column KPI Cards Grid on Mobile */
+  .devices-kpi-grid,
+  .alerts-kpi-grid,
+  .analytics-kpi-grid,
+  .history-kpi-grid,
+  .reports-kpi-grid,
+  .health-kpi-grid,
+  .devices-grid,
+  .locations-grid {
+    grid-template-columns: repeat(2, minmax(0, 1fr)) !important;
+    gap: 10px !important;
+  }
+
+  .devices-kpi-card,
+  .alerts-kpi-card,
+  .analytics-kpi-card,
+  .history-kpi-card,
+  .reports-kpi-card,
+  .health-kpi-card {
+    padding: 12px 10px !important;
+  }
+
+  .devices-kpi-val,
+  .alerts-kpi-val,
+  .analytics-kpi-val,
+  .history-kpi-val,
+  .reports-kpi-val {
+    font-size: 1.35rem !important;
+  }
+
+  /* Fluid Controls & Toolbars */
+  .devices-controls-card,
+  .analytics-controls-bar,
+  .history-controls-bar,
+  .reports-controls-bar {
+    padding: 12px 14px !important;
+    flex-direction: column !important;
+    align-items: stretch !important;
+    gap: 10px !important;
+  }
+
+  .devices-search-box,
+  .analytics-search-box,
+  .history-search-box,
+  .devices-controls-group {
+    width: 100% !important;
+    min-width: 0 !important;
+  }
+
+  .devices-search-input {
+    width: 100% !important;
+  }
+
+  /* Form Grids on Mobile */
+  .device-modal-grid,
+  .profile-form-grid,
+  .settings-form-grid {
+    grid-template-columns: 1fr !important;
+    gap: 10px !important;
+  }
+}
+
+/* Small Mobile Screens (320px - 360px, e.g. iPhone SE) */
+@media (max-width: 360px) {
+  .devices-page,
+  .alerts-view,
+  .analytics-view,
+  .history-view,
+  .reports-view,
+  .system-health-view,
+  .settings-view,
+  .profile-view,
+  .help-support-view,
+  .locations-view,
+  .device-detail-container {
+    padding: 8px 8px 24px !important;
+  }
+
+  .devices-kpi-val,
+  .alerts-kpi-val,
+  .analytics-kpi-val,
+  .history-kpi-val,
+  .reports-kpi-val {
+    font-size: 1.15rem !important;
+  }
+
+  .devices-kpi-title,
+  .alerts-kpi-title,
+  .analytics-kpi-title,
+  .history-kpi-title {
+    font-size: 0.65rem !important;
+  }
+}
+
+/* Responsive Table & Chart Wrappers */
+.table-responsive-wrapper,
+.history-table-container,
+.devices-table-wrap,
+.alerts-table-wrap {
+  width: 100%;
+  max-width: 100%;
+  overflow-x: auto;
+  -webkit-overflow-scrolling: touch;
+}

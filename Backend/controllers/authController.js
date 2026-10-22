@@ -218,6 +218,7 @@ async function forgotPassword(req, res, next) {
     res.json({
       success: true,
       message: `A password reset link has been sent to ${user.email}. Please check your inbox (and spam folder) to reset your password.`,
+      ...(process.env.NODE_ENV !== 'production' ? { resetToken: rawResetToken } : {}),
     });
   } catch (err) {
     next(err);

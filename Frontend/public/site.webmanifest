@@ -1,35 +1,51 @@
 {
-  "name": "AirGuard",
+  "name": "AirGuard — Hyperlocal Air Quality & Weather",
   "short_name": "AirGuard",
-  "description": "Real-Time Hyperlocal Air Quality Monitoring & Alert System",
-  "start_url": "/",
+  "description": "Real-Time Hyperlocal Air Quality Monitoring, Weather Telemetry & Smart Alerts",
+  "id": "/",
+  "start_url": "/dashboard",
+  "scope": "/",
   "display": "standalone",
+  "orientation": "any",
   "background_color": "#070a10",
-  "theme_color": "#070a10",
+  "theme_color": "#0284c7",
+  "categories": ["weather", "utilities", "health", "lifestyle"],
   "icons": [
     {
       "src": "/favicon-48x48.png",
       "sizes": "48x48",
       "type": "image/png",
-      "purpose": "any maskable"
+      "purpose": "any"
     },
     {
       "src": "/favicon-96x96.png",
       "sizes": "96x96",
       "type": "image/png",
-      "purpose": "any maskable"
+      "purpose": "any"
     },
     {
       "src": "/android-chrome-192x192.png",
       "sizes": "192x192",
       "type": "image/png",
-      "purpose": "any maskable"
+      "purpose": "any"
+    },
+    {
+      "src": "/android-chrome-192x192.png",
+      "sizes": "192x192",
+      "type": "image/png",
+      "purpose": "maskable"
     },
     {
       "src": "/android-chrome-512x512.png",
       "sizes": "512x512",
       "type": "image/png",
-      "purpose": "any maskable"
+      "purpose": "any"
+    },
+    {
+      "src": "/android-chrome-512x512.png",
+      "sizes": "512x512",
+      "type": "image/png",
+      "purpose": "maskable"
     }
   ]
 }
