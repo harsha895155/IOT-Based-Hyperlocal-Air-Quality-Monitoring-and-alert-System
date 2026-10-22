@@ -960,76 +960,78 @@
 
 @media (max-width: 640px) {
   .weather-dashboard {
-    padding: 12px 14px 24px;
-    gap: 14px;
+    padding: 10px 12px 24px;
+    gap: 12px;
   }
 
   .weather-location-title {
-    font-size: 1.45rem;
+    font-size: clamp(1.15rem, 3.8vw, 1.45rem);
   }
 
   .weather-hero-card {
-    padding: 18px 16px;
-    border-radius: 16px;
-    gap: 16px;
+    padding: 14px 12px;
+    border-radius: 14px;
+    gap: 12px;
   }
 
   .aqi-hero-dial-wrap {
-    gap: 14px;
+    gap: 10px;
     align-items: center;
   }
 
   .aqi-hero-dial {
-    width: 96px;
-    height: 96px;
+    width: 82px;
+    height: 82px;
   }
 
   .aqi-hero-num {
-    font-size: 2.1rem;
+    font-size: 1.85rem;
   }
 
   .aqi-hero-category {
-    font-size: 1.2rem;
+    font-size: 1.05rem;
   }
 
   .weather-temp-num {
-    font-size: 2.6rem;
+    font-size: 2.1rem;
   }
 
   /* Compact 2-Column Pollutant Cards Grid */
   .pollutants-grid {
     grid-template-columns: repeat(2, minmax(0, 1fr)) !important;
-    gap: 10px !important;
+    gap: 8px !important;
   }
 
   .pollutant-card {
-    padding: 12px 10px !important;
+    padding: 10px 8px !important;
+    border-radius: 10px !important;
   }
 
   .pol-val {
-    font-size: 1.25rem !important;
+    font-size: 1.15rem !important;
   }
 
   .pol-sub {
-    font-size: 0.68rem !important;
+    font-size: 0.65rem !important;
   }
 
-  /* Single Column Environmental Details */
+  /* Compact 2-Column Environmental Details Grid */
   .environmental-details-grid {
-    grid-template-columns: 1fr !important;
-    gap: 12px !important;
+    grid-template-columns: repeat(2, minmax(0, 1fr)) !important;
+    gap: 8px !important;
   }
 
   .env-metric-card {
-    padding: 16px 14px !important;
+    padding: 10px 10px !important;
+    border-radius: 10px !important;
   }
 
   /* Stack Daily Forecast Row on Mobile */
   .daily-forecast-row {
     flex-direction: column;
     align-items: flex-start;
-    padding: 10px 12px;
-    gap: 6px;
+    padding: 8px 10px;
+    gap: 4px;
   }
 
   .daily-day-col {
@@ -1050,25 +1052,25 @@
 
 @media (max-width: 360px) {
   .weather-dashboard {
-    padding: 8px 8px 20px;
-    gap: 10px;
+    padding: 6px 6px 18px;
+    gap: 8px;
   }
 
   .weather-location-title {
-    font-size: 1.25rem;
+    font-size: 1.15rem;
   }
 
   .aqi-hero-dial {
-    width: 86px;
-    height: 86px;
+    width: 74px;
+    height: 74px;
   }
 
   .aqi-hero-num {
-    font-size: 1.85rem;
+    font-size: 1.6rem;
   }
 
   .weather-temp-num {
-    font-size: 2.2rem;
+    font-size: 1.85rem;
   }
 
   .pollutants-grid {
@@ -1076,8 +1078,17 @@
     gap: 6px !important;
   }
 
+  .environmental-details-grid {
+    grid-template-columns: repeat(2, minmax(0, 1fr)) !important;
+    gap: 6px !important;
+  }
+
   .pollutant-card {
-    padding: 10px 8px !important;
+    padding: 8px 6px !important;
+  }
+
+  .env-metric-card {
+    padding: 8px 8px !important;
   }
 
   .pol-name {

@@ -206,17 +206,27 @@ a:hover {
    Eliminates unnecessary whitespace, oversized cards, and horizontal overflow.
    ═════════════════════════════════════════════════════════════════════ */
 
-/* Universal View Containers */
+/* Universal View Containers across all 11 views */
 .page-container,
+.weather-dashboard,
 .devices-page,
+.alerts-page,
 .alerts-view,
+.analytics-page,
 .analytics-view,
+.history-page,
 .history-view,
-.reports-view,
-.system-health-view,
-.settings-view,
-.profile-view,
+.help-page,
 .help-support-view,
+.settings-page,
+.settings-view,
+.health-page,
+.system-health-view,
+.profile-page,
+.profile-view,
+.subpage-view,
+.reports-view,
+.location-weather-page,
 .locations-view,
 .device-detail-container {
   width: 100%;
@@ -224,80 +234,188 @@ a:hover {
   margin: 0 auto;
   box-sizing: border-box;
   min-width: 0;
+  padding: clamp(14px, 2.2vw, 28px);
+}
+
+/* Fluid Page Titles & Subtitles across all views */
+.weather-location-title,
+.devices-title,
+.alerts-title,
+.analytics-title,
+.history-title,
+.reports-title,
+.settings-title,
+.profile-title,
+.health-title,
+.locations-title,
+.page-title,
+.view-title {
+  font-size: clamp(1.2rem, 3.2vw, 1.75rem) !important;
+  font-weight: 700 !important;
+  letter-spacing: -0.02em !important;
+  margin: 0 !important;
+}
+
+.weather-sub,
+.devices-subtitle,
+.alerts-subtitle,
+.analytics-subtitle,
+.history-subtitle,
+.reports-subtitle,
+.settings-subtitle,
+.profile-subtitle,
+.health-subtitle,
+.page-subtitle,
+.view-subtitle {
+  font-size: clamp(0.72rem, 1vw, 0.84rem) !important;
+  color: var(--text-muted) !important;
 }
 
 /* Tablet Portrait & Small Laptops (<= 960px) */
 @media (max-width: 960px) {
+  .weather-dashboard,
   .devices-page,
+  .alerts-page,
   .alerts-view,
+  .analytics-page,
   .analytics-view,
+  .history-page,
   .history-view,
-  .reports-view,
-  .system-health-view,
-  .settings-view,
-  .profile-view,
+  .help-page,
   .help-support-view,
+  .settings-page,
+  .settings-view,
+  .health-page,
+  .system-health-view,
+  .profile-page,
+  .profile-view,
+  .subpage-view,
+  .reports-view,
+  .location-weather-page,
   .locations-view,
   .device-detail-container {
-    padding: 18px 20px 48px !important;
+    padding: 14px 16px 36px !important;
+    gap: 16px !important;
   }
 }
 
-/* Modern Mobile Phones (<= 640px) */
-@media (max-width: 640px) {
+/* Modern Mobile Phones & Compact Screens (<= 768px) */
+@media (max-width: 768px) {
+  .weather-dashboard,
   .devices-page,
+  .alerts-page,
   .alerts-view,
+  .analytics-page,
   .analytics-view,
+  .history-page,
   .history-view,
-  .reports-view,
-  .system-health-view,
-  .settings-view,
-  .profile-view,
+  .help-page,
   .help-support-view,
+  .settings-page,
+  .settings-view,
+  .health-page,
+  .system-health-view,
+  .profile-page,
+  .profile-view,
+  .subpage-view,
+  .reports-view,
+  .location-weather-page,
   .locations-view,
   .device-detail-container {
-    padding: 12px 14px 32px !important;
+    padding: 10px 12px 28px !important;
+    gap: 12px !important;
   }
 
-  /* Compact 2-Column KPI Cards Grid on Mobile */
+  /* Compact 2-Column KPI Cards Grid on Mobile across all views */
   .devices-kpi-grid,
   .alerts-kpi-grid,
   .analytics-kpi-grid,
   .history-kpi-grid,
-  .reports-kpi-grid,
+  .compliance-kpi-grid,
   .health-kpi-grid,
+  .health-infra-grid,
+  .health-bench-grid,
+  .dd-kpi-grid,
+  .reports-grid,
+  .reports-mid-grid,
+  .export-suite-grid,
+  .settings-grid-2,
+  .settings-tools-grid,
+  .profile-content-grid,
   .devices-grid,
-  .locations-grid {
+  .devices-grid-view,
+  .locations-grid,
+  .loc-metrics-grid,
+  .loc-weather-grid,
+  .loc-daily-grid,
+  .pollutants-grid,
+  .environmental-details-grid {
     grid-template-columns: repeat(2, minmax(0, 1fr)) !important;
-    gap: 10px !important;
+    gap: 8px !important;
   }
 
   .devices-kpi-card,
   .alerts-kpi-card,
   .analytics-kpi-card,
   .history-kpi-card,
-  .reports-kpi-card,
-  .health-kpi-card {
-    padding: 12px 10px !important;
+  .compliance-kpi-card,
+  .health-kpi-card,
+  .health-infra-card,
+  .health-bench-card,
+  .dd-kpi-card,
+  .pollutant-card,
+  .env-metric-card,
+  .location-card,
+  .loc-metric-card,
+  .profile-card,
+  .settings-card,
+  .report-section-card,
+  .export-card,
+  .device-card-item {
+    padding: 10px 8px !important;
+    border-radius: 10px !important;
   }
 
   .devices-kpi-val,
   .alerts-kpi-val,
   .analytics-kpi-val,
   .history-kpi-val,
+  .compliance-kpi-val,
+  .health-infra-val,
+  .profile-stat-val,
+  .loc-val,
+  .loc-m-val,
+  .pol-val,
   .reports-kpi-val {
-    font-size: 1.35rem !important;
+    font-size: 1.25rem !important;
+  }
+
+  .devices-kpi-title,
+  .alerts-kpi-title,
+  .analytics-kpi-title,
+  .history-kpi-title,
+  .compliance-kpi-title,
+  .health-kpi-title,
+  .reports-kpi-title,
+  .pollutant-name,
+  .pol-name,
+  .env-metric-title {
+    font-size: 0.65rem !important;
   }
 
   /* Fluid Controls & Toolbars */
   .devices-controls-card,
+  .alerts-controls-card,
   .analytics-controls-bar,
   .history-controls-bar,
-  .reports-controls-bar {
-    padding: 12px 14px !important;
+  .reports-controls-bar,
+  .report-controls-bar,
+  .weather-topbar {
+    padding: 10px 12px !important;
     flex-direction: column !important;
     align-items: stretch !important;
-    gap: 10px !important;
+    gap: 8px !important;
+    border-radius: 10px !important;
   }
 
   .devices-search-box,
@@ -315,41 +433,90 @@ a:hover {
   /* Form Grids on Mobile */
   .device-modal-grid,
   .profile-form-grid,
-  .settings-form-grid {
+  .settings-form-grid,
+  .firmware-inputs-grid,
+  .rules-inputs-grid,
+  .support-form-grid {
     grid-template-columns: 1fr !important;
-    gap: 10px !important;
+    gap: 8px !important;
+  }
+
+  /* Cards, Hero Banners & Forecast Scaling */
+  .weather-hero-card,
+  .weather-stat-card,
+  .forecast-card,
+  .detail-card,
+  .dd-header-card,
+  .location-detail-card {
+    padding: 12px 10px !important;
+    border-radius: 12px !important;
+  }
+
+  .weather-temp-row {
+    gap: 8px !important;
+  }
+
+  .aqi-dial-container {
+    width: 82px !important;
+    height: 82px !important;
+  }
+
+  .aqi-value-large {
+    font-size: 1.65rem !important;
   }
 }
 
 /* Small Mobile Screens (320px - 360px, e.g. iPhone SE) */
 @media (max-width: 360px) {
+  .weather-dashboard,
   .devices-page,
+  .alerts-page,
   .alerts-view,
+  .analytics-page,
   .analytics-view,
+  .history-page,
   .history-view,
-  .reports-view,
-  .system-health-view,
-  .settings-view,
-  .profile-view,
+  .help-page,
   .help-support-view,
+  .settings-page,
+  .settings-view,
+  .health-page,
+  .system-health-view,
+  .profile-page,
+  .profile-view,
+  .subpage-view,
+  .reports-view,
+  .location-weather-page,
   .locations-view,
   .device-detail-container {
-    padding: 8px 8px 24px !important;
+    padding: 6px 8px 24px !important;
+    gap: 8px !important;
   }
 
   .devices-kpi-val,
   .alerts-kpi-val,
   .analytics-kpi-val,
   .history-kpi-val,
-  .reports-kpi-val {
-    font-size: 1.15rem !important;
+  .reports-kpi-val,
+  .compliance-kpi-val {
+    font-size: 1.1rem !important;
   }
 
   .devices-kpi-title,
   .alerts-kpi-title,
   .analytics-kpi-title,
-  .history-kpi-title {
-    font-size: 0.65rem !important;
+  .history-kpi-title,
+  .compliance-kpi-title {
+    font-size: 0.62rem !important;
+  }
+
+  .aqi-dial-container {
+    width: 74px !important;
+    height: 74px !important;
+  }
+
+  .aqi-value-large {
+    font-size: 1.45rem !important;
   }
 }
 
@@ -363,3 +530,14 @@ a:hover {
   overflow-x: auto;
   -webkit-overflow-scrolling: touch;
 }
+
+table {
+  font-size: clamp(0.72rem, 0.7rem + 0.1vw, 0.84rem);
+}
+
+table th,
+table td {
+  padding: clamp(6px, 1vh, 10px) clamp(8px, 1vw, 12px) !important;
+}
+
+

@@ -1,7 +1,7 @@
 /* ─── Devices & Hardware Fleet Modern Styling ─── */
 
 .devices-page {
-  padding: 28px 36px 64px;
+  padding: clamp(14px, 2.2vw, 28px);
   margin: 0;
 }
 
