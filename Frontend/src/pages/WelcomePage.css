@@ -1854,6 +1854,31 @@
   display: block;
 }
 
+.footer-companion-text {
+  font-size: 0.80rem;
+  color: #94a3b8;
+  margin-top: 8px;
+  line-height: 1.5;
+}
+
+.footer-contact-chip {
+  margin-top: 8px;
+  font-size: 0.76rem;
+  color: #94a3b8;
+}
+
+.footer-spec-item {
+  font-size: 0.72rem;
+  color: #94a3b8;
+  display: block;
+}
+
+.footer-copyright-text,
+.footer-support-text {
+  font-size: 0.72rem;
+  color: #64748b;
+}
+
 .footer-links-col {
   display: flex;
   flex-direction: column;
@@ -2771,34 +2796,69 @@
     height: 30px;
   }
   .welcome-footer {
-    padding: 20px 10px;
+    padding: 16px 10px 22px !important;
   }
   .welcome-footer__content {
     display: grid !important;
     grid-template-columns: repeat(2, minmax(0, 1fr)) !important;
-    gap: 16px 12px !important;
+    gap: 10px 12px !important;
   }
   .footer-brand-col {
     grid-column: 1 / -1 !important;
-    margin-bottom: 4px !important;
+    margin-bottom: 2px !important;
+  }
+  .welcome-brand__text {
+    font-size: 0.95rem !important;
+  }
+  .footer-companion-text {
+    font-size: 0.65rem !important;
+    line-height: 1.35 !important;
+    margin-top: 4px !important;
+  }
+  .footer-contact-chip,
+  .footer-contact-lbl,
+  .footer-email-link {
+    font-size: 0.64rem !important;
+    margin-top: 4px !important;
   }
   .footer-links-col {
     min-width: 0 !important;
     display: flex !important;
     flex-direction: column !important;
-    gap: 4px !important;
+    gap: 2px !important;
   }
   .footer-col-title {
-    font-size: 0.68rem !important;
+    font-size: 0.58rem !important;
     font-weight: 800 !important;
     letter-spacing: 0.05em !important;
     color: #38bdf8 !important;
-    margin-bottom: 4px !important;
+    margin-bottom: 2px !important;
   }
   .footer-link-btn {
-    font-size: 0.72rem !important;
-    padding: 2px 0 !important;
-    text-align: left !important;
+    font-size: 0.62rem !important;
+    padding: 1px 0 !important;
+    line-height: 1.25 !important;
+    color: #94a3b8 !important;
+  }
+  .footer-spec-item,
+  .footer-links-col span.text-muted,
+  .footer-links-col span {
+    font-size: 0.60rem !important;
+    line-height: 1.25 !important;
+    color: #94a3b8 !important;
+    display: block !important;
+  }
+  .welcome-footer__bottom {
+    padding-top: 10px !important;
+    margin-top: 10px !important;
+    border-top: 1px solid rgba(255, 255, 255, 0.06) !important;
+  }
+  .footer-copyright-text,
+  .footer-support-text,
+  .welcome-footer__bottom span {
+    font-size: 0.56rem !important;
+    line-height: 1.25 !important;
+    color: #64748b !important;
   }
 }
 

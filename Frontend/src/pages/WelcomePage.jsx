@@ -1187,15 +1187,15 @@ export default function WelcomePage() {
         <div className="welcome-container welcome-footer__content">
           <div className="footer-brand-col">
             <div className="welcome-brand">
-              <AirGuardLogo size={28} />
+              <AirGuardLogo size={24} />
               <span className="welcome-brand__text">AirGuard</span>
             </div>
-            <p className="text-muted" style={{ fontSize: '0.85rem', marginTop: '10px', lineHeight: '1.6' }}>
+            <p className="text-muted footer-companion-text">
               Companion implementation for the IEEE paper: <em>"IoT-Based Hyperlocal Air Quality Monitoring and Alert System with Cloud Integration."</em>
             </p>
-            <div className="footer-contact-chip" style={{ marginTop: '14px' }}>
-              <span style={{ fontSize: '0.8rem', color: 'var(--text-muted)' }}>Official Email: </span>
-              <a href="mailto:airguard396@gmail.com" className="footer-email-link" style={{ fontWeight: 600, color: 'var(--accent)' }}>
+            <div className="footer-contact-chip">
+              <span className="footer-contact-lbl">Official Email: </span>
+              <a href="mailto:airguard396@gmail.com" className="footer-email-link">
                 airguard396@gmail.com
               </a>
             </div>
@@ -1220,16 +1220,16 @@ export default function WelcomePage() {
           <div className="footer-links-col">
             <span className="footer-col-title">CONTACT & SPECS</span>
             <a href="mailto:airguard396@gmail.com" className="footer-link-btn">✉️ airguard396@gmail.com</a>
-            <span className="text-muted fs-xs">Port 5001 Node.js REST API</span>
-            <span className="text-muted fs-xs">Vercel Global Edge CDN</span>
-            <span className="text-muted fs-xs">Render Cloud Backend</span>
+            <span className="text-muted fs-xs footer-spec-item">Port 5001 Node.js REST API</span>
+            <span className="text-muted fs-xs footer-spec-item">Vercel Global Edge CDN</span>
+            <span className="text-muted fs-xs footer-spec-item">Render Cloud Backend</span>
           </div>
         </div>
 
         <div className="welcome-footer__bottom">
-          <div className="welcome-container" style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', flexWrap: 'wrap', gap: '12px' }}>
-            <span className="text-muted fs-xs">© 2026 AirGuard Hyperlocal Intelligence. All rights reserved.</span>
-            <span className="text-muted fs-xs">Direct Support: <a href="mailto:airguard396@gmail.com" style={{ color: 'var(--accent)' }}>airguard396@gmail.com</a></span>
+          <div className="welcome-container" style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', flexWrap: 'wrap', gap: '8px' }}>
+            <span className="text-muted fs-xs footer-copyright-text">© 2026 AirGuard Hyperlocal Intelligence. All rights reserved.</span>
+            <span className="text-muted fs-xs footer-support-text">Direct Support: <a href="mailto:airguard396@gmail.com" style={{ color: 'var(--accent)' }}>airguard396@gmail.com</a></span>
           </div>
         </div>
       </footer>
