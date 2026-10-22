@@ -156,8 +156,9 @@ export default function Dashboard({ readingsData, onNavigateTab }) {
     : (cw.humidity != null ? cw.humidity : null);
 
   const sensorGasPpm = isDeviceConnected && latest?.gasPPM != null
-    ? Math.round(latest.gasPPM)
+    ? (latest.gasPPM < 1 ? Number(latest.gasPPM).toFixed(2) : Number(latest.gasPPM).toFixed(1))
     : null;
+  const numGasPpm = isDeviceConnected && latest?.gasPPM != null ? Number(latest.gasPPM) : null;
 
   const weatherCondition = cw.condition || 'Partly Cloudy';
   const weatherIconType = cw.icon || 'partly-cloudy';
@@ -213,43 +214,97 @@ export default function Dashboard({ readingsData, onNavigateTab }) {
     <div className="weather-dashboard">
       {/* ─── 1. TOP HEADER & LOCATION SELECTOR BAR ─── */}
       <div className="weather-topbar">
-        <div className="weather-topbar__location">
+        <div className="weather-topbar__location" style={{ width: '100%' }}>
           <div className="weather-location-title-row">
-            <h1 className="weather-location-title">
-              {displayPlaceName}
-            </h1>
-            <div className={`live-pulse-badge ${isDeviceConnected ? 'is-live' : (isLiveLocation ? 'is-live' : 'is-standby')}`}>
-              <span className="live-dot" style={isLiveLocation && !isDeviceConnected ? { background: '#10b981', boxShadow: '0 0 8px #10b981' } : {}} />
-              <span>{isDeviceConnected ? 'LIVE IOT FEED' : (isLiveLocation ? 'LIVE GPS ACTIVE' : 'LOCATION MODE')}</span>
+            <div className="weather-title-left">
+              <h1 className="weather-location-title">
+                {displayPlaceName}
+              </h1>
+              <div className={`live-pulse-badge ${isDeviceConnected ? 'is-live' : (isLiveLocation ? 'is-live' : 'is-standby')}`}>
+                <span className="live-dot" style={isLiveLocation && !isDeviceConnected ? { background: '#10b981', boxShadow: '0 0 8px #10b981' } : {}} />
+                <span>{isDeviceConnected ? 'LIVE IOT FEED' : (isLiveLocation ? 'LIVE GPS ACTIVE' : 'LOCATION MODE')}</span>
+              </div>
             </div>
-          </div>
-          <div className="weather-location-sub">
-            {isDeviceConnected ? (
-              <>
-                <span>{currentDevice.name}</span>
-                <span className="sep">•</span>
-                <span>{latest ? `Sensor ping ${timeAgo}` : 'Awaiting sensor stream'}</span>
-                <span className="sep">•</span>
-                <span>{weatherData?.updatedAt ? `Weather updated ${formatTimeAgo(weatherData.updatedAt)}` : 'Live forecast'}</span>
-              </>
-            ) : (
-              <>
-                <span style={{ color: isLiveLocation ? '#10b981' : 'var(--color-primary, #38bdf8)', fontWeight: 600 }}>
-                  {isLiveLocation ? (buildingName || houseName ? `🏠 ${buildingName || houseName}` : '📍 Live Place Tracked') : '📍 Location Mode'}
-                </span>
-                <span className="sep">•</span>
-                <span>{gpsLocation || (coords ? `${coords.lat.toFixed(4)}°, ${coords.lng.toFixed(4)}°` : 'Resolving GPS')}</span>
-                <span className="sep">•</span>
-                <span>{weatherData?.updatedAt ? `Updated ${formatTimeAgo(weatherData.updatedAt)}` : 'Live Forecast'}</span>
-              </>
-            )}
+
+            {/* Station / Location Picker placed at top right as requested in Image 2 */}
+            <div className="device-quick-picker">
+              <button
+                type="button"
+                className="btn-glass-dropdown"
+                onClick={() => setDeviceDropdownOpen(!deviceDropdownOpen)}
+                title={isDeviceConnected ? currentDevice.name : (isLiveLocation ? 'Live User Location' : 'Current Location')}
+              >
+                <span className="dot-node" style={{ background: isDeviceConnected ? '#10b981' : '#38bdf8' }} />
+                <span>{isDeviceConnected ? currentDevice.name : (isLiveLocation ? '📍 Live GPS' : '📍 Current Loc')}</span>
+                <svg width="10" height="10" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5">
+                  <polyline points="6 9 12 15 18 9" />
+                </svg>
+              </button>
+
+              {deviceDropdownOpen && (
+                <div className="device-dropdown-menu">
+                  <div className="device-dropdown-header">STATION SELECTION</div>
+                  <button
+                    type="button"
+                    className={`device-dropdown-item ${!isDeviceConnected ? 'is-active' : ''}`}
+                    onClick={() => {
+                      setSelectedDevice('current-location');
+                      setDeviceDropdownOpen(false);
+                    }}
+                  >
+                    <div>
+                      <div className="dev-name">📍 Current Location Only</div>
+                      <div className="dev-loc">Live Weather & Ambient AQI</div>
+                    </div>
+                    <span className="status-pill-sm is-online" style={{ background: 'rgba(56, 189, 248, 0.2)', color: '#38bdf8' }}>
+                      Active
+                    </span>
+                  </button>
+
+                  {devices.map((dev) => (
+                    <button
+                      key={dev.id}
+                      type="button"
+                      className={`device-dropdown-item ${dev.id === selectedDevice ? 'is-active' : ''}`}
+                      onClick={() => {
+                        setCustomSearchedLocation(null);
+                        setSelectedDevice(dev.id);
+                        setDeviceDropdownOpen(false);
+                      }}
+                    >
+                      <div>
+                        <div className="dev-name">{dev.name}</div>
+                        <div className="dev-loc">{dev.location}</div>
+                      </div>
+                      <span className={`status-pill-sm ${dev.status === 'Online' ? 'is-online' : 'is-offline'}`}>
+                        {dev.status}
+                      </span>
+                    </button>
+                  ))}
+
+                  <div style={{ borderTop: '1px solid rgba(255,255,255,0.08)', padding: '6px' }}>
+                    <button
+                      type="button"
+                      className="btn-secondary btn-sm"
+                      style={{ width: '100%', fontSize: '0.78rem', padding: '6px 10px' }}
+                      onClick={() => {
+                        setDeviceDropdownOpen(false);
+                        if (onNavigateTab) onNavigateTab('devices');
+                      }}
+                    >
+                      + Add New Device
+                    </button>
+                  </div>
+                </div>
+              )}
+            </div>
           </div>
         </div>
 
-        <div className="weather-topbar__actions">
-          {/* Row 1 on mobile: Search Bar + GPS Button */}
-          <div className="weather-topbar__search-row">
-            <div className="location-search-box" ref={searchRef}>
+        <div className="weather-topbar__actions" style={{ width: '100%' }}>
+          {/* Row 2: Search Bar + GPS Button taking full width */}
+          <div className="weather-topbar__search-row" style={{ width: '100%' }}>
+            <div className="location-search-box" ref={searchRef} style={{ flex: 1 }}>
               <div className="location-search-input-wrap">
                 <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
                   <circle cx="11" cy="11" r="8" />
@@ -290,11 +345,11 @@ export default function Dashboard({ readingsData, onNavigateTab }) {
               style={
                 isLiveLocation
                   ? {
-                      borderColor: '#10b981',
-                      color: '#10b981',
-                      background: 'rgba(16, 185, 129, 0.15)',
-                      boxShadow: '0 0 10px rgba(16, 185, 129, 0.25)',
-                    }
+                    borderColor: '#10b981',
+                    color: '#10b981',
+                    background: 'rgba(16, 185, 129, 0.15)',
+                    boxShadow: '0 0 10px rgba(16, 185, 129, 0.25)',
+                  }
                   : {}
               }
               onClick={() => {
@@ -313,78 +368,6 @@ export default function Dashboard({ readingsData, onNavigateTab }) {
                 <polygon points="3 11 22 2 13 21 11 13 3 11" />
               </svg>
             </button>
-          </div>
-
-          {/* Row 2 on mobile: Device Station Picker */}
-          <div className="device-quick-picker">
-            <button
-              type="button"
-              className="btn-glass-dropdown"
-              onClick={() => setDeviceDropdownOpen(!deviceDropdownOpen)}
-            >
-              <span className="dot-node" style={{ background: isDeviceConnected ? '#10b981' : '#38bdf8' }} />
-              <span>{isDeviceConnected ? currentDevice.name : (isLiveLocation ? '📍 Live User Location' : '📍 Current Location')}</span>
-              <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5">
-                <polyline points="6 9 12 15 18 9" />
-              </svg>
-            </button>
-
-            {deviceDropdownOpen && (
-              <div className="device-dropdown-menu">
-                <div className="device-dropdown-header">STATION SELECTION</div>
-                <button
-                  type="button"
-                  className={`device-dropdown-item ${!isDeviceConnected ? 'is-active' : ''}`}
-                  onClick={() => {
-                    setSelectedDevice('current-location');
-                    setDeviceDropdownOpen(false);
-                  }}
-                >
-                  <div>
-                    <div className="dev-name">📍 Current Location Only</div>
-                    <div className="dev-loc">Live Weather & Ambient AQI</div>
-                  </div>
-                  <span className="status-pill-sm is-online" style={{ background: 'rgba(56, 189, 248, 0.2)', color: '#38bdf8' }}>
-                    Active
-                  </span>
-                </button>
-
-                {devices.map((dev) => (
-                  <button
-                    key={dev.id}
-                    type="button"
-                    className={`device-dropdown-item ${dev.id === selectedDevice ? 'is-active' : ''}`}
-                    onClick={() => {
-                      setCustomSearchedLocation(null);
-                      setSelectedDevice(dev.id);
-                      setDeviceDropdownOpen(false);
-                    }}
-                  >
-                    <div>
-                      <div className="dev-name">{dev.name}</div>
-                      <div className="dev-loc">{dev.location}</div>
-                    </div>
-                    <span className={`status-pill-sm ${dev.status === 'Online' ? 'is-online' : 'is-offline'}`}>
-                      {dev.status}
-                    </span>
-                  </button>
-                ))}
-
-                <div style={{ borderTop: '1px solid rgba(255,255,255,0.08)', padding: '6px' }}>
-                  <button
-                    type="button"
-                    className="btn-secondary btn-sm"
-                    style={{ width: '100%', fontSize: '0.78rem', padding: '6px 10px' }}
-                    onClick={() => {
-                      setDeviceDropdownOpen(false);
-                      if (onNavigateTab) onNavigateTab('devices');
-                    }}
-                  >
-                    + Add New Device
-                  </button>
-                </div>
-              </div>
-            )}
           </div>
         </div>
       </div>
@@ -488,6 +471,17 @@ export default function Dashboard({ readingsData, onNavigateTab }) {
                     : `📍 Ambient Air Quality (${displayPlaceName})`}
                 </span>
               </div>
+
+              {/* Live Place Tracked / GPS Coordinates placed here inside the card as shown in Image 2 */}
+              <div className="weather-hero-tracking-sub">
+                <span style={{ color: isLiveLocation ? '#10b981' : 'var(--color-primary, #38bdf8)', fontWeight: 600 }}>
+                  {isLiveLocation ? (buildingName || houseName ? `🏠 ${buildingName || houseName}` : '📍 Live Place Tracked') : '📍 Location Mode'}
+                </span>
+                <span className="sep">•</span>
+                <span>{gpsLocation || (coords ? `${coords.lat.toFixed(4)}°, ${coords.lng.toFixed(4)}°` : 'Resolving GPS')}</span>
+                <span className="sep">•</span>
+                <span>{weatherData?.updatedAt ? `Updated ${formatTimeAgo(weatherData.updatedAt)}` : 'Live Forecast'}</span>
+              </div>
             </div>
           </div>
         </div>
@@ -588,7 +582,7 @@ export default function Dashboard({ readingsData, onNavigateTab }) {
             <div className="pol-val-row">
               <span className="pol-val mono">
                 {isDeviceConnected
-                  ? (sensorGasPpm ? (sensorGasPpm * 0.12).toFixed(1) : '—')
+                  ? (numGasPpm != null ? (numGasPpm * 0.12).toFixed(2) : '—')
                   : (cw.carbonMonoxide ? (cw.carbonMonoxide / 100).toFixed(1) : '2.8')}
               </span>
               <span className="pol-unit">ppm (est.)</span>
@@ -606,7 +600,7 @@ export default function Dashboard({ readingsData, onNavigateTab }) {
             <div className="pol-val-row">
               <span className="pol-val mono">
                 {isDeviceConnected
-                  ? (sensorGasPpm ? Math.round(sensorGasPpm * 1.8) : '—')
+                  ? (numGasPpm != null ? Math.round(400 + numGasPpm * 1.8) : '—')
                   : (cw.pm10 ?? '28.5')}
               </span>
               <span className="pol-unit">{isDeviceConnected ? 'ppm eq' : 'µg/m³'}</span>

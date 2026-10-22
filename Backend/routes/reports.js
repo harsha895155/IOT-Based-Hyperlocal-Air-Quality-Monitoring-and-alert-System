@@ -155,8 +155,8 @@ router.get('/summary', optionalAuth, async (req, res, next) => {
         standard === 'who'
           ? 'WHO Global Air Quality Guidelines (2021)'
           : standard === 'epa'
-          ? 'US EPA National Ambient Air Quality Standards (NAAQS)'
-          : 'Central Pollution Control Board (CPCB) / NAAQS National Standard',
+            ? 'US EPA National Ambient Air Quality Standards (NAAQS)'
+            : 'Central Pollution Control Board (CPCB) / NAAQS National Standard',
     });
   } catch (err) {
     next(err);

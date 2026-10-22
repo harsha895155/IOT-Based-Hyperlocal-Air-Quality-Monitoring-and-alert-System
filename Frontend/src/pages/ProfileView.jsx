@@ -392,7 +392,7 @@ export default function ProfileView({ onNavigateLogin }) {
   }
 
   const roleDisplay = user.role ? user.role.toUpperCase() : 'USER';
-  const onlineDevicesCount = devices.filter((d) => d.isOnline || d.status === 'online').length;
+  const onlineDevicesCount = devices.filter((d) => d.isOnline || d.status === 'Online' || d.status?.toLowerCase() === 'online').length;
 
   return (
     <div className="profile-page">
@@ -830,7 +830,7 @@ export default function ProfileView({ onNavigateLogin }) {
 
               <div className="profile-setting-item">
                 <span style={{ color: '#94a3b8' }}>Registered Email:</span>
-                <span style={{ color: '#f8fafc', fontWeight: 600 }}>{user.email}</span>
+                <span style={{ color: 'var(--text-primary)', fontWeight: 600 }}>{user.email}</span>
               </div>
 
               <div className="profile-setting-item">
@@ -1030,7 +1030,7 @@ export default function ProfileView({ onNavigateLogin }) {
             ) : (
               <div className="profile-devices-list">
                 {devices.map((device) => {
-                  const isOnline = device.isOnline || device.status === 'online';
+                  const isOnline = device.isOnline || device.status === 'Online' || device.status?.toLowerCase() === 'online';
                   return (
                     <div key={device._id || device.deviceId} className="profile-device-card">
                       <div className="profile-device-top">
@@ -1058,7 +1058,7 @@ export default function ProfileView({ onNavigateLogin }) {
                         </div>
                         <div className="profile-device-details-row">
                           <span>Location:</span>
-                          <span style={{ color: '#f8fafc' }}>{device.location || 'Moghalrajpuram'}</span>
+                          <span style={{ color: 'var(--text-primary)' }}>{device.location || 'Moghalrajpuram'}</span>
                         </div>
                         <div className="profile-device-details-row">
                           <span>Firmware:</span>

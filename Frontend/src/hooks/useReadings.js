@@ -137,8 +137,10 @@ export function useReadings() {
     return () => clearInterval(timer);
   }, []);
 
-  const loadData = useCallback(async () => {
-    setLoading(true);
+  const loadData = useCallback(async (isSilent = false) => {
+    if (!isSilent) {
+      setLoading(true);
+    }
     setLoadError(null);
     try {
       const [latestRes, historyRes, alertsRes, devicesRes, locationsRes] = await Promise.allSettled([
@@ -165,30 +167,42 @@ export function useReadings() {
 
       if (latestRes.status === 'fulfilled' && latestRes.value.data) {
         setLatest(latestRes.value.data);
-      } else {
+      } else if (!isSilent) {
         setLatest(null);
       }
 
       if (historyRes.status === 'fulfilled' && historyRes.value.data?.data) {
         setTrend([...historyRes.value.data.data].reverse());
-      } else {
+      } else if (!isSilent) {
         setTrend([]);
       }
 
       if (alertsRes.status === 'fulfilled' && Array.isArray(alertsRes.value.data)) {
         setAlerts(alertsRes.value.data);
-      } else {
+      } else if (!isSilent) {
         setAlerts([]);
       }
     } catch (err) {
-      setLoadError('Failed to fetch telemetry from backend.');
+      if (!isSilent) {
+        setLoadError('Failed to fetch telemetry from backend.');
+      }
     } finally {
-      setLoading(false);
+      if (!isSilent) {
+        setLoading(false);
+      }
     }
-  }, [selectedDevice]);
+  }, [selectedDevice, accountKey]);
 
   useEffect(() => {
-    loadData();
+    loadData(false);
+  }, [loadData]);
+
+  // Periodic polling for live connected hardware telemetry (every 15 seconds)
+  useEffect(() => {
+    const pollInterval = setInterval(() => {
+      loadData(true);
+    }, 15000);
+    return () => clearInterval(pollInterval);
   }, [loadData]);
 
   // Remove a device from local cache and active state

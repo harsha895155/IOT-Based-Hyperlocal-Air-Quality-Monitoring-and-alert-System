@@ -1,4 +1,4 @@
-import React, { useState, useEffect, useCallback } from 'react';
+import React, { useState, useEffect, useCallback, useRef } from 'react';
 import client from '../api/client';
 import { formatTimeAgo } from '../hooks/useReadings';
 import { classifyAQI, healthRecommendation } from '../utils/aqi';
@@ -26,6 +26,34 @@ export default function HistoryView() {
   const [sortOrder, setSortOrder] = useState('desc');
   const [pageSize, setPageSize] = useState(25);
   const [searchQuery, setSearchQuery] = useState('');
+  const [showFilterMenu, setShowFilterMenu] = useState(false);
+  const filterRef = useRef(null);
+
+  // Close filter dropdown on click outside
+  useEffect(() => {
+    function handleClickOutside(e) {
+      if (filterRef.current && !filterRef.current.contains(e.target)) {
+        setShowFilterMenu(false);
+      }
+    }
+    if (showFilterMenu) {
+      document.addEventListener('mousedown', handleClickOutside);
+    }
+    return () => document.removeEventListener('mousedown', handleClickOutside);
+  }, [showFilterMenu]);
+
+  const activeFiltersCount =
+    (selectedDevice !== 'all' ? 1 : 0) +
+    (selectedCategory !== 'all' ? 1 : 0) +
+    (timePreset !== 'all' ? 1 : 0) +
+    (sortOrder !== 'desc' ? 1 : 0);
+
+  const handleClearFilters = () => {
+    setSelectedDevice('all');
+    setSelectedCategory('all');
+    setTimePreset('all');
+    setSortOrder('desc');
+  };
 
   // Inspection Modal
   const [inspectReading, setInspectReading] = useState(null);
@@ -199,108 +227,139 @@ export default function HistoryView() {
 
       {/* Query & Filter Toolbar */}
       <div className="history-filter-card">
-        <div className="history-filter-row">
-          <div className="history-filter-group">
-            {/* Station dropdown */}
-            <div className="history-filter-item">
-              <span className="history-label">Station:</span>
-              <select
-                className="history-select"
-                value={selectedDevice}
-                onChange={(e) => setSelectedDevice(e.target.value)}
+        <div className="history-search-row">
+          {/* Search Input Box */}
+          <div className="history-search-box">
+            <span>🔍</span>
+            <input
+              type="text"
+              className="history-input"
+              placeholder="Search station, reading or category..."
+              value={searchQuery}
+              onChange={(e) => setSearchQuery(e.target.value)}
+            />
+            {searchQuery && (
+              <button
+                type="button"
+                onClick={() => setSearchQuery('')}
+                className="history-clear-search-btn"
               >
-                <option value="all">All IoT Stations</option>
-                {devices.map((d) => (
-                  <option key={d.deviceId} value={d.deviceId}>
-                    {d.name || d.deviceId}
-                  </option>
-                ))}
-              </select>
-            </div>
-
-            {/* Category dropdown */}
-            <div className="history-filter-item">
-              <span className="history-label">Category:</span>
-              <select
-                className="history-select"
-                value={selectedCategory}
-                onChange={(e) => setSelectedCategory(e.target.value)}
-              >
-                <option value="all">All Categories</option>
-                <option value="Good">Good (0 - 50)</option>
-                <option value="Moderate">Moderate (51 - 100)</option>
-                <option value="Unhealthy (SG)">Sensitive (101 - 150)</option>
-                <option value="Unhealthy">Unhealthy (151 - 200)</option>
-                <option value="Very Unhealthy">Very Unhealthy (201 - 300)</option>
-                <option value="Hazardous">Hazardous (&gt; 300)</option>
-              </select>
-            </div>
-
-            {/* Time Horizon dropdown */}
-            <div className="history-filter-item">
-              <span className="history-label">Time Window:</span>
-              <select
-                className="history-select"
-                value={timePreset}
-                onChange={(e) => setTimePreset(e.target.value)}
-              >
-                <option value="all">All Historical Time</option>
-                <option value="24h">Past 24 Hours</option>
-                <option value="7d">Past 7 Days</option>
-                <option value="30d">Past 30 Days</option>
-              </select>
-            </div>
-
-            {/* Sort order */}
-            <div className="history-filter-item">
-              <span className="history-label">Order:</span>
-              <select
-                className="history-select"
-                value={sortOrder}
-                onChange={(e) => setSortOrder(e.target.value)}
-              >
-                <option value="desc">Newest First</option>
-                <option value="asc">Oldest First</option>
-              </select>
-            </div>
+                ✕
+              </button>
+            )}
           </div>
 
-          <div className="history-filter-group">
-            {/* Search Input */}
-            <div className="history-filter-item">
-              <input
-                type="text"
-                className="history-input"
-                placeholder="Search station or category..."
-                value={searchQuery}
-                onChange={(e) => setSearchQuery(e.target.value)}
-                style={{ minWidth: '200px' }}
-              />
-              {searchQuery && (
-                <button
-                  type="button"
-                  onClick={() => setSearchQuery('')}
-                  style={{ background: 'none', border: 'none', color: '#64748b', cursor: 'pointer' }}
-                >
-                  ✕
-                </button>
+          {/* Filter Option Beside the Search Bar */}
+          <div className="history-filter-wrapper" ref={filterRef}>
+            <button
+              type="button"
+              className={`history-filter-btn ${activeFiltersCount > 0 ? 'is-active' : ''}`}
+              onClick={() => setShowFilterMenu(!showFilterMenu)}
+            >
+              <span>⚙️ Filter</span>
+              {activeFiltersCount > 0 && (
+                <span className="history-filter-badge">{activeFiltersCount}</span>
               )}
-            </div>
+              <span style={{ fontSize: '0.7rem' }}>{showFilterMenu ? '▲' : '▼'}</span>
+            </button>
 
-            {/* Rows per page */}
-            <div className="history-filter-item">
-              <span className="history-label">Rows:</span>
-              <select
-                className="history-select"
-                value={pageSize}
-                onChange={(e) => setPageSize(Number(e.target.value))}
-              >
-                <option value="15">15</option>
-                <option value="25">25</option>
-                <option value="50">50</option>
-                <option value="100">100</option>
-              </select>
-            </div>
+            {showFilterMenu && (
+              <div className="history-filter-dropdown">
+                <div className="history-filter-dropdown-header">
+                  <span>FILTER & SORT</span>
+                  {activeFiltersCount > 0 && (
+                    <button
+                      type="button"
+                      className="history-clear-btn"
+                      onClick={handleClearFilters}
+                    >
+                      Reset All
+                    </button>
+                  )}
+                </div>
+
+                {/* Station */}
+                <div className="history-filter-dropdown-item">
+                  <label className="history-dropdown-label">Station:</label>
+                  <select
+                    className="history-select"
+                    value={selectedDevice}
+                    onChange={(e) => setSelectedDevice(e.target.value)}
+                  >
+                    <option value="all">All IoT Stations</option>
+                    {devices.map((d) => (
+                      <option key={d.deviceId} value={d.deviceId}>
+                        {d.name || d.deviceId}
+                      </option>
+                    ))}
+                  </select>
+                </div>
+
+                {/* Category */}
+                <div className="history-filter-dropdown-item">
+                  <label className="history-dropdown-label">Category:</label>
+                  <select
+                    className="history-select"
+                    value={selectedCategory}
+                    onChange={(e) => setSelectedCategory(e.target.value)}
+                  >
+                    <option value="all">All Categories</option>
+                    <option value="Good">Good (0 - 50)</option>
+                    <option value="Moderate">Moderate (51 - 100)</option>
+                    <option value="Unhealthy (SG)">Sensitive (101 - 150)</option>
+                    <option value="Unhealthy">Unhealthy (151 - 200)</option>
+                    <option value="Very Unhealthy">Very Unhealthy (201 - 300)</option>
+                    <option value="Hazardous">Hazardous (&gt; 300)</option>
+                  </select>
+                </div>
+
+                {/* Time Window */}
+                <div className="history-filter-dropdown-item">
+                  <label className="history-dropdown-label">Time Window:</label>
+                  <select
+                    className="history-select"
+                    value={timePreset}
+                    onChange={(e) => setTimePreset(e.target.value)}
+                  >
+                    <option value="all">All Historical Time</option>
+                    <option value="24h">Past 24 Hours</option>
+                    <option value="7d">Past 7 Days</option>
+                    <option value="30d">Past 30 Days</option>
+                  </select>
+                </div>
+
+                {/* Sort order */}
+                <div className="history-filter-dropdown-item">
+                  <label className="history-dropdown-label">Sort Order:</label>
+                  <select
+                    className="history-select"
+                    value={sortOrder}
+                    onChange={(e) => setSortOrder(e.target.value)}
+                  >
+                    <option value="desc">Newest First</option>
+                    <option value="asc">Oldest First</option>
+                  </select>
+                </div>
+              </div>
+            )}
+          </div>
+
+          {/* Rows per page */}
+          <div className="history-rows-picker">
+            <span className="history-label">Rows:</span>
+            <select
+              className="history-select"
+              value={pageSize}
+              onChange={(e) => {
+                setPageSize(Number(e.target.value));
+                setPagination((prev) => ({ ...prev, page: 1 }));
+              }}
+            >
+              <option value="15">15</option>
+              <option value="25">25</option>
+              <option value="50">50</option>
+              <option value="100">100</option>
+            </select>
           </div>
         </div>
       </div>
@@ -459,7 +518,7 @@ export default function HistoryView() {
         <div className="history-modal-backdrop" onClick={() => setInspectReading(null)}>
           <div className="history-modal" onClick={(e) => e.stopPropagation()}>
             <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '14px' }}>
-              <h3 style={{ fontSize: '1.1rem', fontWeight: 700, color: '#f8fafc' }}>
+              <h3 style={{ fontSize: '1.1rem', fontWeight: 700, color: 'var(--text-primary)' }}>
                 🔍 Telemetry Observation Detail
               </h3>
               <button
@@ -507,7 +566,7 @@ export default function HistoryView() {
 
             <div style={{ background: 'rgba(0,0,0,0.2)', padding: '12px', borderRadius: '8px', marginBottom: '16px' }}>
               <div style={{ fontSize: '0.72rem', color: '#64748b', textTransform: 'uppercase', marginBottom: '4px' }}>Health Advisory</div>
-              <div style={{ fontSize: '0.82rem', color: '#f8fafc' }}>
+              <div style={{ fontSize: '0.82rem', color: 'var(--text-primary)' }}>
                 {healthRecommendation(inspectReading.airQuality)}
               </div>
             </div>

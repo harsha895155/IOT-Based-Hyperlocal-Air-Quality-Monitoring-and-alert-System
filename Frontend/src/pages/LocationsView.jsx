@@ -341,14 +341,16 @@ export default function LocationsView() {
       {/* ─── 1. PAGE HEADER ─── */}
       <div className="loc-header">
         <div>
-          <div className="loc-badge-row">
-            <span className="loc-service-pill">
-              <span className="live-dot" />
-              GOOGLE WEATHER INTELLIGENCE
-            </span>
-            <span className="loc-scope-pill">EXTERNAL METEOROLOGICAL SOURCE</span>
+          <div className="loc-title-row" style={{ display: 'flex', alignItems: 'center', gap: '10px', flexWrap: 'wrap', marginBottom: '4px' }}>
+            <h1 className="loc-title" style={{ margin: 0 }}>Location Weather Search</h1>
+            <div className="loc-badge-row" style={{ margin: 0, display: 'flex', alignItems: 'center', gap: '6px', flexWrap: 'nowrap' }}>
+              <span className="loc-service-pill">
+                <span className="live-dot" />
+                GOOGLE WEATHER INTELLIGENCE
+              </span>
+              <span className="loc-scope-pill">EXTERNAL METEOROLOGICAL SOURCE</span>
+            </div>
           </div>
-          <h1 className="loc-title">Location Weather Search</h1>
           <p className="loc-subtitle">
             Search any city, town, district, or region worldwide to inspect real-time atmospheric conditions, 24-hour trends, and 7-day meteorological forecasts.
           </p>
@@ -669,7 +671,7 @@ export default function LocationsView() {
                     <div key={`${hour.time}-${idx}`} className="loc-hour-item">
                       <span className="loc-hour-time">{idx === 0 ? 'Now' : hourTime}</span>
                       <div className="loc-hour-icon">
-                        <IconComp size={32} />
+                        <IconComp size={20} className="loc-hour-svg" />
                       </div>
                       <span className="loc-hour-temp">{hour.temp}°</span>
                       {hour.precipitationProb > 0 ? (
@@ -687,7 +689,7 @@ export default function LocationsView() {
 
           {/* ─── 7. DAILY 7-DAY FORECAST ─── */}
           {dailyList.length > 0 && (
-            <div className="loc-forecast-card" style={{ marginTop: '22px' }}>
+            <div className="loc-forecast-card" style={{ marginTop: '14px' }}>
               <div className="loc-forecast-title-row">
                 <h3 className="loc-forecast-title">7-Day Meteorological Outlook</h3>
                 <span className="loc-forecast-sub">Synoptic Forecast Trend</span>
@@ -708,7 +710,7 @@ export default function LocationsView() {
                       </div>
 
                       <div className="loc-daily-icon-col">
-                        <IconComp size={36} />
+                        <IconComp size={20} className="loc-daily-svg" />
                         <span className="loc-daily-cond">{day.condition}</span>
                       </div>
 

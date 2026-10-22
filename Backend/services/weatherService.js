@@ -127,7 +127,7 @@ async function searchLocations(query) {
           source: 'Google Weather Location Service',
         }));
       }
-    } catch (e) {}
+    } catch (e) { }
   }
 
   searchCache.set(cleanQ, { timestamp: Date.now(), results });
@@ -251,7 +251,7 @@ async function reverseGeocode(lat, lng) {
           };
         }
       }
-    } catch (e) {}
+    } catch (e) { }
   }
 
   // 3. High-precision fallback
@@ -281,7 +281,7 @@ async function reverseGeocode(lat, lng) {
         longitude: lngNum,
       };
     }
-  } catch (e) {}
+  } catch (e) { }
 
   return {
     name: 'Current Location',
@@ -339,7 +339,7 @@ async function getWeatherForCoordinates(lat, lng, locationName = 'Current Locati
     if (aqRes && aqRes.ok) {
       try {
         aqJson = await aqRes.json();
-      } catch (_) {}
+      } catch (_) { }
     }
     const current = json.current || {};
     const hourly = json.hourly || {};
@@ -439,7 +439,7 @@ async function getWeatherForCoordinates(lat, lng, locationName = 'Current Locati
       return { ...cached.data, cached: true, stale: true, warning: 'Using cached weather data' };
     }
     console.warn(`[WeatherService] External meteorological API failed (${err.message}). Using resilient model for coords: ${lat}, ${lng}`);
-    
+
     // Resilient fallback model so the dashboard always has live operational telemetry
     const nowIso = new Date().toISOString();
     const fallbackHourly = Array.from({ length: 24 }).map((_, i) => {

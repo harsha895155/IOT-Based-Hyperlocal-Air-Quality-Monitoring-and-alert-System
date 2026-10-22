@@ -392,7 +392,7 @@ export default function WelcomePage() {
       {/* ─── 2. HERO SECTION WITH 3D HUD & LIVE CONSOLE ─── */}
       <section className="welcome-hero">
         <div className="welcome-hero__container">
-          
+
           {/* ─── Hero Showcase: Dominant Foreground Layer ─── */}
           <div className="welcome-hero__showcase">
             {/* Live System Beacon Pill */}
@@ -614,7 +614,7 @@ export default function WelcomePage() {
 
                   <div className="formula-equation-box mono">
                     <div className="math-row">
-                      <span className="var-result">AQI</span> = 
+                      <span className="var-result">AQI</span> =
                       <span className="fraction">
                         <span className="num">(I_hi - I_lo)</span>
                         <span className="den">(BP_hi - BP_lo)</span>

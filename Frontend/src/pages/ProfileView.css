@@ -741,19 +741,162 @@
 /* Responsive adjustments */
 @media (max-width: 768px) {
   .profile-page {
-    padding: 16px;
+    padding: 10px 10px 28px !important;
   }
   .profile-hero-card {
-    padding: 20px;
+    padding: 8px 10px !important;
+    border-radius: 10px !important;
+    gap: 8px !important;
   }
   .profile-hero-left {
-    gap: 16px;
+    gap: 8px !important;
   }
+  .profile-avatar-circle {
+    width: 48px !important;
+    height: 48px !important;
+    font-size: 1.25rem !important;
+  }
+  .profile-hero-name {
+    font-size: 1.05rem !important;
+  }
+  .profile-hero-email {
+    font-size: 0.72rem !important;
+  }
+  .profile-hero-meta {
+    font-size: 0.65rem !important;
+    gap: 4px !important;
+  }
+  .profile-hero-actions {
+    gap: 6px !important;
+  }
+  .profile-hero-actions button {
+    height: 28px !important;
+    padding: 3px 8px !important;
+    font-size: 0.72rem !important;
+  }
+
+  /* 2-Column Compact Stats Row */
+  .profile-stats-row {
+    display: grid !important;
+    grid-template-columns: repeat(2, minmax(0, 1fr)) !important;
+    gap: 6px !important;
+    margin-bottom: 8px !important;
+  }
+
+  .profile-stat-box {
+    padding: 6px 8px !important;
+    border-radius: 8px !important;
+    gap: 8px !important;
+  }
+
+  .profile-stat-icon {
+    width: 28px !important;
+    height: 28px !important;
+    font-size: 0.9rem !important;
+    border-radius: 6px !important;
+    flex-shrink: 0 !important;
+  }
+
+  .profile-stat-lbl {
+    font-size: 0.58rem !important;
+    letter-spacing: 0.04em !important;
+  }
+
+  .profile-stat-val {
+    font-size: 0.82rem !important;
+    font-weight: 700 !important;
+    margin-top: 1px !important;
+  }
+
+  .profile-tabs-nav {
+    gap: 4px !important;
+    padding-bottom: 2px !important;
+  }
+
+  .profile-tab-btn {
+    padding: 4px 8px !important;
+    font-size: 0.72rem !important;
+    white-space: nowrap !important;
+  }
+
   .profile-content-grid {
-    grid-template-columns: 1fr;
+    grid-template-columns: 1fr !important;
+    gap: 8px !important;
   }
-  .profile-devices-list {
-    grid-template-columns: 1fr;
+
+  .profile-card {
+    padding: 8px 10px !important;
+    border-radius: 10px !important;
+    gap: 8px !important;
+  }
+
+  .profile-card-header {
+    gap: 6px !important;
+    margin-bottom: 4px !important;
+  }
+
+  .profile-card-title {
+    font-size: 0.82rem !important;
+  }
+
+  .profile-card-sub {
+    font-size: 0.65rem !important;
+  }
+
+  .profile-setting-item {
+    padding: 8px 10px !important;
+    gap: 8px !important;
+    flex-wrap: wrap !important;
+  }
+
+  .profile-setting-title {
+    font-size: 0.8rem !important;
+  }
+
+  .profile-setting-desc {
+    font-size: 0.65rem !important;
+  }
+
+  .profile-setting-item > div:last-child {
+    display: flex !important;
+    flex-wrap: wrap !important;
+    gap: 6px !important;
+  }
+
+  .profile-setting-item button {
+    padding: 5px 8px !important;
+    font-size: 0.72rem !important;
+    white-space: nowrap !important;
+  }
+
+  .profile-session-item {
+    padding: 8px 10px !important;
+    gap: 6px !important;
+  }
+
+  /* Prevent long IDs, emails, and URLs from overflowing */
+  .profile-card .mono,
+  .profile-setting-item .mono,
+  .profile-session-meta {
+    word-break: break-all !important;
+    overflow-wrap: anywhere !important;
+    font-size: 0.72rem !important;
+  }
+
+  .profile-actions {
+    display: flex !important;
+    flex-direction: row !important;
+    gap: 6px !important;
+    width: 100% !important;
+  }
+  .profile-actions > button,
+  .profile-actions > a {
+    flex: 1 1 0 !important;
+    min-width: 0 !important;
+    height: 32px !important;
+    font-size: 0.74rem !important;
+    justify-content: center !important;
+    white-space: nowrap !important;
   }
 }
 

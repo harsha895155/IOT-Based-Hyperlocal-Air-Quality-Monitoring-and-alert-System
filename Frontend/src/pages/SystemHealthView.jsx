@@ -362,7 +362,7 @@ export default function SystemHealthView() {
               </thead>
               <tbody>
                 <tr>
-                  <td><strong style={{ color: '#f8fafc' }}>AIRGUARD-001</strong></td>
+                  <td><strong style={{ color: 'var(--text-primary)' }}>AIRGUARD-001</strong></td>
                   <td>GIST Campus (Main Environmental Lab)</td>
                   <td><span className="health-status-badge health-status-badge--online">● Online (Streaming)</span></td>
                   <td><span className="mono" style={{ color: '#10b981' }}>-62 dBm (Excellent)</span></td>
@@ -381,7 +381,7 @@ export default function SystemHealthView() {
                 </tr>
 
                 <tr>
-                  <td><strong style={{ color: '#f8fafc' }}>AIRGUARD-002</strong></td>
+                  <td><strong style={{ color: 'var(--text-primary)' }}>AIRGUARD-002</strong></td>
                   <td>Library Block (Zone B)</td>
                   <td><span className="health-status-badge health-status-badge--online">● Online (Streaming)</span></td>
                   <td><span className="mono" style={{ color: '#38bdf8' }}>-68 dBm (Good)</span></td>
@@ -400,7 +400,7 @@ export default function SystemHealthView() {
                 </tr>
 
                 <tr>
-                  <td><strong style={{ color: '#f8fafc' }}>AIRGUARD-003</strong></td>
+                  <td><strong style={{ color: 'var(--text-primary)' }}>AIRGUARD-003</strong></td>
                   <td>Research Park West (Zone C)</td>
                   <td><span className="health-status-badge health-status-badge--online">● Online (Streaming)</span></td>
                   <td><span className="mono" style={{ color: '#f59e0b' }}>-74 dBm (Fair)</span></td>
@@ -477,7 +477,7 @@ export default function SystemHealthView() {
         <section className="card" style={{ padding: '24px' }}>
           <div className="health-terminal-header">
             <div>
-              <h2 style={{ fontSize: '1.15rem', fontWeight: 600, margin: 0, color: '#f8fafc' }}>
+              <h2 style={{ fontSize: '1.15rem', fontWeight: 600, margin: 0, color: 'var(--text-primary)' }}>
                 Live System Telemetry &amp; Event Stream
               </h2>
               <p className="text-muted fs-xs" style={{ margin: '4px 0 0 0' }}>Real-time server log of incoming sensor packets, database queries, and client socket events</p>
@@ -539,21 +539,21 @@ export default function SystemHealthView() {
           <span className="text-muted fs-xs">Encryption algorithms, session protections, and networking protocols active in this deployment</span>
 
           <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(240px, 1fr))', gap: '14px', marginTop: '16px' }}>
-            <div style={{ padding: '14px', borderRadius: '10px', background: 'rgba(15, 23, 42, 0.4)', border: '1px solid rgba(255, 255, 255, 0.05)' }}>
+            <div style={{ padding: '14px', borderRadius: '10px', background: 'var(--surface-raised)', border: '1px solid var(--border-subtle)' }}>
               <span className="text-faint fs-xs" style={{ display: 'block', fontWeight: 600 }}>PACKET TRANSPORT ENCRYPTION</span>
               <span className="mono" style={{ fontSize: '0.88rem', color: '#38bdf8', fontWeight: 600 }}>TLS 1.3 / HTTPS</span>
               <span className="text-muted fs-xs" style={{ display: 'block', marginTop: '2px' }}>Protected against packet inspection</span>
             </div>
 
-            <div style={{ padding: '14px', borderRadius: '10px', background: 'rgba(15, 23, 42, 0.4)', border: '1px solid rgba(255, 255, 255, 0.05)' }}>
+            <div style={{ padding: '14px', borderRadius: '10px', background: 'var(--surface-raised)', border: '1px solid var(--border-subtle)' }}>
               <span className="text-faint fs-xs" style={{ display: 'block', fontWeight: 600 }}>SOCKET RECONNECTION</span>
               <span className="mono" style={{ fontSize: '0.88rem', color: '#10b981', fontWeight: 600 }}>Exponential Backoff</span>
               <span className="text-muted fs-xs" style={{ display: 'block', marginTop: '2px' }}>Auto-reconnects on network drop</span>
             </div>
 
-            <div style={{ padding: '14px', borderRadius: '10px', background: 'rgba(15, 23, 42, 0.4)', border: '1px solid rgba(255, 255, 255, 0.05)' }}>
+            <div style={{ padding: '14px', borderRadius: '10px', background: 'var(--surface-raised)', border: '1px solid var(--border-subtle)' }}>
               <span className="text-faint fs-xs" style={{ display: 'block', fontWeight: 600 }}>AUTHENTICATION STANDARD</span>
-              <span className="mono" style={{ fontSize: '0.88rem', color: '#f8fafc', fontWeight: 600 }}>JWT HMAC-SHA256</span>
+              <span className="mono" style={{ fontSize: '0.88rem', color: 'var(--text-primary)', fontWeight: 600 }}>JWT HMAC-SHA256</span>
               <span className="text-muted fs-xs" style={{ display: 'block', marginTop: '2px' }}>Cryptographically signed session tokens</span>
             </div>
           </div>

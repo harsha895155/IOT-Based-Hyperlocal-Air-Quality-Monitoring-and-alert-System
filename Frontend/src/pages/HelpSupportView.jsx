@@ -351,7 +351,7 @@ void loop() {
               {/* MQ135 Pinout Card */}
               <div className="pinout-card">
                 <div className="pinout-card__header">
-                  <span style={{ fontWeight: 600, color: '#f8fafc' }}>MQ-135 Gas Sensor</span>
+                  <span style={{ fontWeight: 600, color: 'var(--text-primary)' }}>MQ-135 Gas Sensor</span>
                   <span className="pinout-badge pinout-badge--adc">ADC1 / Analog</span>
                 </div>
                 <p className="text-muted fs-xs" style={{ margin: 0 }}>
@@ -382,7 +382,7 @@ void loop() {
               {/* DHT22 Pinout Card */}
               <div className="pinout-card">
                 <div className="pinout-card__header">
-                  <span style={{ fontWeight: 600, color: '#f8fafc' }}>DHT22 (AM2302)</span>
+                  <span style={{ fontWeight: 600, color: 'var(--text-primary)' }}>DHT22 (AM2302)</span>
                   <span className="pinout-badge pinout-badge--gpio">Digital GPIO</span>
                 </div>
                 <p className="text-muted fs-xs" style={{ margin: 0 }}>
@@ -413,7 +413,7 @@ void loop() {
               {/* Power Supply Requirements Card */}
               <div className="pinout-card">
                 <div className="pinout-card__header">
-                  <span style={{ fontWeight: 600, color: '#f8fafc' }}>Power Regulation</span>
+                  <span style={{ fontWeight: 600, color: 'var(--text-primary)' }}>Power Regulation</span>
                   <span className="pinout-badge pinout-badge--power">5V 2.0A Rail</span>
                 </div>
                 <p className="text-muted fs-xs" style={{ margin: 0 }}>
@@ -557,7 +557,7 @@ void loop() {
           <section className="card" style={{ padding: '28px' }}>
             <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', flexWrap: 'wrap', gap: '10px', marginBottom: '20px' }}>
               <div>
-                <h2 style={{ fontSize: '1.25rem', fontWeight: 700, margin: 0, color: '#f8fafc' }}>
+                <h2 style={{ fontSize: '1.25rem', fontWeight: 700, margin: 0, color: 'var(--text-primary)' }}>
                   How to Connect Your AirGuard Device
                 </h2>
                 <p className="text-muted fs-xs" style={{ margin: '4px 0 0 0' }}>
@@ -661,7 +661,7 @@ void loop() {
                   <div className="firmware-customizer-card">
                     <div className="firmware-customizer-header">
                       <div>
-                        <h4 style={{ fontSize: '0.95rem', fontWeight: 600, margin: 0, color: '#f8fafc' }}>
+                        <h4 style={{ fontSize: '0.95rem', fontWeight: 600, margin: 0, color: 'var(--text-primary)' }}>
                           Custom Firmware Credential Injector
                         </h4>
                         <p className="text-muted fs-xs" style={{ margin: '4px 0 0 0' }}>
@@ -837,7 +837,7 @@ void loop() {
             </div>
 
             <div style={{ marginTop: '16px', padding: '16px', borderRadius: '12px', background: 'rgba(15, 23, 42, 0.45)', border: '1px solid rgba(255, 255, 255, 0.08)' }}>
-              <div style={{ fontSize: '1rem', fontWeight: 600, color: '#f8fafc', marginBottom: '4px' }}>
+              <div style={{ fontSize: '1rem', fontWeight: 600, color: 'var(--text-primary)', marginBottom: '4px' }}>
                 "IoT-Based Hyperlocal Air Quality Monitoring and Alert System with Cloud Integration"
               </div>
               <div className="text-muted fs-xs" style={{ marginBottom: '12px' }}>

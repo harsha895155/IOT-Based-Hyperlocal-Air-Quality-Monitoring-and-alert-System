@@ -20,11 +20,24 @@ export default function DevicesView({
   const [searchQuery, setSearchQuery] = useState('');
   const [statusFilter, setStatusFilter] = useState('All');
   const [viewMode, setViewMode] = useState('table'); // 'table' | 'grid'
+  const [showFilterMenu, setShowFilterMenu] = useState(false);
+  const filterMenuRef = React.useRef(null);
   const [selectedModalDevice, setSelectedModalDevice] = useState(null);
   const [showAddWizard, setShowAddWizard] = useState(false);
   const [pingLatencies, setPingLatencies] = useState({});
   const [pinging, setPinging] = useState(false);
   const [toastMessage, setToastMessage] = useState(null);
+
+  // Close filter dropdown on outside click
+  useEffect(() => {
+    function handleClickOutside(e) {
+      if (filterMenuRef.current && !filterMenuRef.current.contains(e.target)) {
+        setShowFilterMenu(false);
+      }
+    }
+    document.addEventListener('mousedown', handleClickOutside);
+    return () => document.removeEventListener('mousedown', handleClickOutside);
+  }, []);
 
   // Editing Device State
   const [editingDevice, setEditingDevice] = useState(null);
@@ -274,7 +287,7 @@ export default function DevicesView({
 
       {/* Controls & Filter Toolbar */}
       <div className="devices-controls-card">
-        <div className="devices-controls-group">
+        <div className="devices-search-row">
           {/* Search Box */}
           <div className="devices-search-box">
             <span>🔍</span>
@@ -289,45 +302,68 @@ export default function DevicesView({
               <button
                 type="button"
                 onClick={() => setSearchQuery('')}
-                style={{ background: 'none', border: 'none', color: '#64748b', cursor: 'pointer' }}
+                style={{ background: 'none', border: 'none', color: '#64748b', cursor: 'pointer', padding: 0 }}
               >
                 ✕
               </button>
             )}
           </div>
 
-          {/* Status Tabs */}
-          <div className="segmented-control" style={{ margin: 0 }}>
-            {['All', 'Online', 'Offline'].map((st) => (
-              <button
-                key={st}
-                type="button"
-                className={`segmented-control__btn ${statusFilter === st ? 'is-active' : ''}`}
-                onClick={() => setStatusFilter(st)}
-              >
-                {st}
-              </button>
-            ))}
-          </div>
-        </div>
+          {/* Filter Option beside Search Bar */}
+          <div className="devices-filter-wrapper" ref={filterMenuRef}>
+            <button
+              type="button"
+              className={`devices-filter-btn ${showFilterMenu ? 'is-active' : ''} ${statusFilter !== 'All' ? 'has-active-filter' : ''}`}
+              onClick={() => setShowFilterMenu(!showFilterMenu)}
+              title="Filters & Display View"
+            >
+              <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.2">
+                <polygon points="22 3 2 3 10 12.46 10 19 14 21 14 12.46 22 3" />
+              </svg>
+              <span>Filter</span>
+              {statusFilter !== 'All' && (
+                <span className="devices-filter-pill">{statusFilter}</span>
+              )}
+            </button>
 
-        <div className="devices-controls-group">
-          {/* View Mode Toggle */}
-          <div className="segmented-control" style={{ margin: 0 }}>
-            <button
-              type="button"
-              className={`segmented-control__btn ${viewMode === 'table' ? 'is-active' : ''}`}
-              onClick={() => setViewMode('table')}
-            >
-              Table View
-            </button>
-            <button
-              type="button"
-              className={`segmented-control__btn ${viewMode === 'grid' ? 'is-active' : ''}`}
-              onClick={() => setViewMode('grid')}
-            >
-              Hardware Cards
-            </button>
+            {showFilterMenu && (
+              <div className="devices-filter-dropdown">
+                <div className="devices-filter-group-title">NODE STATUS</div>
+                <div className="devices-filter-options">
+                  {['All', 'Online', 'Offline'].map((st) => (
+                    <button
+                      key={st}
+                      type="button"
+                      className={`devices-filter-option-btn ${statusFilter === st ? 'is-selected' : ''}`}
+                      onClick={() => setStatusFilter(st)}
+                    >
+                      <span className={`status-dot-sm ${st === 'Online' ? 'is-online' : st === 'Offline' ? 'is-offline' : ''}`} />
+                      <span>{st}</span>
+                    </button>
+                  ))}
+                </div>
+
+                <div className="devices-filter-divider" />
+
+                <div className="devices-filter-group-title">VIEW LAYOUT</div>
+                <div className="devices-filter-options">
+                  <button
+                    type="button"
+                    className={`devices-filter-option-btn ${viewMode === 'table' ? 'is-selected' : ''}`}
+                    onClick={() => setViewMode('table')}
+                  >
+                    <span>📊 Table View</span>
+                  </button>
+                  <button
+                    type="button"
+                    className={`devices-filter-option-btn ${viewMode === 'grid' ? 'is-selected' : ''}`}
+                    onClick={() => setViewMode('grid')}
+                  >
+                    <span>🗂️ Hardware Cards</span>
+                  </button>
+                </div>
+              </div>
+            )}
           </div>
         </div>
       </div>
@@ -383,7 +419,7 @@ export default function DevicesView({
                 ) : (
                   filteredDevices.map((device) => {
                     const devId = device.deviceId || device.id;
-                    const isOnline = device.status === 'Online';
+                    const isOnline = device.isOnline || device.status === 'Online' || device.status?.toLowerCase() === 'online';
                     const timeAgo = formatTimeAgo(device.lastSeen);
                     const aqiObj = device.aqi != null ? classifyAQI(device.aqi) : null;
                     const latency = pingLatencies[devId];
@@ -527,7 +563,7 @@ export default function DevicesView({
         <div className="devices-grid-view">
           {filteredDevices.map((device) => {
             const devId = device.deviceId || device.id;
-            const isOnline = device.status === 'Online';
+            const isOnline = device.isOnline || device.status === 'Online' || device.status?.toLowerCase() === 'online';
             const aqiObj = device.aqi != null ? classifyAQI(device.aqi) : null;
             const latency = pingLatencies[devId];
 
@@ -563,7 +599,7 @@ export default function DevicesView({
                     </div>
                   </div>
 
-                  <span className="status-indicator">
+                  <span className="status-indicator" style={{ flexShrink: 0 }}>
                     <span className={`status-dot ${isOnline ? 'is-online' : 'is-standby'}`} />
                     <span className="status-label" style={{ fontSize: '0.75rem' }}>{device.status}</span>
                   </span>
@@ -603,7 +639,7 @@ export default function DevicesView({
                   <span style={{ fontSize: '0.72rem', color: '#64748b' }}>
                     Heartbeat: {formatTimeAgo(device.lastSeen)}
                   </span>
-                  <div style={{ display: 'flex', gap: '6px', alignItems: 'center' }}>
+                  <div className="device-card-actions">
                     <button
                       type="button"
                       className="btn-secondary btn-sm"

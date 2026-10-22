@@ -28,6 +28,28 @@
   gap: 14px;
 }
 
+.report-range-wrap {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+}
+
+.report-dropdowns-row {
+  display: flex;
+  align-items: center;
+  gap: 14px;
+}
+
+.report-audit-row {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+}
+
+.report-btn-short {
+  display: none;
+}
+
 .report-filter-item {
   display: flex;
   align-items: center;
@@ -242,6 +264,12 @@
 }
 
 /* ─── Standards Comparison Table ─── */
+.standards-table-wrap {
+  width: 100%;
+  overflow-x: auto;
+  -webkit-overflow-scrolling: touch;
+}
+
 .standards-table {
   width: 100%;
   border-collapse: collapse;
@@ -597,6 +625,206 @@
 
 .modal-close-btn:hover {
   color: var(--text-primary, #f8fafc);
+}
+
+/* ─── Responsive Adjustments ─── */
+@media (max-width: 768px) {
+  .reports-header-actions {
+    display: flex !important;
+    flex-direction: row !important;
+    gap: 6px !important;
+    width: 100% !important;
+  }
+
+  .reports-header-actions > button,
+  .reports-header-actions > a {
+    flex: 1 1 0 !important;
+    min-width: 0 !important;
+    height: 32px !important;
+    padding: 4px 6px !important;
+    font-size: 0.74rem !important;
+    justify-content: center !important;
+    white-space: nowrap !important;
+  }
+
+  .compliance-kpi-grid {
+    grid-template-columns: repeat(2, minmax(0, 1fr)) !important;
+    gap: 6px !important;
+    margin-bottom: 12px !important;
+  }
+
+  .compliance-kpi-card {
+    padding: 8px 10px !important;
+    border-radius: 10px !important;
+  }
+
+  .compliance-kpi-val {
+    font-size: 1.15rem !important;
+  }
+
+  .compliance-kpi-title {
+    font-size: 0.64rem !important;
+  }
+
+  .report-controls-bar {
+    padding: 10px !important;
+    gap: 10px !important;
+    margin-bottom: 12px !important;
+    display: flex !important;
+    flex-direction: column !important;
+    align-items: stretch !important;
+  }
+
+  .report-range-wrap {
+    width: 100% !important;
+    display: flex !important;
+    flex-direction: column !important;
+    align-items: flex-start !important;
+    gap: 4px !important;
+  }
+
+  .report-range-control {
+    width: 100% !important;
+    display: flex !important;
+  }
+
+  .report-range-control .segmented-control__btn {
+    flex: 1 1 0 !important;
+    text-align: center !important;
+    padding: 6px 4px !important;
+    font-size: 0.78rem !important;
+    min-width: 0 !important;
+  }
+
+  .report-btn-full {
+    display: none !important;
+  }
+
+  .report-btn-short {
+    display: inline !important;
+  }
+
+  .report-dropdowns-row {
+    width: 100% !important;
+    display: grid !important;
+    grid-template-columns: 1fr 1fr !important;
+    gap: 8px !important;
+  }
+
+  .report-filter-item {
+    width: 100% !important;
+    min-width: 0 !important;
+    display: flex !important;
+    flex-direction: column !important;
+    align-items: flex-start !important;
+    gap: 3px !important;
+  }
+
+  .report-select {
+    width: 100% !important;
+    height: 36px !important;
+    font-size: 0.78rem !important;
+    padding: 4px 6px !important;
+    box-sizing: border-box !important;
+  }
+
+  .report-audit-row {
+    width: 100% !important;
+    display: flex !important;
+    align-items: center !important;
+    justify-content: space-between !important;
+    gap: 8px !important;
+  }
+
+  .report-section-card {
+    padding: 10px 10px !important;
+    border-radius: 12px !important;
+    box-sizing: border-box !important;
+    width: 100% !important;
+    max-width: 100% !important;
+    overflow: hidden !important;
+  }
+
+  .report-section-title {
+    font-size: 0.85rem !important;
+    display: flex !important;
+    align-items: center !important;
+    justify-content: space-between !important;
+    flex-wrap: wrap !important;
+    gap: 6px !important;
+  }
+
+  .report-section-title span:first-child {
+    flex: 1 1 auto !important;
+    min-width: 0 !important;
+  }
+
+  .report-section-subtitle {
+    font-size: 0.72rem !important;
+    margin-bottom: 12px !important;
+    line-height: 1.4 !important;
+  }
+
+  .compliance-kpi-badge,
+  .audit-meta-pill {
+    flex-shrink: 0 !important;
+    white-space: nowrap !important;
+    font-size: 0.65rem !important;
+    padding: 2px 6px !important;
+  }
+
+  .reports-mid-grid {
+    grid-template-columns: 1fr !important;
+    gap: 10px !important;
+    width: 100% !important;
+    box-sizing: border-box !important;
+  }
+
+  .standards-table-wrap {
+    width: 100% !important;
+    max-width: 100% !important;
+    overflow-x: auto !important;
+    -webkit-overflow-scrolling: touch !important;
+    margin: 6px 0 0 0 !important;
+    box-sizing: border-box !important;
+  }
+
+  .standards-table {
+    min-width: 320px !important;
+    width: 100% !important;
+    font-size: 0.72rem !important;
+  }
+
+  .standards-table th {
+    padding: 6px 8px !important;
+    font-size: 0.65rem !important;
+    white-space: nowrap !important;
+  }
+
+  .standards-table td {
+    padding: 6px 8px !important;
+    font-size: 0.72rem !important;
+  }
+
+  .verdict-tag {
+    font-size: 0.65rem !important;
+    padding: 2px 6px !important;
+  }
+
+  .export-suite-grid {
+    grid-template-columns: repeat(2, minmax(0, 1fr)) !important;
+    gap: 6px !important;
+  }
+
+  .export-card {
+    padding: 10px 8px !important;
+    border-radius: 10px !important;
+  }
+
+  .export-btn {
+    height: 30px !important;
+    font-size: 0.74rem !important;
+  }
 }
 
 /* ─── Print View Styling ─── */

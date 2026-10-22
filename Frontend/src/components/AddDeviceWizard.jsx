@@ -1382,7 +1382,7 @@ export default function AddDeviceWizard({ isOpen, onClose, onDeviceAdded, onNavi
                 <div style={{ fontSize: '3rem', marginBottom: '12px' }}>
                   {verifying ? '📡' : '✅'}
                 </div>
-                <h4 style={{ color: '#f8fafc', margin: '0 0 8px 0', fontSize: '1.1rem' }}>
+                <h4 style={{ color: 'var(--text-primary)', margin: '0 0 8px 0', fontSize: '1.1rem' }}>
                   {verifying ? 'Awaiting Device Ping...' : 'Device Online & Verified!'}
                 </h4>
                 <p style={{ color: '#94a3b8', fontSize: '0.85rem', maxWidth: '420px', margin: '0 auto' }}>
@@ -1464,13 +1464,13 @@ export default function AddDeviceWizard({ isOpen, onClose, onDeviceAdded, onNavi
                   </div>
 
                   <p style={{ textAlign: 'center', fontSize: '0.78rem', color: '#64748b', marginTop: '14px' }}>
-                    Captured at: {latestReading.createdAt ? new Date(latestReading.createdAt).toLocaleTimeString() : 'Just now'} • Streamed via Socket.IO
+                    Observed at: {latestReading.observedAt ? new Date(latestReading.observedAt).toLocaleTimeString() : latestReading.createdAt ? new Date(latestReading.createdAt).toLocaleTimeString() : 'Just now'} • Streamed via Socket.IO
                   </p>
                 </div>
               ) : (
                 <div style={{ textAlign: 'center', padding: '36px 0' }}>
                   <div style={{ fontSize: '2.5rem', marginBottom: '12px' }}>⏱️</div>
-                  <h4 style={{ color: '#f8fafc', margin: '0 0 8px 0' }}>
+                  <h4 style={{ color: 'var(--text-primary)', margin: '0 0 8px 0' }}>
                     {waitingTelemetry ? 'Awaiting First Telemetry Packet...' : 'Listening on Ingestion Socket...'}
                   </h4>
                   <p style={{ color: '#94a3b8', fontSize: '0.85rem', maxWidth: '400px', margin: '0 auto' }}>
@@ -1511,18 +1511,18 @@ export default function AddDeviceWizard({ isOpen, onClose, onDeviceAdded, onNavi
           {step === 7 && (
             <div style={{ textAlign: 'center', padding: '16px 0' }}>
               <div style={{ fontSize: '3.5rem', marginBottom: '14px' }}>🎉</div>
-              <h3 style={{ color: '#f8fafc', fontSize: '1.4rem', margin: '0 0 8px 0' }}>
+              <h3 style={{ color: 'var(--text-primary)', fontSize: '1.4rem', margin: '0 0 8px 0' }}>
                 Onboarding Complete!
               </h3>
               <p style={{ color: '#94a3b8', fontSize: '0.9rem', maxWidth: '460px', margin: '0 auto 24px' }}>
                 Your sensing node is officially configured, authenticated, and streaming live hyperlocal environmental data to your private dashboard.
               </p>
 
-              <div style={{ background: 'rgba(15, 23, 42, 0.6)', border: '1px solid rgba(255, 255, 255, 0.08)', borderRadius: '16px', padding: '18px 22px', maxWidth: '420px', margin: '0 auto', textAlign: 'left' }}>
+              <div style={{ background: 'var(--surface-raised)', border: '1px solid var(--border-subtle)', borderRadius: '16px', padding: '18px 22px', maxWidth: '420px', margin: '0 auto', textAlign: 'left' }}>
                 <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '14px', fontSize: '0.85rem' }}>
                   <div>
                     <span style={{ color: '#64748b' }}>Device Name:</span>
-                    <div style={{ fontWeight: 600, color: '#f8fafc' }}>{formData.name}</div>
+                    <div style={{ fontWeight: 600, color: 'var(--text-primary)' }}>{formData.name}</div>
                   </div>
                   <div>
                     <span style={{ color: '#64748b' }}>Status:</span>
@@ -1530,11 +1530,11 @@ export default function AddDeviceWizard({ isOpen, onClose, onDeviceAdded, onNavi
                   </div>
                   <div>
                     <span style={{ color: '#64748b' }}>Hardware ID:</span>
-                    <div style={{ fontWeight: 600, color: '#f8fafc', fontFamily: 'var(--font-mono, monospace)' }}>{formData.deviceId}</div>
+                    <div style={{ fontWeight: 600, color: 'var(--text-primary)', fontFamily: 'var(--font-mono, monospace)' }}>{formData.deviceId}</div>
                   </div>
                   <div>
                     <span style={{ color: '#64748b' }}>Location:</span>
-                    <div style={{ fontWeight: 600, color: '#f8fafc' }}>
+                    <div style={{ fontWeight: 600, color: 'var(--text-primary)' }}>
                       {[formData.locality, formData.city].filter(Boolean).join(', ') || formData.location}
                     </div>
                   </div>

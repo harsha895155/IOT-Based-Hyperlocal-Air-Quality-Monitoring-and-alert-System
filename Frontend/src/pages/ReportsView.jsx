@@ -110,29 +110,31 @@ export default function ReportsView() {
 
       {/* Interactive Controls Bar */}
       <div className="report-controls-bar">
-        <div className="report-controls-group">
-          {/* Range */}
-          <div className="report-filter-item">
-            <span className="report-filter-label">Time Window:</span>
-            <div className="segmented-control" style={{ margin: 0 }}>
-              {[
-                { id: '24h', label: '24 Hours' },
-                { id: '7d', label: '7 Days' },
-                { id: '30d', label: '30 Days' },
-                { id: '90d', label: '90 Days (Quarter)' },
-              ].map((r) => (
-                <button
-                  key={r.id}
-                  className={`segmented-control__btn ${range === r.id ? 'is-active' : ''}`}
-                  onClick={() => setRange(r.id)}
-                >
-                  {r.label}
-                </button>
-              ))}
-            </div>
+        {/* Row 1: Time Window */}
+        <div className="report-range-wrap">
+          <span className="report-filter-label">Time Window:</span>
+          <div className="segmented-control report-range-control" style={{ margin: 0 }}>
+            {[
+              { id: '24h', short: '24h', full: '24 Hours' },
+              { id: '7d', short: '7d', full: '7 Days' },
+              { id: '30d', short: '30d', full: '30 Days' },
+              { id: '90d', short: '90d', full: '90 Days' },
+            ].map((r) => (
+              <button
+                key={r.id}
+                type="button"
+                className={`segmented-control__btn ${range === r.id ? 'is-active' : ''}`}
+                onClick={() => setRange(r.id)}
+              >
+                <span className="report-btn-full">{r.full}</span>
+                <span className="report-btn-short">{r.short}</span>
+              </button>
+            ))}
           </div>
+        </div>
 
-          {/* Station / Node Filter */}
+        {/* Row 2: 2-Column Dropdowns on Mobile */}
+        <div className="report-dropdowns-row">
           <div className="report-filter-item">
             <span className="report-filter-label">Station:</span>
             <select
@@ -140,16 +142,15 @@ export default function ReportsView() {
               value={selectedDevice}
               onChange={(e) => setSelectedDevice(e.target.value)}
             >
-              <option value="all">All IoT Stations (Fleet-Wide)</option>
+              <option value="all">All IoT Stations</option>
               {devices.map((d) => (
                 <option key={d.deviceId} value={d.deviceId}>
-                  {d.name || d.deviceId} ({d.location || 'Site'})
+                  {d.name || d.deviceId}
                 </option>
               ))}
             </select>
           </div>
 
-          {/* Regulatory Standard */}
           <div className="report-filter-item">
             <span className="report-filter-label">Standard:</span>
             <select
@@ -157,14 +158,15 @@ export default function ReportsView() {
               value={standard}
               onChange={(e) => setStandard(e.target.value)}
             >
-              <option value="naaqs">CPCB / NAAQS (India)</option>
-              <option value="epa">US EPA AQI Standard</option>
-              <option value="who">WHO 2021 Global Guidelines</option>
+              <option value="naaqs">NAAQS (India)</option>
+              <option value="epa">US EPA AQI</option>
+              <option value="who">WHO 2021</option>
             </select>
           </div>
         </div>
 
-        <div className="report-controls-group">
+        {/* Row 3: Audit Pill & Recompute */}
+        <div className="report-audit-row">
           <div className="audit-meta-pill">
             <span>🛡️</span>
             <span>{summary?.auditId || 'AUD-VERIFIED'}</span>
@@ -358,64 +360,66 @@ export default function ReportsView() {
             Measured mean values evaluated against {standard.toUpperCase()} standard guidelines.
           </p>
 
-          <table className="standards-table">
-            <thead>
-              <tr>
-                <th>Compliance Parameter</th>
-                <th>Statutory Limit</th>
-                <th>Measured Value</th>
-                <th>Verdict</th>
-              </tr>
-            </thead>
-            <tbody>
-              <tr>
-                <td><strong>24-hr Mean AQI</strong></td>
-                <td>&le; 100 Index</td>
-                <td className="mono">{summary?.averageAQI || 0}</td>
-                <td>
-                  <span className={`verdict-tag ${(summary?.averageAQI || 0) <= 100 ? 'is-pass' : 'is-advisory'}`}>
-                    {(summary?.averageAQI || 0) <= 100 ? 'PASS' : 'ADVISORY'}
-                  </span>
-                </td>
-              </tr>
-              <tr>
-                <td><strong>Gas / VOC Exposure</strong></td>
-                <td>&le; 1,000 PPM</td>
-                <td className="mono">{summary?.avgGasPPM || 0} PPM</td>
-                <td>
-                  <span className={`verdict-tag ${(summary?.avgGasPPM || 0) <= 1000 ? 'is-pass' : 'is-advisory'}`}>
-                    {(summary?.avgGasPPM || 0) <= 1000 ? 'PASS' : 'ADVISORY'}
-                  </span>
-                </td>
-              </tr>
-              <tr>
-                <td><strong>Peak Pollution Burst</strong></td>
-                <td>&le; 250 AQI</td>
-                <td className="mono">{summary?.maxAQI || 0}</td>
-                <td>
-                  <span className={`verdict-tag ${(summary?.maxAQI || 0) <= 250 ? 'is-pass' : 'is-breach'}`}>
-                    {(summary?.maxAQI || 0) <= 250 ? 'PASS' : 'BREACH'}
-                  </span>
-                </td>
-              </tr>
-              <tr>
-                <td><strong>Thermal Comfort Zone</strong></td>
-                <td>18°C - 35°C</td>
-                <td className="mono">{summary?.avgTemp || 0}°C</td>
-                <td>
-                  <span className="verdict-tag is-pass">PASS</span>
-                </td>
-              </tr>
-              <tr>
-                <td><strong>Relative Humidity Limit</strong></td>
-                <td>30% - 75% RH</td>
-                <td className="mono">{summary?.avgHumidity || 0}% RH</td>
-                <td>
-                  <span className="verdict-tag is-pass">PASS</span>
-                </td>
-              </tr>
-            </tbody>
-          </table>
+          <div className="standards-table-wrap">
+            <table className="standards-table">
+              <thead>
+                <tr>
+                  <th>Compliance Parameter</th>
+                  <th>Statutory Limit</th>
+                  <th>Measured Value</th>
+                  <th>Verdict</th>
+                </tr>
+              </thead>
+              <tbody>
+                <tr>
+                  <td><strong>24-hr Mean AQI</strong></td>
+                  <td>&le; 100 Index</td>
+                  <td className="mono">{summary?.averageAQI || 0}</td>
+                  <td>
+                    <span className={`verdict-tag ${(summary?.averageAQI || 0) <= 100 ? 'is-pass' : 'is-advisory'}`}>
+                      {(summary?.averageAQI || 0) <= 100 ? 'PASS' : 'ADVISORY'}
+                    </span>
+                  </td>
+                </tr>
+                <tr>
+                  <td><strong>Gas / VOC Exposure</strong></td>
+                  <td>&le; 1,000 PPM</td>
+                  <td className="mono">{summary?.avgGasPPM || 0} PPM</td>
+                  <td>
+                    <span className={`verdict-tag ${(summary?.avgGasPPM || 0) <= 1000 ? 'is-pass' : 'is-advisory'}`}>
+                      {(summary?.avgGasPPM || 0) <= 1000 ? 'PASS' : 'ADVISORY'}
+                    </span>
+                  </td>
+                </tr>
+                <tr>
+                  <td><strong>Peak Pollution Burst</strong></td>
+                  <td>&le; 250 AQI</td>
+                  <td className="mono">{summary?.maxAQI || 0}</td>
+                  <td>
+                    <span className={`verdict-tag ${(summary?.maxAQI || 0) <= 250 ? 'is-pass' : 'is-breach'}`}>
+                      {(summary?.maxAQI || 0) <= 250 ? 'PASS' : 'BREACH'}
+                    </span>
+                  </td>
+                </tr>
+                <tr>
+                  <td><strong>Thermal Comfort Zone</strong></td>
+                  <td>18°C - 35°C</td>
+                  <td className="mono">{summary?.avgTemp || 0}°C</td>
+                  <td>
+                    <span className="verdict-tag is-pass">PASS</span>
+                  </td>
+                </tr>
+                <tr>
+                  <td><strong>Relative Humidity Limit</strong></td>
+                  <td>30% - 75% RH</td>
+                  <td className="mono">{summary?.avgHumidity || 0}% RH</td>
+                  <td>
+                    <span className="verdict-tag is-pass">PASS</span>
+                  </td>
+                </tr>
+              </tbody>
+            </table>
+          </div>
         </div>
       </div>
 
@@ -571,7 +575,7 @@ export default function ReportsView() {
                     required
                     value={scheduleConfig.email}
                     onChange={(e) => setScheduleConfig({ ...scheduleConfig, email: e.target.value })}
-                    style={{ width: '100%', padding: '8px 12px', background: 'var(--bg-surface)', border: '1px solid var(--border-subtle)', borderRadius: '8px', color: '#fff' }}
+                    style={{ width: '100%', padding: '8px 12px', background: 'var(--bg-surface)', border: '1px solid var(--border-subtle)', borderRadius: '8px', color: 'var(--text-primary)' }}
                   />
                 </div>
                 <div>

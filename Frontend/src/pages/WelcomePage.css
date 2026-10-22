@@ -112,31 +112,62 @@
 
 .welcome-hamburger {
   display: none;
-  background: none;
-  border: none;
-  color: #fff;
+  background: rgba(255, 255, 255, 0.08);
+  border: 1px solid rgba(255, 255, 255, 0.2);
+  border-radius: 8px;
+  color: #f8fafc;
   cursor: pointer;
-  padding: 4px;
+  padding: 6px;
+  width: 36px;
+  height: 36px;
+  min-width: 36px;
+  min-height: 36px;
+  box-sizing: border-box;
+  align-items: center;
+  justify-content: center;
+  transition: all 0.2s ease;
+  flex-shrink: 0;
+}
+
+.welcome-hamburger:hover {
+  background: rgba(255, 255, 255, 0.16);
+  border-color: rgba(56, 189, 248, 0.5);
+  color: #38bdf8;
+}
+
+.welcome-hamburger svg {
+  display: block;
+  stroke: currentColor;
 }
 
 .welcome-mobile-menu {
   display: flex;
   flex-direction: column;
-  padding: 16px 24px;
-  gap: 14px;
-  background: rgba(10, 15, 30, 0.96);
-  border-bottom: 1px solid rgba(255, 255, 255, 0.1);
-  backdrop-filter: blur(16px);
+  padding: 16px 20px;
+  gap: 10px;
+  background: rgba(10, 15, 30, 0.98);
+  border-bottom: 1px solid rgba(255, 255, 255, 0.12);
+  backdrop-filter: blur(20px);
+  -webkit-backdrop-filter: blur(20px);
 }
 
 .welcome-mobile-link {
   background: none;
   border: none;
+  border-bottom: 1px solid rgba(255, 255, 255, 0.06);
   color: #f1f5f9;
-  font-size: 1rem;
+  font-size: 0.96rem;
+  font-weight: 500;
   text-align: left;
-  padding: 8px 0;
+  padding: 10px 8px;
   cursor: pointer;
+  border-radius: 6px;
+  transition: background 0.15s ease, color 0.15s ease;
+}
+
+.welcome-mobile-link:hover {
+  background: rgba(255, 255, 255, 0.06);
+  color: #38bdf8;
 }
 
 .welcome-mobile-actions {
@@ -144,6 +175,7 @@
   flex-direction: column;
   gap: 10px;
   margin-top: 8px;
+  padding-top: 8px;
 }
 
 /* ─── 2. Hero Section ─── */
@@ -1976,7 +2008,7 @@
     display: none;
   }
   .welcome-hamburger {
-    display: block;
+    display: inline-flex !important;
   }
   .welcome-nav__container {
     padding: 8px 12px;
@@ -2953,6 +2985,46 @@
   background: rgba(255, 255, 255, 0.88) !important;
   border-bottom: 1.5px solid rgba(2, 132, 199, 0.2) !important;
   box-shadow: 0 4px 20px rgba(15, 23, 42, 0.05) !important;
+}
+
+[data-theme='light'] .welcome-hamburger,
+.welcome-page--light .welcome-hamburger {
+  color: #0f172a !important;
+  background: rgba(2, 132, 199, 0.08) !important;
+  border: 1.5px solid rgba(2, 132, 199, 0.35) !important;
+  box-shadow: 0 1px 3px rgba(15, 23, 42, 0.06) !important;
+}
+
+[data-theme='light'] .welcome-hamburger:hover,
+.welcome-page--light .welcome-hamburger:hover {
+  background: rgba(2, 132, 199, 0.18) !important;
+  border-color: #0284c7 !important;
+  color: #0284c7 !important;
+}
+
+[data-theme='light'] .welcome-hamburger svg,
+.welcome-page--light .welcome-hamburger svg {
+  stroke: #0f172a !important;
+}
+
+[data-theme='light'] .welcome-mobile-menu,
+.welcome-page--light .welcome-mobile-menu {
+  background: rgba(255, 255, 255, 0.98) !important;
+  border-bottom: 1.5px solid rgba(2, 132, 199, 0.22) !important;
+  box-shadow: 0 14px 30px rgba(15, 23, 42, 0.12) !important;
+}
+
+[data-theme='light'] .welcome-mobile-link,
+.welcome-page--light .welcome-mobile-link {
+  color: #0f172a !important;
+  border-bottom: 1px solid rgba(226, 232, 240, 0.9) !important;
+  font-weight: 600 !important;
+}
+
+[data-theme='light'] .welcome-mobile-link:hover,
+.welcome-page--light .welcome-mobile-link:hover {
+  background: rgba(2, 132, 199, 0.08) !important;
+  color: #0284c7 !important;
 }
 
 [data-theme='light'] .welcome-brand__text {

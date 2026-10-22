@@ -3,7 +3,7 @@ import { useParams, Link, useNavigate } from 'react-router-dom';
 import client from '../api/client';
 import { classifyAQI, healthRecommendation } from '../utils/aqi';
 import { formatTimeAgo } from '../hooks/useReadings';
-import { AreaChart, Area, XAxis, YAxis, Tooltip, ResponsiveContainer } from 'recharts';
+import { AreaChart, Area, XAxis, YAxis, Tooltip, ResponsiveContainer, ComposedChart, Line, CartesianGrid, Legend } from 'recharts';
 import './DeviceDetailView.css';
 
 export default function DeviceDetailView({ readingsData }) {
@@ -171,6 +171,19 @@ export default function DeviceDetailView({ readingsData }) {
   // Chart stats calculation (min, avg, max)
   const chartStats = useMemo(() => {
     if (!history.length) return null;
+    if (activeMetric === 'dual') {
+      const aqiVals = history.map((r) => r.airQuality).filter((v) => typeof v === 'number' && !isNaN(v));
+      const tempVals = history.map((r) => r.temperature).filter((v) => typeof v === 'number' && !isNaN(v));
+      const avgAqi = aqiVals.length ? (aqiVals.reduce((a, b) => a + b, 0) / aqiVals.length).toFixed(1) : 0;
+      const maxAqi = aqiVals.length ? Math.max(...aqiVals).toFixed(1) : 0;
+      const avgTemp = tempVals.length ? (tempVals.reduce((a, b) => a + b, 0) / tempVals.length).toFixed(1) : 0;
+      return {
+        isDual: true,
+        avgAqi,
+        maxAqi,
+        avgTemp,
+      };
+    }
     const values = history
       .map((r) => r[activeMetric])
       .filter((v) => typeof v === 'number' && !isNaN(v));
@@ -424,6 +437,13 @@ export default function DeviceDetailView({ readingsData }) {
             <div className="dd-tabs-group">
               <button
                 type="button"
+                className={`dd-tab-btn ${activeMetric === 'dual' ? 'is-active' : ''}`}
+                onClick={() => setActiveMetric('dual')}
+              >
+                Dual (Fig. 4)
+              </button>
+              <button
+                type="button"
                 className={`dd-tab-btn ${activeMetric === 'airQuality' ? 'is-active' : ''}`}
                 onClick={() => setActiveMetric('airQuality')}
               >
@@ -456,69 +476,165 @@ export default function DeviceDetailView({ readingsData }) {
           {/* Quick Stats Strip */}
           {chartStats && (
             <div className="dd-chart-stats">
-              <span className="dd-chart-stat-item">
-                Minimum: <strong>{chartStats.min} {currentMetricConfig.unit}</strong>
-              </span>
-              <span>•</span>
-              <span className="dd-chart-stat-item">
-                Average: <strong>{chartStats.avg} {currentMetricConfig.unit}</strong>
-              </span>
-              <span>•</span>
-              <span className="dd-chart-stat-item">
-                Maximum: <strong>{chartStats.max} {currentMetricConfig.unit}</strong>
-              </span>
+              {chartStats.isDual ? (
+                <>
+                  <span className="dd-chart-stat-item">
+                    Avg AQI: <strong style={{ color: '#00d2b4' }}>{chartStats.avgAqi}</strong>
+                  </span>
+                  <span>•</span>
+                  <span className="dd-chart-stat-item">
+                    Peak AQI: <strong style={{ color: '#00d2b4' }}>{chartStats.maxAqi}</strong>
+                  </span>
+                  <span>•</span>
+                  <span className="dd-chart-stat-item">
+                    Avg Temp: <strong style={{ color: '#f59e0b' }}>{chartStats.avgTemp} °C</strong>
+                  </span>
+                </>
+              ) : (
+                <>
+                  <span className="dd-chart-stat-item">
+                    Minimum: <strong>{chartStats.min} {currentMetricConfig?.unit}</strong>
+                  </span>
+                  <span>•</span>
+                  <span className="dd-chart-stat-item">
+                    Average: <strong>{chartStats.avg} {currentMetricConfig?.unit}</strong>
+                  </span>
+                  <span>•</span>
+                  <span className="dd-chart-stat-item">
+                    Maximum: <strong>{chartStats.max} {currentMetricConfig?.unit}</strong>
+                  </span>
+                </>
+              )}
             </div>
           )}
 
-          {/* Recharts AreaChart */}
+          {/* Recharts Chart */}
           <div style={{ width: '100%', height: 280, marginTop: '8px' }}>
             {history.length > 0 ? (
               <ResponsiveContainer width="100%" height="100%">
-                <AreaChart data={history} margin={{ top: 10, right: 10, left: -20, bottom: 0 }}>
-                  <defs>
-                    <linearGradient id={currentMetricConfig.gradientId} x1="0" y1="0" x2="0" y2="1">
-                      <stop offset="5%" stopColor={currentMetricConfig.color} stopOpacity={0.4} />
-                      <stop offset="95%" stopColor={currentMetricConfig.color} stopOpacity={0.0} />
-                    </linearGradient>
-                  </defs>
-                  <XAxis
-                    dataKey="createdAt"
-                    tickFormatter={(v) =>
-                      v ? new Date(v).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' }) : ''
-                    }
-                    stroke="var(--text-faint)"
-                    fontSize={11}
-                    tickLine={false}
-                  />
-                  <YAxis
-                    stroke="var(--text-faint)"
-                    fontSize={11}
-                    domain={currentMetricConfig.domain}
-                    tickLine={false}
-                    axisLine={false}
-                  />
-                  <Tooltip
-                    contentStyle={{
-                      background: 'rgba(14, 21, 32, 0.95)',
-                      border: '1px solid var(--border-active, rgba(56, 189, 248, 0.4))',
-                      borderRadius: '8px',
-                      boxShadow: '0 4px 20px rgba(0,0,0,0.5)',
-                      color: 'var(--text-primary)',
-                      fontSize: '0.82rem',
-                    }}
-                    labelFormatter={(v) => (v ? new Date(v).toLocaleString() : '')}
-                    formatter={(val) => [`${val} ${currentMetricConfig.unit}`, currentMetricConfig.label]}
-                  />
-                  <Area
-                    type="monotone"
-                    dataKey={activeMetric}
-                    name={currentMetricConfig.label}
-                    stroke={currentMetricConfig.color}
-                    strokeWidth={2.5}
-                    fillOpacity={1}
-                    fill={`url(#${currentMetricConfig.gradientId})`}
-                  />
-                </AreaChart>
+                {activeMetric === 'dual' ? (
+                  <ComposedChart data={history} margin={{ top: 10, right: 16, left: -15, bottom: 0 }}>
+                    <defs>
+                      <linearGradient id="dualAqiGrad" x1="0" y1="0" x2="0" y2="1">
+                        <stop offset="5%" stopColor="#00d2b4" stopOpacity={0.4} />
+                        <stop offset="95%" stopColor="#00d2b4" stopOpacity={0.0} />
+                      </linearGradient>
+                    </defs>
+                    <CartesianGrid stroke="var(--border-subtle, rgba(255,255,255,0.06))" vertical={false} />
+                    <XAxis
+                      dataKey="createdAt"
+                      tickFormatter={(v) =>
+                        v ? new Date(v).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' }) : ''
+                      }
+                      stroke="var(--text-faint)"
+                      fontSize={11}
+                      tickLine={false}
+                    />
+                    <YAxis
+                      yAxisId="left"
+                      orientation="left"
+                      stroke="var(--text-faint)"
+                      fontSize={11}
+                      domain={[0, (dataMax) => Math.max(160, Math.ceil(dataMax * 1.15))]}
+                      tickLine={false}
+                      axisLine={false}
+                      width={36}
+                    />
+                    <YAxis
+                      yAxisId="right"
+                      orientation="right"
+                      stroke="#f59e0b"
+                      fontSize={11}
+                      domain={[(dataMin) => Math.floor(Math.max(0, dataMin - 3)), (dataMax) => Math.ceil(dataMax + 3)]}
+                      tickLine={false}
+                      axisLine={false}
+                      width={36}
+                      unit="°"
+                    />
+                    <Tooltip
+                      contentStyle={{
+                        background: 'rgba(14, 21, 32, 0.95)',
+                        border: '1px solid var(--border-active, rgba(56, 189, 248, 0.4))',
+                        borderRadius: '8px',
+                        boxShadow: '0 4px 20px rgba(0,0,0,0.5)',
+                        color: 'var(--text-primary)',
+                        fontSize: '0.82rem',
+                      }}
+                      labelFormatter={(v) => (v ? new Date(v).toLocaleString() : '')}
+                      formatter={(val, name) => [
+                        name.includes('Temp') ? `${val} °C` : `${val}`,
+                        name
+                      ]}
+                    />
+                    <Legend wrapperStyle={{ fontSize: '0.74rem', paddingTop: '4px' }} />
+                    <Area
+                      yAxisId="left"
+                      type="monotone"
+                      dataKey="airQuality"
+                      name="AQI Index"
+                      stroke="#00d2b4"
+                      strokeWidth={2.5}
+                      fillOpacity={1}
+                      fill="url(#dualAqiGrad)"
+                    />
+                    <Line
+                      yAxisId="right"
+                      type="monotone"
+                      dataKey="temperature"
+                      name="Temp (°C)"
+                      stroke="#f59e0b"
+                      strokeWidth={2.5}
+                      strokeDasharray="4 4"
+                      dot={false}
+                    />
+                  </ComposedChart>
+                ) : (
+                  <AreaChart data={history} margin={{ top: 10, right: 10, left: -20, bottom: 0 }}>
+                    <defs>
+                      <linearGradient id={currentMetricConfig?.gradientId || 'devGrad'} x1="0" y1="0" x2="0" y2="1">
+                        <stop offset="5%" stopColor={currentMetricConfig?.color || '#38bdf8'} stopOpacity={0.4} />
+                        <stop offset="95%" stopColor={currentMetricConfig?.color || '#38bdf8'} stopOpacity={0.0} />
+                      </linearGradient>
+                    </defs>
+                    <XAxis
+                      dataKey="createdAt"
+                      tickFormatter={(v) =>
+                        v ? new Date(v).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' }) : ''
+                      }
+                      stroke="var(--text-faint)"
+                      fontSize={11}
+                      tickLine={false}
+                    />
+                    <YAxis
+                      stroke="var(--text-faint)"
+                      fontSize={11}
+                      domain={currentMetricConfig?.domain}
+                      tickLine={false}
+                      axisLine={false}
+                    />
+                    <Tooltip
+                      contentStyle={{
+                        background: 'rgba(14, 21, 32, 0.95)',
+                        border: '1px solid var(--border-active, rgba(56, 189, 248, 0.4))',
+                        borderRadius: '8px',
+                        boxShadow: '0 4px 20px rgba(0,0,0,0.5)',
+                        color: 'var(--text-primary)',
+                        fontSize: '0.82rem',
+                      }}
+                      labelFormatter={(v) => (v ? new Date(v).toLocaleString() : '')}
+                      formatter={(val) => [`${val} ${currentMetricConfig?.unit}`, currentMetricConfig?.label]}
+                    />
+                    <Area
+                      type="monotone"
+                      dataKey={activeMetric}
+                      name={currentMetricConfig?.label}
+                      stroke={currentMetricConfig?.color}
+                      strokeWidth={2.5}
+                      fillOpacity={1}
+                      fill={`url(#${currentMetricConfig?.gradientId || 'devGrad'})`}
+                    />
+                  </AreaChart>
+                )}
               </ResponsiveContainer>
             ) : (
               <div

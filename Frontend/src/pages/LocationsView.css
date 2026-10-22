@@ -886,37 +886,69 @@
   }
 
   .loc-badge-row {
-    flex-wrap: wrap;
-    gap: 6px;
-    margin-bottom: 6px;
+    display: flex !important;
+    flex-direction: row !important;
+    align-items: center !important;
+    flex-wrap: nowrap !important;
+    gap: 6px !important;
+    margin-bottom: 6px !important;
   }
 
   .loc-service-pill,
   .loc-scope-pill {
-    font-size: 0.65rem;
-    padding: 3px 8px;
+    font-size: 0.62rem !important;
+    padding: 3px 6px !important;
+    white-space: nowrap !important;
   }
 
   .loc-disclaimer-box {
-    max-width: 100%;
-    padding: 10px 12px;
-    font-size: 0.75rem;
+    max-width: 100% !important;
+    padding: 6px 10px !important;
+    font-size: 0.7rem !important;
+    margin-bottom: 8px !important;
+    border-radius: 10px !important;
+    gap: 8px !important;
+  }
+
+  .disclaimer-icon {
+    font-size: 1rem !important;
+  }
+
+  .disclaimer-title {
+    font-size: 0.74rem !important;
+    margin-bottom: 1px !important;
+  }
+
+  .disclaimer-text {
+    font-size: 0.68rem !important;
+    line-height: 1.35 !important;
   }
 
   .loc-search-card {
-    padding: 10px 12px;
-    margin-bottom: 14px;
+    padding: 8px 10px !important;
+    margin-bottom: 10px !important;
+    border-radius: 12px !important;
   }
 
   .loc-search-bar-wrap {
-    flex-direction: column;
-    gap: 8px;
-    width: 100%;
+    display: flex !important;
+    flex-direction: row !important;
+    align-items: center !important;
+    gap: 6px !important;
+    width: 100% !important;
+    position: relative !important;
   }
 
   .loc-search-input-box {
-    width: 100%;
-    min-width: 0;
+    flex: 1 !important;
+    width: auto !important;
+    min-width: 0 !important;
+    height: 36px !important;
+  }
+
+  .loc-search-input {
+    font-size: 0.78rem !important;
+    padding: 6px 8px 6px 30px !important;
   }
 
   .loc-autocomplete-dropdown {
@@ -926,9 +958,50 @@
   }
 
   .loc-btn-gps {
-    width: 100%;
-    height: 38px;
-    justify-content: center;
+    width: auto !important;
+    height: 36px !important;
+    padding: 0 10px !important;
+    font-size: 0.76rem !important;
+    white-space: nowrap !important;
+    flex-shrink: 0 !important;
+    justify-content: center !important;
+  }
+
+  .loc-saved-section {
+    background: var(--bg-card) !important;
+    border: 1px solid var(--border-subtle) !important;
+    border-radius: 12px !important;
+    padding: 8px 10px !important;
+    margin-bottom: 12px !important;
+  }
+
+  .loc-saved-header {
+    display: flex !important;
+    align-items: center !important;
+    justify-content: space-between !important;
+    margin-bottom: 6px !important;
+  }
+
+  .loc-saved-title {
+    font-size: 0.7rem !important;
+    font-weight: 700 !important;
+    color: var(--text-muted) !important;
+  }
+
+  .loc-save-current-btn {
+    font-size: 0.7rem !important;
+    padding: 3px 8px !important;
+    border-radius: 6px !important;
+    background: var(--surface-raised) !important;
+    border: 1px solid var(--border-subtle) !important;
+    color: var(--text-primary) !important;
+    cursor: pointer !important;
+  }
+
+  .loc-saved-empty {
+    font-size: 0.68rem !important;
+    padding: 2px 0 !important;
+    color: var(--text-faint) !important;
   }
 
   .loc-weather-grid {
@@ -976,22 +1049,159 @@
     font-size: 0.65rem !important;
   }
 
-  .loc-daily-card {
-    padding: 12px 10px;
-    border-radius: 12px;
+  .loc-forecast-card {
+    padding: 8px 10px !important;
+    border-radius: 10px !important;
+    margin-top: 8px !important;
   }
 
+  .loc-forecast-title-row {
+    margin-bottom: 6px !important;
+    display: flex !important;
+    align-items: baseline !important;
+    justify-content: space-between !important;
+  }
+
+  .loc-forecast-title {
+    font-size: 0.82rem !important;
+  }
+
+  .loc-forecast-sub {
+    font-size: 0.62rem !important;
+  }
+
+  .loc-hourly-strip {
+    gap: 5px !important;
+    padding-bottom: 3px !important;
+  }
+
+  .loc-hour-item {
+    min-width: 52px !important;
+    padding: 6px 4px !important;
+    border-radius: 8px !important;
+    gap: 2px !important;
+  }
+
+  .loc-hour-time {
+    font-size: 0.62rem !important;
+    font-weight: 600 !important;
+  }
+
+  .loc-hour-icon svg,
+  .loc-hour-svg {
+    width: 17px !important;
+    height: 17px !important;
+  }
+
+  .loc-hour-temp {
+    font-size: 0.85rem !important;
+    font-weight: 700 !important;
+  }
+
+  .loc-hour-pop,
+  .loc-hour-pop-zero {
+    font-size: 0.58rem !important;
+  }
+
+  .loc-hour-wind {
+    font-size: 0.56rem !important;
+  }
+
+  /* ── 7-Day Meteorological Outlook Compact Rows ── */
   .loc-daily-grid {
-    display: flex;
-    flex-direction: column;
-    gap: 8px;
+    display: flex !important;
+    flex-direction: column !important;
+    gap: 4px !important;
   }
 
-  .loc-daily-row {
-    flex-direction: column;
-    align-items: stretch;
-    padding: 8px 10px;
-    gap: 4px;
+  .loc-daily-card {
+    display: flex !important;
+    flex-direction: row !important;
+    align-items: center !important;
+    justify-content: space-between !important;
+    padding: 5px 8px !important;
+    border-radius: 8px !important;
+    gap: 6px !important;
+    min-height: 32px !important;
+  }
+
+  .loc-daily-date-col {
+    display: flex !important;
+    flex-direction: row !important;
+    align-items: baseline !important;
+    gap: 4px !important;
+    width: 72px !important;
+    flex-shrink: 0 !important;
+  }
+
+  .loc-daily-day {
+    font-size: 0.72rem !important;
+    font-weight: 700 !important;
+  }
+
+  .loc-daily-date {
+    font-size: 0.6rem !important;
+    color: var(--text-faint) !important;
+  }
+
+  .loc-daily-icon-col {
+    display: flex !important;
+    align-items: center !important;
+    gap: 4px !important;
+    flex: 1 !important;
+    min-width: 0 !important;
+  }
+
+  .loc-daily-icon-col svg,
+  .loc-daily-svg {
+    width: 16px !important;
+    height: 16px !important;
+    flex-shrink: 0 !important;
+  }
+
+  .loc-daily-cond {
+    font-size: 0.68rem !important;
+    white-space: nowrap !important;
+    overflow: hidden !important;
+    text-overflow: ellipsis !important;
+  }
+
+  .loc-daily-rain-col {
+    display: flex !important;
+    flex-direction: row !important;
+    align-items: center !important;
+    gap: 3px !important;
+    width: 44px !important;
+    flex-shrink: 0 !important;
+    justify-content: center !important;
+  }
+
+  .loc-daily-pop,
+  .loc-daily-pop-none {
+    font-size: 0.62rem !important;
+  }
+
+  .loc-daily-wind {
+    display: none !important;
+  }
+
+  .loc-daily-temp-col {
+    display: flex !important;
+    align-items: center !important;
+    justify-content: flex-end !important;
+    gap: 5px !important;
+    width: 48px !important;
+    flex-shrink: 0 !important;
+  }
+
+  .loc-daily-max {
+    font-size: 0.8rem !important;
+    font-weight: 700 !important;
+  }
+
+  .loc-daily-min {
+    font-size: 0.7rem !important;
+    color: var(--text-faint) !important;
   }
 }
 

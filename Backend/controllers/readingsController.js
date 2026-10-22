@@ -154,7 +154,7 @@ async function createReading(req, res, next) {
                   severity,
                 })
                   .then(() => {
-                    Alert.findByIdAndUpdate(alert._id, { $addToSet: { channelsDelivered: 'email' } }).catch(() => {});
+                    Alert.findByIdAndUpdate(alert._id, { $addToSet: { channelsDelivered: 'email' } }).catch(() => { });
                   })
                   .catch((mailErr) => {
                     console.error('[Alert Engine] Async email dispatch notice:', mailErr.message);
@@ -178,9 +178,9 @@ async function createReading(req, res, next) {
           }),
         })
           .then(() => {
-            Alert.findByIdAndUpdate(alert._id, { $addToSet: { channelsDelivered: 'webhook' } }).catch(() => {});
+            Alert.findByIdAndUpdate(alert._id, { $addToSet: { channelsDelivered: 'webhook' } }).catch(() => { });
           })
-          .catch(() => {});
+          .catch(() => { });
       }
     }
 

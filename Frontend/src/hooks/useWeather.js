@@ -152,7 +152,7 @@ export function useWeather(initialLocation = 'Current Location', initialCoords =
       fetchWeather(coords.lat, coords.lng, locationName);
       const interval = setInterval(() => {
         fetchWeather(coords.lat, coords.lng, locationName);
-      }, 600000);
+      }, 300000); // Refreshes every 5 minutes
       return () => clearInterval(interval);
     }
   }, [coords?.lat, coords?.lng, locationName, fetchWeather]);

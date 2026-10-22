@@ -610,14 +610,56 @@
 
   .login-form-pane {
     flex: 1;
-    padding: 32px 16px;
-    align-items: flex-start;
+    padding: 16px 12px 32px;
+    align-items: center;
   }
 
   .login-form-container {
-    padding: 28px 20px;
+    padding: 18px 16px;
     box-shadow: none;
     border-radius: 12px;
+    max-width: 420px;
+    gap: 12px;
+  }
+
+  .login-brand-name {
+    font-size: 1.35rem;
+  }
+
+  .login-title {
+    font-size: 1.3rem;
+  }
+
+  .login-desc {
+    font-size: 0.8rem;
+    line-height: 1.4;
+  }
+
+  .login-input {
+    padding: 8px 12px;
+    font-size: 0.84rem;
+    height: 38px;
+  }
+
+  .login-submit-btn,
+  .login-google-btn,
+  .login-guest-btn {
+    padding: 8px 12px;
+    font-size: 0.84rem;
+    height: 38px;
+  }
+
+  .login-options {
+    font-size: 0.78rem;
+  }
+
+  .login-forgot-link {
+    font-size: 0.78rem;
+  }
+
+  .login-switch {
+    margin-top: 14px;
+    font-size: 0.8rem;
   }
 }
 

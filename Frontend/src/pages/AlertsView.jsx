@@ -1,4 +1,4 @@
-import React, { useState, useMemo, useEffect } from 'react';
+import React, { useState, useMemo, useEffect, useRef } from 'react';
 import { useAuth } from '../context/AuthContext';
 import { formatTimeAgo } from '../hooks/useReadings';
 import { classifyAQI, healthRecommendation } from '../utils/aqi';
@@ -27,6 +27,33 @@ export default function AlertsView({
   const [searchQuery, setSearchQuery] = useState('');
   const [selectedStation, setSelectedStation] = useState('all');
   const [sortBy, setSortBy] = useState('newest');
+  const [showFilterMenu, setShowFilterMenu] = useState(false);
+  const filterRef = useRef(null);
+
+  // Close filter dropdown on outside click
+  useEffect(() => {
+    function handleClickOutside(e) {
+      if (filterRef.current && !filterRef.current.contains(e.target)) {
+        setShowFilterMenu(false);
+      }
+    }
+    if (showFilterMenu) {
+      document.addEventListener('mousedown', handleClickOutside);
+    }
+    return () => document.removeEventListener('mousedown', handleClickOutside);
+  }, [showFilterMenu]);
+
+  const activeFiltersCount =
+    (selectedStation !== 'all' ? 1 : 0) +
+    (sortBy !== 'newest' ? 1 : 0) +
+    (filterTab !== 'All' ? 1 : 0);
+
+  const handleClearFilters = () => {
+    setSelectedStation('all');
+    setSortBy('newest');
+    setFilterTab('All');
+  };
+
   const [audioEnabled, setAudioEnabled] = useState(() => {
     return localStorage.getItem('airguard_audio_alerts') === 'true';
   });
@@ -218,31 +245,6 @@ export default function AlertsView({
           >
             {audioEnabled ? '🔊 Siren ON' : '🔇 Muted'}
           </button>
-
-          {/* Quick Sound Selector */}
-          <div style={{ display: 'inline-flex', alignItems: 'center' }}>
-            <select
-              value={currentSound}
-              onChange={(e) => handleSoundChange(e.target.value)}
-              title="Change Alert Sound Profile"
-              style={{
-                background: 'var(--surface-raised)',
-                border: '1.5px solid var(--border-active, #0284c7)',
-                borderRadius: '8px',
-                color: 'var(--accent, #0284c7)',
-                fontWeight: 600,
-                padding: '7px 10px',
-                fontSize: '0.8rem',
-                cursor: 'pointer',
-              }}
-            >
-              {SOUND_PROFILES.map((p) => (
-                <option key={p.id} value={p.id} style={{ background: 'var(--bg-card, #0f172a)', color: 'var(--text-primary, #f1f5f9)' }}>
-                  {p.icon} {p.name}
-                </option>
-              ))}
-            </select>
-          </div>
 
           <button
             className="btn-secondary"
@@ -480,43 +482,111 @@ export default function AlertsView({
               <button
                 type="button"
                 onClick={() => setSearchQuery('')}
-                style={{ background: 'none', border: 'none', color: '#64748b', cursor: 'pointer' }}
+                className="alerts-clear-search-btn"
               >
                 ✕
               </button>
             )}
           </div>
 
-          <div className="alerts-dropdowns">
-            {/* Station dropdown */}
-            <select
-              className="alerts-select"
-              value={selectedStation}
-              onChange={(e) => setSelectedStation(e.target.value)}
+          {/* Filter Option Beside Search Bar */}
+          <div className="alerts-filter-wrapper" ref={filterRef}>
+            <button
+              type="button"
+              className={`alerts-filter-btn ${activeFiltersCount > 0 ? 'is-active' : ''}`}
+              onClick={() => setShowFilterMenu(!showFilterMenu)}
             >
-              <option value="all">All IoT Stations</option>
-              {devices.map((d) => (
-                <option key={d.deviceId} value={d.deviceId}>
-                  {d.name || d.deviceId}
-                </option>
-              ))}
-            </select>
+              <span>⚙️ Filter</span>
+              {activeFiltersCount > 0 && (
+                <span className="alerts-filter-badge">{activeFiltersCount}</span>
+              )}
+              <span style={{ fontSize: '0.7rem' }}>{showFilterMenu ? '▲' : '▼'}</span>
+            </button>
 
-            {/* Sort dropdown */}
-            <select
-              className="alerts-select"
-              value={sortBy}
-              onChange={(e) => setSortBy(e.target.value)}
-            >
-              <option value="newest">Sort: Newest First</option>
-              <option value="oldest">Sort: Oldest First</option>
-              <option value="severity">Sort: Highest AQI Severity</option>
-              <option value="seen">Sort: Most Frequent (Seen Count)</option>
-            </select>
+            {showFilterMenu && (
+              <div className="alerts-filter-dropdown">
+                <div className="alerts-filter-dropdown-header">
+                  <span>FILTERS & SEVERITY</span>
+                  {activeFiltersCount > 0 && (
+                    <button
+                      type="button"
+                      className="alerts-clear-btn"
+                      onClick={handleClearFilters}
+                    >
+                      Reset All
+                    </button>
+                  )}
+                </div>
+
+                {/* Severity Status Selection */}
+                <div className="alerts-filter-dropdown-item">
+                  <label className="alerts-dropdown-label">Incident Status:</label>
+                  <div className="alerts-dropdown-pills">
+                    {[
+                      { id: 'All', label: 'All', count: alerts.length },
+                      { id: 'Unread', label: 'Unread', count: stats.unread },
+                      { id: 'Critical', label: 'Critical', count: stats.critical },
+                      {
+                        id: 'Sensitive',
+                        label: 'Sensitive',
+                        count: alerts.filter((a) => (a.airQuality || 0) >= 101 && (a.airQuality || 0) <= 150).length,
+                      },
+                      {
+                        id: 'Hazardous',
+                        label: 'Hazardous',
+                        count: alerts.filter((a) => (a.airQuality || 0) > 300).length,
+                      },
+                      { id: 'Resolved', label: 'Resolved', count: stats.resolved },
+                    ].map((tab) => (
+                      <button
+                        key={tab.id}
+                        type="button"
+                        className={`alerts-dropdown-pill ${filterTab === tab.id ? 'is-active' : ''}`}
+                        onClick={() => setFilterTab(tab.id)}
+                      >
+                        {tab.label} ({tab.count})
+                      </button>
+                    ))}
+                  </div>
+                </div>
+
+                {/* Station Dropdown */}
+                <div className="alerts-filter-dropdown-item">
+                  <label className="alerts-dropdown-label">Station Node:</label>
+                  <select
+                    className="alerts-select"
+                    value={selectedStation}
+                    onChange={(e) => setSelectedStation(e.target.value)}
+                  >
+                    <option value="all">All IoT Stations</option>
+                    {devices.map((d) => (
+                      <option key={d.deviceId} value={d.deviceId}>
+                        {d.name || d.deviceId}
+                      </option>
+                    ))}
+                  </select>
+                </div>
+
+                {/* Sort Dropdown */}
+                <div className="alerts-filter-dropdown-item">
+                  <label className="alerts-dropdown-label">Sort Order:</label>
+                  <select
+                    className="alerts-select"
+                    value={sortBy}
+                    onChange={(e) => setSortBy(e.target.value)}
+                  >
+                    <option value="newest">Sort: Newest First</option>
+                    <option value="oldest">Sort: Oldest First</option>
+                    <option value="severity">Sort: Highest AQI Severity</option>
+                    <option value="seen">Sort: Most Frequent (Seen Count)</option>
+                  </select>
+                </div>
+              </div>
+            )}
           </div>
         </div>
 
-        {/* Filter Tabs */}
+        {/* Filter Tabs on wider screens */}
         <div className="alerts-tabs-row">
           <div className="alerts-tabs">
             {[
@@ -548,7 +618,7 @@ export default function AlertsView({
             ))}
           </div>
 
-          <span className="fs-xs text-muted">
+          <span className="fs-xs text-muted alerts-showing-count">
             Showing {filteredAlerts.length} of {alerts.length} incidents
           </span>
         </div>
@@ -559,7 +629,7 @@ export default function AlertsView({
         {filteredAlerts.length === 0 ? (
           <div className="alerts-empty">
             <div style={{ fontSize: '2.5rem', marginBottom: '12px' }}>🍃</div>
-            <h3 style={{ color: '#f8fafc', marginBottom: '6px' }}>No Incidents in this View</h3>
+            <h3 style={{ color: 'var(--text-primary)', marginBottom: '6px' }}>No Incidents in this View</h3>
             <p>
               Sensor readings are currently within nominal thresholds, or no alerts match the active search filter.
             </p>

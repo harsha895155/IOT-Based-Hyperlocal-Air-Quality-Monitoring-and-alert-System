@@ -174,29 +174,30 @@ export default function AnalyticsView() {
 
       {/* Query & Filter Toolbar */}
       <div className="analytics-controls-bar">
-        <div className="analytics-controls-group">
-          {/* Time Horizon */}
-          <div className="analytics-filter-item">
-            <span className="analytics-filter-label">Horizon:</span>
-            <div className="segmented-control" style={{ margin: 0 }}>
-              {[
-                { id: '24h', label: '24 Hours' },
-                { id: '7d', label: '7 Days' },
-                { id: '30d', label: '30 Days' },
-                { id: 'all', label: 'All Time' },
-              ].map((h) => (
-                <button
-                  key={h.id}
-                  className={`segmented-control__btn ${timeHorizon === h.id ? 'is-active' : ''}`}
-                  onClick={() => setTimeHorizon(h.id)}
-                >
-                  {h.label}
-                </button>
-              ))}
-            </div>
+        {/* Time Horizon Row */}
+        <div className="analytics-horizon-wrap">
+          <span className="analytics-filter-label">Horizon:</span>
+          <div className="segmented-control analytics-horizon-control" style={{ margin: 0 }}>
+            {[
+              { id: '24h', label: '24h' },
+              { id: '7d', label: '7d' },
+              { id: '30d', label: '30d' },
+              { id: 'all', label: 'All' },
+            ].map((h) => (
+              <button
+                key={h.id}
+                type="button"
+                className={`segmented-control__btn ${timeHorizon === h.id ? 'is-active' : ''}`}
+                onClick={() => setTimeHorizon(h.id)}
+              >
+                {h.label}
+              </button>
+            ))}
           </div>
+        </div>
 
-          {/* Station dropdown */}
+        {/* Dropdowns Row (Clean 2-Column Grid on Mobile) */}
+        <div className="analytics-dropdowns-row">
           <div className="analytics-filter-item">
             <span className="analytics-filter-label">Station:</span>
             <select
@@ -204,7 +205,7 @@ export default function AnalyticsView() {
               value={selectedDevice}
               onChange={(e) => setSelectedDevice(e.target.value)}
             >
-              <option value="all">All IoT Stations (Fleet-Wide)</option>
+              <option value="all">All IoT Stations</option>
               {devices.map((d) => (
                 <option key={d.deviceId} value={d.deviceId}>
                   {d.name || d.deviceId}
@@ -213,23 +214,22 @@ export default function AnalyticsView() {
             </select>
           </div>
 
-          {/* Metric Focus */}
           <div className="analytics-filter-item">
-            <span className="analytics-filter-label">Chart Metric:</span>
+            <span className="analytics-filter-label">Metric:</span>
             <select
               className="analytics-select"
               value={selectedMetric}
               onChange={(e) => setSelectedMetric(e.target.value)}
             >
-              <option value="aqi">Mean AQI Index</option>
-              <option value="temp">Ambient Temperature (°C)</option>
-              <option value="samples">Sample Volume (Count)</option>
+              <option value="aqi">Mean AQI</option>
+              <option value="temp">Temperature (°C)</option>
+              <option value="samples">Sample Volume</option>
             </select>
           </div>
         </div>
 
-        <div className="analytics-controls-group">
-          <span style={{ fontSize: '0.75rem', fontFamily: 'var(--font-mono)', color: '#00d2b4' }}>
+        <div className="analytics-pipeline-meta">
+          <span style={{ fontSize: '0.74rem', fontFamily: 'var(--font-mono)', color: '#00d2b4' }}>
             ⚡ MongoDB Pipeline Stage: $match &rarr; $group &rarr; $sort
           </span>
         </div>
@@ -366,8 +366,8 @@ export default function AnalyticsView() {
                           selectedMetric === 'aqi'
                             ? entry.color
                             : selectedMetric === 'temp'
-                            ? '#a855f7'
-                            : '#00d2b4'
+                              ? '#a855f7'
+                              : '#00d2b4'
                         }
                       />
                     ))}
@@ -409,14 +409,14 @@ export default function AnalyticsView() {
                 cat.category === 'Good'
                   ? 30
                   : cat.category === 'Moderate'
-                  ? 75
-                  : cat.category === 'Unhealthy (SG)'
-                  ? 125
-                  : cat.category === 'Unhealthy'
-                  ? 175
-                  : cat.category === 'Very Unhealthy'
-                  ? 250
-                  : 350
+                    ? 75
+                    : cat.category === 'Unhealthy (SG)'
+                      ? 125
+                      : cat.category === 'Unhealthy'
+                        ? 175
+                        : cat.category === 'Very Unhealthy'
+                          ? 250
+                          : 350
               );
 
               return (

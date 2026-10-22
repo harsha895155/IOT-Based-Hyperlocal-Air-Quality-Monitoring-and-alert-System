@@ -418,3 +418,280 @@
 [data-theme='light'] table tr:hover td {
   background: #f0f9ff !important;
 }
+
+/* ═════════════════════════════════════════════════════════════════════
+   Comprehensive Light Theme Visibility & Contrast Enhancements
+   ═════════════════════════════════════════════════════════════════════ */
+
+/* Light Theme Navigation & TopNav */
+[data-theme='light'] .topnav {
+  background: rgba(255, 255, 255, 0.94) !important;
+  border-bottom: 1px solid #e2e8f0 !important;
+}
+
+[data-theme='light'] .topnav__user-chip {
+  background: #ffffff !important;
+  border-color: #cbd5e1 !important;
+  color: #0f172a !important;
+}
+
+[data-theme='light'] .topnav__dropdown {
+  background: #ffffff !important;
+  border: 1px solid #e2e8f0 !important;
+  box-shadow: 0 16px 36px rgba(15, 23, 42, 0.12) !important;
+}
+
+[data-theme='light'] .topnav__dropdown-name {
+  color: #0f172a !important;
+}
+
+[data-theme='light'] .topnav__dropdown-email {
+  color: #64748b !important;
+}
+
+[data-theme='light'] .topnav__dropdown-item {
+  color: #334155 !important;
+}
+
+[data-theme='light'] .topnav__dropdown-item:hover {
+  background: #f1f5f9 !important;
+  color: #059669 !important;
+}
+
+[data-theme='light'] .topnav__dropdown-divider {
+  background: #e2e8f0 !important;
+}
+
+/* Light Theme Mobile Bottom Bar */
+[data-theme='light'] .mobile-bottom-bar {
+  background: rgba(255, 255, 255, 0.96) !important;
+  border-top: 1px solid #e2e8f0 !important;
+  box-shadow: 0 -4px 20px rgba(15, 23, 42, 0.08) !important;
+}
+
+[data-theme='light'] .mobile-bottom-bar__item {
+  color: #64748b !important;
+}
+
+[data-theme='light'] .mobile-bottom-bar__item.is-active {
+  color: #0284c7 !important;
+}
+
+[data-theme='light'] .mobile-bottom-bar__item.is-active .mobile-bottom-bar__icon-wrap {
+  filter: drop-shadow(0 0 6px rgba(2, 132, 199, 0.35)) !important;
+}
+
+[data-theme='light'] .mobile-bottom-bar__badge {
+  border-color: #ffffff !important;
+}
+
+/* Light Theme Search, Select, and Filter Bars */
+[data-theme='light'] .devices-search-box,
+[data-theme='light'] .alerts-search-box,
+[data-theme='light'] .history-search-box,
+[data-theme='light'] .loc-search-bar-wrap,
+[data-theme='light'] .loc-search-input-box {
+  background: #ffffff !important;
+  border: 1px solid #cbd5e1 !important;
+}
+
+[data-theme='light'] .devices-search-input,
+[data-theme='light'] .alerts-search-input,
+[data-theme='light'] .history-search-input,
+[data-theme='light'] .loc-search-input {
+  color: #0f172a !important;
+}
+
+[data-theme='light'] .devices-search-input::placeholder,
+[data-theme='light'] .alerts-search-input::placeholder,
+[data-theme='light'] .history-search-input::placeholder,
+[data-theme='light'] .loc-search-input::placeholder {
+  color: #94a3b8 !important;
+}
+
+/* Light Theme Filter Buttons & Dropdowns */
+[data-theme='light'] .devices-filter-btn,
+[data-theme='light'] .alerts-filter-btn,
+[data-theme='light'] .history-filter-btn,
+[data-theme='light'] .audio-toggle-btn {
+  background: #ffffff !important;
+  border: 1px solid #cbd5e1 !important;
+  color: #0f172a !important;
+  box-shadow: 0 1px 3px rgba(15, 23, 42, 0.04) !important;
+}
+
+[data-theme='light'] .devices-filter-btn:hover,
+[data-theme='light'] .alerts-filter-btn:hover,
+[data-theme='light'] .history-filter-btn:hover,
+[data-theme='light'] .audio-toggle-btn:hover {
+  background: #f8fafc !important;
+  border-color: #0284c7 !important;
+  color: #0284c7 !important;
+}
+
+[data-theme='light'] .devices-filter-dropdown,
+[data-theme='light'] .alerts-filter-dropdown,
+[data-theme='light'] .history-filter-dropdown,
+[data-theme='light'] .device-dropdown-menu,
+[data-theme='light'] .search-results-dropdown {
+  background: #ffffff !important;
+  border: 1px solid #cbd5e1 !important;
+  box-shadow: 0 16px 36px rgba(15, 23, 42, 0.12) !important;
+}
+
+[data-theme='light'] .devices-filter-option-btn,
+[data-theme='light'] .device-dropdown-item,
+[data-theme='light'] .search-result-item {
+  color: #0f172a !important;
+  border-bottom: 1px solid #f1f5f9 !important;
+}
+
+[data-theme='light'] .devices-filter-option-btn:hover,
+[data-theme='light'] .device-dropdown-item:hover,
+[data-theme='light'] .search-result-item:hover {
+  background: #f1f5f9 !important;
+}
+
+/* Light Theme Segmented Controls & Tabs */
+[data-theme='light'] .segmented-control,
+[data-theme='light'] .report-range-control,
+[data-theme='light'] .trend-chart__switcher,
+[data-theme='light'] .profile-tabs-nav {
+  background: #f1f5f9 !important;
+  border: 1px solid #e2e8f0 !important;
+}
+
+[data-theme='light'] .segmented-control__btn,
+[data-theme='light'] .profile-tab-btn {
+  color: #64748b !important;
+}
+
+[data-theme='light'] .segmented-control__btn.is-active,
+[data-theme='light'] .profile-tab-btn.is-active {
+  background: #ffffff !important;
+  color: #0f172a !important;
+  box-shadow: 0 1px 4px rgba(15, 23, 42, 0.08) !important;
+}
+
+/* Light Theme Subpage & Dashboard Headings */
+[data-theme='light'] .page-title,
+[data-theme='light'] .loc-title,
+[data-theme='light'] .weather-location-title,
+[data-theme='light'] .section-card-title,
+[data-theme='light'] .trend-chart__title {
+  color: #0f172a !important;
+}
+
+[data-theme='light'] .page-subtitle,
+[data-theme='light'] .loc-subtitle,
+[data-theme='light'] .weather-location-sub,
+[data-theme='light'] .section-card-sub,
+[data-theme='light'] .trend-chart__subtitle {
+  color: #475569 !important;
+}
+
+/* Light Theme Badges & Pills */
+[data-theme='light'] .hardware-pill,
+[data-theme='light'] .meta-pill {
+  background: #f1f5f9 !important;
+  border: 1px solid #e2e8f0 !important;
+  color: #334155 !important;
+}
+
+[data-theme='light'] .signal-pill {
+  background: #e0f2fe !important;
+  color: #0369a1 !important;
+}
+
+[data-theme='light'] .alert-card {
+  background: #ffffff !important;
+  border-color: #e2e8f0 !important;
+  box-shadow: 0 1px 3px rgba(15, 23, 42, 0.04), 0 4px 14px -2px rgba(15, 23, 42, 0.04) !important;
+}
+
+[data-theme='light'] .alert-card__message {
+  color: #0f172a !important;
+}
+
+[data-theme='light'] .alert-card__ack-btn {
+  background: #f8fafc !important;
+  border: 1px solid #cbd5e1 !important;
+  color: #0f172a !important;
+}
+
+[data-theme='light'] .alert-card__ack-btn:hover {
+  background: #0284c7 !important;
+  border-color: #0284c7 !important;
+  color: #ffffff !important;
+}
+
+/* Light Theme Hourly & Daily Items */
+[data-theme='light'] .loc-hour-item,
+[data-theme='light'] .hourly-item {
+  background: #ffffff !important;
+  border: 1px solid #e2e8f0 !important;
+  color: #0f172a !important;
+}
+
+[data-theme='light'] .loc-hour-item:hover,
+[data-theme='light'] .hourly-item:hover {
+  border-color: #0284c7 !important;
+  box-shadow: 0 4px 14px rgba(2, 132, 199, 0.15) !important;
+}
+
+[data-theme='light'] .loc-hour-time,
+[data-theme='light'] .loc-hour-wind {
+  color: #64748b !important;
+}
+
+[data-theme='light'] .loc-hour-temp {
+  color: #0f172a !important;
+}
+
+[data-theme='light'] .loc-daily-card {
+  background: #ffffff !important;
+  border: 1px solid #e2e8f0 !important;
+  color: #0f172a !important;
+}
+
+[data-theme='light'] .loc-daily-day,
+[data-theme='light'] .loc-daily-max {
+  color: #0f172a !important;
+}
+
+[data-theme='light'] .loc-daily-date,
+[data-theme='light'] .loc-daily-cond,
+[data-theme='light'] .loc-daily-min {
+  color: #64748b !important;
+}
+
+/* Light Theme Empty States */
+[data-theme='light'] .loc-empty-search-state,
+[data-theme='light'] .alerts-empty,
+[data-theme='light'] .devices-empty-state,
+[data-theme='light'] .profile-empty-state {
+  background: #ffffff !important;
+  border: 1px dashed #cbd5e1 !important;
+  color: #475569 !important;
+}
+
+[data-theme='light'] .loc-empty-search-state h3,
+[data-theme='light'] .alerts-empty h3,
+[data-theme='light'] .devices-empty-state h3 {
+  color: #0f172a !important;
+}
+
+/* Light Theme Modal / Dialogs */
+[data-theme='light'] .modal-box,
+[data-theme='light'] .device-modal,
+[data-theme='light'] .schedule-modal-card {
+  background: #ffffff !important;
+  border: 1px solid #cbd5e1 !important;
+  box-shadow: 0 24px 48px rgba(15, 23, 42, 0.16) !important;
+  color: #0f172a !important;
+}
+
+[data-theme='light'] .modal-title,
+[data-theme='light'] .device-modal h2 {
+  color: #0f172a !important;
+}
