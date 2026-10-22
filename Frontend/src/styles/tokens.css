@@ -102,6 +102,17 @@
   --fs-2xl: 1.9rem;
   --fs-hero: clamp(2.8rem, 6vw, 4.4rem);
 
+  /* Fluid Responsive Sizing & Spacing Tokens */
+  --page-padding: clamp(0.75rem, 2vw, 1.75rem);
+  --section-gap: clamp(0.75rem, 1.8vw, 1.5rem);
+  --card-padding: clamp(0.75rem, 1.5vw, 1.25rem);
+  --grid-gap: clamp(0.5rem, 1.2vw, 1rem);
+  --radius-card: clamp(0.625rem, 1vw, 1rem);
+  --header-height: clamp(54px, 7vh, 66px);
+  --sidebar-width: clamp(240px, 20vw, 280px);
+  --button-height: clamp(38px, 4.5vh, 44px);
+  --chart-height: clamp(240px, 32vh, 380px);
+
   /* Radii */
   --radius-xs: 6px;
   --radius-sm: 8px;

@@ -48,4 +48,10 @@
   z-index: 1;
 }
 
+@media (max-width: 768px) {
+  .app-content {
+    padding-bottom: calc(clamp(60px, 8.5vh, 74px) + env(safe-area-inset-bottom, 0px));
+  }
+}
+
 

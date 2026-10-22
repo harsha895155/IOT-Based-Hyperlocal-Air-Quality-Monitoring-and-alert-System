@@ -2,6 +2,7 @@ import React, { useState, useEffect } from 'react';
 import { BrowserRouter, Routes, Route, Navigate, Outlet, useNavigate, useLocation } from 'react-router-dom';
 import Sidebar from './components/Sidebar';
 import TopNav from './components/TopNav';
+import MobileBottomBar from './components/MobileBottomBar';
 import ProtectedRoute from './components/ProtectedRoute';
 
 /**
@@ -113,6 +114,11 @@ function AppLayout({ readingsData }) {
         <main className="app-content">
           <Outlet />
         </main>
+
+        <MobileBottomBar
+          unreadAlerts={unreadAlertsCount}
+          onOpenMenu={() => setMobileOpen(true)}
+        />
       </div>
     </div>
   );
