@@ -1,10 +1,10 @@
 /**
- * AirGuard PWA Service Worker (v1.0.0)
+ * AirGuard PWA Service Worker (v1.0.1)
  * Provides offline navigation resilience, static asset caching,
  * and secure handling of real-time sensor streams without caching sensitive credentials.
  */
 
-const CACHE_NAME = 'airguard-v1.0.0';
+const CACHE_NAME = 'airguard-v1.0.1';
 const PRECACHE_ASSETS = [
   '/',
   '/index.html',
@@ -15,6 +15,27 @@ const PRECACHE_ASSETS = [
   '/android-chrome-512x512.png',
 ];
 
+// Helper to safely cache a valid response
+function safeCachePut(cacheName, request, response) {
+  // Cache API only supports http: and https: schemes
+  if (!request.url.startsWith('http://') && !request.url.startsWith('https://')) {
+    return Promise.resolve();
+  }
+
+  // Only cache successful standard/CORS GET responses
+  if (!response || response.status !== 200 || (response.type !== 'basic' && response.type !== 'cors')) {
+    return Promise.resolve();
+  }
+
+  return caches
+    .open(cacheName)
+    .then((cache) => cache.put(request, response.clone()))
+    .catch((err) => {
+      // Gracefully ignore cache put errors (e.g. quota, aborted requests)
+      console.debug('[SW] Cache put ignored:', err.message);
+    });
+}
+
 // Install Event: Precaches essential application shell assets
 self.addEventListener('install', (event) => {
   event.waitUntil(
@@ -22,6 +43,9 @@ self.addEventListener('install', (event) => {
       .open(CACHE_NAME)
       .then((cache) => cache.addAll(PRECACHE_ASSETS))
       .then(() => self.skipWaiting())
+      .catch((err) => {
+        console.warn('[SW] Precache failed:', err);
+      })
   );
 });
 
@@ -44,32 +68,36 @@ self.addEventListener('activate', (event) => {
 // Fetch Event: Intelligent routing between network and cache
 self.addEventListener('fetch', (event) => {
   const { request } = event;
-  const url = new URL(request.url);
 
-  // 1. Never cache non-GET requests or sensitive auth/login endpoints
+  // 1. Strictly ignore non-http(s) requests (e.g. chrome-extension://, data:, blob:)
+  if (!request.url.startsWith('http://') && !request.url.startsWith('https://')) {
+    return;
+  }
+
+  // 2. Never cache non-GET requests or sensitive auth/login endpoints
+  const url = new URL(request.url);
   if (request.method !== 'GET' || url.pathname.startsWith('/api/auth')) {
     return;
   }
 
-  // 2. Dynamic Sensor Telemetry & Weather API: Network-First with Cache Fallback
-  if (url.pathname.startsWith('/api/readings') || url.pathname.startsWith('/api/devices') || url.pathname.startsWith('/api/weather')) {
+  // 3. Dynamic Sensor Telemetry & Weather API: Network-First with Cache Fallback
+  if (
+    url.pathname.startsWith('/api/readings') ||
+    url.pathname.startsWith('/api/devices') ||
+    url.pathname.startsWith('/api/weather')
+  ) {
     event.respondWith(
       fetch(request)
         .then((response) => {
-          if (response && response.status === 200) {
-            const clone = response.clone();
-            caches.open(CACHE_NAME).then((cache) => cache.put(request, clone));
-          }
+          safeCachePut(CACHE_NAME, request, response);
           return response;
         })
-        .catch(() => {
-          return caches.match(request);
-        })
+        .catch(() => caches.match(request))
     );
     return;
   }
 
-  // 3. SPA Navigation Requests (HTML Pages): Network-First, falling back to cached index.html
+  // 4. SPA Navigation Requests (HTML Pages): Network-First, falling back to cached index.html
   if (request.mode === 'navigate') {
     event.respondWith(
       fetch(request).catch(() => {
@@ -79,16 +107,14 @@ self.addEventListener('fetch', (event) => {
     return;
   }
 
-  // 4. Static Assets (JS, CSS, Web Fonts, Images): Cache-First with Network Revalidation
+  // 5. Static Assets (JS, CSS, Web Fonts, Images): Cache-First with Background Revalidation
   event.respondWith(
     caches.match(request).then((cachedResponse) => {
       if (cachedResponse) {
         // Fetch revalidation in background
         fetch(request)
           .then((networkResponse) => {
-            if (networkResponse && networkResponse.status === 200) {
-              caches.open(CACHE_NAME).then((cache) => cache.put(request, networkResponse));
-            }
+            safeCachePut(CACHE_NAME, request, networkResponse);
           })
           .catch(() => {
             // Ignore offline fetch errors during revalidation
@@ -97,10 +123,7 @@ self.addEventListener('fetch', (event) => {
       }
 
       return fetch(request).then((networkResponse) => {
-        if (networkResponse && networkResponse.status === 200) {
-          const clone = networkResponse.clone();
-          caches.open(CACHE_NAME).then((cache) => cache.put(request, clone));
-        }
+        safeCachePut(CACHE_NAME, request, networkResponse);
         return networkResponse;
       });
     })
