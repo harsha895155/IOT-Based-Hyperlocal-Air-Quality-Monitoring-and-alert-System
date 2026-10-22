@@ -2,6 +2,8 @@ import React from 'react';
 import { NavLink, useLocation, useNavigate } from 'react-router-dom';
 import AirGuardLogo from './AirGuardLogo';
 import { useAuth } from '../context/AuthContext';
+import { useTheme } from '../context/ThemeContext';
+import Sidebar3DCanvas from './Sidebar3DCanvas';
 import './Sidebar.css';
 
 // SVG Icons matching the clean modern outline style
@@ -104,6 +106,7 @@ const Icons = {
 
 export default function Sidebar({ isOpen, setIsOpen, isCollapsed = false, unreadAlerts = 0 }) {
   const { user, isGuest, logout } = useAuth();
+  const { resolvedTheme } = useTheme() || {};
   const location = useLocation();
   const navigate = useNavigate();
 
@@ -132,6 +135,9 @@ export default function Sidebar({ isOpen, setIsOpen, isCollapsed = false, unread
       )}
 
       <aside className={`sidebar ${isOpen ? 'is-open' : ''} ${isCollapsed ? 'is-collapsed' : ''}`}>
+        {/* ─── 3D Hardware-Accelerated Atmospheric Sidebar Background ─── */}
+        <Sidebar3DCanvas theme={resolvedTheme} />
+
         <NavLink to="/" className="sidebar__brand" onClick={handleLinkClick} title="AirGuard Home">
           <AirGuardLogo size={26} />
           <span className="sidebar__brand-name">AirGuard</span>
