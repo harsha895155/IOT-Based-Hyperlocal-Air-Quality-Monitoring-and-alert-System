@@ -2,10 +2,13 @@ import React, { useState, useEffect } from 'react';
 import { useNavigate, useLocation, useSearchParams, Link } from 'react-router-dom';
 import AirGuardLogo from '../components/AirGuardLogo';
 import { useAuth } from '../context/AuthContext';
+import { useTheme } from '../context/ThemeContext';
+import Login3DCanvas from '../components/Login3DCanvas';
 import './LoginView.css';
 
 export default function LoginView() {
   const { login, register, loginWithGoogle, forgotPassword, resetPassword, continueAsGuest } = useAuth();
+  const { resolvedTheme } = useTheme() || {};
   const navigate = useNavigate();
   const location = useLocation();
   const [searchParams] = useSearchParams();
@@ -198,6 +201,9 @@ export default function LoginView() {
     <div className="login-layout">
       {/* Left branding hero panel */}
       <div className="login-hero">
+        {/* 3D Atmospheric Environmental Canvas */}
+        <Login3DCanvas theme={resolvedTheme} />
+
         <div className="login-hero__content">
           <Link to="/" className="login-hero__brand" style={{ textDecoration: 'none' }}>
             <AirGuardLogo size={36} />
