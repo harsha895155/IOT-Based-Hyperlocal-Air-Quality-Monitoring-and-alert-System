@@ -1,7 +1,7 @@
 import React, { useEffect, useRef, useState } from 'react';
 import * as THREE from 'three';
 
-export default function AirGuard3DCanvas({ particleMode = 'atmospheric', theme = 'obsidian' }) {
+export default function AirGuard3DCanvas({ theme = 'obsidian' }) {
   const mountRef = useRef(null);
   const [webglSupported, setWebglSupported] = useState(true);
 
@@ -36,8 +36,8 @@ export default function AirGuard3DCanvas({ particleMode = 'atmospheric', theme =
     }
 
     const camera = new THREE.PerspectiveCamera(60, width / height, 0.1, 1000);
-    camera.position.z = 120;
-    camera.position.y = 15;
+    camera.position.z = 132;
+    camera.position.y = 12;
 
     const renderer = new THREE.WebGLRenderer({
       alpha: true,
@@ -72,7 +72,7 @@ export default function AirGuard3DCanvas({ particleMode = 'atmospheric', theme =
       color: isLight ? 0x0284c7 : 0x0ea5e9,
       wireframe: true,
       transparent: true,
-      opacity: isLight ? 0.45 : 0.14,
+      opacity: isLight ? 0.22 : 0.08,
     });
     const globeMesh = new THREE.Mesh(globeGeometry, globeWireMaterial);
     globeGroup.add(globeMesh);
@@ -83,7 +83,7 @@ export default function AirGuard3DCanvas({ particleMode = 'atmospheric', theme =
       color: isLight ? 0x059669 : 0x00d2b4,
       wireframe: true,
       transparent: true,
-      opacity: isLight ? 0.28 : 0.06,
+      opacity: isLight ? 0.12 : 0.035,
     });
     const haloMesh = new THREE.Mesh(haloGeometry, haloMaterial);
     globeGroup.add(haloMesh);
@@ -117,7 +117,7 @@ export default function AirGuard3DCanvas({ particleMode = 'atmospheric', theme =
       const ringMat = new THREE.MeshBasicMaterial({
         color: i % 6 === 0 ? (isLight ? 0xd97706 : 0xf59e0b) : (isLight ? 0x0284c7 : 0x00d2b4),
         transparent: true,
-        opacity: isLight ? 0.88 : 0.75,
+        opacity: isLight ? 0.45 : 0.28,
         side: THREE.DoubleSide,
       });
       const ring = new THREE.Mesh(ringGeo, ringMat);
@@ -145,7 +145,7 @@ export default function AirGuard3DCanvas({ particleMode = 'atmospheric', theme =
     const lineMat = new THREE.LineBasicMaterial({
       color: isLight ? 0x0284c7 : 0x38bdf8,
       transparent: true,
-      opacity: isLight ? 0.55 : 0.25,
+      opacity: isLight ? 0.24 : 0.10,
     });
     const networkLines = new THREE.LineSegments(lineGeo, lineMat);
     beaconGroup.add(networkLines);
@@ -209,11 +209,11 @@ export default function AirGuard3DCanvas({ particleMode = 'atmospheric', theme =
     };
 
     const particleMaterial = new THREE.PointsMaterial({
-      size: isLight ? 4.2 : 3.0,
+      size: isLight ? 3.4 : 2.4,
       vertexColors: true,
       map: createParticleTexture(),
       transparent: true,
-      opacity: isLight ? 0.95 : 0.82,
+      opacity: isLight ? 0.75 : 0.55,
       blending: isLight ? THREE.NormalBlending : THREE.AdditiveBlending,
       depthWrite: false,
     });
@@ -255,11 +255,11 @@ export default function AirGuard3DCanvas({ particleMode = 'atmospheric', theme =
       currentMouseX += (targetMouseX - currentMouseX) * 0.05;
       currentMouseY += (targetMouseY - currentMouseY) * 0.05;
 
-      // Rotate Globe & Beacons
+      // Rotate Globe & Beacons — positioned lower to form a majestic atmospheric horizon under the hero title
       globeGroup.rotation.y = elapsedTime * 0.08 + currentMouseX * 0.35;
       globeGroup.rotation.x = Math.sin(elapsedTime * 0.05) * 0.15 - currentMouseY * 0.25;
-      globeGroup.position.y = -8 + Math.sin(elapsedTime * 0.5) * 2 - scrollProgress * 25;
-      globeGroup.position.z = -scrollProgress * 40;
+      globeGroup.position.y = -22 + Math.sin(elapsedTime * 0.4) * 1.5 - scrollProgress * 25;
+      globeGroup.position.z = -12 - scrollProgress * 40;
 
       // Animate pulsing beacon wave rings
       beaconRings.forEach(({ ring, phase }) => {
@@ -337,7 +337,7 @@ export default function AirGuard3DCanvas({ particleMode = 'atmospheric', theme =
       particleMaterial.dispose();
       renderer.dispose();
     };
-  }, [particleMode, isLight]);
+  }, [isLight]);
 
   return (
     <div

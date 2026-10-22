@@ -161,22 +161,54 @@
   align-items: center;
 }
 
+/* ─── Hero Showcase: Dominant Foreground Layer ─── */
+.welcome-hero__showcase {
+  position: relative;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  max-width: 980px;
+  margin: 0 auto 34px;
+  padding: 40px 36px 36px;
+  border-radius: 36px;
+  /* Deep atmospheric vignette and frosted scrim so foreground text completely dominates the 3D background */
+  background: radial-gradient(
+    ellipse 90% 80% at 50% 50%,
+    rgba(6, 11, 25, 0.84) 0%,
+    rgba(6, 11, 25, 0.68) 55%,
+    rgba(6, 11, 25, 0.25) 85%,
+    transparent 100%
+  );
+  backdrop-filter: blur(14px);
+  -webkit-backdrop-filter: blur(14px);
+  border: 1px solid rgba(56, 189, 248, 0.16);
+  box-shadow: 
+    0 24px 64px rgba(2, 6, 23, 0.65),
+    0 0 80px rgba(56, 189, 248, 0.08),
+    inset 0 1px 0 rgba(255, 255, 255, 0.1);
+  z-index: 2;
+  transition: all 0.3s ease;
+}
+
 /* Live Badge Pill */
 .welcome-hero__badge {
   display: inline-flex;
   align-items: center;
   gap: 10px;
-  padding: 6px 18px;
+  padding: 7px 20px;
   border-radius: 999px;
-  background: rgba(56, 189, 248, 0.1);
-  border: 1px solid rgba(56, 189, 248, 0.3);
-  font-size: 0.78rem;
-  font-weight: 700;
-  letter-spacing: 0.06em;
+  background: rgba(10, 19, 38, 0.92);
+  border: 1px solid rgba(56, 189, 248, 0.45);
+  font-size: 0.8rem;
+  font-weight: 750;
+  letter-spacing: 0.08em;
   color: #38bdf8;
   margin-bottom: 22px;
-  backdrop-filter: blur(8px);
-  box-shadow: 0 0 20px rgba(56, 189, 248, 0.15);
+  backdrop-filter: blur(12px);
+  -webkit-backdrop-filter: blur(12px);
+  box-shadow: 
+    0 4px 16px rgba(0, 0, 0, 0.5),
+    0 0 24px rgba(56, 189, 248, 0.22);
 }
 
 .pulse-dot {
@@ -201,78 +233,42 @@
 }
 
 .welcome-hero__title {
-  font-size: 3.5rem;
-  font-weight: 800;
+  font-size: clamp(2.8rem, 5.2vw, 4.2rem);
+  font-weight: 850;
   line-height: 1.12;
-  letter-spacing: -0.035em;
-  margin-bottom: 18px;
+  letter-spacing: -0.04em;
+  margin-bottom: 20px;
   color: #ffffff;
+  /* Deep multi-tier text shadows ensure razor-sharp legibility over any 3D graphics */
+  text-shadow: 
+    0 2px 4px rgba(0, 0, 0, 0.85),
+    0 8px 30px rgba(0, 0, 0, 0.95),
+    0 0 60px rgba(6, 11, 25, 0.95);
+  position: relative;
+  z-index: 2;
 }
 
 .text-gradient {
-  background: linear-gradient(135deg, #38bdf8 0%, #00d2b4 50%, #818cf8 100%);
+  background: linear-gradient(135deg, #38bdf8 0%, #2dd4bf 45%, #a78bfa 100%);
   -webkit-background-clip: text;
   background-clip: text;
   -webkit-text-fill-color: transparent;
   display: inline-block;
+  filter: drop-shadow(0 4px 24px rgba(56, 189, 248, 0.5));
 }
 
 .welcome-hero__subtitle {
-  font-size: 1.15rem;
-  line-height: 1.65;
-  color: #cbd5e1;
-  max-width: 760px;
-  margin-bottom: 28px;
-}
-
-/* 3D Scene Controller Pill */
-.scene-control-pill {
-  display: inline-flex;
-  align-items: center;
-  gap: 12px;
-  padding: 6px 14px;
-  background: rgba(15, 23, 42, 0.75);
-  border: 1px solid rgba(56, 189, 248, 0.25);
-  border-radius: 999px;
-  margin-bottom: 30px;
-  backdrop-filter: blur(12px);
-}
-
-.scene-control-label {
-  font-size: 0.78rem;
-  font-weight: 700;
-  color: #94a3b8;
-  text-transform: uppercase;
-  letter-spacing: 0.05em;
-}
-
-.scene-control-buttons {
-  display: flex;
-  gap: 6px;
-}
-
-.scene-btn {
-  background: transparent;
-  border: 1px solid transparent;
-  color: #cbd5e1;
-  font-size: 0.78rem;
-  font-weight: 600;
-  padding: 4px 12px;
-  border-radius: 999px;
-  cursor: pointer;
-  transition: all 0.2s ease;
-}
-
-.scene-btn:hover {
-  background: rgba(255, 255, 255, 0.08);
-  color: #fff;
-}
-
-.scene-btn.is-active {
-  background: rgba(56, 189, 248, 0.2);
-  border-color: rgba(56, 189, 248, 0.5);
-  color: #38bdf8;
-  box-shadow: 0 0 12px rgba(56, 189, 248, 0.2);
+  font-size: 1.22rem;
+  font-weight: 450;
+  line-height: 1.7;
+  color: #f8fafc; /* High-contrast crisp white-slate */
+  max-width: 840px;
+  margin: 0 auto;
+  text-shadow: 
+    0 2px 6px rgba(0, 0, 0, 0.95),
+    0 6px 20px rgba(0, 0, 0, 0.85);
+  position: relative;
+  z-index: 2;
 }
 
 /* Hero CTA Group */
@@ -282,6 +278,8 @@
   flex-wrap: wrap;
   justify-content: center;
   margin-bottom: 46px;
+  position: relative;
+  z-index: 2;
 }
 
 .welcome-cta-primary {
@@ -1966,6 +1964,11 @@
   .welcome-hamburger {
     display: block;
   }
+  .welcome-hero__showcase {
+    padding: 24px 18px 22px;
+    border-radius: 24px;
+    margin-bottom: 24px;
+  }
   .welcome-hero__title {
     font-size: 2.3rem;
   }
@@ -2032,53 +2035,49 @@
   color: #0284c7 !important;
 }
 
+[data-theme='light'] .welcome-hero__showcase {
+  background: radial-gradient(
+    ellipse 90% 80% at 50% 50%,
+    rgba(255, 255, 255, 0.94) 0%,
+    rgba(255, 255, 255, 0.82) 55%,
+    rgba(255, 255, 255, 0.35) 85%,
+    transparent 100%
+  ) !important;
+  backdrop-filter: blur(14px) !important;
+  -webkit-backdrop-filter: blur(14px) !important;
+  border: 1px solid rgba(2, 132, 199, 0.18) !important;
+  box-shadow: 
+    0 20px 56px rgba(15, 23, 42, 0.08),
+    0 0 60px rgba(2, 132, 199, 0.08),
+    inset 0 1px 0 rgba(255, 255, 255, 0.95) !important;
+}
+
 [data-theme='light'] .welcome-hero__badge {
-  background: rgba(2, 132, 199, 0.1) !important;
-  border: 1.5px solid rgba(2, 132, 199, 0.35) !important;
+  background: rgba(240, 249, 255, 0.95) !important;
+  border: 1.5px solid rgba(2, 132, 199, 0.4) !important;
   color: #0284c7 !important;
-  box-shadow: 0 4px 14px rgba(2, 132, 199, 0.15) !important;
+  box-shadow: 0 4px 16px rgba(2, 132, 199, 0.18) !important;
 }
 
 [data-theme='light'] .welcome-hero__title {
   color: #0f172a !important;
+  text-shadow: 
+    0 1px 2px rgba(255, 255, 255, 0.9),
+    0 4px 18px rgba(15, 23, 42, 0.06) !important;
 }
 
 [data-theme='light'] .text-gradient {
-  background: linear-gradient(135deg, #0284c7 0%, #059669 50%, #d97706 100%) !important;
+  background: linear-gradient(135deg, #0284c7 0%, #059669 45%, #7c3aed 100%) !important;
   -webkit-background-clip: text !important;
   background-clip: text !important;
   -webkit-text-fill-color: transparent !important;
+  filter: drop-shadow(0 2px 10px rgba(2, 132, 199, 0.22)) !important;
 }
 
 [data-theme='light'] .welcome-hero__subtitle {
-  color: #334155 !important;
-}
-
-/* 3D Scene Controller in Light Mode */
-[data-theme='light'] .scene-control-pill {
-  background: rgba(255, 255, 255, 0.92) !important;
-  border: 1.5px solid rgba(2, 132, 199, 0.3) !important;
-  box-shadow: 0 4px 14px rgba(15, 23, 42, 0.06) !important;
-}
-
-[data-theme='light'] .scene-control-label {
-  color: #64748b !important;
-}
-
-[data-theme='light'] .scene-btn {
-  color: #334155 !important;
-}
-
-[data-theme='light'] .scene-btn:hover {
-  background: #f1f5f9 !important;
-  color: #0f172a !important;
-}
-
-[data-theme='light'] .scene-btn.is-active {
-  background: #e0f2fe !important;
-  border-color: #0284c7 !important;
-  color: #0284c7 !important;
-  box-shadow: 0 0 10px rgba(2, 132, 199, 0.2) !important;
+  color: #1e293b !important;
+  font-weight: 500 !important;
+  text-shadow: 0 1px 2px rgba(255, 255, 255, 0.8) !important;
 }
 
 /* Hero Telemetry Glass Console in Light Mode */

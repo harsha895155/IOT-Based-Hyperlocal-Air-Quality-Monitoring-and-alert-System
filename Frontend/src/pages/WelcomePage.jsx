@@ -13,7 +13,6 @@ export default function WelcomePage() {
   const { resolvedTheme, toggleTheme } = useTheme() || {};
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
   const [emailCopied, setEmailCopied] = useState(false);
-  const [particleMode, setParticleMode] = useState('mesh'); // 'mesh' | 'aerosols' | 'clean'
   const [activeModuleTab, setActiveModuleTab] = useState(0);
 
   // Hero Console Interactive Mode: 'telemetry' | 'formula' | 'tour'
@@ -254,7 +253,7 @@ export default function WelcomePage() {
   return (
     <div className="welcome-page">
       {/* ─── 0. 3D WEBGL INTERACTIVE ATMOSPHERIC BACKGROUND ─── */}
-      <AirGuard3DCanvas particleMode={particleMode} theme={resolvedTheme} />
+      <AirGuard3DCanvas theme={resolvedTheme} />
 
       {/* ─── 1. TOP NAVBAR ─── */}
       <header className="welcome-nav">
@@ -391,49 +390,24 @@ export default function WelcomePage() {
       <section className="welcome-hero">
         <div className="welcome-hero__container">
           
-          {/* Live System Beacon Pill */}
-          <div className="welcome-hero__badge">
-            <span className="welcome-hero__dot pulse-dot" />
-            <span className="welcome-badge-text">
-              REAL-TIME IOT SENSOR MESH • FULL-DUPLEX WEBSOCKETS (28ms PING)
-            </span>
-          </div>
-
-          <h1 className="welcome-hero__title">
-            Hyperlocal Air Quality & <br />
-            <span className="text-gradient">Atmospheric Intelligence</span>
-          </h1>
-
-          <p className="welcome-hero__subtitle">
-            An industry-grade environmental monitoring platform fusing physical IoT sensor nodes (ESP32, MQ-135, DHT22) with Google Weather-class meteorological analytics, real-time Web Audio emergency sirens, and automated compliance verification.
-          </p>
-
-          {/* 3D Scene Interactive View Controller Pill */}
-          <div className="scene-control-pill" title="Interact with the 3D Background Engine">
-            <span className="scene-control-label">3D Animation Mode:</span>
-            <div className="scene-control-buttons">
-              <button
-                type="button"
-                className={`scene-btn ${particleMode === 'mesh' ? 'is-active' : ''}`}
-                onClick={() => setParticleMode('mesh')}
-              >
-                🌐 IoT Mesh Network
-              </button>
-              <button
-                type="button"
-                className={`scene-btn ${particleMode === 'aerosols' ? 'is-active' : ''}`}
-                onClick={() => setParticleMode('aerosols')}
-              >
-                💨 Aerosol Flow
-              </button>
-              <button
-                type="button"
-                className={`scene-btn ${particleMode === 'clean' ? 'is-active' : ''}`}
-                onClick={() => setParticleMode('clean')}
-              >
-                ✨ Clean Atmosphere
-              </button>
+          {/* ─── Hero Showcase: Dominant Foreground Layer ─── */}
+          <div className="welcome-hero__showcase">
+            {/* Live System Beacon Pill */}
+            <div className="welcome-hero__badge">
+              <span className="welcome-hero__dot pulse-dot" />
+              <span className="welcome-badge-text">
+                REAL-TIME IOT SENSOR MESH • FULL-DUPLEX WEBSOCKETS (28ms PING)
+              </span>
             </div>
+
+            <h1 className="welcome-hero__title">
+              Hyperlocal Air Quality & <br />
+              <span className="text-gradient">Atmospheric Intelligence</span>
+            </h1>
+
+            <p className="welcome-hero__subtitle">
+              An industry-grade environmental monitoring platform fusing physical IoT sensor nodes (ESP32, MQ-135, DHT22) with Google Weather-class meteorological analytics, real-time Web Audio emergency sirens, and automated compliance verification.
+            </p>
           </div>
 
           {/* Call to Actions */}
