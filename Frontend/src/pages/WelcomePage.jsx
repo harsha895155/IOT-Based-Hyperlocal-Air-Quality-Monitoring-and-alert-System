@@ -251,7 +251,10 @@ export default function WelcomePage() {
   ];
 
   return (
-    <div className="welcome-page">
+    <div
+      className={`welcome-page ${resolvedTheme === 'light' ? 'welcome-page--light' : ''}`}
+      data-theme={resolvedTheme}
+    >
       {/* ─── 0. 3D WEBGL INTERACTIVE ATMOSPHERIC BACKGROUND ─── */}
       <AirGuard3DCanvas theme={resolvedTheme} />
 
