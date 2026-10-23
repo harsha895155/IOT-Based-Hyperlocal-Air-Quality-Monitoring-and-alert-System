@@ -24,21 +24,21 @@
 
 .wizard-card {
   width: 100%;
-  max-width: 680px;
+  max-width: 560px;
   background: var(--bg-card, #13192b);
   border: 1px solid var(--border-subtle, rgba(56, 189, 248, 0.25));
-  border-radius: 24px;
-  box-shadow: var(--shadow-card-hover, 0 24px 60px rgba(0, 0, 0, 0.25));
+  border-radius: 20px;
+  box-shadow: var(--shadow-card-hover, 0 24px 60px rgba(0, 0, 0, 0.35));
   display: flex;
   flex-direction: column;
   overflow: hidden;
   position: relative;
-  max-height: 90vh;
+  max-height: 88vh;
 }
 
 /* ─── Header & Progress Stepper ─── */
 .wizard-header {
-  padding: 24px 28px 18px;
+  padding: 16px 20px 12px;
   border-bottom: 1px solid var(--border-soft, rgba(255, 255, 255, 0.08));
   background: var(--bg-surface, rgba(15, 23, 42, 0.4));
 }
@@ -47,38 +47,38 @@
   display: flex;
   justify-content: space-between;
   align-items: center;
-  margin-bottom: 16px;
+  margin-bottom: 12px;
 }
 
 .wizard-title-group {
   display: flex;
   align-items: center;
-  gap: 12px;
+  gap: 10px;
 }
 
 .wizard-icon-badge {
-  width: 42px;
-  height: 42px;
-  border-radius: 12px;
+  width: 36px;
+  height: 36px;
+  border-radius: 10px;
   background: linear-gradient(135deg, rgba(56, 189, 248, 0.15) 0%, rgba(0, 210, 180, 0.15) 100%);
   border: 1px solid var(--border-subtle, rgba(56, 189, 248, 0.35));
   display: flex;
   align-items: center;
   justify-content: center;
-  font-size: 1.3rem;
+  font-size: 1.15rem;
 }
 
 .wizard-title {
   margin: 0;
-  font-size: 1.25rem;
+  font-size: 1.12rem;
   font-weight: 700;
   color: var(--text-primary, #f8fafc);
   letter-spacing: -0.01em;
 }
 
 .wizard-subtitle {
-  margin: 2px 0 0 0;
-  font-size: 0.8rem;
+  margin: 1px 0 0 0;
+  font-size: 0.76rem;
   color: var(--text-muted, #94a3b8);
 }
 
@@ -86,14 +86,14 @@
   background: var(--surface-raised, rgba(255, 255, 255, 0.06));
   border: 1px solid var(--border-soft, rgba(255, 255, 255, 0.1));
   color: var(--text-muted, #94a3b8);
-  width: 34px;
-  height: 34px;
+  width: 30px;
+  height: 30px;
   border-radius: 50%;
   cursor: pointer;
   display: flex;
   align-items: center;
   justify-content: center;
-  font-size: 1rem;
+  font-size: 0.9rem;
   transition: all 0.2s;
 }
 
@@ -109,15 +109,15 @@
   justify-content: space-between;
   align-items: center;
   position: relative;
-  padding: 8px 6px 0;
+  padding: 4px 6px 0;
 }
 
 .wizard-stepper::before {
   content: '';
   position: absolute;
-  top: 20px;
-  left: 20px;
-  right: 20px;
+  top: 15px;
+  left: 14px;
+  right: 14px;
   height: 2px;
   background: var(--border-soft, rgba(255, 255, 255, 0.08));
   z-index: 1;
@@ -133,15 +133,15 @@
 }
 
 .wizard-step-circle {
-  width: 26px;
-  height: 26px;
+  width: 24px;
+  height: 24px;
   border-radius: 50%;
   background: var(--surface-raised, #0f172a);
   border: 2px solid var(--border, rgba(255, 255, 255, 0.2));
   display: flex;
   align-items: center;
   justify-content: center;
-  font-size: 0.72rem;
+  font-size: 0.7rem;
   font-weight: 700;
   color: var(--text-faint, #64748b);
   transition: all 0.25s;
@@ -157,29 +157,54 @@
   background: var(--accent, #0284c7);
   border-color: var(--accent, #38bdf8);
   color: #ffffff;
-  box-shadow: 0 0 14px var(--border-glow, rgba(56, 189, 248, 0.6));
+  box-shadow: 0 0 12px var(--border-glow, rgba(56, 189, 248, 0.5));
 }
 
-.wizard-step-label {
-  font-size: 0.68rem;
+.wizard-step-lbl {
+  font-size: 0.65rem;
   font-weight: 600;
   color: var(--text-faint, #64748b);
-  margin-top: 6px;
+  margin-top: 5px;
   text-align: center;
   white-space: nowrap;
+  max-width: 58px;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  display: block;
 }
 
-.wizard-step-node.is-active .wizard-step-label {
+.wizard-step-node.is-active .wizard-step-lbl {
   color: var(--accent, #38bdf8);
+  font-weight: 700;
 }
 
-.wizard-step-node.is-complete .wizard-step-label {
+.wizard-step-node.is-complete .wizard-step-lbl {
   color: #10b981;
+}
+
+.wizard-mobile-step-indicator {
+  display: none;
+  text-align: center;
+  font-size: 0.78rem;
+  color: var(--text-muted, #94a3b8);
+  margin-top: 10px;
+  background: rgba(56, 189, 248, 0.08);
+  border: 1px solid rgba(56, 189, 248, 0.2);
+  border-radius: 999px;
+  padding: 3px 12px;
+  width: fit-content;
+  margin-left: auto;
+  margin-right: auto;
+}
+
+.wizard-mobile-step-name {
+  color: #38bdf8;
+  font-weight: 700;
 }
 
 /* ─── Wizard Body ─── */
 .wizard-body {
-  padding: 28px;
+  padding: 18px 20px;
   overflow-y: auto;
   flex: 1;
 }
@@ -260,13 +285,13 @@
   color: var(--text-primary, #f8fafc);
 }
 
-/* Hardware Visual Diagram (Step 3) */
+/* Hardware Visual Diagram (Step 1) */
 .wizard-connection-diagram {
   background: var(--card-sub-bg, rgba(15, 23, 42, 0.6));
   border: 1px solid var(--border-subtle, rgba(56, 189, 248, 0.2));
-  border-radius: 16px;
-  padding: 22px;
-  margin-bottom: 22px;
+  border-radius: 14px;
+  padding: 12px 14px;
+  margin-bottom: 14px;
   display: flex;
   align-items: center;
   justify-content: space-around;
@@ -277,29 +302,29 @@
   display: flex;
   flex-direction: column;
   align-items: center;
-  gap: 8px;
+  gap: 4px;
 }
 
 .diagram-icon-box {
-  width: 58px;
-  height: 58px;
-  border-radius: 14px;
+  width: 42px;
+  height: 42px;
+  border-radius: 12px;
   background: var(--surface-raised, rgba(56, 189, 248, 0.1));
   border: 1px solid var(--border-subtle, rgba(56, 189, 248, 0.3));
   display: flex;
   align-items: center;
   justify-content: center;
-  font-size: 1.8rem;
+  font-size: 1.35rem;
 }
 
 .diagram-device-lbl {
-  font-size: 0.82rem;
+  font-size: 0.78rem;
   font-weight: 700;
   color: var(--text-primary, #f8fafc);
 }
 
 .diagram-device-sub {
-  font-size: 0.72rem;
+  font-size: 0.68rem;
   color: var(--text-faint, #64748b);
 }
 
@@ -307,13 +332,19 @@
   display: flex;
   flex-direction: column;
   align-items: center;
-  gap: 4px;
+  gap: 3px;
   color: #00d2b4;
 }
 
+.diagram-cable-lbl {
+  font-size: 0.65rem;
+  font-weight: 700;
+  letter-spacing: 0.04em;
+}
+
 .diagram-cable-line {
-  width: 80px;
-  height: 3px;
+  width: 60px;
+  height: 2px;
   background: linear-gradient(90deg, #38bdf8 0%, #00d2b4 100%);
   position: relative;
   border-radius: 2px;
@@ -324,8 +355,8 @@
   position: absolute;
   top: -3px;
   right: -2px;
-  width: 8px;
-  height: 8px;
+  width: 7px;
+  height: 7px;
   border-radius: 50%;
   background: #00d2b4;
   box-shadow: 0 0 8px #00d2b4;
@@ -558,7 +589,7 @@
 
 /* ─── Footer Controls ─── */
 .wizard-footer {
-  padding: 18px 28px 24px;
+  padding: 12px 20px 14px;
   border-top: 1px solid var(--border-soft, rgba(255, 255, 255, 0.08));
   background: var(--bg-surface, rgba(15, 23, 42, 0.5));
   display: flex;
@@ -570,9 +601,9 @@
   background: var(--surface-raised, rgba(255, 255, 255, 0.06));
   border: 1px solid var(--border-soft, rgba(255, 255, 255, 0.12));
   color: var(--text-primary, #cbd5e1);
-  padding: 10px 20px;
-  border-radius: 12px;
-  font-size: 0.9rem;
+  padding: 9px 18px;
+  border-radius: 10px;
+  font-size: 0.88rem;
   font-weight: 600;
   cursor: pointer;
   transition: all 0.2s;
@@ -587,16 +618,16 @@
   background: linear-gradient(135deg, #0284c7 0%, #00d2b4 100%);
   border: none;
   color: #ffffff;
-  padding: 11px 24px;
-  border-radius: 12px;
-  font-size: 0.92rem;
+  padding: 9px 20px;
+  border-radius: 10px;
+  font-size: 0.88rem;
   font-weight: 700;
   cursor: pointer;
   transition: all 0.2s;
   box-shadow: 0 4px 14px rgba(0, 210, 180, 0.25);
   display: inline-flex;
   align-items: center;
-  gap: 8px;
+  gap: 6px;
 }
 
 .wizard-btn-primary:hover:not(:disabled) {
@@ -614,9 +645,9 @@
   background: linear-gradient(135deg, #059669 0%, #10b981 100%);
   border: none;
   color: #ffffff;
-  padding: 11px 24px;
-  border-radius: 12px;
-  font-size: 0.92rem;
+  padding: 9px 20px;
+  border-radius: 10px;
+  font-size: 0.88rem;
   font-weight: 700;
   cursor: pointer;
   transition: all 0.2s;
@@ -631,10 +662,10 @@
 /* ─── In-Browser 1-Click ESP32 Flasher Card ─── */
 .wizard-flasher-card {
   background: linear-gradient(135deg, rgba(14, 165, 233, 0.08) 0%, rgba(16, 185, 129, 0.08) 100%);
-  border: 1px solid rgba(56, 189, 248, 0.35);
-  border-radius: 16px;
-  padding: 20px;
-  margin: 18px 0;
+  border: 1px solid rgba(56, 189, 248, 0.3);
+  border-radius: 14px;
+  padding: 14px 16px;
+  margin: 10px 0;
   text-align: left;
   position: relative;
   overflow: hidden;
@@ -643,40 +674,40 @@
 .flasher-badge {
   display: inline-flex;
   align-items: center;
-  gap: 6px;
+  gap: 5px;
   background: rgba(14, 165, 233, 0.18);
   border: 1px solid rgba(56, 189, 248, 0.4);
   color: #38bdf8;
-  font-size: 0.72rem;
+  font-size: 0.68rem;
   font-weight: 700;
   text-transform: uppercase;
   letter-spacing: 0.06em;
-  padding: 4px 10px;
+  padding: 3px 8px;
   border-radius: 999px;
-  margin-bottom: 10px;
+  margin-bottom: 8px;
 }
 
 .flasher-heading {
-  font-size: 1.05rem;
+  font-size: 0.95rem;
   font-weight: 700;
   color: #f8fafc;
-  margin: 0 0 6px 0;
+  margin: 0 0 5px 0;
   display: flex;
   align-items: center;
-  gap: 8px;
+  gap: 6px;
 }
 
 .flasher-desc {
-  font-size: 0.82rem;
+  font-size: 0.78rem;
   color: #94a3b8;
-  line-height: 1.5;
-  margin: 0 0 16px 0;
+  line-height: 1.45;
+  margin: 0 0 12px 0;
 }
 
 .flasher-actions-row {
   display: flex;
   align-items: center;
-  gap: 12px;
+  gap: 10px;
   flex-wrap: wrap;
 }
 
@@ -684,21 +715,21 @@
   background: linear-gradient(135deg, #0ea5e9 0%, #10b981 100%);
   border: none;
   color: #ffffff;
-  padding: 12px 22px;
-  border-radius: 12px;
-  font-size: 0.92rem;
+  padding: 9px 16px;
+  border-radius: 10px;
+  font-size: 0.86rem;
   font-weight: 700;
   cursor: pointer;
   transition: all 0.2s;
-  box-shadow: 0 4px 16px rgba(16, 185, 129, 0.3);
+  box-shadow: 0 4px 14px rgba(16, 185, 129, 0.25);
   display: inline-flex;
   align-items: center;
-  gap: 8px;
+  gap: 6px;
 }
 
 .wizard-btn-flash:hover:not(:disabled) {
   transform: translateY(-1px);
-  box-shadow: 0 6px 22px rgba(16, 185, 129, 0.45);
+  box-shadow: 0 6px 20px rgba(16, 185, 129, 0.4);
 }
 
 .wizard-btn-flash:disabled {
@@ -710,15 +741,15 @@
   background: rgba(255, 255, 255, 0.06);
   border: 1px solid rgba(255, 255, 255, 0.14);
   color: #cbd5e1;
-  padding: 11px 18px;
-  border-radius: 12px;
-  font-size: 0.84rem;
+  padding: 8px 12px;
+  border-radius: 10px;
+  font-size: 0.78rem;
   font-weight: 600;
   cursor: pointer;
   text-decoration: none;
   display: inline-flex;
   align-items: center;
-  gap: 6px;
+  gap: 5px;
   transition: all 0.2s;
 }
 
@@ -729,20 +760,20 @@
 }
 
 .flasher-progress-container {
-  margin-top: 14px;
+  margin-top: 10px;
   background: rgba(15, 23, 42, 0.6);
   border: 1px solid rgba(255, 255, 255, 0.08);
-  border-radius: 10px;
-  padding: 12px 14px;
+  border-radius: 8px;
+  padding: 10px 12px;
 }
 
 .flasher-progress-track {
   width: 100%;
-  height: 8px;
+  height: 6px;
   background: rgba(255, 255, 255, 0.08);
   border-radius: 999px;
   overflow: hidden;
-  margin-bottom: 8px;
+  margin-bottom: 6px;
 }
 
 .flasher-progress-fill {
@@ -756,7 +787,7 @@
   display: flex;
   justify-content: space-between;
   align-items: center;
-  font-size: 0.78rem;
+  font-size: 0.74rem;
   color: #cbd5e1;
 }
 
@@ -764,9 +795,9 @@
   display: flex;
   align-items: center;
   text-align: center;
-  margin: 18px 0;
+  margin: 14px 0;
   color: #64748b;
-  font-size: 0.76rem;
+  font-size: 0.72rem;
   font-weight: 600;
   text-transform: uppercase;
   letter-spacing: 0.08em;
@@ -780,10 +811,139 @@
 }
 
 .wizard-divider-text:not(:empty)::before {
-  margin-right: 12px;
+  margin-right: 10px;
 }
 
 .wizard-divider-text:not(:empty)::after {
-  margin-left: 12px;
+  margin-left: 10px;
+}
+
+/* ─── Mobile Responsiveness ─── */
+@media (max-width: 640px) {
+  .wizard-overlay {
+    padding: 8px;
+  }
+
+  .wizard-card {
+    max-width: 100%;
+    max-height: 85vh;
+    border-radius: 18px;
+  }
+
+  .wizard-header {
+    padding: 12px 14px 10px;
+  }
+
+  .wizard-header-top {
+    margin-bottom: 10px;
+  }
+
+  .wizard-title {
+    font-size: 1.02rem;
+  }
+
+  .wizard-subtitle {
+    font-size: 0.72rem;
+  }
+
+  .wizard-icon-badge {
+    width: 30px;
+    height: 30px;
+    font-size: 1rem;
+    border-radius: 8px;
+  }
+
+  /* Stepper on Mobile: Hide squished text labels, show clean indicator */
+  .wizard-stepper {
+    padding: 2px 2px 0;
+  }
+
+  .wizard-stepper::before {
+    top: 12px;
+    left: 12px;
+    right: 12px;
+  }
+
+  .wizard-step-circle {
+    width: 22px;
+    height: 22px;
+    font-size: 0.65rem;
+  }
+
+  .wizard-step-lbl {
+    display: none !important;
+  }
+
+  .wizard-mobile-step-indicator {
+    display: inline-flex !important;
+    align-items: center;
+    gap: 4px;
+    font-size: 0.74rem;
+    margin-top: 8px;
+    padding: 3px 10px;
+  }
+
+  .wizard-body {
+    padding: 12px 14px;
+  }
+
+  .wizard-step-title {
+    font-size: 0.95rem;
+    margin-bottom: 3px;
+  }
+
+  .wizard-step-desc {
+    font-size: 0.76rem;
+    margin-bottom: 10px;
+  }
+
+  .wizard-connection-diagram {
+    padding: 10px 12px;
+    margin-bottom: 10px;
+  }
+
+  .diagram-icon-box {
+    width: 36px;
+    height: 36px;
+    font-size: 1.15rem;
+  }
+
+  .diagram-cable-line {
+    width: 40px;
+  }
+
+  .diagram-device-lbl {
+    font-size: 0.7rem;
+  }
+
+  .diagram-device-sub {
+    font-size: 0.62rem;
+  }
+
+  .wizard-flasher-card {
+    padding: 10px 12px;
+    margin: 8px 0;
+  }
+
+  .flasher-heading {
+    font-size: 0.86rem;
+  }
+
+  .flasher-desc {
+    font-size: 0.72rem;
+    margin-bottom: 8px;
+  }
+
+  .wizard-footer {
+    padding: 10px 14px 12px;
+  }
+
+  .wizard-btn-primary,
+  .wizard-btn-secondary,
+  .wizard-btn-success {
+    padding: 8px 16px;
+    font-size: 0.82rem;
+    border-radius: 8px;
+  }
 }
 

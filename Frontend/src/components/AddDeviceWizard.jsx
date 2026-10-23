@@ -781,6 +781,10 @@ export default function AddDeviceWizard({ isOpen, onClose, onDeviceAdded, onNavi
               );
             })}
           </div>
+
+          <div className="wizard-mobile-step-indicator">
+            Step {step} of 7: <span className="wizard-mobile-step-name">{STEPS[step - 1].label}</span>
+          </div>
         </div>
 
         {/* ─── STEP BODY ─── */}
@@ -864,7 +868,7 @@ export default function AddDeviceWizard({ isOpen, onClose, onDeviceAdded, onNavi
                           <span>🔥</span> Flash Blank ESP32 Directly from Browser
                         </h4>
                         <p className="flasher-desc">
-                          No Arduino IDE, code, or local folders needed. Anyone on any laptop can plug in a brand-new ESP32 chip via USB and burn the official AirGuard firmware in 1 click over WebUSB. Includes Mobile Phone Hotspot setup (zero cables needed to change Wi-Fi).
+                          Plug in your ESP32 via USB to burn the official AirGuard firmware in 1 click over WebUSB. No Arduino IDE or local code files required.
                         </p>
 
                         <div className="flasher-actions-row">
