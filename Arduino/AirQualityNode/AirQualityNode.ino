@@ -122,7 +122,10 @@ void checkBootButton() {
           digitalWrite(STATUS_LED_PIN, HIGH); delay(80);
           digitalWrite(STATUS_LED_PIN, LOW); delay(80);
         }
-        network.startCaptivePortal(180000UL);
+        if (network.startCaptivePortal(180000UL)) {
+          Serial.println("[BOOT] New Wi-Fi saved from phone! Connecting immediately...");
+          network.connectWiFi();
+        }
         break;
       }
       delay(30);

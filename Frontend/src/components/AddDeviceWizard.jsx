@@ -478,6 +478,20 @@ export default function AddDeviceWizard({
     setQuickStatus('Please choose your connected ESP32 COM port in the browser popup...');
 
     try {
+      // 1. Request port immediately while user gesture is active
+      let port = null;
+      try {
+        port = await navigator.serial.requestPort();
+      } catch (portErr) {
+        if (portErr.name === 'NotFoundError') {
+          setQuickError('USB port selection was cancelled.');
+          setQuickPushing(false);
+          return;
+        }
+        throw portErr;
+      }
+
+      // 2. Clean up previous streams/ports if any
       if (serialReaderRef.current) {
         try { await serialReaderRef.current.cancel(); } catch (e) {}
         serialReaderRef.current = null;
@@ -491,15 +505,7 @@ export default function AddDeviceWizard({
         setSerialPort(null);
       }
 
-      let port = null;
-      try {
-        const ports = await navigator.serial.getPorts();
-        if (ports && ports.length > 0) port = ports[0];
-      } catch (e) {}
-      if (!port) {
-        port = await navigator.serial.requestPort();
-      }
-
+      // 3. Open selected port at 115200 baud
       if (!port.readable) {
         try {
           await port.open({ baudRate: 115200 });
