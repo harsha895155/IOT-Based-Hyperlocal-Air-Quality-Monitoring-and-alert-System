@@ -16,7 +16,7 @@ const ALERT_DEDUPLICATION_WINDOW_MS = 30 * 60 * 1000;
  */
 async function createReading(req, res, next) {
   try {
-    const { deviceId, temperature, humidity, gasPPM, airQuality } = req.body;
+    const { deviceId, temperature, humidity, gasPPM, airQuality, wifiSSID, ip, rssi } = req.body;
 
     // Strict validation of payload types & physiological/sensor ranges
     if (
@@ -42,13 +42,30 @@ async function createReading(req, res, next) {
       return res.status(400).json({ error: 'airQuality out of range (0 to 500).' });
     }
 
-    // 1. Verify device exists in fleet registry
+    // 1. Verify device exists in fleet registry, or auto-provision on first ping
     const cleanId = deviceId.trim();
     let device = await Device.findOne({ deviceId: cleanId });
+    const now = new Date();
+
     if (!device) {
-      return res.status(404).json({
-        error: `Device "${cleanId}" is not registered in the fleet registry. Please onboard via the Add Device Wizard.`,
+      // Auto-provision newly flashed / connected hardware
+      const defaultUser = (await User.findOne({ role: 'admin' })) || (await User.findOne());
+      device = await Device.create({
+        deviceId: cleanId,
+        userId: defaultUser ? defaultUser._id : null,
+        name: `AirGuard Node (${cleanId})`,
+        location: 'Gangavaram, Andhra Pradesh',
+        type: 'AirGuard ESP32 Sensing Node',
+        wifiSSID: wifiSSID || '',
+        ipAddress: ip || '',
+        rssi: rssi != null ? rssi : null,
+        lastSeen: now,
       });
+      req.app.get('io')?.emit('device_created', { device: device.toObject({ virtuals: true }) });
+    } else {
+      if (wifiSSID) device.wifiSSID = wifiSSID;
+      if (ip) device.ipAddress = ip;
+      if (rssi != null) device.rssi = rssi;
     }
 
     const { category } = classifyAQI(airQuality);

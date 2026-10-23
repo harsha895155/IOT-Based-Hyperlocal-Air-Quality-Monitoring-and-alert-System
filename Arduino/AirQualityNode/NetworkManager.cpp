@@ -242,7 +242,10 @@ bool NodeNetworkManager::sendReading(const SensorReading &reading) {
   payload += "\"temperature\":" + String(reading.temperature, 2) + ",";
   payload += "\"humidity\":" + String(reading.humidity, 2) + ",";
   payload += "\"gasPPM\":" + String(reading.gasPPM, 2) + ",";
-  payload += "\"airQuality\":" + String(reading.aqi);
+  payload += "\"airQuality\":" + String(reading.aqi) + ",";
+  payload += "\"wifiSSID\":\"" + WiFi.SSID() + "\",";
+  payload += "\"ip\":\"" + WiFi.localIP().toString() + "\",";
+  payload += "\"rssi\":" + String(WiFi.RSSI());
   payload += "}";
 
   bool ok = false;

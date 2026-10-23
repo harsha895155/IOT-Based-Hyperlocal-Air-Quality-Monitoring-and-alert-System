@@ -58,6 +58,20 @@ const deviceSchema = new mongoose.Schema(
       default: '',
       trim: true,
     },
+    wifiSSID: {
+      type: String,
+      default: '',
+      trim: true,
+    },
+    ipAddress: {
+      type: String,
+      default: '',
+      trim: true,
+    },
+    rssi: {
+      type: Number,
+      default: null,
+    },
     locality: {
       type: String,
       default: '',

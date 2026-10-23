@@ -652,7 +652,7 @@ export default function DevicesView({
                 <div className="device-card-chips">
                   <span className="hardware-pill">ESP32-WROOM-32</span>
                   <span className="hardware-pill">MQ135 + DHT22</span>
-                  <span className="signal-pill">📶 -62 dBm</span>
+                  <span className="signal-pill">📶 {device.wifiSSID || 'AI+ Nova 1 5G'}</span>
                   {latency && <span className="signal-pill">⚡ {latency}ms</span>}
                 </div>
 
@@ -768,9 +768,15 @@ export default function DevicesView({
                 </span>
               </div>
               <div className="device-modal-item">
-                <span className="device-modal-label">Wi-Fi Link Strength</span>
+                <span className="device-modal-label">Connected Wi-Fi (SSID)</span>
+                <span className="device-modal-val" style={{ color: '#00d2b4', fontWeight: 700 }}>
+                  📶 {selectedModalDevice.wifiSSID || 'AI+ Nova 1 5G'}
+                </span>
+              </div>
+              <div className="device-modal-item">
+                <span className="device-modal-label">Wi-Fi Signal & IP</span>
                 <span className="device-modal-val mono" style={{ color: '#38bdf8' }}>
-                  -62 dBm (Excellent)
+                  {selectedModalDevice.rssi ? `${selectedModalDevice.rssi} dBm · ` : ''}{selectedModalDevice.ipAddress || 'DHCP Online'}
                 </span>
               </div>
             </div>

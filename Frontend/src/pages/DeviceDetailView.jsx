@@ -706,6 +706,24 @@ export default function DeviceDetailView({ readingsData }) {
 
             <div className="dd-spec-row">
               <div className="dd-spec-label">
+                <span>📶</span> Connected Wi-Fi
+              </div>
+              <div className="dd-spec-value mono" style={{ color: '#00d2b4', fontWeight: 700 }}>
+                {device.wifiSSID || 'AI+ Nova 1 5G'}
+              </div>
+            </div>
+
+            <div className="dd-spec-row">
+              <div className="dd-spec-label">
+                <span>🌐</span> Wi-Fi Signal & IP
+              </div>
+              <div className="dd-spec-value mono" style={{ color: '#38bdf8' }}>
+                {device.rssi ? `${device.rssi} dBm · ` : ''}{device.ipAddress || 'Local Network (DHCP)'}
+              </div>
+            </div>
+
+            <div className="dd-spec-row">
+              <div className="dd-spec-label">
                 <span>⏱️</span> Sampling Cadence
               </div>
               <div className="dd-spec-value mono">15s Non-blocking FreeRTOS</div>
