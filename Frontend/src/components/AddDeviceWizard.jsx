@@ -18,12 +18,12 @@ const STEPS = [
 export default function AddDeviceWizard({ isOpen, onClose, onDeviceAdded, onNavigateDashboard }) {
   const [step, setStep] = useState(1);
 
-  // Form State — Defaulted to canonical node identifier for seamless telemetry ingestion
+  // Form State — Clean inputs for fresh device onboarding (no demo data)
   const [formData, setFormData] = useState({
-    name: 'AirGuard ESP32 Sensor',
-    deviceId: 'esp32-node-01',
+    name: '',
+    deviceId: '',
     type: 'AirGuard ESP32 Sensing Node',
-    description: 'Hyperlocal ambient air quality monitor',
+    description: '',
     // Location
     location: '',
     locality: '',
@@ -36,6 +36,8 @@ export default function AddDeviceWizard({ isOpen, onClose, onDeviceAdded, onNavi
     wifiSsid: '',
     wifiPassword: '',
   });
+
+  const [verificationError, setVerificationError] = useState(null);
 
   const [showPassword, setShowPassword] = useState(false);
   const [searchingLoc, setSearchingLoc] = useState(false);
@@ -131,10 +133,13 @@ export default function AddDeviceWizard({ isOpen, onClose, onDeviceAdded, onNavi
       clearInterval(identifyTimer);
       clearTimeout(autoResetTimer);
 
-      const canonicalId = 'esp32-node-01';
+      const uniqueHwId = (hwId && hwId.startsWith('AG-'))
+        ? hwId
+        : (customInfo.hardwareId || (formData.deviceId?.trim() ? formData.deviceId.trim() : `esp32-node-${Math.random().toString(36).substring(2, 6)}`));
+
       const hwInfo = {
         device: customInfo.device || 'AirGuard ESP32 Sensing Node',
-        hardwareId: canonicalId,
+        hardwareId: uniqueHwId,
         mac: customInfo.mac || (hwId && hwId.startsWith('AG-') ? hwId : 'USB:Serial'),
         chip: customInfo.chip || 'ESP32',
         revision: customInfo.revision != null ? customInfo.revision : 1,
@@ -145,11 +150,11 @@ export default function AddDeviceWizard({ isOpen, onClose, onDeviceAdded, onNavi
       setDetectedHardware(hwInfo);
       setFormData((f) => ({
         ...f,
-        deviceId: canonicalId,
+        deviceId: f.deviceId || uniqueHwId,
         type: hwInfo.device,
-        name: f.name || 'Primary AirGuard Station',
+        name: f.name || `AirGuard Node (${uniqueHwId})`,
       }));
-      checkDeviceIdAvailability(canonicalId);
+      checkDeviceIdAvailability(uniqueHwId);
       setSerialConnected(true);
       setSerialConnecting(false);
     };
@@ -549,6 +554,7 @@ export default function AddDeviceWizard({ isOpen, onClose, onDeviceAdded, onNavi
         country: formData.country,
         type: formData.type,
         description: formData.description,
+        wifiSSID: formData.wifiSsid,
         hardwareMac: detectedHardware?.mac || '',
         coordinates: { lat: formData.lat, lng: formData.lng },
       });
@@ -594,55 +600,46 @@ export default function AddDeviceWizard({ isOpen, onClose, onDeviceAdded, onNavi
   // Step 5: Verify Device Connectivity with Backend
   const startVerification = async () => {
     setVerifying(true);
+    setVerificationError(null);
     let attempts = 0;
-    const maxAttempts = 15;
-    const idToCheck = formData.deviceId || 'esp32-node-01';
+    const maxAttempts = 18; // 18 attempts * 2s = 36 seconds
+    const idToCheck = formData.deviceId?.trim();
 
     const checkStatus = async () => {
       attempts++;
       try {
-        let res = await client.get(`/devices/verify/${encodeURIComponent(idToCheck)}`);
-        // If not verified under idToCheck, try checking default node
-        if (!res.data?.connected && !res.data?.verified && idToCheck !== 'esp32-node-01') {
-          try {
-            const fallback = await client.get('/devices/verify/esp32-node-01');
-            if (fallback.data?.connected || fallback.data?.verified) {
-              res = fallback;
+        if (idToCheck) {
+          const res = await client.get(`/devices/verify/${encodeURIComponent(idToCheck)}`);
+          if (res.data?.connected || res.data?.verified) {
+            clearInterval(interval);
+            setVerificationResult(res.data);
+            setVerifying(false);
+            setVerificationError(null);
+            if (res.data.latestReading) {
+              setLatestReading(res.data.latestReading);
             }
-          } catch (e) {}
-        }
-
-        if (res.data?.connected || res.data?.verified) {
-          clearInterval(interval);
-          setVerificationResult(res.data);
-          setVerifying(false);
-          if (res.data.latestReading) {
-            setLatestReading(res.data.latestReading);
+            // Advance to Step 6
+            setTimeout(() => {
+              setStep(6);
+              listenForTelemetry(res.data.latestReading);
+            }, 700);
+            return true;
           }
-          // Advance to Step 6
-          setTimeout(() => {
-            setStep(6);
-            listenForTelemetry(res.data.latestReading);
-          }, 600);
-          return true;
         }
       } catch (e) {}
 
       if (attempts >= maxAttempts) {
         clearInterval(interval);
         setVerifying(false);
-        // Fallback: registered status
-        setVerificationResult({ verified: true, connected: true, device: { name: formData.name, location: formData.location } });
-        setTimeout(() => {
-          setStep(6);
-          listenForTelemetry(null);
-        }, 600);
+        setVerificationError(
+          `Hardware connection timed out. The ESP32 node did not transmit telemetry over "${formData.wifiSsid || 'your Wi-Fi network'}". Please confirm the hotspot/Wi-Fi is ON, 2.4 GHz is enabled, and the password is correct.`
+        );
         return true;
       }
       return false;
     };
 
-    // Immediate check so user doesn't wait
+    // Immediate check
     const matched = await checkStatus();
     if (matched) return;
     const interval = setInterval(checkStatus, 2000);
@@ -657,10 +654,11 @@ export default function AddDeviceWizard({ isOpen, onClose, onDeviceAdded, onNavi
     }
 
     setWaitingTelemetry(true);
-    const id = formData.deviceId || 'esp32-node-01';
+    const id = formData.deviceId?.trim();
 
     // 1. Immediately probe backend for latest reading
     const probeReading = async () => {
+      if (!id) return false;
       try {
         const vRes = await client.get(`/devices/verify/${encodeURIComponent(id)}`);
         if (vRes.data?.latestReading) {
@@ -679,16 +677,6 @@ export default function AddDeviceWizard({ isOpen, onClose, onDeviceAdded, onNavi
         }
       } catch (e) {}
 
-      if (id !== 'esp32-node-01') {
-        try {
-          const fbRes = await client.get('/devices/verify/esp32-node-01');
-          if (fbRes.data?.latestReading) {
-            setLatestReading(fbRes.data.latestReading);
-            setWaitingTelemetry(false);
-            return true;
-          }
-        } catch (e) {}
-      }
       return false;
     };
 
@@ -997,10 +985,10 @@ export default function AddDeviceWizard({ isOpen, onClose, onDeviceAdded, onNavi
                               gap: '6px',
                             }}
                             onClick={() => {
-                              const defaultId = formData.deviceId || 'esp32-node-01';
+                              const autoId = formData.deviceId?.trim() || `esp32-node-${Math.random().toString(36).substring(2, 6)}`;
                               setDetectedHardware({
                                 device: 'AirGuard ESP32 Sensing Node',
-                                hardwareId: defaultId,
+                                hardwareId: autoId,
                                 mac: 'Wi-Fi Standalone',
                                 chip: 'ESP32',
                                 revision: 1,
@@ -1010,8 +998,8 @@ export default function AddDeviceWizard({ isOpen, onClose, onDeviceAdded, onNavi
                               });
                               setFormData((f) => ({
                                 ...f,
-                                deviceId: defaultId,
-                                name: f.name || 'Primary AirGuard Station',
+                                deviceId: autoId,
+                                name: f.name || `AirGuard Node (${autoId})`,
                               }));
                               setSerialConnected(true);
                             }}
@@ -1063,11 +1051,40 @@ export default function AddDeviceWizard({ isOpen, onClose, onDeviceAdded, onNavi
               </p>
 
               {/* Connected Device Summary Pill */}
-              <div style={{ background: 'rgba(56, 189, 248, 0.08)', border: '1px solid rgba(56, 189, 248, 0.25)', borderRadius: '12px', padding: '10px 14px', marginBottom: '18px', display: 'flex', alignItems: 'center', justifyContent: 'space-between', fontSize: '0.84rem' }}>
+              <div style={{ background: 'rgba(56, 189, 248, 0.08)', border: '1px solid rgba(56, 189, 248, 0.25)', borderRadius: '12px', padding: '10px 14px', marginBottom: '16px', display: 'flex', alignItems: 'center', justifyContent: 'space-between', fontSize: '0.84rem' }}>
                 <span style={{ color: '#94a3b8' }}>Detected Hardware:</span>
                 <span style={{ color: '#38bdf8', fontWeight: 600, fontFamily: 'var(--font-mono, monospace)' }}>
-                  {formData.deviceId} ({detectedHardware?.chip || 'ESP32'})
+                  {formData.deviceId || 'New Node'} ({detectedHardware?.chip || 'ESP32'})
                 </span>
+              </div>
+
+              {/* Device Custom Name & Unique Identifier */}
+              <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '14px', marginBottom: '16px' }}>
+                <div className="wizard-field-group">
+                  <label className="wizard-field-label">Device Station Name</label>
+                  <input
+                    type="text"
+                    className="wizard-input"
+                    value={formData.name}
+                    onChange={(e) => setFormData({ ...formData, name: e.target.value })}
+                    placeholder="e.g. Balcony Node, Lab 102"
+                  />
+                </div>
+                <div className="wizard-field-group">
+                  <label className="wizard-field-label">Unique Device ID</label>
+                  <input
+                    type="text"
+                    className="wizard-input mono"
+                    value={formData.deviceId}
+                    onChange={(e) => {
+                      const newId = e.target.value.trim();
+                      setFormData({ ...formData, deviceId: newId });
+                      checkDeviceIdAvailability(newId);
+                    }}
+                    placeholder="e.g. esp32-node-02"
+                  />
+                  {idError && <span style={{ color: '#ef4444', fontSize: '0.74rem', marginTop: '4px', display: 'block' }}>⚠️ {idError}</span>}
+                </div>
               </div>
 
               <div className="wizard-field-group" style={{ position: 'relative' }}>
@@ -1311,6 +1328,7 @@ export default function AddDeviceWizard({ isOpen, onClose, onDeviceAdded, onNavi
                           country: formData.country,
                           type: formData.type,
                           description: formData.description,
+                          wifiSSID: formData.wifiSsid,
                           hardwareMac: detectedHardware?.mac || '',
                           coordinates: { lat: formData.lat, lng: formData.lng },
                         });
@@ -1396,35 +1414,114 @@ export default function AddDeviceWizard({ isOpen, onClose, onDeviceAdded, onNavi
 
               <div style={{ textAlign: 'center', padding: '24px 0' }}>
                 <div style={{ fontSize: '3rem', marginBottom: '12px' }}>
-                  {verifying ? '📡' : '✅'}
+                  {verificationError ? '⚠️' : verifying ? '📡' : '✅'}
                 </div>
-                <h4 style={{ color: 'var(--text-primary)', margin: '0 0 8px 0', fontSize: '1.1rem' }}>
-                  {verifying ? 'Awaiting Device Ping...' : 'Device Online & Verified!'}
+                <h4 style={{ color: verificationError ? '#f59e0b' : 'var(--text-primary)', margin: '0 0 8px 0', fontSize: '1.1rem' }}>
+                  {verificationError
+                    ? 'Awaiting Device Telemetry'
+                    : verifying
+                    ? 'Awaiting Device Ping...'
+                    : 'Device Online & Verified!'}
                 </h4>
-                <p style={{ color: '#94a3b8', fontSize: '0.85rem', maxWidth: '420px', margin: '0 auto' }}>
-                  {verifying
-                    ? 'The ESP32 is connecting to Wi-Fi and authenticating with the AirGuard backend.'
-                    : 'The AirGuard backend has confirmed device authentication and registration.'}
+                <p style={{ color: '#94a3b8', fontSize: '0.85rem', maxWidth: '440px', margin: '0 auto', lineHeight: 1.5 }}>
+                  {verificationError
+                    ? verificationError
+                    : verifying
+                    ? `The ESP32 is connecting to "${formData.wifiSsid || 'your Wi-Fi'}" and authenticating with the AirGuard backend.`
+                    : `The AirGuard backend has verified active cloud ingestion from ${formData.deviceId}.`}
                 </p>
 
-                {/* Real Verified Checklist */}
-                <div style={{ maxWidth: '360px', margin: '20px auto 0', textAlign: 'left', background: 'rgba(15, 23, 42, 0.6)', borderRadius: '12px', padding: '14px 18px', border: '1px solid rgba(255,255,255,0.06)' }}>
-                  <div style={{ display: 'flex', alignItems: 'center', gap: '8px', color: '#10b981', fontSize: '0.84rem', marginBottom: '6px' }}>
-                    <span>✓</span> <span>Device: Detected via Serial</span>
+                {/* Real Verified Checklist — Dynamically reflecting physical reality */}
+                <div style={{ maxWidth: '380px', margin: '20px auto 0', textAlign: 'left', background: 'rgba(15, 23, 42, 0.6)', borderRadius: '12px', padding: '14px 18px', border: '1px solid rgba(255,255,255,0.06)' }}>
+                  <div style={{ display: 'flex', alignItems: 'center', gap: '8px', color: '#10b981', fontSize: '0.84rem', marginBottom: '8px' }}>
+                    <span>✓</span> <span>Device: {detectedHardware?.hardwareId || formData.deviceId || 'Configured Node'}</span>
                   </div>
-                  <div style={{ display: 'flex', alignItems: 'center', gap: '8px', color: '#10b981', fontSize: '0.84rem', marginBottom: '6px' }}>
-                    <span>✓</span> <span>Wi-Fi: Connected ({formData.wifiSsid})</span>
+
+                  {/* Real Wi-Fi Status: NEVER fake green tick while still connecting or failed */}
+                  <div style={{
+                    display: 'flex',
+                    alignItems: 'center',
+                    gap: '8px',
+                    color: verificationResult?.connected ? '#10b981' : verificationError ? '#ef4444' : '#38bdf8',
+                    fontSize: '0.84rem',
+                    marginBottom: '8px'
+                  }}>
+                    <span>{verificationResult?.connected ? '✓' : verificationError ? '✕' : '⏳'}</span>
+                    <span>
+                      Wi-Fi: {verificationResult?.connected
+                        ? `Connected (${verificationResult?.wifiSSID || formData.wifiSsid})`
+                        : verificationError
+                        ? `Not Connected (${formData.wifiSsid || 'Unknown'})`
+                        : `Connecting to "${formData.wifiSsid || 'Wi-Fi'}"...`}
+                    </span>
                   </div>
-                  <div style={{ display: 'flex', alignItems: 'center', gap: '8px', color: '#10b981', fontSize: '0.84rem', marginBottom: '6px' }}>
-                    <span>✓</span> <span>Internet: Available</span>
+
+                  {/* Real Internet / Cloud Uplink Status */}
+                  <div style={{
+                    display: 'flex',
+                    alignItems: 'center',
+                    gap: '8px',
+                    color: verificationResult?.connected ? '#10b981' : verificationError ? '#ef4444' : '#94a3b8',
+                    fontSize: '0.84rem',
+                    marginBottom: '8px'
+                  }}>
+                    <span>{verificationResult?.connected ? '✓' : verificationError ? '✕' : '○'}</span>
+                    <span>
+                      Internet / Uplink: {verificationResult?.connected
+                        ? 'Available & Verified'
+                        : verificationError
+                        ? 'No Ingestion Ping Received'
+                        : 'Awaiting device ping...'}
+                    </span>
                   </div>
-                  <div style={{ display: 'flex', alignItems: 'center', gap: '8px', color: verifying ? '#94a3b8' : '#10b981', fontSize: '0.84rem', marginBottom: '6px' }}>
-                    <span>{verifying ? '○' : '✓'}</span> <span>AirGuard Server: {verifying ? 'Connecting...' : 'Connected'}</span>
+
+                  {/* Server Handshake */}
+                  <div style={{
+                    display: 'flex',
+                    alignItems: 'center',
+                    gap: '8px',
+                    color: verificationResult?.connected ? '#10b981' : '#94a3b8',
+                    fontSize: '0.84rem',
+                    marginBottom: '8px'
+                  }}>
+                    <span>{verificationResult?.connected ? '✓' : '○'}</span>
+                    <span>AirGuard Server: {verificationResult?.connected ? 'Connected' : 'Listening...'}</span>
                   </div>
-                  <div style={{ display: 'flex', alignItems: 'center', gap: '8px', color: verifying ? '#94a3b8' : '#10b981', fontSize: '0.84rem' }}>
-                    <span>{verifying ? '○' : '✓'}</span> <span>Device Authentication: {verifying ? 'Pending...' : 'Verified'}</span>
+
+                  {/* Device Authentication */}
+                  <div style={{
+                    display: 'flex',
+                    alignItems: 'center',
+                    gap: '8px',
+                    color: verificationResult?.verified ? '#10b981' : '#94a3b8',
+                    fontSize: '0.84rem'
+                  }}>
+                    <span>{verificationResult?.verified ? '✓' : '○'}</span>
+                    <span>Device Authentication: {verificationResult?.verified ? 'Verified & Provisioned' : 'Pending...'}</span>
                   </div>
                 </div>
+
+                {/* If connection timed out or failed, offer clear user actions */}
+                {verificationError && (
+                  <div style={{ marginTop: '20px', display: 'flex', gap: '10px', justifyContent: 'center', flexWrap: 'wrap' }}>
+                    <button
+                      type="button"
+                      className="wizard-btn-primary"
+                      style={{ width: 'auto', padding: '10px 18px', fontSize: '0.86rem' }}
+                      onClick={() => startVerification()}
+                    >
+                      🔄 Retry Verification
+                    </button>
+                    <button
+                      type="button"
+                      className="wizard-btn-secondary"
+                      style={{ width: 'auto', padding: '10px 16px', fontSize: '0.86rem' }}
+                      onClick={() => setStep(3)}
+                    >
+                      ← Edit Wi-Fi Network
+                    </button>
+                  </div>
+                )}
               </div>
             </div>
           )}

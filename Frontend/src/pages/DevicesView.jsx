@@ -4,6 +4,7 @@ import client from '../api/client';
 import { getSocket } from '../api/socket';
 import { formatTimeAgo } from '../hooks/useReadings';
 import { classifyAQI } from '../utils/aqi';
+import { useAuth } from '../context/AuthContext';
 import AddDeviceWizard from '../components/AddDeviceWizard';
 import './DevicesView.css';
 
@@ -14,9 +15,11 @@ export default function DevicesView({
   onDeleteDevice,
 }) {
   const navigate = useNavigate();
+  const { user, isGuest } = useAuth() || {};
+  const isAdmin = user?.role === 'admin';
 
   // State
-  const [deviceList, setDeviceList] = useState(devices);
+  const [deviceList, setDeviceList] = useState(() => (isGuest || !user ? [] : devices));
   const [searchQuery, setSearchQuery] = useState('');
   const [statusFilter, setStatusFilter] = useState('All');
   const [isMobile, setIsMobile] = useState(() => {
@@ -62,8 +65,12 @@ export default function DevicesView({
 
   // Sync internal list when parent prop updates
   useEffect(() => {
-    setDeviceList(devices || []);
-  }, [devices]);
+    if (isGuest || !user) {
+      setDeviceList([]);
+    } else {
+      setDeviceList(devices || []);
+    }
+  }, [devices, isGuest, user]);
 
   // Real-time socket listener for device removal
   useEffect(() => {
@@ -403,16 +410,25 @@ export default function DevicesView({
             boxShadow: 'var(--shadow-card)',
           }}
         >
-          <div style={{ fontSize: '3.5rem', marginBottom: '16px' }}>📡</div>
+          <div style={{ fontSize: '3.5rem', marginBottom: '16px' }}>{isGuest ? '🔒' : '📡'}</div>
           <h2 style={{ fontSize: '1.35rem', fontWeight: 700, color: 'var(--text-primary, #f8fafc)', marginBottom: '8px' }}>
-            No devices connected yet.
+            {isGuest ? 'No Devices in Guest Mode' : 'No devices connected yet.'}
           </h2>
-          <p style={{ color: 'var(--text-muted, #94a3b8)', maxWidth: '440px', margin: '0 auto 24px', lineHeight: 1.6, fontSize: '0.95rem' }}>
-            Connect/register your AirGuard device to start monitoring.
+          <p style={{ color: 'var(--text-muted, #94a3b8)', maxWidth: '460px', margin: '0 auto 24px', lineHeight: 1.6, fontSize: '0.95rem' }}>
+            {isGuest
+              ? 'Physical hardware nodes are strictly isolated per account. Please log in or register your account to connect and manage your sensing stations.'
+              : 'Connect or register your AirGuard hardware node to start monitoring ambient air quality in real-time.'}
           </p>
-          <button className="btn-primary" style={{ padding: '12px 24px', fontSize: '0.95rem' }} onClick={() => setShowAddWizard(true)}>
-            + Add New Device
-          </button>
+          <div style={{ display: 'flex', gap: '12px', justifyContent: 'center', flexWrap: 'wrap' }}>
+            {isGuest ? (
+              <Link to="/login" className="btn-primary" style={{ padding: '12px 24px', fontSize: '0.95rem', textDecoration: 'none' }}>
+                Sign In / Register →
+              </Link>
+            ) : null}
+            <button className={isGuest ? 'btn-secondary' : 'btn-primary'} style={{ padding: '12px 24px', fontSize: '0.95rem' }} onClick={() => setShowAddWizard(true)}>
+              + Add New Device
+            </button>
+          </div>
         </div>
       ) : (!isMobile && viewMode === 'table') ? (
         <div className="devices-table-card">
@@ -421,6 +437,7 @@ export default function DevicesView({
               <thead>
                 <tr>
                   <th>DEVICE NODE</th>
+                  {isAdmin && <th>OWNER / ADDED BY</th>}
                   <th>DEPLOYED LOCATION</th>
                   <th>STATUS & LATENCY</th>
                   <th>LIVE AQI</th>
@@ -433,7 +450,7 @@ export default function DevicesView({
               <tbody>
                 {filteredDevices.length === 0 ? (
                   <tr>
-                    <td colSpan="8" style={{ textAlign: 'center', padding: '36px', color: '#94a3b8' }}>
+                    <td colSpan={isAdmin ? 9 : 8} style={{ textAlign: 'center', padding: '36px', color: '#94a3b8' }}>
                       No sensing nodes found matching current filters.
                     </td>
                   </tr>
@@ -470,6 +487,14 @@ export default function DevicesView({
                             {devId} · ESP32-WROOM
                           </div>
                         </td>
+
+                        {isAdmin && (
+                          <td>
+                            <span style={{ fontSize: '0.8rem', color: '#38bdf8', fontWeight: 600 }}>
+                              👤 {device.addedBy || 'System'}
+                            </span>
+                          </td>
+                        )}
 
                         <td>
                           <span style={{ fontSize: '0.82rem' }}>📍 {device.location}</span>
@@ -652,7 +677,12 @@ export default function DevicesView({
                 <div className="device-card-chips">
                   <span className="hardware-pill">ESP32-WROOM-32</span>
                   <span className="hardware-pill">MQ135 + DHT22</span>
-                  <span className="signal-pill">📶 {device.wifiSSID || 'AI+ Nova 1 5G'}</span>
+                  <span className="signal-pill">📶 {device.wifiSSID || 'Wi-Fi Standalone'}</span>
+                  {isAdmin && (
+                    <span className="hardware-pill" style={{ color: '#38bdf8', borderColor: 'rgba(56, 189, 248, 0.35)' }}>
+                      👤 {device.addedBy || 'System'}
+                    </span>
+                  )}
                   {latency && <span className="signal-pill">⚡ {latency}ms</span>}
                 </div>
 
@@ -770,9 +800,17 @@ export default function DevicesView({
               <div className="device-modal-item">
                 <span className="device-modal-label">Connected Wi-Fi (SSID)</span>
                 <span className="device-modal-val" style={{ color: '#00d2b4', fontWeight: 700 }}>
-                  📶 {selectedModalDevice.wifiSSID || 'AI+ Nova 1 5G'}
+                  📶 {selectedModalDevice.wifiSSID || 'Awaiting Hardware Sync'}
                 </span>
               </div>
+              {selectedModalDevice.addedBy && (
+                <div className="device-modal-item">
+                  <span className="device-modal-label">Added by Account</span>
+                  <span className="device-modal-val" style={{ color: '#a855f7' }}>
+                    👤 {selectedModalDevice.addedBy}
+                  </span>
+                </div>
+              )}
               <div className="device-modal-item">
                 <span className="device-modal-label">Wi-Fi Signal & IP</span>
                 <span className="device-modal-val mono" style={{ color: '#38bdf8' }}>

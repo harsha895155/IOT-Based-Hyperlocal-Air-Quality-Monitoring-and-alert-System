@@ -75,15 +75,11 @@ export function useReadings() {
 
   const [selectedDevice, setSelectedDeviceRaw] = useState(getInitialDevice);
   const [devices, setDevices] = useState(() => {
+    if (isGuest || !user) return [];
     try {
       const cached = localStorage.getItem(`airguard_devices_cache_${accountKey}`);
       if (cached) {
         const parsed = JSON.parse(cached);
-        if (Array.isArray(parsed) && parsed.length > 0) return parsed;
-      }
-      const fallbackCached = localStorage.getItem('airguard_devices_cache');
-      if (fallbackCached) {
-        const parsed = JSON.parse(fallbackCached);
         if (Array.isArray(parsed) && parsed.length > 0) return parsed;
       }
     } catch (e) {}
@@ -151,12 +147,13 @@ export function useReadings() {
         client.get('/locations'),
       ]);
 
-      if (devicesRes.status === 'fulfilled' && Array.isArray(devicesRes.value.data)) {
+      if (isGuest || !user) {
+        setDevices([]);
+      } else if (devicesRes.status === 'fulfilled' && Array.isArray(devicesRes.value.data)) {
         const loadedDevs = devicesRes.value.data;
         setDevices(loadedDevs);
         try {
           localStorage.setItem(`airguard_devices_cache_${accountKey}`, JSON.stringify(loadedDevs));
-          localStorage.setItem('airguard_devices_cache', JSON.stringify(loadedDevs));
         } catch (e) {}
         setSelectedDeviceRaw((curr) => resolveDeviceId(curr, loadedDevs));
       }

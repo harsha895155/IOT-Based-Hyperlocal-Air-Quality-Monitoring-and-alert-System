@@ -10,31 +10,37 @@ const { protect, optionalAuth } = require('../middleware/auth');
 router.get('/', optionalAuth, async (req, res, next) => {
   try {
     // If user is not authenticated (e.g. guest), return an empty array.
-    // The frontend UI displays: "No devices connected yet. Connect/register your AirGuard device to start monitoring."
     if (!req.user) {
       return res.json([]);
     }
 
     let filter = {};
     if (req.user.role === 'admin') {
-      // Migrate legacy nodes to admin ownership if unassigned
-      await Device.updateMany(
-        { $or: [{ userId: null }, { userId: { $exists: false } }] },
-        { $set: { userId: req.user._id } }
-      );
-      filter = { userId: req.user._id };
+      // Admins view all fleet devices across all user accounts
+      filter = {};
     } else {
       // Standard users can ONLY view their own devices
       filter = { userId: req.user._id };
     }
 
-    const devices = await Device.find(filter).sort({ createdAt: 1 });
+    const devices = await Device.find(filter)
+      .populate('userId', 'name email role')
+      .sort({ createdAt: 1 });
 
     // Attach latest reading metrics to each owned device
     const enriched = await Promise.all(
       devices.map(async (doc) => {
         const dev = doc.toObject({ virtuals: true });
         const latest = await Reading.findOne({ deviceId: dev.deviceId }).sort({ createdAt: -1 });
+
+        const ownerUser = doc.userId && typeof doc.userId === 'object' && doc.userId.name
+          ? {
+              id: doc.userId._id || doc.userId.id,
+              name: doc.userId.name,
+              email: doc.userId.email,
+              role: doc.userId.role,
+            }
+          : null;
 
         return {
           id: dev.deviceId,
@@ -47,7 +53,9 @@ router.get('/', optionalAuth, async (req, res, next) => {
           status: dev.status, // derived dynamically from lastSeen vs OFFLINE_TIMEOUT_MS
           offlineTimeoutMs: dev.offlineTimeoutMs || OFFLINE_TIMEOUT_MS,
           lastSeen: dev.lastSeen,
-          userId: dev.userId,
+          userId: ownerUser ? ownerUser.id : (dev.userId || null),
+          addedBy: ownerUser ? `${ownerUser.name} (${ownerUser.email})` : 'System / Legacy Node',
+          owner: ownerUser,
           wifiSSID: dev.wifiSSID || '',
           ipAddress: dev.ipAddress || '',
           rssi: dev.rssi || null,
@@ -118,7 +126,8 @@ router.get('/check-id/:id', protect, async (req, res, next) => {
 // POST /api/devices/provision-session — Initialize secure device onboarding session
 router.post('/provision-session', protect, async (req, res, next) => {
   try {
-    const { deviceId, name, location, locality, city, state, country, type, coordinates, description, hardwareMac } = req.body;
+    const { deviceId, name, location, locality, city, state, country, type, coordinates, description, hardwareMac, wifiSSID, wifiSsid } = req.body;
+    const targetWifi = wifiSSID || wifiSsid;
     if (!deviceId || !deviceId.trim()) {
       return res.status(400).json({ error: 'deviceId is required' });
     }
@@ -152,6 +161,7 @@ router.post('/provision-session', protect, async (req, res, next) => {
       existing.type = type || existing.type;
       existing.userId = req.user._id;
       existing.description = description || existing.description;
+      if (targetWifi) existing.wifiSSID = targetWifi;
       if (hardwareMac) existing.hardwareMac = hardwareMac;
       if (coordinates) existing.coordinates = coordinates;
       existing.provisioningStatus = 'pending';
@@ -171,6 +181,7 @@ router.post('/provision-session', protect, async (req, res, next) => {
         sensors: ['MQ135', 'DHT22'],
         coordinates: coordinates || { lat: null, lng: null },
         hardwareMac: hardwareMac || '',
+        wifiSSID: targetWifi || '',
         provisioningStatus: 'pending',
       });
     }
@@ -225,12 +236,17 @@ router.get('/verify/:id', protect, async (req, res, next) => {
       verified: !!latest,
       connected: !!isConnected,
       lastSeen: device.lastSeen,
+      wifiSSID: device.wifiSSID || '',
+      ipAddress: device.ipAddress || '',
+      rssi: device.rssi || null,
       device: {
         id: device.deviceId,
         deviceId: device.deviceId,
         name: device.name,
         location: device.location,
         status: device.status,
+        wifiSSID: device.wifiSSID || '',
+        ipAddress: device.ipAddress || '',
       },
       latestReading: latest
         ? {
@@ -251,7 +267,8 @@ router.get('/verify/:id', protect, async (req, res, next) => {
 // POST /api/devices — Register/connect a new IoT node bound to the authenticated user
 router.post('/', protect, async (req, res, next) => {
   try {
-    const { deviceId, name, location, locality, city, state, country, type, sensors, coordinates, description, hardwareMac } = req.body;
+    const { deviceId, name, location, locality, city, state, country, type, sensors, coordinates, description, hardwareMac, wifiSSID, wifiSsid } = req.body;
+    const targetWifi = wifiSSID || wifiSsid;
     if (!deviceId || !deviceId.trim()) {
       return res.status(400).json({ error: 'deviceId is required' });
     }
@@ -279,6 +296,7 @@ router.post('/', protect, async (req, res, next) => {
       if (country) existing.country = country;
       if (description) existing.description = description;
       if (hardwareMac) existing.hardwareMac = hardwareMac;
+      if (targetWifi) existing.wifiSSID = targetWifi;
       existing.type = type || existing.type;
       existing.userId = req.user._id;
       existing.provisioningStatus = 'active';
@@ -300,10 +318,11 @@ router.post('/', protect, async (req, res, next) => {
       state: state || '',
       country: country || 'India',
       description: description || '',
-      hardwareMac: hardwareMac || '',
       type: type || 'ESP32 Sensing Node',
       sensors: sensors || ['MQ135', 'DHT22'],
       coordinates: coordinates || { lat: null, lng: null },
+      hardwareMac: hardwareMac || '',
+      wifiSSID: targetWifi || '',
       lastSeen: new Date(),
       provisioningStatus: 'active',
     });

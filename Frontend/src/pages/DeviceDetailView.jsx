@@ -174,14 +174,18 @@ export default function DeviceDetailView({ readingsData }) {
     if (activeMetric === 'dual') {
       const aqiVals = history.map((r) => r.airQuality).filter((v) => typeof v === 'number' && !isNaN(v));
       const tempVals = history.map((r) => r.temperature).filter((v) => typeof v === 'number' && !isNaN(v));
+      const humVals = history.map((r) => r.humidity).filter((v) => typeof v === 'number' && !isNaN(v));
+      const gasVals = history.map((r) => r.gasPPM).filter((v) => typeof v === 'number' && !isNaN(v));
       const avgAqi = aqiVals.length ? (aqiVals.reduce((a, b) => a + b, 0) / aqiVals.length).toFixed(1) : 0;
-      const maxAqi = aqiVals.length ? Math.max(...aqiVals).toFixed(1) : 0;
       const avgTemp = tempVals.length ? (tempVals.reduce((a, b) => a + b, 0) / tempVals.length).toFixed(1) : 0;
+      const avgHum = humVals.length ? (humVals.reduce((a, b) => a + b, 0) / humVals.length).toFixed(1) : 0;
+      const avgGas = gasVals.length ? (gasVals.reduce((a, b) => a + b, 0) / gasVals.length).toFixed(1) : 0;
       return {
         isDual: true,
         avgAqi,
-        maxAqi,
         avgTemp,
+        avgHum,
+        avgGas,
       };
     }
     const values = history
@@ -440,7 +444,7 @@ export default function DeviceDetailView({ readingsData }) {
                 className={`dd-tab-btn ${activeMetric === 'dual' ? 'is-active' : ''}`}
                 onClick={() => setActiveMetric('dual')}
               >
-                Dual (Fig. 4)
+                Combined (All 4)
               </button>
               <button
                 type="button"
@@ -483,11 +487,15 @@ export default function DeviceDetailView({ readingsData }) {
                   </span>
                   <span>•</span>
                   <span className="dd-chart-stat-item">
-                    Peak AQI: <strong style={{ color: '#00d2b4' }}>{chartStats.maxAqi}</strong>
+                    Avg Temp: <strong style={{ color: '#f59e0b' }}>{chartStats.avgTemp} °C</strong>
                   </span>
                   <span>•</span>
                   <span className="dd-chart-stat-item">
-                    Avg Temp: <strong style={{ color: '#f59e0b' }}>{chartStats.avgTemp} °C</strong>
+                    Avg Hum: <strong style={{ color: '#38bdf8' }}>{chartStats.avgHum} %</strong>
+                  </span>
+                  <span>•</span>
+                  <span className="dd-chart-stat-item">
+                    Avg Gas: <strong style={{ color: '#a855f7' }}>{chartStats.avgGas} ppm</strong>
                   </span>
                 </>
               ) : (
@@ -516,7 +524,7 @@ export default function DeviceDetailView({ readingsData }) {
                   <ComposedChart data={history} margin={{ top: 10, right: 16, left: -15, bottom: 0 }}>
                     <defs>
                       <linearGradient id="dualAqiGrad" x1="0" y1="0" x2="0" y2="1">
-                        <stop offset="5%" stopColor="#00d2b4" stopOpacity={0.4} />
+                        <stop offset="5%" stopColor="#00d2b4" stopOpacity={0.35} />
                         <stop offset="95%" stopColor="#00d2b4" stopOpacity={0.0} />
                       </linearGradient>
                     </defs>
@@ -533,7 +541,7 @@ export default function DeviceDetailView({ readingsData }) {
                     <YAxis
                       yAxisId="left"
                       orientation="left"
-                      stroke="var(--text-faint)"
+                      stroke="#00d2b4"
                       fontSize={11}
                       domain={[0, (dataMax) => Math.max(160, Math.ceil(dataMax * 1.15))]}
                       tickLine={false}
@@ -545,11 +553,11 @@ export default function DeviceDetailView({ readingsData }) {
                       orientation="right"
                       stroke="#f59e0b"
                       fontSize={11}
-                      domain={[(dataMin) => Math.floor(Math.max(0, dataMin - 3)), (dataMax) => Math.ceil(dataMax + 3)]}
+                      domain={[0, 100]}
                       tickLine={false}
                       axisLine={false}
                       width={36}
-                      unit="°"
+                      unit="%"
                     />
                     <Tooltip
                       contentStyle={{
@@ -561,10 +569,12 @@ export default function DeviceDetailView({ readingsData }) {
                         fontSize: '0.82rem',
                       }}
                       labelFormatter={(v) => (v ? new Date(v).toLocaleString() : '')}
-                      formatter={(val, name) => [
-                        name.includes('Temp') ? `${val} °C` : `${val}`,
-                        name
-                      ]}
+                      formatter={(val, name) => {
+                        if (name.includes('Temp')) return [`${val} °C`, name];
+                        if (name.includes('Humidity')) return [`${val} %`, name];
+                        if (name.includes('Gas')) return [`${val} ppm`, name];
+                        return [`${val}`, name];
+                      }}
                     />
                     <Legend wrapperStyle={{ fontSize: '0.74rem', paddingTop: '4px' }} />
                     <Area
@@ -578,13 +588,31 @@ export default function DeviceDetailView({ readingsData }) {
                       fill="url(#dualAqiGrad)"
                     />
                     <Line
+                      yAxisId="left"
+                      type="monotone"
+                      dataKey="gasPPM"
+                      name="Gas (ppm)"
+                      stroke="#a855f7"
+                      strokeWidth={2}
+                      dot={false}
+                    />
+                    <Line
                       yAxisId="right"
                       type="monotone"
                       dataKey="temperature"
                       name="Temp (°C)"
                       stroke="#f59e0b"
-                      strokeWidth={2.5}
+                      strokeWidth={2}
                       strokeDasharray="4 4"
+                      dot={false}
+                    />
+                    <Line
+                      yAxisId="right"
+                      type="monotone"
+                      dataKey="humidity"
+                      name="Humidity (%)"
+                      stroke="#38bdf8"
+                      strokeWidth={2}
                       dot={false}
                     />
                   </ComposedChart>
@@ -709,7 +737,7 @@ export default function DeviceDetailView({ readingsData }) {
                 <span>📶</span> Connected Wi-Fi
               </div>
               <div className="dd-spec-value mono" style={{ color: '#00d2b4', fontWeight: 700 }}>
-                {device.wifiSSID || 'AI+ Nova 1 5G'}
+                {device.wifiSSID || 'Awaiting Hardware Sync'}
               </div>
             </div>
 
@@ -721,6 +749,17 @@ export default function DeviceDetailView({ readingsData }) {
                 {device.rssi ? `${device.rssi} dBm · ` : ''}{device.ipAddress || 'Local Network (DHCP)'}
               </div>
             </div>
+
+            {device.addedBy && (
+              <div className="dd-spec-row">
+                <div className="dd-spec-label">
+                  <span>👤</span> Node Owner
+                </div>
+                <div className="dd-spec-value mono" style={{ color: '#a855f7' }}>
+                  {device.addedBy}
+                </div>
+              </div>
+            )}
 
             <div className="dd-spec-row">
               <div className="dd-spec-label">
