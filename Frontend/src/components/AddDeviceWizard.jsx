@@ -314,11 +314,31 @@ export default function AddDeviceWizard({ isOpen, onClose, onDeviceAdded, onNavi
 
     let transportInstance = null;
     try {
+      // 1. Pre-load firmware binary into memory FIRST before touching USB
+      setFlashStatus('Downloading AirGuard firmware package (4 MB)...');
+      setFlashProgress(10);
+
+      let arrayBuf;
+      try {
+        const resp = await fetch('/firmware/AirGuard_ESP32_AllInOne.bin');
+        if (!resp.ok) {
+          throw new Error(`HTTP ${resp.status}`);
+        }
+        arrayBuf = await resp.arrayBuffer();
+      } catch (fetchErr) {
+        throw new Error(`Could not download firmware binary (${fetchErr.message}). Check your internet connection or use the Download .bin button.`);
+      }
+
+      const fileData = new Uint8Array(arrayBuf);
+      setFlashProgress(20);
+
+      // 2. Request serial port from user
+      setFlashStatus('Firmware loaded. Please select your ESP32 COM port in the browser prompt...');
       const port = await navigator.serial.requestPort({});
       transportInstance = new Transport(port, true);
 
-      setFlashStatus('Connecting to ESP32 bootloader (hold BOOT button if needed)...');
-      setFlashProgress(5);
+      setFlashStatus('Connecting to ESP32 bootloader (hold BOOT for 1 sec if needed)...');
+      setFlashProgress(25);
 
       const espLoader = new ESPLoader({
         transport: transportInstance,
@@ -332,16 +352,8 @@ export default function AddDeviceWizard({ isOpen, onClose, onDeviceAdded, onNavi
       });
 
       const chip = await espLoader.main();
-      setFlashStatus(`Detected ${chip || 'ESP32'}. Fetching AirGuard firmware binary...`);
-      setFlashProgress(15);
-
-      const resp = await fetch('/firmware/AirGuard_ESP32_AllInOne.bin');
-      if (!resp.ok) {
-        throw new Error(`Failed to load firmware binary from web server (HTTP ${resp.status})`);
-      }
-      const arrayBuf = await resp.arrayBuffer();
-      const fileData = new Uint8Array(arrayBuf);
-      setFlashProgress(25);
+      setFlashStatus(`Detected ${chip || 'ESP32'}. RELEASE BOOT button! Writing firmware into flash...`);
+      setFlashProgress(35);
 
       setFlashStatus(`Writing ${(fileData.length / 1024).toFixed(0)} KB firmware directly into flash at 0x0000...`);
 
