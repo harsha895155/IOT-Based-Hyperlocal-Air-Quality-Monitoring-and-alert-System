@@ -45,6 +45,8 @@ export default function DevicesView({
   const filterMenuRef = React.useRef(null);
   const [selectedModalDevice, setSelectedModalDevice] = useState(null);
   const [showAddWizard, setShowAddWizard] = useState(false);
+  const [wizardMode, setWizardMode] = useState('onboard');
+  const [wizardTargetDevice, setWizardTargetDevice] = useState(null);
   const [pingLatencies, setPingLatencies] = useState({});
   const [pinging, setPinging] = useState(false);
   const [toastMessage, setToastMessage] = useState(null);
@@ -234,7 +236,27 @@ export default function DevicesView({
           <button className="btn-secondary" onClick={handleExportManifest}>
             📑 Export Manifest
           </button>
-          <button className="btn-primary" onClick={() => setShowAddWizard(true)}>
+          <button
+            type="button"
+            className="btn-secondary"
+            onClick={() => {
+              setWizardMode('reconfig');
+              setWizardTargetDevice(null);
+              setShowAddWizard(true);
+            }}
+            title="Easily change Wi-Fi or re-flash an existing device without code"
+          >
+            ⚡ Change Wi-Fi / Re-Flash
+          </button>
+          <button
+            type="button"
+            className="btn-primary"
+            onClick={() => {
+              setWizardMode('onboard');
+              setWizardTargetDevice(null);
+              setShowAddWizard(true);
+            }}
+          >
             + Add New Device
           </button>
         </div>
@@ -835,6 +857,8 @@ export default function DevicesView({
                 type="button"
                 className="btn-secondary"
                 onClick={() => {
+                  setWizardMode('reconfig');
+                  setWizardTargetDevice(selectedModalDevice);
                   setSelectedModalDevice(null);
                   setShowAddWizard(true);
                 }}
@@ -968,14 +992,20 @@ export default function DevicesView({
         </div>
       )}
 
-      {/* ─── CONSUMER IOT DEVICE ONBOARDING WIZARD ─── */}
+      {/* ─── CONSUMER IOT DEVICE ONBOARDING & RECONFIG WIZARD ─── */}
       <AddDeviceWizard
         isOpen={showAddWizard}
-        onClose={() => setShowAddWizard(false)}
+        initialMode={wizardMode}
+        targetDevice={wizardTargetDevice}
+        onClose={() => {
+          setShowAddWizard(false);
+          setWizardMode('onboard');
+          setWizardTargetDevice(null);
+        }}
         onDeviceAdded={(newDev) => {
           setDeviceList((prev) => [newDev, ...prev.filter((d) => (d.deviceId || d.id) !== newDev.deviceId)]);
           if (onSelectDevice) onSelectDevice(newDev.deviceId);
-          showToast(`✓ Node "${newDev.name}" successfully connected and added to your fleet!`);
+          showToast(`✓ Node "${newDev.name}" successfully updated!`);
         }}
         onNavigateDashboard={() => navigate('/dashboard')}
       />

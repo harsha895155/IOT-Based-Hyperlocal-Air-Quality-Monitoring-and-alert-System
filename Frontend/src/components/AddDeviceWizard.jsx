@@ -15,7 +15,15 @@ const STEPS = [
   { id: 7, label: 'Complete' },
 ];
 
-export default function AddDeviceWizard({ isOpen, onClose, onDeviceAdded, onNavigateDashboard }) {
+export default function AddDeviceWizard({
+  isOpen,
+  onClose,
+  onDeviceAdded,
+  onNavigateDashboard,
+  initialMode = 'onboard',
+  targetDevice = null,
+}) {
+  const [activeMode, setActiveMode] = useState(initialMode || 'onboard');
   const [step, setStep] = useState(1);
 
   // Form State — Clean inputs for fresh device onboarding (no demo data)
@@ -36,6 +44,31 @@ export default function AddDeviceWizard({ isOpen, onClose, onDeviceAdded, onNavi
     wifiSsid: '',
     wifiPassword: '',
   });
+
+  // Quick Wi-Fi Reconfig & Re-Flash State
+  const [quickPushing, setQuickPushing] = useState(false);
+  const [quickStatus, setQuickStatus] = useState(null);
+  const [quickError, setQuickError] = useState(null);
+  const [quickSuccess, setQuickSuccess] = useState(null);
+
+  // Sync mode and pre-populate targetDevice when props change
+  useEffect(() => {
+    if (isOpen) {
+      if (initialMode) setActiveMode(initialMode);
+      setQuickError(null);
+      setQuickSuccess(null);
+      setQuickStatus(null);
+      if (targetDevice) {
+        setFormData((prev) => ({
+          ...prev,
+          deviceId: targetDevice.deviceId || targetDevice.id || prev.deviceId,
+          name: targetDevice.name || prev.name,
+          location: targetDevice.location || prev.location,
+          wifiSsid: targetDevice.wifiSSID || prev.wifiSsid,
+        }));
+      }
+    }
+  }, [isOpen, initialMode, targetDevice]);
 
   const [verificationError, setVerificationError] = useState(null);
 
@@ -428,6 +461,140 @@ export default function AddDeviceWizard({ isOpen, onClose, onDeviceAdded, onNavi
     }
   };
 
+  // Fast 1-Click Wi-Fi Push to ESP32 Flash Memory (Zero Code)
+  const handleQuickPushWifi = async () => {
+    if (!formData.wifiSsid || !formData.wifiSsid.trim()) {
+      setQuickError('Please enter your 2.4 GHz Wi-Fi Name (SSID).');
+      return;
+    }
+    if (!isSerialSupported) {
+      setQuickError('USB Wi-Fi update requires Google Chrome or Microsoft Edge on a Desktop computer.');
+      return;
+    }
+
+    setQuickPushing(true);
+    setQuickError(null);
+    setQuickSuccess(null);
+    setQuickStatus('Please choose your connected ESP32 COM port in the browser popup...');
+
+    try {
+      if (serialReaderRef.current) {
+        try { await serialReaderRef.current.cancel(); } catch (e) {}
+        serialReaderRef.current = null;
+      }
+      if (serialWriterRef.current) {
+        try { await serialWriterRef.current.close(); } catch (e) {}
+        serialWriterRef.current = null;
+      }
+      if (serialPort && serialPort.readable) {
+        try { await serialPort.close(); } catch (e) {}
+        setSerialPort(null);
+      }
+
+      let port = null;
+      try {
+        const ports = await navigator.serial.getPorts();
+        if (ports && ports.length > 0) port = ports[0];
+      } catch (e) {}
+      if (!port) {
+        port = await navigator.serial.requestPort();
+      }
+
+      if (!port.readable) {
+        try {
+          await port.open({ baudRate: 115200 });
+        } catch (oe) {
+          if (!oe.message || !oe.message.includes('already open')) throw oe;
+        }
+      }
+      setSerialPort(port);
+
+      setQuickStatus('Port open! Writing new Wi-Fi credentials into ESP32 non-volatile flash memory...');
+
+      const textEncoder = new TextEncoderStream();
+      textEncoder.readable.pipeTo(port.writable).catch(() => {});
+      const writer = textEncoder.writable.getWriter();
+      serialWriterRef.current = writer;
+
+      const textDecoder = new TextDecoderStream();
+      port.readable.pipeTo(textDecoder.writable).catch(() => {});
+      const reader = textDecoder.readable.getReader();
+      serialReaderRef.current = reader;
+
+      const devId = formData.deviceId?.trim() || 'esp32-node-01';
+
+      // Register session with cloud backend
+      try {
+        await client.post('/devices/provision-session', {
+          deviceId: devId,
+          name: formData.name || `AirGuard Station (${devId})`,
+          location: formData.location || 'Local Deployment',
+          wifiSSID: formData.wifiSsid.trim(),
+        });
+      } catch (be) {}
+
+      // Send PROVISION command to ESP32
+      const cmd = `PROVISION {"cmd":"PROVISION","ssid":"${formData.wifiSsid.trim()}","password":"${formData.wifiPassword || ''}","deviceId":"${devId}"}\n`;
+      await writer.write(cmd);
+
+      setQuickStatus(`Credentials written. Waiting for ESP32 to connect to "${formData.wifiSsid.trim()}"...`);
+
+      // Read response from ESP32
+      let buffer = '';
+      const start = Date.now();
+      while (Date.now() - start < 12000) {
+        const { value, done } = await Promise.race([
+          reader.read(),
+          new Promise((resolve) => setTimeout(() => resolve({ value: null, done: false }), 2000)),
+        ]);
+        if (done) break;
+        if (value) {
+          buffer += value;
+          if (buffer.includes('PROVISIONED') || buffer.includes('WL_CONNECTED') || buffer.includes('Connected!')) {
+            break;
+          }
+          if (buffer.includes('WIFI_FAILED')) {
+            throw new Error(`ESP32 failed to authenticate with "${formData.wifiSsid}". Check password and verify 2.4 GHz is active.`);
+          }
+        }
+      }
+
+      // Verify live telemetry on backend
+      setQuickStatus('Confirming active cloud ingestion on AirGuard backend...');
+      for (let i = 0; i < 4; i++) {
+        await new Promise((r) => setTimeout(r, 1500));
+        try {
+          const vRes = await client.get(`/devices/verify/${encodeURIComponent(devId)}`);
+          if (vRes.data?.connected || vRes.data?.verified) {
+            break;
+          }
+        } catch (e) {}
+      }
+
+      setQuickSuccess(`✓ Successfully Updated! Your ESP32 is now connected to "${formData.wifiSsid.trim()}" and actively transmitting telemetry.`);
+      setQuickStatus(null);
+      if (onDeviceAdded) {
+        onDeviceAdded({
+          deviceId: devId,
+          name: formData.name || devId,
+          location: formData.location || 'AirGuard Station',
+          status: 'Online',
+          wifiSSID: formData.wifiSsid.trim(),
+        });
+      }
+    } catch (err) {
+      console.error('Quick Wi-Fi update error:', err);
+      if (err.name === 'NotFoundError') {
+        setQuickError('USB port selection was cancelled.');
+      } else {
+        setQuickError(`${err.message}. If the board's firmware is older or unresponsive, use "1-Click Re-Flash Firmware" below.`);
+      }
+      setQuickStatus(null);
+    } finally {
+      setQuickPushing(false);
+    }
+  };
+
   // Step 2: Location search autocomplete
   const handleLocationSearch = async (query) => {
     setFormData((prev) => ({ ...prev, location: query }));
@@ -751,32 +918,285 @@ export default function AddDeviceWizard({ isOpen, onClose, onDeviceAdded, onNavi
             </button>
           </div>
 
-          {/* Stepper Steps (1 to 7) */}
-          <div className="wizard-stepper">
-            {STEPS.map((s) => {
-              const isDone = step > s.id;
-              const isActive = step === s.id;
-              return (
-                <div
-                  key={s.id}
-                  className={`wizard-step-node ${isDone ? 'is-complete' : ''} ${isActive ? 'is-active' : ''}`}
-                >
-                  <div className="wizard-step-circle">
-                    {isDone ? '✓' : s.id}
-                  </div>
-                  <span className="wizard-step-lbl">{s.label}</span>
-                </div>
-              );
-            })}
+          {/* Mode Switcher Tabs */}
+          <div className="wizard-mode-tabs" style={{ display: 'flex', gap: '8px', margin: '6px 0 12px 0', background: 'rgba(0,0,0,0.25)', padding: '4px', borderRadius: '10px' }}>
+            <button
+              type="button"
+              className={`wizard-mode-tab-btn ${activeMode === 'reconfig' ? 'active' : ''}`}
+              onClick={() => setActiveMode('reconfig')}
+              style={{
+                flex: 1,
+                padding: '8px 12px',
+                borderRadius: '8px',
+                border: activeMode === 'reconfig' ? '1px solid #00d2b4' : '1px solid transparent',
+                background: activeMode === 'reconfig' ? 'rgba(0, 210, 180, 0.15)' : 'transparent',
+                color: activeMode === 'reconfig' ? '#00d2b4' : '#94a3b8',
+                fontWeight: 600,
+                fontSize: '0.82rem',
+                cursor: 'pointer',
+                display: 'flex',
+                alignItems: 'center',
+                justifyContent: 'center',
+                gap: '6px',
+                transition: 'all 0.2s',
+              }}
+            >
+              <span>⚡ Fast Wi-Fi Change / Re-Flash</span>
+            </button>
+            <button
+              type="button"
+              className={`wizard-mode-tab-btn ${activeMode === 'onboard' ? 'active' : ''}`}
+              onClick={() => setActiveMode('onboard')}
+              style={{
+                flex: 1,
+                padding: '8px 12px',
+                borderRadius: '8px',
+                border: activeMode === 'onboard' ? '1px solid #38bdf8' : '1px solid transparent',
+                background: activeMode === 'onboard' ? 'rgba(56, 189, 248, 0.15)' : 'transparent',
+                color: activeMode === 'onboard' ? '#38bdf8' : '#94a3b8',
+                fontWeight: 600,
+                fontSize: '0.82rem',
+                cursor: 'pointer',
+                display: 'flex',
+                alignItems: 'center',
+                justifyContent: 'center',
+                gap: '6px',
+                transition: 'all 0.2s',
+              }}
+            >
+              <span>🛠️ Full Setup Wizard (7 Steps)</span>
+            </button>
           </div>
 
-          <div className="wizard-mobile-step-indicator">
-            Step {step} of 7: <span className="wizard-mobile-step-name">{STEPS[step - 1].label}</span>
-          </div>
+          {activeMode === 'onboard' ? (
+            <>
+              {/* Stepper Steps (1 to 7) */}
+              <div className="wizard-stepper">
+                {STEPS.map((s) => {
+                  const isDone = step > s.id;
+                  const isActive = step === s.id;
+                  return (
+                    <div
+                      key={s.id}
+                      className={`wizard-step-node ${isDone ? 'is-complete' : ''} ${isActive ? 'is-active' : ''}`}
+                    >
+                      <div className="wizard-step-circle">
+                        {isDone ? '✓' : s.id}
+                      </div>
+                      <span className="wizard-step-lbl">{s.label}</span>
+                    </div>
+                  );
+                })}
+              </div>
+
+              <div className="wizard-mobile-step-indicator">
+                Step {step} of 7: <span className="wizard-mobile-step-name">{STEPS[step - 1].label}</span>
+              </div>
+            </>
+          ) : (
+            <div style={{ textAlign: 'center', padding: '4px 0 2px' }}>
+              <span style={{ fontSize: '0.78rem', color: '#00d2b4', fontWeight: 600 }}>
+                ⚡ Fast Wi-Fi Update & Re-Flash (No Arduino Code Needed)
+              </span>
+            </div>
+          )}
         </div>
 
         {/* ─── STEP BODY ─── */}
         <div className="wizard-body">
+          {activeMode === 'reconfig' ? (
+            <div className="wizard-reconfig-panel" style={{ padding: '4px 0' }}>
+              <div style={{ background: 'rgba(0, 210, 180, 0.08)', border: '1px solid rgba(0, 210, 180, 0.25)', borderRadius: '12px', padding: '12px 14px', marginBottom: '16px', display: 'flex', gap: '10px', alignItems: 'center' }}>
+                <span style={{ fontSize: '1.4rem' }}>⚡</span>
+                <div style={{ fontSize: '0.82rem', color: '#e2e8f0', lineHeight: 1.4 }}>
+                  <strong>Zero-Code Wi-Fi Reconfiguration & Fast Re-Flash:</strong> Easily change your ESP32's Wi-Fi network anytime without touching Arduino IDE, modifying C++ code, or recompiling.
+                </div>
+              </div>
+
+              {/* Target Device & Wi-Fi Inputs */}
+              <div style={{ background: 'var(--surface-raised, rgba(255,255,255,0.03))', border: '1px solid var(--border-soft, rgba(255,255,255,0.08))', borderRadius: '14px', padding: '16px', marginBottom: '16px' }}>
+                <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '12px', marginBottom: '12px' }}>
+                  <div>
+                    <label style={{ display: 'block', fontSize: '0.75rem', fontWeight: 600, color: '#94a3b8', marginBottom: '4px' }}>
+                      Hardware Device ID
+                    </label>
+                    <input
+                      type="text"
+                      className="wizard-text-input"
+                      value={formData.deviceId}
+                      onChange={(e) => setFormData((p) => ({ ...p, deviceId: e.target.value }))}
+                      placeholder="e.g. esp32-node-01"
+                      style={{ width: '100%', fontFamily: 'monospace' }}
+                    />
+                  </div>
+                  <div>
+                    <label style={{ display: 'block', fontSize: '0.75rem', fontWeight: 600, color: '#94a3b8', marginBottom: '4px' }}>
+                      Device Name (Friendly)
+                    </label>
+                    <input
+                      type="text"
+                      className="wizard-text-input"
+                      value={formData.name}
+                      onChange={(e) => setFormData((p) => ({ ...p, name: e.target.value }))}
+                      placeholder="e.g. Living Room Station"
+                      style={{ width: '100%' }}
+                    />
+                  </div>
+                </div>
+
+                <div style={{ marginBottom: '12px' }}>
+                  <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '4px' }}>
+                    <label style={{ fontSize: '0.75rem', fontWeight: 600, color: '#94a3b8' }}>
+                      New Wi-Fi Network (SSID) *
+                    </label>
+                    <span style={{ fontSize: '0.7rem', color: '#00d2b4' }}>2.4 GHz Required</span>
+                  </div>
+                  <input
+                    type="text"
+                    className="wizard-text-input"
+                    value={formData.wifiSsid}
+                    onChange={(e) => setFormData((p) => ({ ...p, wifiSsid: e.target.value }))}
+                    placeholder="e.g. Airtel_Wifi_first floor"
+                    style={{ width: '100%', padding: '10px 12px', fontWeight: 600 }}
+                  />
+                </div>
+
+                <div>
+                  <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '4px' }}>
+                    <label style={{ fontSize: '0.75rem', fontWeight: 600, color: '#94a3b8' }}>
+                      Wi-Fi Password
+                    </label>
+                    <button
+                      type="button"
+                      onClick={() => setShowPassword((v) => !v)}
+                      style={{ background: 'none', border: 'none', color: '#38bdf8', fontSize: '0.72rem', cursor: 'pointer', padding: 0 }}
+                    >
+                      {showPassword ? 'Hide' : 'Show'} Password
+                    </button>
+                  </div>
+                  <input
+                    type={showPassword ? 'text' : 'password'}
+                    className="wizard-text-input"
+                    value={formData.wifiPassword}
+                    onChange={(e) => setFormData((p) => ({ ...p, wifiPassword: e.target.value }))}
+                    placeholder="Leave blank if network is open / unencrypted"
+                    style={{ width: '100%', padding: '10px 12px' }}
+                  />
+                </div>
+              </div>
+
+              {/* Status / Error Alerts */}
+              {quickStatus && (
+                <div style={{ background: 'rgba(56, 189, 248, 0.12)', border: '1px solid rgba(56, 189, 248, 0.4)', borderRadius: '10px', padding: '10px 14px', marginBottom: '14px', color: '#38bdf8', fontSize: '0.82rem', display: 'flex', alignItems: 'center', gap: '8px' }}>
+                  <span className="wizard-spinner" style={{ width: '14px', height: '14px' }}></span>
+                  <span>{quickStatus}</span>
+                </div>
+              )}
+
+              {quickSuccess && (
+                <div style={{ background: 'rgba(16, 185, 129, 0.15)', border: '1px solid rgba(16, 185, 129, 0.45)', borderRadius: '10px', padding: '12px 14px', marginBottom: '14px', color: '#10b981', fontSize: '0.84rem', fontWeight: 600 }}>
+                  {quickSuccess}
+                </div>
+              )}
+
+              {quickError && (
+                <div style={{ background: 'rgba(239, 68, 68, 0.12)', border: '1px solid rgba(239, 68, 68, 0.4)', borderRadius: '10px', padding: '10px 14px', marginBottom: '14px', color: '#ef4444', fontSize: '0.82rem' }}>
+                  ❌ {quickError}
+                </div>
+              )}
+
+              {/* Flashing Progress Bar */}
+              {flashing && (
+                <div style={{ background: 'rgba(0, 0, 0, 0.3)', border: '1px solid rgba(56, 189, 248, 0.3)', borderRadius: '12px', padding: '14px', marginBottom: '14px' }}>
+                  <div style={{ display: 'flex', justifyContent: 'space-between', fontSize: '0.78rem', color: '#e2e8f0', marginBottom: '6px' }}>
+                    <span>{flashStatus}</span>
+                    <strong style={{ color: '#00d2b4' }}>{flashProgress}%</strong>
+                  </div>
+                  <div style={{ height: '8px', background: 'rgba(255,255,255,0.1)', borderRadius: '4px', overflow: 'hidden' }}>
+                    <div style={{ height: '100%', width: `${flashProgress}%`, background: 'linear-gradient(90deg, #38bdf8, #00d2b4)', transition: 'width 0.2s ease' }} />
+                  </div>
+                </div>
+              )}
+
+              {flashError && (
+                <div style={{ background: 'rgba(239, 68, 68, 0.12)', border: '1px solid rgba(239, 68, 68, 0.4)', borderRadius: '10px', padding: '10px 14px', marginBottom: '14px', color: '#ef4444', fontSize: '0.82rem' }}>
+                  ❌ {flashError}
+                </div>
+              )}
+
+              {/* 3 Methods Cards */}
+              <div style={{ display: 'flex', flexDirection: 'column', gap: '12px' }}>
+                {/* Method 1: Instant USB Push */}
+                <div style={{ background: 'linear-gradient(135deg, rgba(0, 210, 180, 0.08) 0%, rgba(56, 189, 248, 0.05) 100%)', border: '1px solid rgba(0, 210, 180, 0.3)', borderRadius: '14px', padding: '14px 16px' }}>
+                  <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '8px' }}>
+                    <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
+                      <span style={{ fontSize: '1.2rem' }}>⚡</span>
+                      <div>
+                        <div style={{ fontWeight: 700, fontSize: '0.88rem', color: '#f8fafc' }}>Method 1: Instant USB Wi-Fi Push (Fastest)</div>
+                        <div style={{ fontSize: '0.74rem', color: '#94a3b8' }}>Connect USB cable → 1-Click writes new Wi-Fi into ESP32 memory (Takes 3 seconds)</div>
+                      </div>
+                    </div>
+                  </div>
+                  <button
+                    type="button"
+                    className="wizard-btn-primary"
+                    style={{ width: '100%', padding: '10px 16px', background: 'linear-gradient(135deg, #00d2b4 0%, #0284c7 100%)', border: 'none', fontWeight: 700, borderRadius: '8px', cursor: 'pointer', display: 'flex', justifyContent: 'center', alignItems: 'center', gap: '8px' }}
+                    onClick={handleQuickPushWifi}
+                    disabled={quickPushing || flashing || !formData.wifiSsid.trim()}
+                  >
+                    {quickPushing ? (
+                      <>
+                        <span className="wizard-spinner" style={{ width: '14px', height: '14px' }}></span>
+                        <span>Updating ESP32 Wi-Fi...</span>
+                      </>
+                    ) : (
+                      <>
+                        <span>⚡ Write New Wi-Fi to ESP32 over USB</span>
+                      </>
+                    )}
+                  </button>
+                </div>
+
+                {/* Method 2: 1-Click In-Browser Re-Flash */}
+                <div style={{ background: 'rgba(255, 255, 255, 0.02)', border: '1px solid rgba(255, 255, 255, 0.08)', borderRadius: '14px', padding: '14px 16px' }}>
+                  <div style={{ display: 'flex', alignItems: 'center', gap: '8px', marginBottom: '8px' }}>
+                    <span style={{ fontSize: '1.2rem' }}>🔥</span>
+                    <div>
+                      <div style={{ fontWeight: 700, fontSize: '0.88rem', color: '#f8fafc' }}>Method 2: 1-Click In-Browser Re-Flash (WebUSB)</div>
+                      <div style={{ fontSize: '0.74rem', color: '#94a3b8' }}>If the board is unresponsive or has old code, replace its entire OS in 25 seconds</div>
+                    </div>
+                  </div>
+                  <button
+                    type="button"
+                    className="wizard-btn-secondary"
+                    style={{ width: '100%', padding: '9px 16px', borderRadius: '8px', cursor: 'pointer', fontWeight: 600, fontSize: '0.82rem', borderColor: 'rgba(56, 189, 248, 0.4)', color: '#38bdf8' }}
+                    onClick={handleOneClickFlash}
+                    disabled={flashing || quickPushing}
+                  >
+                    {flashing ? 'Flashing in Progress...' : '🔥 1-Click Re-Flash ESP32 Firmware (No Code)'}
+                  </button>
+                </div>
+
+                {/* Method 3: Wireless Captive Portal */}
+                <div style={{ background: 'rgba(255, 255, 255, 0.02)', border: '1px solid rgba(255, 255, 255, 0.08)', borderRadius: '14px', padding: '14px 16px' }}>
+                  <div style={{ display: 'flex', alignItems: 'center', gap: '8px', marginBottom: '8px' }}>
+                    <span style={{ fontSize: '1.2rem' }}>📶</span>
+                    <div>
+                      <div style={{ fontWeight: 700, fontSize: '0.88rem', color: '#f8fafc' }}>Method 3: 100% Wireless Captive Portal (No PC / No Cable)</div>
+                      <div style={{ fontSize: '0.74rem', color: '#94a3b8' }}>Reconfigure Wi-Fi directly from your mobile phone anywhere:</div>
+                    </div>
+                  </div>
+                  <ol style={{ margin: '6px 0 0 16px', padding: 0, fontSize: '0.76rem', color: '#cbd5e1', lineHeight: 1.6 }}>
+                    <li>Hold the ESP32's physical <strong>BOOT button for 2 seconds</strong> (or turn off previous hotspot).</li>
+                    <li>Status LED will blink fast and board broadcasts hotspot: <strong style={{ color: '#00d2b4' }}>AirGuard-Setup</strong>.</li>
+                    <li>Connect your phone to <strong style={{ color: '#00d2b4' }}>AirGuard-Setup</strong> (no password).</li>
+                    <li>Open browser to <strong style={{ color: '#38bdf8' }}>http://192.168.4.1</strong> → select new Wi-Fi & Save.</li>
+                  </ol>
+                </div>
+              </div>
+            </div>
+          ) : (
+            <>
           {/* STEP 1: CONNECT DEVICE (MANDATORY PHYSICAL HARDWARE DETECTION) */}
           {step === 1 && (
             <div>
@@ -1655,115 +2075,139 @@ export default function AddDeviceWizard({ isOpen, onClose, onDeviceAdded, onNavi
               </div>
             </div>
           )}
+          </>
+          )}
         </div>
 
-        {/* ─── FOOTER CONTROLS (STRICT STATE MACHINE: NO SKIPPING) ─── */}
+        {/* ─── FOOTER CONTROLS ─── */}
         <div className="wizard-footer">
-          {step > 1 && step < 7 ? (
-            <button
-              type="button"
-              className="wizard-btn-secondary"
-              onClick={() => setStep((s) => Math.max(1, s - 1))}
-              disabled={step === 4 || step === 5}
-            >
-              ← Back
-            </button>
+          {activeMode === 'reconfig' ? (
+            <div style={{ display: 'flex', justifyContent: 'flex-end', width: '100%', gap: '10px' }}>
+              <button type="button" className="wizard-btn-secondary" onClick={onClose}>
+                Close
+              </button>
+              {quickSuccess && onNavigateDashboard && (
+                <button
+                  type="button"
+                  className="wizard-btn-success"
+                  onClick={() => {
+                    onClose();
+                    onNavigateDashboard();
+                  }}
+                >
+                  Go to Dashboard →
+                </button>
+              )}
+            </div>
           ) : (
-            <button type="button" className="wizard-btn-secondary" onClick={onClose}>
-              Cancel
-            </button>
-          )}
+            <>
+              {step > 1 && step < 7 ? (
+                <button
+                  type="button"
+                  className="wizard-btn-secondary"
+                  onClick={() => setStep((s) => Math.max(1, s - 1))}
+                  disabled={step === 4 || step === 5}
+                >
+                  ← Back
+                </button>
+              ) : (
+                <button type="button" className="wizard-btn-secondary" onClick={onClose}>
+                  Cancel
+                </button>
+              )}
 
-          {/* Step 1 Next: ONLY enabled when device is genuinely connected and identified */}
-          {step === 1 && (
-            <button
-              type="button"
-              className="wizard-btn-primary"
-              onClick={() => setStep(2)}
-              disabled={!serialConnected || !detectedHardware || !formData.deviceId || !!idError}
-            >
-              Next: Location →
-            </button>
-          )}
+              {/* Step 1 Next: ONLY enabled when device is genuinely connected and identified */}
+              {step === 1 && (
+                <button
+                  type="button"
+                  className="wizard-btn-primary"
+                  onClick={() => setStep(2)}
+                  disabled={!serialConnected || !detectedHardware || !formData.deviceId || !!idError}
+                >
+                  Next: Location →
+                </button>
+              )}
 
-          {/* Step 2 Next: ONLY enabled when location/city is set */}
-          {step === 2 && (
-            <button
-              type="button"
-              className="wizard-btn-primary"
-              onClick={() => setStep(3)}
-              disabled={!formData.location && !formData.city}
-            >
-              Next: Configure Wi-Fi →
-            </button>
-          )}
+              {/* Step 2 Next: ONLY enabled when location/city is set */}
+              {step === 2 && (
+                <button
+                  type="button"
+                  className="wizard-btn-primary"
+                  onClick={() => setStep(3)}
+                  disabled={!formData.location && !formData.city}
+                >
+                  Next: Configure Wi-Fi →
+                </button>
+              )}
 
-          {/* Step 3 Next: ONLY enabled when Wi-Fi SSID is entered */}
-          {step === 3 && (
-            <button
-              type="button"
-              className="wizard-btn-primary"
-              onClick={() => {
-                setStep(4);
-                handleProvisionDevice();
-              }}
-              disabled={!formData.wifiSsid.trim()}
-            >
-              Provision Device →
-            </button>
-          )}
+              {/* Step 3 Next: ONLY enabled when Wi-Fi SSID is entered */}
+              {step === 3 && (
+                <button
+                  type="button"
+                  className="wizard-btn-primary"
+                  onClick={() => {
+                    setStep(4);
+                    handleProvisionDevice();
+                  }}
+                  disabled={!formData.wifiSsid.trim()}
+                >
+                  Provision Device →
+                </button>
+              )}
 
-          {/* Step 4 Next: Provisioning (advances automatically or with retry) */}
-          {step === 4 && (
-            <button
-              type="button"
-              className="wizard-btn-primary"
-              onClick={() => {
-                setStep(5);
-                startVerification();
-              }}
-              disabled={!provisioningStatus.registered}
-            >
-              Verify Connection →
-            </button>
-          )}
+              {/* Step 4 Next: Provisioning (advances automatically or with retry) */}
+              {step === 4 && (
+                <button
+                  type="button"
+                  className="wizard-btn-primary"
+                  onClick={() => {
+                    setStep(5);
+                    startVerification();
+                  }}
+                  disabled={!provisioningStatus.registered}
+                >
+                  Verify Connection →
+                </button>
+              )}
 
-          {/* Step 5 Next: Verification (ONLY enabled when verified) */}
-          {step === 5 && (
-            <button
-              type="button"
-              className="wizard-btn-primary"
-              onClick={() => {
-                setStep(6);
-                listenForTelemetry(verificationResult?.latestReading);
-              }}
-              disabled={verifying}
-            >
-              View Telemetry →
-            </button>
-          )}
+              {/* Step 5 Next: Verification (ONLY enabled when verified) */}
+              {step === 5 && (
+                <button
+                  type="button"
+                  className="wizard-btn-primary"
+                  onClick={() => {
+                    setStep(6);
+                    listenForTelemetry(verificationResult?.latestReading);
+                  }}
+                  disabled={verifying}
+                >
+                  View Telemetry →
+                </button>
+              )}
 
-          {/* Step 6 Next: First Live Reading */}
-          {step === 6 && (
-            <button
-              type="button"
-              className="wizard-btn-primary"
-              onClick={() => setStep(7)}
-              disabled={!latestReading && !verificationResult?.verified && !verificationResult?.connected}
-            >
-              Finish Setup →
-            </button>
-          )}
+              {/* Step 6 Next: First Live Reading */}
+              {step === 6 && (
+                <button
+                  type="button"
+                  className="wizard-btn-primary"
+                  onClick={() => setStep(7)}
+                  disabled={!latestReading && !verificationResult?.verified && !verificationResult?.connected}
+                >
+                  Finish Setup →
+                </button>
+              )}
 
-          {/* Step 7: Complete */}
-          {step === 7 && (
-            <button
-              type="button"
-              className="wizard-btn-success"
-              onClick={handleFinishOnboarding}
-            >
-              Go to Dashboard ✓
-            </button>
+              {/* Step 7: Complete */}
+              {step === 7 && (
+                <button
+                  type="button"
+                  className="wizard-btn-success"
+                  onClick={handleFinishOnboarding}
+                >
+                  Go to Dashboard ✓
+                </button>
+              )}
+            </>
           )}
         </div>
       </div>

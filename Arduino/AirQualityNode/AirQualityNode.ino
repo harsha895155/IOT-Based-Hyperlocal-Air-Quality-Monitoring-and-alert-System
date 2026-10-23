@@ -110,7 +110,28 @@ void handleSerialCommands() {
   }
 }
 
+// Check if user is holding the physical BOOT button (GPIO 0) for 2 seconds to launch captive portal
+void checkBootButton() {
+  pinMode(0, INPUT_PULLUP);
+  if (digitalRead(0) == LOW) {
+    unsigned long pressStart = millis();
+    while (digitalRead(0) == LOW) {
+      if (millis() - pressStart > 2000) {
+        Serial.println("\n[BOOT] BOOT button held for 2s! Activating Mobile Phone Hotspot: AirGuard-Setup...");
+        for (int i = 0; i < 6; i++) {
+          digitalWrite(STATUS_LED_PIN, HIGH); delay(80);
+          digitalWrite(STATUS_LED_PIN, LOW); delay(80);
+        }
+        network.startCaptivePortal(180000UL);
+        break;
+      }
+      delay(30);
+    }
+  }
+}
+
 void loop() {
+  checkBootButton();
   handleSerialCommands();
 
   unsigned long now = millis();
