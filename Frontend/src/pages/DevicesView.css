@@ -542,6 +542,10 @@
     padding: 10px 10px 28px !important;
   }
 
+  .devices-table-card {
+    display: none !important;
+  }
+
   .devices-header-actions {
     display: flex !important;
     flex-direction: row !important;

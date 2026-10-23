@@ -19,7 +19,25 @@ export default function DevicesView({
   const [deviceList, setDeviceList] = useState(devices);
   const [searchQuery, setSearchQuery] = useState('');
   const [statusFilter, setStatusFilter] = useState('All');
-  const [viewMode, setViewMode] = useState('table'); // 'table' | 'grid'
+  const [isMobile, setIsMobile] = useState(() => {
+    return typeof window !== 'undefined' ? window.innerWidth <= 768 : false;
+  });
+  const [viewMode, setViewMode] = useState(() => {
+    return typeof window !== 'undefined' && window.innerWidth <= 768 ? 'grid' : 'table';
+  });
+
+  useEffect(() => {
+    const handleResize = () => {
+      const mobile = window.innerWidth <= 768;
+      setIsMobile(mobile);
+      if (mobile) {
+        setViewMode('grid');
+      }
+    };
+    window.addEventListener('resize', handleResize);
+    return () => window.removeEventListener('resize', handleResize);
+  }, []);
+
   const [showFilterMenu, setShowFilterMenu] = useState(false);
   const filterMenuRef = React.useRef(null);
   const [selectedModalDevice, setSelectedModalDevice] = useState(null);
@@ -343,25 +361,28 @@ export default function DevicesView({
                   ))}
                 </div>
 
-                <div className="devices-filter-divider" />
-
-                <div className="devices-filter-group-title">VIEW LAYOUT</div>
-                <div className="devices-filter-options">
-                  <button
-                    type="button"
-                    className={`devices-filter-option-btn ${viewMode === 'table' ? 'is-selected' : ''}`}
-                    onClick={() => setViewMode('table')}
-                  >
-                    <span>📊 Table View</span>
-                  </button>
-                  <button
-                    type="button"
-                    className={`devices-filter-option-btn ${viewMode === 'grid' ? 'is-selected' : ''}`}
-                    onClick={() => setViewMode('grid')}
-                  >
-                    <span>🗂️ Hardware Cards</span>
-                  </button>
-                </div>
+                {!isMobile && (
+                  <>
+                    <div className="devices-filter-divider" />
+                    <div className="devices-filter-group-title">VIEW LAYOUT</div>
+                    <div className="devices-filter-options">
+                      <button
+                        type="button"
+                        className={`devices-filter-option-btn ${viewMode === 'table' ? 'is-selected' : ''}`}
+                        onClick={() => setViewMode('table')}
+                      >
+                        <span>📊 Table View</span>
+                      </button>
+                      <button
+                        type="button"
+                        className={`devices-filter-option-btn ${viewMode === 'grid' ? 'is-selected' : ''}`}
+                        onClick={() => setViewMode('grid')}
+                      >
+                        <span>🗂️ Hardware Cards</span>
+                      </button>
+                    </div>
+                  </>
+                )}
               </div>
             )}
           </div>
@@ -393,7 +414,7 @@ export default function DevicesView({
             + Add New Device
           </button>
         </div>
-      ) : viewMode === 'table' ? (
+      ) : (!isMobile && viewMode === 'table') ? (
         <div className="devices-table-card">
           <div className="devices-table-wrap">
             <table className="devices-table">
