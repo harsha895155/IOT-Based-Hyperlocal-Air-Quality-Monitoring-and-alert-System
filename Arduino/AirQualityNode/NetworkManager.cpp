@@ -32,11 +32,16 @@ bool NodeNetworkManager::startCaptivePortal(unsigned long timeoutMs) {
   Serial.println("  AirGuard — Mobile Phone Hotspot Activated   ");
   Serial.println("  Connect phone Wi-Fi to: AirGuard-Setup      ");
   Serial.println("  Portal URL: http://192.168.4.1 (Auto-Popup) ");
-  Serial.println("==============================================");
-
-  // Scan local 2.4GHz networks before enabling AP
+  Serial.println("==============================================");  // Scan local 2.4GHz networks before enabling AP
   WiFi.mode(WIFI_AP_STA);
-  int n = WiFi.scanNetworks();
+  WiFi.disconnect();
+  delay(200);
+  int n = WiFi.scanNetworks(false, true);
+  if (n <= 0) {
+    delay(300);
+    n = WiFi.scanNetworks(false, true);
+  }
+  
   String networkOptions = "";
   for (int i = 0; i < n; ++i) {
     String net = WiFi.SSID(i);
@@ -44,6 +49,7 @@ bool NodeNetworkManager::startCaptivePortal(unsigned long timeoutMs) {
       networkOptions += "<option value=\"" + net + "\">" + net + " (" + String(WiFi.RSSI(i)) + " dBm)</option>";
     }
   }
+  WiFi.scanDelete();
 
   IPAddress apIP(192, 168, 4, 1);
   WiFi.softAPConfig(apIP, apIP, IPAddress(255, 255, 255, 0));
@@ -59,13 +65,13 @@ bool NodeNetworkManager::startCaptivePortal(unsigned long timeoutMs) {
   String newPass = "";
 
   auto getPortalHtml = [&]() -> String {
-    String html = "<!DOCTYPE html><html><head><meta name=\"viewport\" content=\"width=device-width, initial-scale=1.0\">";
+    String html = "<!DOCTYPE html><html><head><meta charset=\"UTF-8\"><meta name=\"viewport\" content=\"width=device-width, initial-scale=1.0\">";
     html += "<title>AirGuard Wi-Fi Setup</title><style>";
     html += "body{font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',Roboto,sans-serif;background:#0b1120;color:#f8fafc;margin:0;padding:20px;display:flex;justify-content:center;align-items:center;min-height:90vh;}";
     html += ".card{background:#131d33;border:1px solid #1e293b;border-radius:20px;padding:24px;max-width:380px;width:100%;box-shadow:0 20px 40px rgba(0,0,0,0.5);}";
     html += ".logo{font-size:2.4rem;text-align:center;margin-bottom:8px;}";
     html += "h2{font-size:1.35rem;margin:0 0 6px 0;text-align:center;color:#38bdf8;}";
-    html += "p{font-size:0.86rem;color:#94a3b8;text-align:center;margin:0 0 20px 0;line-height:1.4;}";
+    html += "p{font-size:0.86rem;color:#94a3b8;text-align:center;margin:0 0 16px 0;line-height:1.4;}";
     html += "label{font-size:0.78rem;font-weight:700;color:#cbd5e1;display:block;margin-bottom:6px;text-transform:uppercase;letter-spacing:0.06em;}";
     html += "select,input{width:100%;box-sizing:border-box;background:#0f172a;border:1px solid #334155;border-radius:12px;padding:12px 14px;font-size:0.95rem;color:#f8fafc;margin-bottom:16px;outline:none;}";
     html += "select:focus,input:focus{border-color:#00d2b4;}";
@@ -74,12 +80,13 @@ bool NodeNetworkManager::startCaptivePortal(unsigned long timeoutMs) {
     html += "</style></head><body><div class=\"card\"><div class=\"logo\">📡</div><h2>AirGuard Wi-Fi Setup</h2>";
     html += "<p>Connect this sensing node to your home or office 2.4 GHz Wi-Fi network.</p>";
     html += "<form action=\"/save\" method=\"POST\"><label>Select Wi-Fi Network</label>";
-    html += "<select name=\"ssid\" id=\"ssid\" onchange=\"var m=document.getElementById('manual');if(this.value==='__custom__'){m.style.display='block';m.required=true;}else{m.style.display='none';m.required=false;}\">";
+    html += "<select name=\"ssid\" id=\"ssid\" onchange=\"updateManual();\">";
     html += networkOptions;
-    html += "<option value=\"__custom__\">-- Enter Wi-Fi Name Manually --</option></select>";
-    html += "<input type=\"text\" name=\"manual_ssid\" id=\"manual\" placeholder=\"Type Hidden Wi-Fi Name (SSID)\" style=\"display:none;\">";
+    html += "<option value=\"__custom__\"" + String(networkOptions.length() == 0 ? " selected" : "") + ">-- Enter Wi-Fi Name Manually --</option></select>";
+    html += "<input type=\"text\" name=\"manual_ssid\" id=\"manual\" placeholder=\"Enter your 2.4 GHz Wi-Fi Name (SSID)\" style=\"" + String(networkOptions.length() == 0 ? "display:block;" : "display:none;") + "\">";
     html += "<label>Wi-Fi Password</label><input type=\"password\" name=\"password\" placeholder=\"Enter Wi-Fi Password\" required>";
     html += "<button type=\"submit\">Save & Connect Node</button></form>";
+    html += "<script>function updateManual(){var s=document.getElementById('ssid');var m=document.getElementById('manual');if(!s||s.value==='__custom__'){m.style.display='block';m.required=true;}else{m.style.display='none';m.required=false;}}updateManual();</script>";
     html += "<div class=\"footer\">AirGuard IoT Sensing Node &bull; Hyperlocal Monitor</div></div></body></html>";
     return html;
   };

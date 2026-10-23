@@ -101,7 +101,7 @@ self.addEventListener('fetch', (event) => {
   if (request.mode === 'navigate') {
     event.respondWith(
       fetch(request).catch(() => {
-        return caches.match('/index.html') || caches.match('/');
+        return caches.match('/index.html').then((res) => res || caches.match('/'));
       })
     );
     return;
@@ -122,10 +122,14 @@ self.addEventListener('fetch', (event) => {
         return cachedResponse;
       }
 
-      return fetch(request).then((networkResponse) => {
-        safeCachePut(CACHE_NAME, request, networkResponse);
-        return networkResponse;
-      });
+      return fetch(request)
+        .then((networkResponse) => {
+          safeCachePut(CACHE_NAME, request, networkResponse);
+          return networkResponse;
+        })
+        .catch(() => {
+          return new Response('', { status: 503, statusText: 'Service Unavailable (Offline)' });
+        });
     })
   );
 });

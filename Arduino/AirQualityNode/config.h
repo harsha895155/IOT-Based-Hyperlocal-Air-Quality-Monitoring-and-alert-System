@@ -8,8 +8,8 @@
 // ============================================================
 
 // ---- Wi-Fi credentials ----
-#define WIFI_SSID "Airtel_Wifi_first floor"
-#define WIFI_PASSWORD "Firstfloor@1"
+#define WIFI_SSID "AI+ Nova 1 5G"
+#define WIFI_PASSWORD "12345678"
 
 // ---- Backend endpoint ----
 // Live Cloud Deployment (Render):
@@ -24,7 +24,7 @@
 
 // Shared secret sent as an API key header; must match API_KEY in
 // the backend's .env. Keeps random devices from posting fake data.
-#define DEVICE_API_KEY "CHANGE_ME_SHARED_SECRET"
+#define DEVICE_API_KEY "AIR_QUALITY_SYSTEM_NODE_KEY_2026"
 
 // ---- Pin assignments ----
 #define MQ135_PIN 34     // analog-capable ADC1 pin
