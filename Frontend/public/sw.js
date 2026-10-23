@@ -4,7 +4,7 @@
  * and secure handling of real-time sensor streams without caching sensitive credentials.
  */
 
-const CACHE_NAME = 'airguard-v1.0.1';
+const CACHE_NAME = 'airguard-v1.0.2';
 const PRECACHE_ASSETS = [
   '/',
   '/index.html',

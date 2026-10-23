@@ -24,7 +24,7 @@
 
 // Shared secret sent as an API key header; must match API_KEY in
 // the backend's .env. Keeps random devices from posting fake data.
-#define DEVICE_API_KEY "AIR_QUALITY_SYSTEM_NODE_KEY_2026"
+#define DEVICE_API_KEY "CHANGE_ME_SHARED_SECRET"
 
 // ---- Pin assignments ----
 #define MQ135_PIN 34     // analog-capable ADC1 pin
