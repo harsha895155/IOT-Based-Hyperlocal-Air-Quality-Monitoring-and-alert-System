@@ -134,10 +134,18 @@ export default function Dashboard({ readingsData, onNavigateTab }) {
   const cw = weatherData?.current || {};
   const todayForecast = weatherData?.daily?.[0] || {};
 
+  // Check if device is selected and has recorded telemetry in database
+  const isDeviceActiveOrRecorded = Boolean(
+    selectedDevice !== 'current-location' &&
+    currentDevice &&
+    latest &&
+    (latest.temperature != null || latest.airQuality != null)
+  );
+
   // Telemetry metrics:
-  // When hardware device is connected and transmitting, prioritize live hardware readings.
-  // When device is NOT connected, display current location ambient meteorological & air quality data.
-  const aqiVal = isDeviceConnected && typeof latest?.airQuality === 'number'
+  // When hardware device is selected and has readings, prioritize hardware readings.
+  // When in Location Mode or no device readings exist, fall back to current location ambient data.
+  const aqiVal = (isDeviceConnected || isDeviceActiveOrRecorded) && typeof latest?.airQuality === 'number'
     ? latest.airQuality
     : (cw.aqi != null ? cw.aqi : null);
 
@@ -145,24 +153,28 @@ export default function Dashboard({ readingsData, onNavigateTab }) {
   const { category: aqiCategory, color: aqiColor } = classifyAQI(aqiVal ?? 0);
   const aqiHealthAdvice = healthRecommendation(aqiVal ?? 0);
 
-  const sensorTemp = isDeviceConnected && latest?.temperature != null
+  const sensorTemp = (isDeviceConnected || isDeviceActiveOrRecorded) && latest?.temperature != null
     ? Number(latest.temperature).toFixed(1)
     : (cw.temp != null ? `${cw.temp}` : null);
 
   const currentTemp = sensorTemp;
   const feelsLike = cw.feelsLike != null ? `${cw.feelsLike}°C` : '—';
-  const sensorHumidity = isDeviceConnected && latest?.humidity != null
+  const sensorHumidity = (isDeviceConnected || isDeviceActiveOrRecorded) && latest?.humidity != null
     ? Math.round(latest.humidity)
     : (cw.humidity != null ? cw.humidity : null);
 
-  const sensorGasPpm = isDeviceConnected && latest?.gasPPM != null
+  const sensorGasPpm = (isDeviceConnected || isDeviceActiveOrRecorded) && latest?.gasPPM != null
     ? (latest.gasPPM < 1 ? Number(latest.gasPPM).toFixed(2) : Number(latest.gasPPM).toFixed(1))
     : null;
-  const numGasPpm = isDeviceConnected && latest?.gasPPM != null ? Number(latest.gasPPM) : null;
+  const numGasPpm = (isDeviceConnected || isDeviceActiveOrRecorded) && latest?.gasPPM != null ? Number(latest.gasPPM) : null;
 
-  const weatherCondition = cw.condition || 'Partly Cloudy';
-  const weatherIconType = cw.icon || 'partly-cloudy';
-  const isDay = cw.isDay ?? true;
+  // Local solar day/night failsafe: between 6:30 PM (18:30) and 6:00 AM, it is nighttime
+  const currentHour = new Date().getHours() + new Date().getMinutes() / 60;
+  const localIsDay = currentHour >= 6.0 && currentHour < 18.5;
+  const isDay = cw.isDay !== undefined ? Boolean(cw.isDay) : localIsDay;
+
+  const weatherCondition = cw.condition || (isDay ? 'Partly Cloudy' : 'Clear Sky');
+  const weatherIconType = cw.icon || (isDay ? 'partly-cloudy' : 'clear');
 
   const activeAlerts = alerts.filter((a) => !a.acknowledged);
   const timeAgo = formatTimeAgo(latest?.createdAt);
@@ -414,19 +426,28 @@ export default function Dashboard({ readingsData, onNavigateTab }) {
         </div>
       )}
 
-      {/* ─── Informative Banner when in Current Location Mode ─── */}
+      {/* ─── Informative Banner when in Current Location Mode or Device Standby ─── */}
       {!isDeviceConnected && (
         <div className="dashboard-current-mode-banner">
           <div className="current-mode-info">
-            <span className="current-mode-icon">📍</span>
+            <span className="current-mode-icon">{isDeviceActiveOrRecorded ? '📡' : '📍'}</span>
             <div className="current-mode-text">
-              <strong style={{ color: 'var(--accent)' }}>Current Place Mode:</strong>{' '}
-              {devices.length === 0
-                ? 'No AirGuard IoT device connected yet. Displaying live weather & ambient air quality for '
-                : 'Device offline. Displaying real-time weather & air quality for '}
-              <span style={{ fontWeight: 600, color: 'var(--text-primary)' }}>
-                {displayPlaceName}
-              </span>.
+              {isDeviceActiveOrRecorded ? (
+                <>
+                  <strong style={{ color: '#f59e0b' }}>Device Standby:</strong>{' '}
+                  Station <span style={{ fontWeight: 600, color: 'var(--text-primary)' }}>{currentDevice?.name || currentDevice?.id}</span> last transmitted telemetry {timeAgo}. Displaying recorded device metrics & local ambient forecast.
+                </>
+              ) : (
+                <>
+                  <strong style={{ color: 'var(--accent)' }}>Current Place Mode:</strong>{' '}
+                  {devices.length === 0
+                    ? 'No AirGuard IoT device connected yet. Displaying live weather & ambient air quality for '
+                    : 'Device offline. Displaying real-time weather & air quality for '}
+                  <span style={{ fontWeight: 600, color: 'var(--text-primary)' }}>
+                    {displayPlaceName}
+                  </span>.
+                </>
+              )}
             </div>
           </div>
           <button
@@ -434,7 +455,7 @@ export default function Dashboard({ readingsData, onNavigateTab }) {
             className="btn-primary btn-sm current-mode-connect-btn"
             onClick={() => onNavigateTab ? onNavigateTab('devices') : null}
           >
-            + Connect Device
+            {isDeviceActiveOrRecorded ? 'Manage Device' : '+ Connect Device'}
           </button>
         </div>
       )}
@@ -524,17 +545,25 @@ export default function Dashboard({ readingsData, onNavigateTab }) {
           {/* Card 1: Gas Sensor or Ambient PM2.5 */}
           <div className="pollutant-card is-active-sensor">
             <div className="pol-top">
-              <span className="pol-name">{isDeviceConnected ? 'MQ135 Gas Sensor' : 'Ambient Fine PM2.5'}</span>
-              <span className="pol-tag" style={{ color: isDeviceConnected ? '#10b981' : '#38bdf8' }}>
-                {isDeviceConnected ? 'Active Sensor' : 'Current Location'}
+              <span className="pol-name">
+                {isDeviceConnected || isDeviceActiveOrRecorded ? 'MQ135 Gas Sensor' : 'Ambient Fine PM2.5'}
+              </span>
+              <span className="pol-tag" style={{ color: isDeviceConnected ? '#10b981' : (isDeviceActiveOrRecorded ? '#f59e0b' : '#38bdf8') }}>
+                {isDeviceConnected ? 'Active Sensor' : (isDeviceActiveOrRecorded ? 'Recorded Telemetry' : 'Current Location')}
               </span>
             </div>
             <div className="pol-val-row">
-              <span className="pol-val mono">{isDeviceConnected ? (sensorGasPpm ?? '—') : (cw.pm2_5 != null ? cw.pm2_5 : '—')}</span>
-              <span className="pol-unit">{isDeviceConnected ? 'ppm' : 'µg/m³'}</span>
+              <span className="pol-val mono">
+                {isDeviceConnected || isDeviceActiveOrRecorded
+                  ? (sensorGasPpm ?? '—')
+                  : (cw.pm2_5 != null ? cw.pm2_5 : '—')}
+              </span>
+              <span className="pol-unit">{isDeviceConnected || isDeviceActiveOrRecorded ? 'ppm' : 'µg/m³'}</span>
             </div>
             <div className="pol-sub">
-              {isDeviceConnected ? 'Calibrated Baseline: R0 = 76.63 kΩ' : 'Fine respirable atmospheric particulate'}
+              {isDeviceConnected || isDeviceActiveOrRecorded
+                ? 'Calibrated Baseline: R0 = 76.63 kΩ'
+                : 'Fine respirable atmospheric particulate'}
             </div>
             <div className="pollutant-live-bar"><div className="pollutant-live-bar-fill" /></div>
           </div>
@@ -542,9 +571,11 @@ export default function Dashboard({ readingsData, onNavigateTab }) {
           {/* Temperature DHT22 / Weather */}
           <div className="pollutant-card is-active-sensor">
             <div className="pol-top">
-              <span className="pol-name">{isDeviceConnected ? 'DHT22 Temperature' : 'Ambient Temperature'}</span>
-              <span className="pol-tag" style={{ color: isDeviceConnected ? '#10b981' : '#38bdf8' }}>
-                {isDeviceConnected ? 'Active Sensor' : 'Current Location'}
+              <span className="pol-name">
+                {isDeviceConnected || isDeviceActiveOrRecorded ? 'DHT22 / DHT11 Temperature' : 'Ambient Temperature'}
+              </span>
+              <span className="pol-tag" style={{ color: isDeviceConnected ? '#10b981' : (isDeviceActiveOrRecorded ? '#f59e0b' : '#38bdf8') }}>
+                {isDeviceConnected ? 'Active Sensor' : (isDeviceActiveOrRecorded ? 'Recorded Telemetry' : 'Current Location')}
               </span>
             </div>
             <div className="pol-val-row">
@@ -552,7 +583,9 @@ export default function Dashboard({ readingsData, onNavigateTab }) {
               <span className="pol-unit">°C</span>
             </div>
             <div className="pol-sub">
-              {isDeviceConnected ? 'High accuracy capacitive sensor' : 'Current regional weather temperature'}
+              {isDeviceConnected || isDeviceActiveOrRecorded
+                ? (isDeviceConnected ? 'Live hardware capacitive sensor' : `Last recorded reading • ${timeAgo}`)
+                : 'Current regional weather temperature'}
             </div>
             <div className="pollutant-live-bar"><div className="pollutant-live-bar-fill" /></div>
           </div>
@@ -560,16 +593,22 @@ export default function Dashboard({ readingsData, onNavigateTab }) {
           {/* Humidity DHT22 / Weather */}
           <div className="pollutant-card is-active-sensor">
             <div className="pol-top">
-              <span className="pol-name">{isDeviceConnected ? 'DHT22 Humidity' : 'Ambient Relative Humidity'}</span>
-              <span className="pol-tag" style={{ color: isDeviceConnected ? '#10b981' : '#38bdf8' }}>
-                {isDeviceConnected ? 'Active Sensor' : 'Current Location'}
+              <span className="pol-name">
+                {isDeviceConnected || isDeviceActiveOrRecorded ? 'DHT22 / DHT11 Humidity' : 'Ambient Relative Humidity'}
+              </span>
+              <span className="pol-tag" style={{ color: isDeviceConnected ? '#10b981' : (isDeviceActiveOrRecorded ? '#f59e0b' : '#38bdf8') }}>
+                {isDeviceConnected ? 'Active Sensor' : (isDeviceActiveOrRecorded ? 'Recorded Telemetry' : 'Current Location')}
               </span>
             </div>
             <div className="pol-val-row">
               <span className="pol-val mono">{sensorHumidity ?? '—'}</span>
               <span className="pol-unit">% RH</span>
             </div>
-            <div className="pol-sub">Relative moisture saturation</div>
+            <div className="pol-sub">
+              {isDeviceConnected || isDeviceActiveOrRecorded
+                ? (isDeviceConnected ? 'Live hardware humidity sensor' : `Last recorded reading • ${timeAgo}`)
+                : 'Relative moisture saturation'}
+            </div>
             <div className="pollutant-live-bar"><div className="pollutant-live-bar-fill" /></div>
           </div>
 
@@ -577,11 +616,13 @@ export default function Dashboard({ readingsData, onNavigateTab }) {
           <div className="pollutant-card">
             <div className="pol-top">
               <span className="pol-name">Carbon Monoxide (CO)</span>
-              <span className="pol-tag text-accent">{isDeviceConnected ? 'Derived' : 'Regional'}</span>
+              <span className="pol-tag text-accent">
+                {isDeviceConnected ? 'Derived' : (isDeviceActiveOrRecorded ? 'Hardware Derived' : 'Regional')}
+              </span>
             </div>
             <div className="pol-val-row">
               <span className="pol-val mono">
-                {isDeviceConnected
+                {isDeviceConnected || isDeviceActiveOrRecorded
                   ? (numGasPpm != null ? (numGasPpm * 0.12).toFixed(2) : '—')
                   : (cw.carbonMonoxide ? (cw.carbonMonoxide / 100).toFixed(1) : '2.8')}
               </span>
@@ -594,46 +635,63 @@ export default function Dashboard({ readingsData, onNavigateTab }) {
           {/* Estimated CO2 Eq / PM10 */}
           <div className="pollutant-card">
             <div className="pol-top">
-              <span className="pol-name">{isDeviceConnected ? 'CO₂ Equivalent' : 'Coarse PM10 Particulate'}</span>
-              <span className="pol-tag text-accent">{isDeviceConnected ? 'Derived' : 'Regional'}</span>
+              <span className="pol-name">
+                {isDeviceConnected || isDeviceActiveOrRecorded ? 'CO₂ Equivalent' : 'Coarse PM10 Particulate'}
+              </span>
+              <span className="pol-tag text-accent">
+                {isDeviceConnected ? 'Derived' : (isDeviceActiveOrRecorded ? 'Hardware Derived' : 'Regional')}
+              </span>
             </div>
             <div className="pol-val-row">
               <span className="pol-val mono">
-                {isDeviceConnected
+                {isDeviceConnected || isDeviceActiveOrRecorded
                   ? (numGasPpm != null ? Math.round(400 + numGasPpm * 1.8) : '—')
                   : (cw.pm10 ?? '28.5')}
               </span>
-              <span className="pol-unit">{isDeviceConnected ? 'ppm eq' : 'µg/m³'}</span>
+              <span className="pol-unit">{isDeviceConnected || isDeviceActiveOrRecorded ? 'ppm eq' : 'µg/m³'}</span>
             </div>
             <div className="pol-sub">
-              {isDeviceConnected ? 'Typical fresh air baseline: 400-500 ppm' : 'Inhalable coarse particulate threshold'}
+              {isDeviceConnected || isDeviceActiveOrRecorded
+                ? 'Typical fresh air baseline: 400-500 ppm'
+                : 'Inhalable coarse particulate threshold'}
             </div>
             <div className="pollutant-live-bar"><div className="pollutant-live-bar-fill" /></div>
           </div>
 
           {/* Hardware Connection Card */}
-          <div className={`pollutant-card ${isDeviceConnected ? 'is-active-sensor' : 'is-unsupported'}`}>
+          <div className={`pollutant-card ${isDeviceConnected ? 'is-active-sensor' : (isDeviceActiveOrRecorded ? 'is-active-sensor' : 'is-unsupported')}`}>
             <div className="pol-top">
-              <span className="pol-name">{isDeviceConnected ? `Hardware Node (${currentDevice?.id})` : 'AirGuard ESP32 Sensor'}</span>
-              <span className={`pol-tag ${isDeviceConnected ? 'text-online' : 'text-faint'}`} style={{ display: 'inline-flex', alignItems: 'center', gap: '6px' }}>
-                {!isDeviceConnected && (
-                  <span className="sensor-radar-wrap">
-                    <span className="sensor-radar-ping" />
-                    <span style={{ width: 6, height: 6, borderRadius: '50%', background: '#f59e0b', display: 'inline-block' }} />
-                  </span>
-                )}
-                {isDeviceConnected ? 'Online' : 'Not Connected'}
+              <span className="pol-name">
+                {currentDevice ? `Hardware Node (${currentDevice?.id})` : 'AirGuard ESP32 Sensor'}
+              </span>
+              <span
+                className={`pol-tag ${isDeviceConnected ? 'text-online' : (isDeviceActiveOrRecorded ? 'text-amber-400' : 'text-faint')}`}
+                style={{ display: 'inline-flex', alignItems: 'center', gap: '6px' }}
+              >
+                <span
+                  style={{
+                    width: 6,
+                    height: 6,
+                    borderRadius: '50%',
+                    background: isDeviceConnected ? '#10b981' : (isDeviceActiveOrRecorded ? '#f59e0b' : '#64748b'),
+                    display: 'inline-block',
+                    boxShadow: isDeviceConnected ? '0 0 6px #10b981' : (isDeviceActiveOrRecorded ? '0 0 6px #f59e0b' : 'none'),
+                  }}
+                />
+                {isDeviceConnected ? 'Online' : (isDeviceActiveOrRecorded ? 'Standby' : 'Not Connected')}
               </span>
             </div>
             <div className="pol-val-row">
-              <span className={`pol-val ${isDeviceConnected ? 'mono' : 'text-faint'}`} style={!isDeviceConnected ? { fontSize: '0.95rem' } : {}}>
-                {isDeviceConnected ? currentDevice?.name : 'Current Location Mode'}
+              <span className={`pol-val ${isDeviceConnected || isDeviceActiveOrRecorded ? 'mono' : 'text-faint'}`} style={!isDeviceConnected && !isDeviceActiveOrRecorded ? { fontSize: '0.95rem' } : {}}>
+                {currentDevice ? currentDevice?.name : 'Current Location Mode'}
               </span>
             </div>
             <div className="pol-sub">
               {isDeviceConnected
                 ? `Transmitting via ${currentDevice?.type || 'ESP32'}`
-                : 'Click "+ Connect Device" to link hardware'}
+                : (isDeviceActiveOrRecorded
+                  ? `Hardware Standby • Last seen ${timeAgo}`
+                  : 'Click "+ Connect Device" to link hardware')}
             </div>
             <div className="pollutant-live-bar"><div className="pollutant-live-bar-fill" /></div>
           </div>

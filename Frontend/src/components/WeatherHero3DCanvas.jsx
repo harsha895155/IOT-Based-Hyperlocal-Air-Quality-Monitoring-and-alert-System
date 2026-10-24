@@ -46,8 +46,11 @@ export default function WeatherHero3DCanvas({
     if (c.includes('rain') || c.includes('drizzle') || c.includes('shower') || ic.includes('rain') || ic.includes('drizzle')) {
       return 'rain';
     }
+    if (!day) {
+      return 'clear-night';
+    }
     if (c.includes('clear') || c.includes('sunny') || ic.includes('clear')) {
-      return day ? 'clear-day' : 'clear-night';
+      return 'clear-day';
     }
     if (c.includes('wind') || ic.includes('wind')) {
       return 'windy';

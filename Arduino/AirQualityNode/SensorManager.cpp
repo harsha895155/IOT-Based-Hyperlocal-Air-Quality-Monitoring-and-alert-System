@@ -2,11 +2,14 @@
 #include "config.h"
 #include <DHT.h>
 
-static DHT dht(DHT11_PIN, DHT11);
+static DHT dht11(DHT11_PIN, DHT11);
+static DHT dht22(DHT11_PIN, DHT22);
+static uint8_t detectedSensorType = 0; // 0 = unknown, 11 = DHT11, 22 = DHT22
 
 void SensorManager::begin() {
   pinMode(MQ135_PIN, INPUT);
-  dht.begin();
+  dht11.begin();
+  dht22.begin();
   // MQ135 needs a warm-up period before readings stabilize; the caller
   // (main .ino) waits on this during setup() so the first transmitted
   // reading isn't garbage.
@@ -90,23 +93,51 @@ const char* SensorManager::aqiCategory(int aqi) {
 
 SensorReading SensorManager::read() {
   SensorReading r;
-  r.temperature = dht.readTemperature();
-  r.humidity    = dht.readHumidity();
+  r.temperature = NAN;
+  r.humidity    = NAN;
 
-  // If initial read returned NaN, wait 250ms and retry once (common DHT timing quirk)
+  // 1. If previously detected, prioritize known sensor type
+  if (detectedSensorType == 22) {
+    r.temperature = dht22.readTemperature();
+    r.humidity    = dht22.readHumidity();
+  } else if (detectedSensorType == 11) {
+    r.temperature = dht11.readTemperature();
+    r.humidity    = dht11.readHumidity();
+  }
+
+  // 2. Auto-detect if unconfirmed or previous read returned NaN
   if (isnan(r.temperature) || isnan(r.humidity)) {
-    delay(250);
-    r.temperature = dht.readTemperature();
-    r.humidity    = dht.readHumidity();
+    // Try DHT22 (high precision)
+    float t22 = dht22.readTemperature();
+    float h22 = dht22.readHumidity();
+    if (!isnan(t22) && !isnan(h22)) {
+      r.temperature = t22;
+      r.humidity    = h22;
+      if (detectedSensorType != 22) {
+        detectedSensorType = 22;
+        Serial.println("[Sensors] Confirmed connected sensor: DHT22 (Precision AM2302)");
+      }
+    } else {
+      delay(250);
+      // Try DHT11
+      float t11 = dht11.readTemperature();
+      float h11 = dht11.readHumidity();
+      if (!isnan(t11) && !isnan(h11)) {
+        r.temperature = t11;
+        r.humidity    = h11;
+        if (detectedSensorType != 11) {
+          detectedSensorType = 11;
+          Serial.println("[Sensors] Confirmed connected sensor: DHT11 (Blue Module)");
+        }
+      }
+    }
   }
 
-  // If still NaN, use nominal ambient fallbacks (26.0 C, 50.0 % RH) so that
-  // MQ-135 gas and AQI telemetry continue to transmit instead of silencing the node
-  if (isnan(r.temperature)) {
-    r.temperature = 26.0f;
-  }
-  if (isnan(r.humidity)) {
-    r.humidity = 50.0f;
+  // 3. Fallback only if hardware pin communication fails completely
+  if (isnan(r.temperature) || isnan(r.humidity)) {
+    Serial.printf("[Sensors WARN] DHT returned NaN on GPIO %d! Check wiring (VCC, GND, GPIO %d) or sensor module.\n", DHT11_PIN, DHT11_PIN);
+    if (isnan(r.temperature)) r.temperature = 26.0f;
+    if (isnan(r.humidity))    r.humidity    = 50.0f;
   }
 
   r.gasPPM   = readMQ135PPM();

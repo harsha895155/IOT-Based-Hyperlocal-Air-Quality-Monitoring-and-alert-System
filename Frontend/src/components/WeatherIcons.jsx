@@ -26,13 +26,20 @@ export const WeatherIcons = {
     )
   ),
 
-  'partly-cloudy': ({ size = 28, className = '' }) => (
-    <svg width={size} height={size} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className={className}>
-      <g className="anim-sun-rays">
-        <path d="M12 2v2M4.93 4.93l1.41 1.41M2 12h2M20 12h2M19.07 4.93l-1.41 1.41" stroke="#f59e0b" />
-      </g>
-      <path className="anim-cloud-float" d="M17.5 19H9a5 5 0 1 1 2.3-9.45A7 7 0 0 1 21 16a3.5 3.5 0 0 1-3.5 3z" fill="#94a3b8" fillOpacity="0.25" stroke="#cbd5e1" />
-    </svg>
+  'partly-cloudy': ({ size = 28, isDay = true, className = '' }) => (
+    isDay ? (
+      <svg width={size} height={size} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className={className}>
+        <g className="anim-sun-rays">
+          <path d="M12 2v2M4.93 4.93l1.41 1.41M2 12h2M20 12h2M19.07 4.93l-1.41 1.41" stroke="#f59e0b" />
+        </g>
+        <path className="anim-cloud-float" d="M17.5 19H9a5 5 0 1 1 2.3-9.45A7 7 0 0 1 21 16a3.5 3.5 0 0 1-3.5 3z" fill="#94a3b8" fillOpacity="0.25" stroke="#cbd5e1" />
+      </svg>
+    ) : (
+      <svg width={size} height={size} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className={`anim-moon-glow ${className}`}>
+        <path d="M15.5 11A5 5 0 0 0 10 5.2a6 6 0 1 1 5.5 5.8z" fill="#38bdf8" fillOpacity="0.3" stroke="#38bdf8" />
+        <path className="anim-cloud-float" d="M17.5 19H9a5 5 0 1 1 2.3-9.45A7 7 0 0 1 21 16a3.5 3.5 0 0 1-3.5 3z" fill="#94a3b8" fillOpacity="0.3" stroke="#94a3b8" />
+      </svg>
+    )
   ),
 
   cloudy: ({ size = 28, className = '' }) => (
