@@ -716,7 +716,7 @@ export default function DevicesView({
                 <div className="device-card-chips">
                   <span className="hardware-pill">ESP32-WROOM-32</span>
                   <span className="hardware-pill">MQ135 + DHT22</span>
-                  <span className="signal-pill">📶 {device.wifiSSID || 'AI+ Nova 1 5G'}</span>
+                  <span className="signal-pill">📶 {device.wifiSSID || (device.status === 'Online' ? 'Wi-Fi Active' : 'No Wi-Fi Linked')}</span>
                   {isAdmin && (
                     <span className="hardware-pill" style={{ color: '#38bdf8', borderColor: 'rgba(56, 189, 248, 0.35)' }}>
                       👤 {device.addedBy || 'System'}
@@ -841,7 +841,7 @@ export default function DevicesView({
               <div className="device-modal-item">
                 <span className="device-modal-label">Connected Wi-Fi (SSID)</span>
                 <span className="device-modal-val mono" style={{ color: '#00d2b4', fontWeight: 700 }}>
-                  📶 {selectedModalDevice.wifiSSID || 'AI+ Nova 1 5G'}
+                  📶 {selectedModalDevice.wifiSSID || (selectedModalDevice.status === 'Online' ? 'Wi-Fi Connected' : 'No Wi-Fi Linked')}
                 </span>
               </div>
               {selectedModalDevice.addedBy && (

@@ -1099,7 +1099,7 @@ export default function ProfileView({ onNavigateLogin }) {
                         <div className="profile-device-details-row">
                           <span>Connected Wi-Fi:</span>
                           <span style={{ color: '#00d2b4', fontWeight: 600 }}>
-                            📶 {device.wifiSSID || 'AI+ Nova 1 5G'}
+                            📶 {device.wifiSSID || (isOnline ? 'Wi-Fi Connected' : 'Not Linked')}
                           </span>
                         </div>
                         <div className="profile-device-details-row">

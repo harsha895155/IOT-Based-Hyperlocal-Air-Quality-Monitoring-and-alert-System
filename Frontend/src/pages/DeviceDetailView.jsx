@@ -766,7 +766,7 @@ export default function DeviceDetailView({ readingsData }) {
                 <span>📶</span> Connected Wi-Fi
               </div>
               <div className="dd-spec-value mono" style={{ color: '#00d2b4', fontWeight: 700 }}>
-                {device.wifiSSID || 'AI+ Nova 1 5G'}
+                {device.wifiSSID || (device.status === 'Online' ? 'Active Wi-Fi Link' : 'Not Connected')}
               </div>
             </div>
 
