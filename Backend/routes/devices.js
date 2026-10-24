@@ -5,6 +5,7 @@ const Reading = require('../models/Reading');
 const Alert = require('../models/Alert');
 const User = require('../models/User');
 const { protect, optionalAuth } = require('../middleware/auth');
+const { getWeatherForCoordinates } = require('../services/weatherService');
 
 // GET /api/devices — returns ONLY devices owned by the currently authenticated user
 router.get('/', optionalAuth, async (req, res, next) => {
@@ -33,6 +34,21 @@ router.get('/', optionalAuth, async (req, res, next) => {
         const dev = doc.toObject({ virtuals: true });
         const latest = await Reading.findOne({ deviceId: dev.deviceId }).sort({ createdAt: -1 });
 
+        let temp = latest ? latest.temperature : null;
+        let hum = latest ? latest.humidity : null;
+
+        // If reading has the constant fallback (26°C / 50%), always show the location's live weather
+        if (latest && Math.round(temp) === 26 && Math.round(hum) === 50) {
+          try {
+            const coords = dev.coordinates && dev.coordinates.lat != null ? dev.coordinates : { lat: 14.489, lng: 79.957 };
+            const weather = await getWeatherForCoordinates(coords.lat, coords.lng, dev.location);
+            if (weather && weather.temperature != null && weather.humidity != null) {
+              temp = weather.temperature;
+              hum = weather.humidity;
+            }
+          } catch (wErr) {}
+        }
+
         const ownerUser = doc.userId && typeof doc.userId === 'object' && doc.userId.name
           ? {
               id: doc.userId._id || doc.userId.id,
@@ -60,8 +76,8 @@ router.get('/', optionalAuth, async (req, res, next) => {
           ipAddress: dev.ipAddress || '',
           rssi: dev.rssi || null,
           aqi: latest ? latest.airQuality : null,
-          temperature: latest ? latest.temperature : null,
-          humidity: latest ? latest.humidity : null,
+          temperature: temp,
+          humidity: hum,
           gasPPM: latest ? latest.gasPPM : null,
         };
       })

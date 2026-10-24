@@ -10,18 +10,41 @@ router.get('/', async (req, res) => {
     let lng = req.query.lng ? parseFloat(req.query.lng) : null;
     let locationName = req.query.location || 'Current Location';
 
-    // If no coordinates provided, try device coords, or fallback to default coordinates
+    // If no coordinates provided, resolve via device registry or geocode the location name
     if (lat == null || lng == null || isNaN(lat) || isNaN(lng)) {
-      const dev = await Device.findOne({ 'coordinates.lat': { $exists: true } });
-      if (dev && dev.coordinates?.lat && dev.coordinates?.lng) {
-        lat = dev.coordinates.lat;
-        lng = dev.coordinates.lng;
-        if (!req.query.location) locationName = dev.location || locationName;
-      } else {
-        // Fallback default coordinates (sensing hub) so the dashboard always has live data
-        lat = 14.4426;
-        lng = 79.9865;
-        if (!req.query.location) locationName = 'AirGuard Regional Station';
+      if (req.query.location && req.query.location !== 'Current Location') {
+        // 1. Try matching a registered physical device's coordinates
+        const dev = await Device.findOne({
+          location: new RegExp('^' + req.query.location.replace(/[.*+?^${}()|[\]\\]/g, '\\$&'), 'i'),
+          'coordinates.lat': { $exists: true },
+        });
+        if (dev && dev.coordinates?.lat && dev.coordinates?.lng) {
+          lat = dev.coordinates.lat;
+          lng = dev.coordinates.lng;
+        } else {
+          // 2. Geocode the location name via meteorological geocoder
+          try {
+            const searchResults = await searchLocations(req.query.location);
+            if (searchResults && searchResults.length > 0 && searchResults[0].latitude) {
+              lat = searchResults[0].latitude;
+              lng = searchResults[0].longitude;
+            }
+          } catch (geoErr) {}
+        }
+      }
+
+      // 3. Fallback to registered device coordinates or sensing hub
+      if (lat == null || lng == null || isNaN(lat) || isNaN(lng)) {
+        const anyDev = await Device.findOne({ 'coordinates.lat': { $exists: true } });
+        if (anyDev && anyDev.coordinates?.lat && anyDev.coordinates?.lng) {
+          lat = anyDev.coordinates.lat;
+          lng = anyDev.coordinates.lng;
+          if (!req.query.location) locationName = anyDev.location || locationName;
+        } else {
+          lat = 14.4426;
+          lng = 79.9865;
+          if (!req.query.location) locationName = 'AirGuard Regional Station';
+        }
       }
     }
 

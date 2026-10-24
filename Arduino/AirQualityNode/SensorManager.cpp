@@ -50,37 +50,42 @@ float SensorManager::readMQ135PPM() {
 // modifiers) onto the 0-500 EPA-style AQI scale used throughout this
 // project (see Table I in the accompanying paper).
 int SensorManager::computeAQI(float gasPPM, float temperature, float humidity) {
-  // Breakpoints tuned for the MQ135's usable range (400-2000ppm
-  // covers background-to-hazardous indoor/outdoor conditions).
-  struct Breakpoint { float ppmLow, ppmHigh; int aqiLow, aqiHigh; };
-  static const Breakpoint table[] = {
-    {   0,  400,    0,  50 },
-    { 400,  700,   51, 100 },
-    { 700, 1000,  101, 150 },
-    {1000, 1500,  151, 200 },
-    {1500, 2000,  201, 300 },
-    {2000, 5000,  301, 500 },
-  };
+  float ppm = gasPPM < 0.0f ? 0.0f : gasPPM;
+  int aqi = 35; // Standard baseline for clean ambient indoor/outdoor air
 
-  int aqi = 500;
-  for (auto &bp : table) {
-    if (gasPPM <= bp.ppmHigh) {
-      float frac = (gasPPM - bp.ppmLow) / (bp.ppmHigh - bp.ppmLow);
-      frac = constrain(frac, 0.0f, 1.0f);
-      aqi = bp.aqiLow + (int)round(frac * (bp.aqiHigh - bp.aqiLow));
-      break;
-    }
+  if (ppm <= 0.5f) {
+    aqi = (int)round(20.0f + ppm * 20.0f); // 20 - 30 (Clean/Excellent)
+  } else if (ppm <= 5.0f) {
+    // Typical normal room / outdoor ambient VOC levels (0.5 to 5 ppm) -> AQI 30 to 48 (Good)
+    aqi = (int)round(30.0f + ((ppm - 0.5f) / 4.5f) * 18.0f);
+  } else if (ppm <= 15.0f) {
+    // Mild air pollution / stuffy room (5 to 15 ppm) -> AQI 51 to 100 (Moderate)
+    aqi = (int)round(51.0f + ((ppm - 5.0f) / 10.0f) * 49.0f);
+  } else if (ppm <= 30.0f) {
+    // Noticeable pollution / poor ventilation -> AQI 101 to 150 (Unhealthy SG)
+    aqi = (int)round(101.0f + ((ppm - 15.0f) / 15.0f) * 49.0f);
+  } else if (ppm <= 60.0f) {
+    // High smoke / pollutants -> AQI 151 to 200 (Unhealthy)
+    aqi = (int)round(151.0f + ((ppm - 30.0f) / 30.0f) * 49.0f);
+  } else if (ppm <= 150.0f) {
+    // Severe pollution -> AQI 201 to 300 (Very Unhealthy)
+    aqi = (int)round(201.0f + ((ppm - 60.0f) / 90.0f) * 99.0f);
+  } else {
+    // Extreme danger (> 150 ppm) -> AQI 301 to 500 (Hazardous)
+    float extra = ((ppm - 150.0f) / 350.0f) * 199.0f;
+    if (extra > 199.0f) extra = 199.0f;
+    aqi = (int)round(301.0f + extra);
   }
 
-  // Humidity materially affects metal-oxide sensor response; nudge the
-  // index slightly upward in very humid conditions to avoid
-  // under-reporting, mirroring the contextual-correction approach
-  // described in the paper (Section V-C).
+  // Humidity & temperature contextual adjustments
   if (humidity > 70.0f) {
-    aqi += (int)((humidity - 70.0f) * 0.3f);
+    aqi += (int)((humidity - 70.0f) * 0.25f);
+  }
+  if (temperature > 35.0f) {
+    aqi += (int)((temperature - 35.0f) * 0.5f);
   }
 
-  return constrain(aqi, 0, 500);
+  return constrain(aqi, 15, 500);
 }
 
 const char* SensorManager::aqiCategory(int aqi) {
@@ -96,6 +101,7 @@ SensorReading SensorManager::read() {
   SensorReading r;
   r.temperature = NAN;
   r.humidity    = NAN;
+  r.dhtHardwareValid = true;
 
   static uint32_t readCount = 0;
   readCount++;
@@ -137,6 +143,7 @@ SensorReading SensorManager::read() {
 
   // 3. Fallback only if hardware pin communication fails
   if (isnan(r.temperature) || isnan(r.humidity)) {
+    r.dhtHardwareValid = false; // Mark that DHT failed so cloud backend provides location weather
     Serial.printf("[Sensors WARN] DHT returned NaN on GPIO %d! Check wiring (VCC to 3.3V/5V, GND, DATA to GPIO %d).\n", DHT11_PIN, DHT11_PIN);
     // Add natural micro-variance so fallback is not a dead static line
     float jitterT = ((float)(random(-15, 16))) / 10.0f; // +/- 1.5C

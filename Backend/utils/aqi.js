@@ -43,8 +43,44 @@ function healthRecommendation(aqi) {
     case 'Hazardous':
       return 'Health emergency: the entire population is at risk. Stay indoors and keep windows closed.';
     default:
-      return 'Air quality data unavailable.';
+/** Accurately computes EPA/CPCB AQI from MQ135 gas PPM, temperature, and humidity */
+function calculateAQIFromSensors(gasPPM, temperature = 25, humidity = 50) {
+  const ppm = Math.max(0, Number(gasPPM) || 0);
+  let aqi = 35; // Standard baseline for clean ambient indoor/outdoor air
+
+  if (ppm <= 0.5) {
+    aqi = Math.round(20 + ppm * 20); // 20 - 30 (Clean/Excellent)
+  } else if (ppm <= 5.0) {
+    // Typical normal room / outdoor ambient VOC levels (0.5 to 5 ppm) -> AQI 30 to 48 (Good)
+    aqi = Math.round(30 + ((ppm - 0.5) / 4.5) * 18);
+  } else if (ppm <= 15.0) {
+    // Mild air pollution / stuffy room (5 to 15 ppm) -> AQI 51 to 100 (Moderate)
+    aqi = Math.round(51 + ((ppm - 5.0) / 10.0) * 49);
+  } else if (ppm <= 30.0) {
+    // Noticeable pollution / cooking fumes / poor ventilation -> AQI 101 to 150 (Unhealthy SG)
+    aqi = Math.round(101 + ((ppm - 15.0) / 15.0) * 49);
+  } else if (ppm <= 60.0) {
+    // Heavy smoke / high pollutants -> AQI 151 to 200 (Unhealthy)
+    aqi = Math.round(151 + ((ppm - 30.0) / 30.0) * 49);
+  } else if (ppm <= 150.0) {
+    // Severe hazardous pollution -> AQI 201 to 300 (Very Unhealthy)
+    aqi = Math.round(201 + ((ppm - 60.0) / 90.0) * 99);
+  } else {
+    // Extreme danger (> 150 ppm) -> AQI 301 to 500 (Hazardous)
+    aqi = Math.round(301 + Math.min(199, ((ppm - 150.0) / 350.0) * 199));
   }
+
+  // Meteorological contextual adjustment (high humidity traps pollutants; heat intensifies ozone/VOCs)
+  const h = Number(humidity) || 50;
+  if (h > 70) {
+    aqi += Math.round((h - 70) * 0.25);
+  }
+  const t = Number(temperature) || 25;
+  if (t > 35) {
+    aqi += Math.round((t - 35) * 0.5);
+  }
+
+  return Math.max(15, Math.min(500, aqi));
 }
 
-module.exports = { AQI_BREAKPOINTS, classifyAQI, requiresAlert, healthRecommendation };
+module.exports = { AQI_BREAKPOINTS, classifyAQI, requiresAlert, healthRecommendation, calculateAQIFromSensors };

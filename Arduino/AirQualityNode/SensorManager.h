@@ -8,6 +8,7 @@
 // `valid` before trusting the payload.
 struct SensorReading {
   bool  valid;
+  bool  dhtHardwareValid; // true only when physical DHT responded with real hardware data
   float temperature;   // deg C
   float humidity;       // % RH
   float gasPPM;          // estimated CO2-equivalent ppm from MQ135

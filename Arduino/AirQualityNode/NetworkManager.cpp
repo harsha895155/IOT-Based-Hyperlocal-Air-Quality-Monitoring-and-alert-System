@@ -337,6 +337,7 @@ bool NodeNetworkManager::sendReading(const SensorReading &reading) {
   payload += "\"deviceId\":\"" + getDeviceId() + "\",";
   payload += "\"temperature\":" + String(reading.temperature, 2) + ",";
   payload += "\"humidity\":" + String(reading.humidity, 2) + ",";
+  payload += "\"dhtHardwareValid\":" + String(reading.dhtHardwareValid ? "true" : "false") + ",";
   payload += "\"gasPPM\":" + String(reading.gasPPM, 2) + ",";
   payload += "\"airQuality\":" + String(reading.aqi) + ",";
   payload += "\"wifiSSID\":\"" + WiFi.SSID() + "\",";

@@ -59,10 +59,12 @@ export default function Dashboard({ readingsData, onNavigateTab }) {
     useCurrentLocation,
     refreshWeather,
   } = useWeather(
-    currentDevice?.coordinates?.lat ? currentDevice?.location : null,
+    currentDevice?.location || null,
     currentDevice?.coordinates?.lat ? currentDevice.coordinates : null,
-    true
+    selectedDevice === 'current-location'
   );
+
+  const isConnectedDeviceSelected = selectedDevice !== 'current-location' && Boolean(currentDevice);
 
   const [customSearchedLocation, setCustomSearchedLocation] = useState(null);
   const [searchQuery, setSearchQuery] = useState('');
@@ -72,23 +74,46 @@ export default function Dashboard({ readingsData, onNavigateTab }) {
 
   const displayPlaceName =
     customSearchedLocation ||
-    (isDeviceConnected ? currentDevice?.location : null) ||
+    (isConnectedDeviceSelected ? currentDevice?.location : null) ||
     placeName ||
     buildingName ||
     houseName ||
     (locationName && locationName !== 'Current Location' ? locationName : null) ||
     'Current Location';
 
-  // When currentDevice changes, sync location coords; if no device or device coords missing, use user live location
+  // When selectedDevice or currentDevice changes:
+  // - If 'current-location': use browser GPS live location
+  // - If connected device: ALWAYS use the physical device's registered location (from Step 3)
   useEffect(() => {
-    if (!customSearchedLocation && currentDevice?.coordinates?.lat && currentDevice?.coordinates?.lng) {
-      selectLocation({
-        name: currentDevice.location,
-        latitude: currentDevice.coordinates.lat,
-        longitude: currentDevice.coordinates.lng,
-      });
-    } else if (!customSearchedLocation && (!currentDevice?.coordinates?.lat || selectedDevice === 'current-location')) {
+    if (customSearchedLocation) return;
+
+    if (selectedDevice === 'current-location') {
       useCurrentLocation();
+    } else if (currentDevice) {
+      if (currentDevice.coordinates?.lat && currentDevice.coordinates?.lng) {
+        selectLocation({
+          name: currentDevice.location || 'Device Location',
+          latitude: currentDevice.coordinates.lat,
+          longitude: currentDevice.coordinates.lng,
+        });
+      } else if (currentDevice.location) {
+        // Geocode the physical device's registered installation location
+        client.get('/weather', { params: { location: currentDevice.location } })
+          .then((res) => {
+            if (res.data?.coords?.lat && res.data?.coords?.lng) {
+              selectLocation({
+                name: currentDevice.location,
+                latitude: res.data.coords.lat,
+                longitude: res.data.coords.lng,
+              });
+            } else {
+              selectLocation({ name: currentDevice.location, location: currentDevice.location });
+            }
+          })
+          .catch(() => {
+            selectLocation({ name: currentDevice.location, location: currentDevice.location });
+          });
+      }
     }
   }, [
     currentDevice?.id,
@@ -142,26 +167,71 @@ export default function Dashboard({ readingsData, onNavigateTab }) {
     (latest.temperature != null || latest.airQuality != null)
   );
 
+  // Check if physical sensor has transmitted real hardware readings (not static fallback 26°C / 50%)
+  const isPhysicalSensorActive = Boolean(
+    latest &&
+    latest.temperature != null &&
+    latest.humidity != null &&
+    !(Math.round(latest.temperature) === 26 && Math.round(latest.humidity) === 50)
+  );
+
   // Telemetry metrics:
-  // When hardware device is selected and has readings, prioritize hardware readings.
-  // When in Location Mode or no device readings exist, fall back to current location ambient data.
-  const aqiVal = (isDeviceConnected || isDeviceActiveOrRecorded) && typeof latest?.airQuality === 'number'
+  // 1. AQI: Prioritize physical sensor AQI when device is selected
+  const aqiVal = (isDeviceConnected || isDeviceActiveOrRecorded) && typeof latest?.airQuality === 'number' && latest.airQuality > 0
     ? latest.airQuality
-    : (cw.aqi != null ? cw.aqi : null);
+    : (cw.aqi != null ? cw.aqi : (latest?.airQuality != null ? latest.airQuality : null));
 
   const hasAqi = aqiVal != null;
   const { category: aqiCategory, color: aqiColor } = classifyAQI(aqiVal ?? 0);
   const aqiHealthAdvice = healthRecommendation(aqiVal ?? 0);
 
-  const sensorTemp = (isDeviceConnected || isDeviceActiveOrRecorded) && latest?.temperature != null
-    ? Number(latest.temperature).toFixed(1)
-    : (cw.temp != null ? `${cw.temp}` : null);
+  // 2. Temperature:
+  // When connected device is selected:
+  //   - If physical DHT sensor sends real data: show physical sensor reading
+  //   - If physical DHT is disconnected/fallback: show weather from device's registered location
+  // When current location is selected: show current location weather
+  let currentTemp = null;
+  let currentTempTag = 'Current Location';
+  let currentTempSub = 'Current regional weather temperature';
 
-  const currentTemp = sensorTemp;
+  if (isConnectedDeviceSelected) {
+    if (isPhysicalSensorActive) {
+      currentTemp = Number(latest.temperature).toFixed(1);
+      currentTempTag = isDeviceConnected ? 'Physical DHT Sensor' : 'Recorded Telemetry';
+      currentTempSub = isDeviceConnected ? 'Live hardware sensor reading' : `Last recorded reading • ${formatTimeAgo(latest?.createdAt)}`;
+    } else {
+      currentTemp = cw.temp != null ? `${cw.temp}` : (latest?.temperature != null ? Number(latest.temperature).toFixed(1) : '—');
+      currentTempTag = 'Device Location Weather';
+      currentTempSub = `Weather from device location (${currentDevice?.location || 'Station Location'})`;
+    }
+  } else {
+    currentTemp = cw.temp != null ? `${cw.temp}` : '—';
+    currentTempTag = 'Current Location';
+    currentTempSub = 'Current regional weather temperature';
+  }
+
   const feelsLike = cw.feelsLike != null ? `${cw.feelsLike}°C` : '—';
-  const sensorHumidity = (isDeviceConnected || isDeviceActiveOrRecorded) && latest?.humidity != null
-    ? Math.round(latest.humidity)
-    : (cw.humidity != null ? cw.humidity : null);
+
+  // 3. Humidity:
+  let sensorHumidity = null;
+  let sensorHumidityTag = 'Current Location';
+  let sensorHumiditySub = 'Relative moisture saturation';
+
+  if (isConnectedDeviceSelected) {
+    if (isPhysicalSensorActive) {
+      sensorHumidity = Math.round(latest.humidity);
+      sensorHumidityTag = isDeviceConnected ? 'Physical DHT Sensor' : 'Recorded Telemetry';
+      sensorHumiditySub = isDeviceConnected ? 'Live hardware humidity sensor' : `Last recorded reading • ${formatTimeAgo(latest?.createdAt)}`;
+    } else {
+      sensorHumidity = cw.humidity != null ? cw.humidity : (latest?.humidity != null ? Math.round(latest.humidity) : '—');
+      sensorHumidityTag = 'Device Location Weather';
+      sensorHumiditySub = `Humidity from device location (${currentDevice?.location || 'Station Location'})`;
+    }
+  } else {
+    sensorHumidity = cw.humidity != null ? cw.humidity : '—';
+    sensorHumidityTag = 'Current Location';
+    sensorHumiditySub = 'Relative moisture saturation';
+  }
 
   const sensorGasPpm = (isDeviceConnected || isDeviceActiveOrRecorded) && latest?.gasPPM != null
     ? (latest.gasPPM < 1 ? Number(latest.gasPPM).toFixed(2) : Number(latest.gasPPM).toFixed(1))
@@ -572,10 +642,10 @@ export default function Dashboard({ readingsData, onNavigateTab }) {
           <div className="pollutant-card is-active-sensor">
             <div className="pol-top">
               <span className="pol-name">
-                {isDeviceConnected || isDeviceActiveOrRecorded ? 'DHT22 / DHT11 Temperature' : 'Ambient Temperature'}
+                {isConnectedDeviceSelected && isPhysicalSensorActive ? 'DHT22 / DHT11 Temperature' : (isConnectedDeviceSelected ? 'Station Location Temperature' : 'Ambient Temperature')}
               </span>
-              <span className="pol-tag" style={{ color: isDeviceConnected ? '#10b981' : (isDeviceActiveOrRecorded ? '#f59e0b' : '#38bdf8') }}>
-                {isDeviceConnected ? 'Active Sensor' : (isDeviceActiveOrRecorded ? 'Recorded Telemetry' : 'Current Location')}
+              <span className="pol-tag" style={{ color: isPhysicalSensorActive ? '#10b981' : (isConnectedDeviceSelected ? '#38bdf8' : '#94a3b8') }}>
+                {currentTempTag}
               </span>
             </div>
             <div className="pol-val-row">
@@ -583,9 +653,7 @@ export default function Dashboard({ readingsData, onNavigateTab }) {
               <span className="pol-unit">°C</span>
             </div>
             <div className="pol-sub">
-              {isDeviceConnected || isDeviceActiveOrRecorded
-                ? (isDeviceConnected ? 'Live hardware capacitive sensor' : `Last recorded reading • ${timeAgo}`)
-                : 'Current regional weather temperature'}
+              {currentTempSub}
             </div>
             <div className="pollutant-live-bar"><div className="pollutant-live-bar-fill" /></div>
           </div>
@@ -594,10 +662,10 @@ export default function Dashboard({ readingsData, onNavigateTab }) {
           <div className="pollutant-card is-active-sensor">
             <div className="pol-top">
               <span className="pol-name">
-                {isDeviceConnected || isDeviceActiveOrRecorded ? 'DHT22 / DHT11 Humidity' : 'Ambient Relative Humidity'}
+                {isConnectedDeviceSelected && isPhysicalSensorActive ? 'DHT22 / DHT11 Humidity' : (isConnectedDeviceSelected ? 'Station Location Humidity' : 'Ambient Relative Humidity')}
               </span>
-              <span className="pol-tag" style={{ color: isDeviceConnected ? '#10b981' : (isDeviceActiveOrRecorded ? '#f59e0b' : '#38bdf8') }}>
-                {isDeviceConnected ? 'Active Sensor' : (isDeviceActiveOrRecorded ? 'Recorded Telemetry' : 'Current Location')}
+              <span className="pol-tag" style={{ color: isPhysicalSensorActive ? '#10b981' : (isConnectedDeviceSelected ? '#38bdf8' : '#94a3b8') }}>
+                {sensorHumidityTag}
               </span>
             </div>
             <div className="pol-val-row">
@@ -605,9 +673,7 @@ export default function Dashboard({ readingsData, onNavigateTab }) {
               <span className="pol-unit">% RH</span>
             </div>
             <div className="pol-sub">
-              {isDeviceConnected || isDeviceActiveOrRecorded
-                ? (isDeviceConnected ? 'Live hardware humidity sensor' : `Last recorded reading • ${timeAgo}`)
-                : 'Relative moisture saturation'}
+              {sensorHumiditySub}
             </div>
             <div className="pollutant-live-bar"><div className="pollutant-live-bar-fill" /></div>
           </div>

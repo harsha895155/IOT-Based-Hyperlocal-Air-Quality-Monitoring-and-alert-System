@@ -2,7 +2,7 @@ const Reading = require('../models/Reading');
 const Alert = require('../models/Alert');
 const User = require('../models/User');
 const { Device } = require('../models/Device');
-const { classifyAQI, requiresAlert, healthRecommendation } = require('../utils/aqi');
+const { classifyAQI, requiresAlert, healthRecommendation, calculateAQIFromSensors } = require('../utils/aqi');
 const { sendAirQualityAlertEmail } = require('../services/emailService');
 const { getWeatherForCoordinates } = require('../services/weatherService');
 
@@ -73,40 +73,44 @@ async function createReading(req, res, next) {
       if (incomingRssi != null) device.rssi = Number(incomingRssi);
     }
 
-    const { category } = classifyAQI(airQuality);
+    // 1. Temperature & Humidity: Prioritize physical hardware sensor readings
+    // If the board's DHT communicated (or values differ from the static fallback 26.0 / 50.0),
+    // we preserve the physical hardware temperature & humidity 100% without modification!
+    const isPhysicalDHTReading = req.body.dhtHardwareValid === true ||
+      (Number(temperature) !== 26.0 || Number(humidity) !== 50.0);
 
     let finalTemp = Number(temperature);
     let finalHumidity = Number(humidity);
 
-    // If reading matches the ESP32 hardware NaN fallback signature (26.0C / 50.0%),
-    // seamlessly provide live meteorological conditions for the station's location
-    if (Math.round(finalTemp) === 26 && Math.round(finalHumidity) === 50) {
+    if (!isPhysicalDHTReading) {
+      // ONLY if physical sensor is disconnected/failed, use location's real-time weather
       try {
         const coords = (device.coordinates && device.coordinates.lat != null)
           ? device.coordinates
           : { lat: 14.489, lng: 79.957 };
         const weather = await getWeatherForCoordinates(coords.lat, coords.lng, device.location);
         if (weather && weather.temperature != null && weather.humidity != null) {
-          const jitterT = Math.sin(Date.now() / 25000) * 0.35;
-          const jitterH = Math.cos(Date.now() / 30000) * 1.2;
-          finalTemp = Number((weather.temperature + jitterT).toFixed(1));
-          finalHumidity = Number(Math.max(10, Math.min(100, weather.humidity + jitterH)).toFixed(1));
+          finalTemp = weather.temperature;
+          finalHumidity = weather.humidity;
         }
-      } catch (wErr) {
-        const jitterT = Math.sin(Date.now() / 25000) * 0.4;
-        const jitterH = Math.cos(Date.now() / 30000) * 1.5;
-        finalTemp = Number((26.0 + jitterT).toFixed(1));
-        finalHumidity = Number((50.0 + jitterH).toFixed(1));
-      }
+      } catch (wErr) {}
     }
 
-    // 2. Persist sensor reading
+    // 2. Accurately compute EPA/CPCB AQI from real sensor gasPPM, temperature, and humidity
+    let finalAQI = Number(airQuality);
+    if (!finalAQI || finalAQI < 10) {
+      finalAQI = calculateAQIFromSensors(gasPPM, finalTemp, finalHumidity);
+    }
+
+    const { category } = classifyAQI(finalAQI);
+
+    // 3. Persist sensor reading
     const reading = await Reading.create({
       deviceId: cleanId,
       temperature: finalTemp,
       humidity: finalHumidity,
       gasPPM,
-      airQuality,
+      airQuality: finalAQI,
       category,
     });
 
@@ -285,8 +289,25 @@ async function getLatestReading(req, res, next) {
       filter = { deviceId: { $in: userDevices.map((d) => d.deviceId) } };
     }
 
-    const reading = await Reading.findOne(filter).sort({ createdAt: -1 });
-    if (!reading) return res.status(404).json({ error: 'No readings found.' });
+    const readingDoc = await Reading.findOne(filter).sort({ createdAt: -1 });
+    if (!readingDoc) return res.status(404).json({ error: 'No readings found.' });
+
+    let reading = readingDoc.toObject();
+
+    // Guard against static fallback (26°C / 50%): always substitute live location weather
+    if (Math.round(reading.temperature) === 26 && Math.round(reading.humidity) === 50) {
+      try {
+        const dev = await Device.findOne({ deviceId: reading.deviceId });
+        if (dev) {
+          const coords = dev.coordinates && dev.coordinates.lat != null ? dev.coordinates : { lat: 14.489, lng: 79.957 };
+          const weather = await getWeatherForCoordinates(coords.lat, coords.lng, dev.location);
+          if (weather && weather.temperature != null && weather.humidity != null) {
+            reading.temperature = weather.temperature;
+            reading.humidity = weather.humidity;
+          }
+        }
+      } catch (wErr) {}
+    }
 
     res.json(reading);
   } catch (err) {

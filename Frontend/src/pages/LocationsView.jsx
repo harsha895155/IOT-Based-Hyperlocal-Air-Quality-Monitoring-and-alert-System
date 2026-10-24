@@ -384,7 +384,7 @@ export default function LocationsView() {
               <input
                 type="text"
                 className="loc-search-input"
-                placeholder="Search any city worldwide (e.g. Hyderabad, London, Tokyo)..."
+                placeholder="Search city worldwide..."
                 value={searchQuery}
                 onChange={(e) => setSearchQuery(e.target.value)}
                 onFocus={() => searchResults.length > 0 && setDropdownOpen(true)}
