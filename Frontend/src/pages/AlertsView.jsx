@@ -305,14 +305,13 @@ export default function AlertsView({
           </button>
 
           <button
-            className="btn-secondary"
+            className="btn-secondary alert-test-btn"
             onClick={() => {
               playSoundProfile(currentSound, true, currentVolume);
               const p = SOUND_PROFILES.find((s) => s.id === currentSound);
               showToast(`🚨 Playing: ${p?.name || currentSound} (Volume: ${Math.round(currentVolume * 100)}%)`);
             }}
             title="Test the currently selected alarm sound"
-            style={{ borderColor: 'rgba(239, 68, 68, 0.4)', color: '#f87171' }}
           >
             🚨 Test Siren
           </button>

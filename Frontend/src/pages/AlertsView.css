@@ -13,24 +13,32 @@
 }
 
 .audio-toggle-btn {
+  height: 38px;
+  padding: 0 16px;
+  border-radius: 9px;
   display: inline-flex;
   align-items: center;
-  gap: 6px;
-  background: var(--bg-surface, #1e2438);
+  gap: 7px;
+  background: var(--surface-raised, rgba(15, 23, 42, 0.65));
   border: 1px solid var(--border-subtle, rgba(255, 255, 255, 0.12));
-  color: var(--text-primary, #f8fafc);
-  padding: 8px 14px;
-  border-radius: 8px;
+  color: var(--text-primary, #f1f5f9);
   font-size: 0.82rem;
   font-weight: 600;
   cursor: pointer;
-  transition: all 0.2s ease;
+  transition: all 0.2s cubic-bezier(0.16, 1, 0.3, 1);
+  box-shadow: 0 2px 6px rgba(0, 0, 0, 0.15);
 }
 
 .audio-toggle-btn.is-active {
-  background: rgba(0, 210, 180, 0.15);
-  border-color: #00d2b4;
-  color: #00d2b4;
+  background: rgba(16, 185, 129, 0.15);
+  border-color: rgba(16, 185, 129, 0.45);
+  color: #10b981;
+  box-shadow: 0 0 14px rgba(16, 185, 129, 0.2);
+}
+
+.audio-toggle-btn:hover {
+  transform: translateY(-1.5px);
+  border-color: #10b981;
 }
 
 /* ─── Alerts KPI Bar ─── */

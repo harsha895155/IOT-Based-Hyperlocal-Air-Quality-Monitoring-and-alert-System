@@ -102,62 +102,82 @@ a:hover {
 }
 
 /* Unified Modern Button System */
-.btn {
+.btn,
+.btn-primary,
+.btn--primary,
+.btn-secondary,
+.btn--secondary,
+.btn-ghost,
+.btn--ghost,
+.audio-toggle-btn {
   display: inline-flex;
   align-items: center;
   justify-content: center;
-  gap: 8px;
-  font-family: var(--font-body);
-  font-size: var(--fs-sm);
+  gap: 7px;
+  font-family: inherit;
+  font-size: 0.82rem;
   font-weight: 600;
-  padding: 9px 18px;
-  border-radius: var(--radius-sm);
+  letter-spacing: 0.01em;
+  height: 38px;
+  padding: 0 16px;
+  border-radius: 9px;
   cursor: pointer;
   text-decoration: none;
   transition: all 0.2s cubic-bezier(0.16, 1, 0.3, 1);
   box-sizing: border-box;
+  white-space: nowrap;
+  line-height: 1;
 }
 
-.btn:active {
+.btn:active,
+.btn-primary:active,
+.btn--primary:active,
+.btn-secondary:active,
+.btn--secondary:active,
+.audio-toggle-btn:active {
   transform: translateY(0);
 }
 
 .btn-primary,
 .btn--primary {
-  background: var(--btn-primary-bg);
-  color: var(--btn-primary-text, #ffffff) !important;
-  border: 1px solid rgba(2, 132, 199, 0.3);
-  box-shadow: var(--btn-shadow);
+  background: linear-gradient(135deg, #0284c7 0%, #0369a1 100%);
+  color: #ffffff !important;
+  border: 1px solid rgba(56, 189, 248, 0.4);
+  box-shadow: 0 2px 10px rgba(2, 132, 199, 0.35);
 }
 
 .btn-primary:hover,
 .btn--primary:hover {
-  background: var(--btn-primary-hover);
-  transform: translateY(-2px);
-  box-shadow: 0 8px 24px rgba(2, 132, 199, 0.4);
+  background: linear-gradient(135deg, #0ea5e9 0%, #0284c7 100%);
+  border-color: rgba(56, 189, 248, 0.7);
+  box-shadow: 0 4px 18px rgba(2, 132, 199, 0.5);
+  transform: translateY(-1.5px);
+  color: #ffffff !important;
 }
 
 .btn-secondary,
 .btn--secondary {
-  background: var(--surface-raised);
-  color: var(--text-primary);
-  border: 1px solid var(--border);
-  box-shadow: var(--shadow-card);
+  background: var(--surface-raised, rgba(15, 23, 42, 0.65));
+  color: var(--text-primary, #f1f5f9);
+  border: 1px solid var(--border-subtle, rgba(255, 255, 255, 0.12));
+  box-shadow: 0 2px 6px rgba(0, 0, 0, 0.15);
+  backdrop-filter: blur(8px);
 }
 
 .btn-secondary:hover,
 .btn--secondary:hover {
-  background: var(--surface-hover);
-  border-color: var(--border-active);
-  transform: translateY(-2px);
-  box-shadow: var(--shadow-card-hover);
+  background: var(--surface-hover, rgba(30, 41, 59, 0.85));
+  border-color: var(--accent, #38bdf8);
+  color: var(--accent, #38bdf8);
+  box-shadow: 0 4px 14px rgba(0, 0, 0, 0.25);
+  transform: translateY(-1.5px);
 }
 
 .btn-ghost,
 .btn--ghost {
   background: var(--card-sub-bg, transparent);
   color: var(--text-primary);
-  border: 1px solid var(--border);
+  border: 1px solid var(--border-subtle, rgba(255, 255, 255, 0.1));
 }
 
 .btn-ghost:hover,
@@ -165,13 +185,65 @@ a:hover {
   background: var(--surface-hover);
   border-color: var(--border-active);
   color: var(--accent);
-  transform: translateY(-2px);
+  transform: translateY(-1.5px);
+}
+
+.alert-test-btn {
+  background: rgba(239, 68, 68, 0.1) !important;
+  border: 1px solid rgba(239, 68, 68, 0.35) !important;
+  color: #f87171 !important;
+}
+
+.alert-test-btn:hover {
+  background: rgba(239, 68, 68, 0.22) !important;
+  border-color: rgba(239, 68, 68, 0.6) !important;
+  color: #ef4444 !important;
+  box-shadow: 0 2px 12px rgba(239, 68, 68, 0.25);
+  transform: translateY(-1.5px);
+}
+
+.btn-sm,
+.btn--sm {
+  height: 30px !important;
+  padding: 0 10px !important;
+  font-size: 0.74rem !important;
+  border-radius: 7px !important;
 }
 
 .btn--lg {
-  padding: 13px 26px;
-  font-size: 1rem;
-  border-radius: 12px;
+  padding: 0 24px;
+  height: 44px;
+  font-size: 0.95rem;
+  border-radius: 11px;
+}
+
+/* Page Headers & Action Bars Layout */
+.page-header,
+.dashboard-header {
+  display: flex !important;
+  justify-content: space-between !important;
+  align-items: flex-end !important;
+  flex-wrap: wrap !important;
+  gap: 16px !important;
+  margin-bottom: 24px !important;
+}
+
+.page-header > div:first-child,
+.dashboard-header > div:first-child {
+  min-width: 260px;
+  flex: 1;
+}
+
+.devices-header-actions,
+.analytics-header-actions,
+.history-header-actions,
+.alerts-header-actions,
+.reports-header-actions,
+.page-header-actions {
+  display: flex !important;
+  flex-wrap: wrap !important;
+  align-items: center !important;
+  gap: 10px !important;
 }
 
 .fs-xs {
