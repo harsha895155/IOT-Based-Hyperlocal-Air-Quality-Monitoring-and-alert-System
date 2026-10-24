@@ -34,37 +34,49 @@ bool NodeNetworkManager::startCaptivePortal(unsigned long timeoutMs) {
   Serial.println("  Portal URL: http://192.168.4.1 (Auto-Popup) ");
   Serial.println("==============================================");
 
-  // 1. Initialize Wi-Fi in dual AP + STA mode cleanly
-  WiFi.disconnect(true, true);
-  delay(200);
-  WiFi.mode(WIFI_AP_STA);
+  // 1. Scan nearby 2.4 GHz networks in pure STA mode for 100% sensitivity before launching AP
+  WiFi.disconnect();
+  delay(100);
+  WiFi.mode(WIFI_STA);
   delay(150);
 
-  IPAddress apIP(192, 168, 4, 1);
-  WiFi.softAPConfig(apIP, apIP, IPAddress(255, 255, 255, 0));
-  WiFi.softAP("AirGuard-Setup");
-  delay(250);
+  Serial.println("[Portal] Scanning for nearby 2.4 GHz Wi-Fi networks in STA mode...");
+  WiFi.scanDelete();
+  int n = WiFi.scanNetworks(false, false);
+  if (n <= 0) {
+    delay(300);
+    n = WiFi.scanNetworks(false, false);
+  }
+  Serial.printf("[Portal] Discovered %d Wi-Fi networks:\n", n);
 
-  // Helper lambda to scan and format networks as HTML <option> items
+  String cachedNetworkOptions = "";
+  if (n > 0) {
+    for (int i = 0; i < n; ++i) {
+      String net = WiFi.SSID(i);
+      if (net.length() > 0) {
+        int rssi = WiFi.RSSI(i);
+        Serial.printf("   - %s (%d dBm)\n", net.c_str(), rssi);
+        cachedNetworkOptions += "<option value=\"" + net + "\">" + net + " (" + String(rssi) + " dBm)</option>";
+      }
+    }
+  }
+
+  // Helper lambda to refresh scan if requested via /?rescan=1
   auto scanAndFormatNetworks = [&]() -> String {
-    Serial.println("[Portal] Scanning for nearby 2.4 GHz Wi-Fi networks...");
+    Serial.println("[Portal] Rescanning 2.4 GHz networks...");
     WiFi.scanDelete();
     delay(100);
-    // Dwell 250ms per channel for high sensitivity across all 2.4GHz channels (1-13)
-    int n = WiFi.scanNetworks(false, false, false, 250);
-    if (n <= 0) {
+    int count = WiFi.scanNetworks(false, false);
+    if (count <= 0) {
       delay(300);
-      n = WiFi.scanNetworks(false, false, false, 300);
+      count = WiFi.scanNetworks(false, false);
     }
-    Serial.printf("[Portal] Found %d Wi-Fi networks:\n", n);
-
     String options = "";
-    if (n > 0) {
-      for (int i = 0; i < n; ++i) {
+    if (count > 0) {
+      for (int i = 0; i < count; ++i) {
         String net = WiFi.SSID(i);
         if (net.length() > 0) {
           int rssi = WiFi.RSSI(i);
-          Serial.printf("   - %s (%d dBm)\n", net.c_str(), rssi);
           options += "<option value=\"" + net + "\">" + net + " (" + String(rssi) + " dBm)</option>";
         }
       }
@@ -72,8 +84,12 @@ bool NodeNetworkManager::startCaptivePortal(unsigned long timeoutMs) {
     return options;
   };
 
-  // Perform initial scan
-  String cachedNetworkOptions = scanAndFormatNetworks();
+  // 2. Now launch the SoftAP with the scanned list pre-cached and ready
+  IPAddress apIP(192, 168, 4, 1);
+  WiFi.mode(WIFI_AP_STA);
+  WiFi.softAPConfig(apIP, apIP, IPAddress(255, 255, 255, 0));
+  WiFi.softAP("AirGuard-Setup");
+  delay(200);
 
   DNSServer dnsServer;
   dnsServer.start(53, "*", apIP);
