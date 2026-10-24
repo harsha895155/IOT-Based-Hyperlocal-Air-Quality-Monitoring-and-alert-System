@@ -716,7 +716,7 @@ export default function DevicesView({
                 <div className="device-card-chips">
                   <span className="hardware-pill">ESP32-WROOM-32</span>
                   <span className="hardware-pill">MQ135 + DHT22</span>
-                  <span className="signal-pill">📶 {device.wifiSSID || 'Awaiting Wi-Fi Sync'}</span>
+                  <span className="signal-pill">📶 {device.wifiSSID || 'AI+ Nova 1 5G'}</span>
                   {isAdmin && (
                     <span className="hardware-pill" style={{ color: '#38bdf8', borderColor: 'rgba(56, 189, 248, 0.35)' }}>
                       👤 {device.addedBy || 'System'}
@@ -840,33 +840,8 @@ export default function DevicesView({
               </div>
               <div className="device-modal-item">
                 <span className="device-modal-label">Connected Wi-Fi (SSID)</span>
-                <span className="device-modal-val" style={{ color: selectedModalDevice.wifiSSID ? '#00d2b4' : '#f59e0b', fontWeight: 700, display: 'flex', alignItems: 'center', justifyContent: 'space-between', gap: '6px' }}>
-                  <span>📶 {selectedModalDevice.wifiSSID || 'Awaiting Hardware Sync'}</span>
-                  <button
-                    type="button"
-                    onClick={() => {
-                      const newSsid = window.prompt(
-                        'Enter the Wi-Fi network SSID (name) that this ESP32 station connects to:',
-                        selectedModalDevice.wifiSSID || ''
-                      );
-                      if (newSsid !== null && newSsid.trim()) {
-                        handleSaveDeviceWifi(selectedModalDevice.deviceId || selectedModalDevice.id, newSsid.trim());
-                      }
-                    }}
-                    style={{
-                      background: 'rgba(0, 210, 180, 0.12)',
-                      border: '1px solid rgba(0, 210, 180, 0.3)',
-                      color: '#00d2b4',
-                      borderRadius: '5px',
-                      fontSize: '0.68rem',
-                      padding: '2px 7px',
-                      cursor: 'pointer',
-                      whiteSpace: 'nowrap',
-                    }}
-                    title="Click to specify or update the Wi-Fi SSID for this node"
-                  >
-                    {selectedModalDevice.wifiSSID ? '✏️ Edit' : '+ Set Wi-Fi'}
-                  </button>
+                <span className="device-modal-val mono" style={{ color: '#00d2b4', fontWeight: 700 }}>
+                  📶 {selectedModalDevice.wifiSSID || 'AI+ Nova 1 5G'}
                 </span>
               </div>
               {selectedModalDevice.addedBy && (

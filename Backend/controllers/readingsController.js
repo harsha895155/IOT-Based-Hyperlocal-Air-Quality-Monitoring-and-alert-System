@@ -59,7 +59,7 @@ async function createReading(req, res, next) {
         name: `AirGuard Node (${cleanId})`,
         location: 'Gangavaram, Andhra Pradesh',
         type: 'AirGuard ESP32 Sensing Node',
-        wifiSSID: incomingWifi ? String(incomingWifi).trim() : '',
+        wifiSSID: incomingWifi ? String(incomingWifi).trim() : 'AI+ Nova 1 5G',
         ipAddress: incomingIp ? String(incomingIp).trim() : '',
         rssi: incomingRssi != null ? Number(incomingRssi) : null,
         lastSeen: now,
@@ -68,6 +68,8 @@ async function createReading(req, res, next) {
     } else {
       if (incomingWifi && String(incomingWifi).trim()) {
         device.wifiSSID = String(incomingWifi).trim();
+      } else if (!device.wifiSSID) {
+        device.wifiSSID = 'AI+ Nova 1 5G';
       }
       if (incomingIp) device.ipAddress = String(incomingIp).trim();
       if (incomingRssi != null) device.rssi = Number(incomingRssi);
