@@ -147,6 +147,7 @@ bool NodeNetworkManager::startCaptivePortal(unsigned long timeoutMs) {
     html += "<option value=\"__custom__\"" + String(cachedNetworkOptions.length() == 0 ? " selected" : "") + ">-- Enter Wi-Fi Name Manually --</option></select>";
     html += "<input type=\"text\" name=\"manual_ssid\" id=\"manual\" placeholder=\"Enter your 2.4 GHz Wi-Fi Name (SSID)\" style=\"" + String(cachedNetworkOptions.length() == 0 ? "display:block;" : "display:none;") + "\">";
     html += "<label style=\"margin-bottom:6px;\">Wi-Fi Password</label><input type=\"password\" name=\"password\" placeholder=\"Enter Wi-Fi Password\" required>";
+    html += "<label style=\"margin-bottom:6px;\">Device Station ID (Optional)</label><input type=\"text\" name=\"device_id\" placeholder=\"e.g. esp32-node-02 (Current: " + getDeviceId() + ")\">";
     html += "<button type=\"submit\" class=\"btn-save\">Save & Connect Node</button></form>";
     html += "<script>function updateManual(){var s=document.getElementById('ssid');var m=document.getElementById('manual');if(!s||s.value==='__custom__'){m.style.display='block';m.required=true;}else{m.style.display='none';m.required=false;}}updateManual();</script>";
     html += "<div class=\"footer\">AirGuard IoT Sensing Node &bull; Hyperlocal Monitor</div></div></body></html>";
@@ -197,6 +198,11 @@ bool NodeNetworkManager::startCaptivePortal(unsigned long timeoutMs) {
       chosenSsid = webServer.arg("manual_ssid");
     }
     String chosenPass = webServer.arg("password");
+    String chosenDev = webServer.arg("device_id");
+    chosenDev.trim();
+    if (chosenDev.length() > 0) {
+      saveDeviceId(chosenDev);
+    }
 
     if (chosenSsid.length() > 0) {
       newSsid = chosenSsid;

@@ -861,10 +861,10 @@ export default function AddDeviceWizard({
         }
       } catch (e) {}
 
-      // Fallback: If deviceId hasn't responded yet, check if esp32-node-01 has active readings
-      if (idToCheck !== 'esp32-node-01') {
+      // Fallback: ONLY if near timeout (attempts >= 14) and idToCheck is still waiting, check if esp32-node-01 was the active hardware
+      if (attempts >= 14 && idToCheck !== 'esp32-node-01') {
         try {
-          const fbRes = await client.get('/devices/verify/esp32-node-01');
+          const fbRes = await client.get('/devices/verify/esp32-node-01?allowFallback=true');
           if (fbRes.data?.connected || fbRes.data?.verified) {
             clearInterval(interval);
             setVerificationResult(fbRes.data);

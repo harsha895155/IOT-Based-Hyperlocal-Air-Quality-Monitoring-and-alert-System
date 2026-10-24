@@ -245,8 +245,8 @@ router.get('/verify/:id', protect, async (req, res, next) => {
     // Check latest reading from this hardware
     let latest = await Reading.findOne({ deviceId: devId }).sort({ createdAt: -1 });
 
-    // If no reading for this specific devId, check if esp32-node-01 has a recent reading (within last 5 mins)
-    if (!latest && devId !== 'esp32-node-01') {
+    // If no reading for this specific devId, only check esp32-node-01 fallback if explicitly enabled
+    if (!latest && devId !== 'esp32-node-01' && req.query.allowFallback === 'true') {
       const fallbackReading = await Reading.findOne({
         deviceId: 'esp32-node-01',
         createdAt: { $gte: new Date(Date.now() - 300000) }
