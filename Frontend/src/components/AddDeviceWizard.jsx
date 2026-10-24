@@ -50,8 +50,9 @@ export default function AddDeviceWizard({
   const [quickStatus, setQuickStatus] = useState(null);
   const [quickError, setQuickError] = useState(null);
   const [quickSuccess, setQuickSuccess] = useState(null);
+  const [userDeviceList, setUserDeviceList] = useState([]);
 
-  // Sync mode and pre-populate targetDevice when props change
+  // Sync mode and pre-populate targetDevice when props change, and load user's devices
   useEffect(() => {
     if (isOpen) {
       if (initialMode) setActiveMode(initialMode);
@@ -67,6 +68,28 @@ export default function AddDeviceWizard({
           wifiSsid: targetDevice.wifiSSID || prev.wifiSsid,
         }));
       }
+
+      // Fetch user's devices for the device selector dropdown
+      client.get('/devices').then((res) => {
+        if (Array.isArray(res.data) && res.data.length > 0) {
+          setUserDeviceList(res.data);
+          // If no target device was provided and no deviceId is selected, default to first device
+          setFormData((prev) => {
+            if (!prev.deviceId && !targetDevice) {
+              const first = res.data[0];
+              const dId = first.deviceId || first.id;
+              return {
+                ...prev,
+                deviceId: dId,
+                name: first.name || dId,
+                location: first.location || prev.location,
+                wifiSsid: first.wifiSSID || prev.wifiSsid,
+              };
+            }
+            return prev;
+          });
+        }
+      }).catch(() => {});
     }
   }, [isOpen, initialMode, targetDevice]);
 
@@ -1012,50 +1035,108 @@ export default function AddDeviceWizard({
         <div className="wizard-body">
           {activeMode === 'reconfig' ? (
             <div className="wizard-reconfig-panel" style={{ padding: '4px 0' }}>
-              <div style={{ background: 'rgba(0, 210, 180, 0.08)', border: '1px solid rgba(0, 210, 180, 0.25)', borderRadius: '12px', padding: '12px 14px', marginBottom: '16px', display: 'flex', gap: '10px', alignItems: 'center' }}>
-                <span style={{ fontSize: '1.4rem' }}>⚡</span>
-                <div style={{ fontSize: '0.82rem', color: '#e2e8f0', lineHeight: 1.4 }}>
-                  <strong>Zero-Code Wi-Fi Reconfiguration & Fast Re-Flash:</strong> Easily change your ESP32's Wi-Fi network anytime without touching Arduino IDE, modifying C++ code, or recompiling.
+              <div style={{ background: 'rgba(0, 210, 180, 0.08)', border: '1px solid rgba(0, 210, 180, 0.25)', borderRadius: '10px', padding: '8px 12px', marginBottom: '10px', display: 'flex', gap: '8px', alignItems: 'center' }}>
+                <span style={{ fontSize: '1.2rem' }}>⚡</span>
+                <div style={{ fontSize: '0.78rem', color: '#e2e8f0', lineHeight: 1.35 }}>
+                  <strong>Zero-Code Wi-Fi Reconfiguration:</strong> Easily change your ESP32's Wi-Fi network anytime without touching Arduino IDE, modifying C++ code, or recompiling.
                 </div>
               </div>
 
               {/* Target Device & Wi-Fi Inputs */}
-              <div style={{ background: 'var(--surface-raised, rgba(255,255,255,0.03))', border: '1px solid var(--border-soft, rgba(255,255,255,0.08))', borderRadius: '14px', padding: '16px', marginBottom: '16px' }}>
-                <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '12px', marginBottom: '12px' }}>
-                  <div>
-                    <label style={{ display: 'block', fontSize: '0.75rem', fontWeight: 600, color: '#94a3b8', marginBottom: '4px' }}>
-                      Hardware Device ID
+              <div style={{ background: 'var(--surface-raised, rgba(255,255,255,0.03))', border: '1px solid var(--border-soft, rgba(255,255,255,0.08))', borderRadius: '12px', padding: '12px 14px', marginBottom: '10px' }}>
+                {/* Device Selector Dropdown */}
+                <div style={{ marginBottom: '10px' }}>
+                  <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '4px' }}>
+                    <label style={{ fontSize: '0.74rem', fontWeight: 700, color: '#94a3b8' }}>
+                      Choose Device to Update *
                     </label>
-                    <input
-                      type="text"
-                      className="wizard-text-input"
-                      value={formData.deviceId}
-                      onChange={(e) => setFormData((p) => ({ ...p, deviceId: e.target.value }))}
-                      placeholder="e.g. esp32-node-01"
-                      style={{ width: '100%', fontFamily: 'monospace' }}
-                    />
+                    {formData.deviceId && (
+                      <span style={{ color: '#00d2b4', fontFamily: 'monospace', fontSize: '0.72rem', fontWeight: 600 }}>
+                        ID: {formData.deviceId}
+                      </span>
+                    )}
                   </div>
-                  <div>
-                    <label style={{ display: 'block', fontSize: '0.75rem', fontWeight: 600, color: '#94a3b8', marginBottom: '4px' }}>
-                      Device Name (Friendly)
-                    </label>
-                    <input
-                      type="text"
-                      className="wizard-text-input"
-                      value={formData.name}
-                      onChange={(e) => setFormData((p) => ({ ...p, name: e.target.value }))}
-                      placeholder="e.g. Living Room Station"
-                      style={{ width: '100%' }}
-                    />
-                  </div>
+                  <select
+                    className="wizard-text-input"
+                    value={formData.deviceId || ''}
+                    onChange={(e) => {
+                      const selId = e.target.value;
+                      if (selId === '__custom__') {
+                        setFormData((p) => ({ ...p, deviceId: '', name: '' }));
+                      } else {
+                        const found = userDeviceList.find((d) => (d.deviceId || d.id) === selId);
+                        if (found) {
+                          setFormData((p) => ({
+                            ...p,
+                            deviceId: found.deviceId || found.id,
+                            name: found.name || found.deviceId || found.id,
+                            location: found.location || p.location,
+                            wifiSsid: found.wifiSSID || p.wifiSsid,
+                          }));
+                        } else {
+                          setFormData((p) => ({ ...p, deviceId: selId }));
+                        }
+                      }
+                    }}
+                    style={{
+                      width: '100%',
+                      padding: '7px 10px',
+                      fontSize: '0.82rem',
+                      fontWeight: 600,
+                      background: 'var(--surface-raised, rgba(15,23,42,0.6))',
+                      color: 'var(--text-primary)',
+                      borderRadius: '8px',
+                      border: '1px solid var(--border-soft, rgba(255,255,255,0.12))',
+                    }}
+                  >
+                    {userDeviceList.length === 0 ? (
+                      <option value={formData.deviceId || 'esp32-node-01'}>
+                        📡 {formData.name || 'Primary AirGuard Station'} ({formData.deviceId || 'esp32-node-01'})
+                      </option>
+                    ) : (
+                      <>
+                        {userDeviceList.map((d) => {
+                          const devId = d.deviceId || d.id;
+                          return (
+                            <option key={devId} value={devId}>
+                              📡 {d.name || devId} ({devId}){d.wifiSSID ? ` · [Wi-Fi: ${d.wifiSSID}]` : ''}
+                            </option>
+                          );
+                        })}
+                        <option value="__custom__">➕ Enter Device ID Manually / New Node</option>
+                      </>
+                    )}
+                  </select>
+
+                  {/* Manual entry fallback if user chose __custom__ or no devices found */}
+                  {(!formData.deviceId || !userDeviceList.some((d) => (d.deviceId || d.id) === formData.deviceId)) && (
+                    <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '8px', marginTop: '8px' }}>
+                      <input
+                        type="text"
+                        className="wizard-text-input"
+                        value={formData.deviceId}
+                        onChange={(e) => setFormData((p) => ({ ...p, deviceId: e.target.value }))}
+                        placeholder="Hardware ID (e.g. esp32-node-01)"
+                        style={{ width: '100%', fontFamily: 'monospace', padding: '6px 10px', fontSize: '0.78rem' }}
+                      />
+                      <input
+                        type="text"
+                        className="wizard-text-input"
+                        value={formData.name}
+                        onChange={(e) => setFormData((p) => ({ ...p, name: e.target.value }))}
+                        placeholder="Device Name (Friendly)"
+                        style={{ width: '100%', padding: '6px 10px', fontSize: '0.78rem' }}
+                      />
+                    </div>
+                  )}
                 </div>
 
-                <div style={{ marginBottom: '12px' }}>
+                <div style={{ marginBottom: '10px' }}>
                   <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '4px' }}>
-                    <label style={{ fontSize: '0.75rem', fontWeight: 600, color: '#94a3b8' }}>
+                    <label style={{ fontSize: '0.74rem', fontWeight: 600, color: '#94a3b8' }}>
                       New Wi-Fi Network (SSID) *
                     </label>
-                    <span style={{ fontSize: '0.7rem', color: '#00d2b4' }}>2.4 GHz Required</span>
+                    <span style={{ fontSize: '0.68rem', color: '#00d2b4' }}>2.4 GHz Required</span>
                   </div>
                   <input
                     type="text"
@@ -1063,19 +1144,19 @@ export default function AddDeviceWizard({
                     value={formData.wifiSsid}
                     onChange={(e) => setFormData((p) => ({ ...p, wifiSsid: e.target.value }))}
                     placeholder="e.g. Airtel_Wifi_first floor"
-                    style={{ width: '100%', padding: '10px 12px', fontWeight: 600 }}
+                    style={{ width: '100%', padding: '7px 10px', fontWeight: 600, fontSize: '0.82rem' }}
                   />
                 </div>
 
                 <div>
                   <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '4px' }}>
-                    <label style={{ fontSize: '0.75rem', fontWeight: 600, color: '#94a3b8' }}>
+                    <label style={{ fontSize: '0.74rem', fontWeight: 600, color: '#94a3b8' }}>
                       Wi-Fi Password
                     </label>
                     <button
                       type="button"
                       onClick={() => setShowPassword((v) => !v)}
-                      style={{ background: 'none', border: 'none', color: '#38bdf8', fontSize: '0.72rem', cursor: 'pointer', padding: 0 }}
+                      style={{ background: 'none', border: 'none', color: '#38bdf8', fontSize: '0.7rem', cursor: 'pointer', padding: 0 }}
                     >
                       {showPassword ? 'Hide' : 'Show'} Password
                     </button>
@@ -1086,7 +1167,7 @@ export default function AddDeviceWizard({
                     value={formData.wifiPassword}
                     onChange={(e) => setFormData((p) => ({ ...p, wifiPassword: e.target.value }))}
                     placeholder="Leave blank if network is open / unencrypted"
-                    style={{ width: '100%', padding: '10px 12px' }}
+                    style={{ width: '100%', padding: '7px 10px', fontSize: '0.82rem' }}
                   />
                 </div>
               </div>
@@ -1130,29 +1211,27 @@ export default function AddDeviceWizard({
                 </div>
               )}
 
-              {/* 3 Methods Cards */}
-              <div style={{ display: 'flex', flexDirection: 'column', gap: '12px' }}>
+              {/* 3 Methods Cards (Compact) */}
+              <div style={{ display: 'flex', flexDirection: 'column', gap: '8px' }}>
                 {/* Method 1: Instant USB Push */}
-                <div style={{ background: 'linear-gradient(135deg, rgba(0, 210, 180, 0.08) 0%, rgba(56, 189, 248, 0.05) 100%)', border: '1px solid rgba(0, 210, 180, 0.3)', borderRadius: '14px', padding: '14px 16px' }}>
-                  <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '8px' }}>
-                    <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
-                      <span style={{ fontSize: '1.2rem' }}>⚡</span>
-                      <div>
-                        <div style={{ fontWeight: 700, fontSize: '0.88rem', color: '#f8fafc' }}>Method 1: Instant USB Wi-Fi Push (Fastest)</div>
-                        <div style={{ fontSize: '0.74rem', color: '#94a3b8' }}>Connect USB cable → 1-Click writes new Wi-Fi into ESP32 memory (Takes 3 seconds)</div>
-                      </div>
+                <div style={{ background: 'linear-gradient(135deg, rgba(0, 210, 180, 0.08) 0%, rgba(56, 189, 248, 0.05) 100%)', border: '1px solid rgba(0, 210, 180, 0.3)', borderRadius: '10px', padding: '10px 12px' }}>
+                  <div style={{ display: 'flex', alignItems: 'center', gap: '8px', marginBottom: '6px' }}>
+                    <span style={{ fontSize: '1.1rem' }}>⚡</span>
+                    <div>
+                      <div style={{ fontWeight: 700, fontSize: '0.82rem', color: '#f8fafc' }}>Method 1: Instant USB Wi-Fi Push (Fastest)</div>
+                      <div style={{ fontSize: '0.7rem', color: '#94a3b8' }}>Connect USB cable → 1-Click writes new Wi-Fi into ESP32 flash memory (Takes 3 seconds)</div>
                     </div>
                   </div>
                   <button
                     type="button"
                     className="wizard-btn-primary"
-                    style={{ width: '100%', padding: '10px 16px', background: 'linear-gradient(135deg, #00d2b4 0%, #0284c7 100%)', border: 'none', fontWeight: 700, borderRadius: '8px', cursor: 'pointer', display: 'flex', justifyContent: 'center', alignItems: 'center', gap: '8px' }}
+                    style={{ width: '100%', padding: '8px 12px', background: 'linear-gradient(135deg, #00d2b4 0%, #0284c7 100%)', border: 'none', fontWeight: 700, borderRadius: '6px', cursor: 'pointer', display: 'flex', justifyContent: 'center', alignItems: 'center', gap: '6px', fontSize: '0.8rem' }}
                     onClick={handleQuickPushWifi}
                     disabled={quickPushing || flashing || !formData.wifiSsid.trim()}
                   >
                     {quickPushing ? (
                       <>
-                        <span className="wizard-spinner" style={{ width: '14px', height: '14px' }}></span>
+                        <span className="wizard-spinner" style={{ width: '12px', height: '12px' }}></span>
                         <span>Updating ESP32 Wi-Fi...</span>
                       </>
                     ) : (
@@ -1164,18 +1243,18 @@ export default function AddDeviceWizard({
                 </div>
 
                 {/* Method 2: 1-Click In-Browser Re-Flash */}
-                <div style={{ background: 'rgba(255, 255, 255, 0.02)', border: '1px solid rgba(255, 255, 255, 0.08)', borderRadius: '14px', padding: '14px 16px' }}>
-                  <div style={{ display: 'flex', alignItems: 'center', gap: '8px', marginBottom: '8px' }}>
-                    <span style={{ fontSize: '1.2rem' }}>🔥</span>
+                <div style={{ background: 'rgba(255, 255, 255, 0.02)', border: '1px solid rgba(255, 255, 255, 0.08)', borderRadius: '10px', padding: '10px 12px' }}>
+                  <div style={{ display: 'flex', alignItems: 'center', gap: '8px', marginBottom: '6px' }}>
+                    <span style={{ fontSize: '1.1rem' }}>🔥</span>
                     <div>
-                      <div style={{ fontWeight: 700, fontSize: '0.88rem', color: '#f8fafc' }}>Method 2: 1-Click In-Browser Re-Flash (WebUSB)</div>
-                      <div style={{ fontSize: '0.74rem', color: '#94a3b8' }}>If the board is unresponsive or has old code, replace its entire OS in 25 seconds</div>
+                      <div style={{ fontWeight: 700, fontSize: '0.82rem', color: '#f8fafc' }}>Method 2: 1-Click In-Browser Re-Flash (WebUSB)</div>
+                      <div style={{ fontSize: '0.7rem', color: '#94a3b8' }}>If the board is unresponsive or has old code, replace its entire OS in 25 seconds</div>
                     </div>
                   </div>
                   <button
                     type="button"
                     className="wizard-btn-secondary"
-                    style={{ width: '100%', padding: '9px 16px', borderRadius: '8px', cursor: 'pointer', fontWeight: 600, fontSize: '0.82rem', borderColor: 'rgba(56, 189, 248, 0.4)', color: '#38bdf8' }}
+                    style={{ width: '100%', padding: '7px 12px', borderRadius: '6px', cursor: 'pointer', fontWeight: 600, fontSize: '0.78rem', borderColor: 'rgba(56, 189, 248, 0.4)', color: '#38bdf8' }}
                     onClick={handleOneClickFlash}
                     disabled={flashing || quickPushing}
                   >
@@ -1184,19 +1263,18 @@ export default function AddDeviceWizard({
                 </div>
 
                 {/* Method 3: Wireless Captive Portal */}
-                <div style={{ background: 'rgba(255, 255, 255, 0.02)', border: '1px solid rgba(255, 255, 255, 0.08)', borderRadius: '14px', padding: '14px 16px' }}>
-                  <div style={{ display: 'flex', alignItems: 'center', gap: '8px', marginBottom: '8px' }}>
-                    <span style={{ fontSize: '1.2rem' }}>📶</span>
+                <div style={{ background: 'rgba(255, 255, 255, 0.02)', border: '1px solid rgba(255, 255, 255, 0.08)', borderRadius: '10px', padding: '10px 12px' }}>
+                  <div style={{ display: 'flex', alignItems: 'center', gap: '8px', marginBottom: '6px' }}>
+                    <span style={{ fontSize: '1.1rem' }}>📶</span>
                     <div>
-                      <div style={{ fontWeight: 700, fontSize: '0.88rem', color: '#f8fafc' }}>Method 3: 100% Wireless Captive Portal (No PC / No Cable)</div>
-                      <div style={{ fontSize: '0.74rem', color: '#94a3b8' }}>Reconfigure Wi-Fi directly from your mobile phone anywhere:</div>
+                      <div style={{ fontWeight: 700, fontSize: '0.82rem', color: '#f8fafc' }}>Method 3: 100% Wireless Captive Portal (No PC / No Cable)</div>
+                      <div style={{ fontSize: '0.7rem', color: '#94a3b8' }}>Reconfigure Wi-Fi directly from your mobile phone anywhere:</div>
                     </div>
                   </div>
-                  <ol style={{ margin: '6px 0 0 16px', padding: 0, fontSize: '0.76rem', color: '#cbd5e1', lineHeight: 1.6 }}>
+                  <ol style={{ margin: '4px 0 0 14px', padding: 0, fontSize: '0.72rem', color: '#cbd5e1', lineHeight: 1.5 }}>
                     <li>Hold the ESP32's physical <strong>BOOT button for 2 seconds</strong> (or turn off previous hotspot).</li>
-                    <li>Status LED will blink fast and board broadcasts hotspot: <strong style={{ color: '#00d2b4' }}>AirGuard-Setup</strong>.</li>
-                    <li>Connect your phone to <strong style={{ color: '#00d2b4' }}>AirGuard-Setup</strong> (no password).</li>
-                    <li>Open browser to <strong style={{ color: '#38bdf8' }}>http://192.168.4.1</strong> → select new Wi-Fi & Save.</li>
+                    <li>Status LED blinks fast & board broadcasts hotspot: <strong style={{ color: '#00d2b4' }}>AirGuard-Setup</strong>.</li>
+                    <li>Connect phone to <strong style={{ color: '#00d2b4' }}>AirGuard-Setup</strong> → open <strong style={{ color: '#38bdf8' }}>http://192.168.4.1</strong> → select Wi-Fi & Save.</li>
                   </ol>
                 </div>
               </div>

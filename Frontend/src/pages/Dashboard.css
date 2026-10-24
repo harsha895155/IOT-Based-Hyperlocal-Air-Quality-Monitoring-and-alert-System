@@ -633,22 +633,22 @@
   font-size: 0.7rem;
 }
 
-/* ─── 5. POLLUTANTS GRID ─── */
+/* ─── 5. POLLUTANTS GRID (COMPACT) ─── */
 .pollutants-grid {
   display: grid;
-  grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
-  gap: 14px;
+  grid-template-columns: repeat(auto-fit, minmax(170px, 1fr));
+  gap: 10px;
 }
 
 .pollutant-card {
-  padding: 16px;
-  border-radius: 12px;
+  padding: 10px 14px;
+  border-radius: 10px;
   background: var(--card-sub-bg);
   border: 1px solid var(--border-subtle);
   box-shadow: var(--shadow-card);
   display: flex;
   flex-direction: column;
-  gap: 8px;
+  gap: 4px;
 }
 
 .pollutant-card.is-active-sensor {
@@ -667,13 +667,13 @@
 }
 
 .pol-name {
-  font-size: 0.8rem;
+  font-size: 0.75rem;
   font-weight: 600;
   color: var(--text-primary);
 }
 
 .pol-tag {
-  font-size: 0.68rem;
+  font-size: 0.64rem;
   font-weight: 700;
   text-transform: uppercase;
 }
@@ -681,24 +681,24 @@
 .pol-val-row {
   display: flex;
   align-items: baseline;
-  gap: 6px;
+  gap: 5px;
 }
 
 .pol-val {
-  font-size: 1.45rem;
+  font-size: 1.18rem;
   font-weight: 700;
   color: var(--text-primary);
 }
 
 .pol-unit {
-  font-size: 0.78rem;
+  font-size: 0.72rem;
   color: var(--text-muted);
 }
 
 .pol-sub {
-  font-size: 0.72rem;
+  font-size: 0.68rem;
   color: var(--text-faint);
-  line-height: 1.35;
+  line-height: 1.3;
 }
 
 /* ─── 6. 7-DAY FORECAST ─── */
@@ -798,19 +798,19 @@
 /* ─── 7. ENVIRONMENTAL DETAILS GRID ─── */
 .environmental-details-grid {
   display: grid;
-  grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
-  gap: 18px;
+  grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
+  gap: 10px;
 }
 
 .env-metric-card {
-  padding: 20px;
-  border-radius: 16px;
+  padding: 12px 14px;
+  border-radius: 12px;
   background: var(--surface);
   border: 1px solid var(--border);
   display: flex;
   flex-direction: column;
   justify-content: space-between;
-  gap: 16px;
+  gap: 8px;
 }
 
 .env-metric-header {
@@ -820,40 +820,40 @@
 }
 
 .env-metric-title {
-  font-size: 0.75rem;
+  font-size: 0.68rem;
   font-weight: 700;
   letter-spacing: 0.06em;
   color: var(--text-faint);
 }
 
 .env-metric-num {
-  font-size: 1.85rem;
+  font-size: 1.32rem;
   font-weight: 700;
   color: var(--text-primary);
   line-height: 1;
-  margin-bottom: 6px;
+  margin-bottom: 4px;
 }
 
 .env-metric-num .unit {
-  font-size: 1rem;
+  font-size: 0.78rem;
   font-weight: 500;
   color: var(--text-muted);
 }
 
 .env-metric-sub {
-  font-size: 0.85rem;
+  font-size: 0.72rem;
   color: var(--text-muted);
-  line-height: 1.4;
+  line-height: 1.3;
 }
 
 .env-metric-foot {
-  margin-top: 6px;
+  margin-top: 4px;
 }
 
 .compass-layout {
   display: flex;
   align-items: center;
-  gap: 18px;
+  gap: 12px;
 }
 
 .sun-times-row {

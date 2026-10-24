@@ -24,21 +24,21 @@
 
 .wizard-card {
   width: 100%;
-  max-width: 560px;
+  max-width: 530px;
   background: var(--bg-card, #13192b);
   border: 1px solid var(--border-subtle, rgba(56, 189, 248, 0.25));
-  border-radius: 20px;
+  border-radius: 16px;
   box-shadow: var(--shadow-card-hover, 0 24px 60px rgba(0, 0, 0, 0.35));
   display: flex;
   flex-direction: column;
   overflow: hidden;
   position: relative;
-  max-height: 88vh;
+  max-height: 86vh;
 }
 
 /* ─── Header & Progress Stepper ─── */
 .wizard-header {
-  padding: 16px 20px 12px;
+  padding: 12px 18px 10px;
   border-bottom: 1px solid var(--border-soft, rgba(255, 255, 255, 0.08));
   background: var(--bg-surface, rgba(15, 23, 42, 0.4));
 }
@@ -57,20 +57,20 @@
 }
 
 .wizard-icon-badge {
-  width: 36px;
-  height: 36px;
-  border-radius: 10px;
+  width: 32px;
+  height: 32px;
+  border-radius: 8px;
   background: linear-gradient(135deg, rgba(56, 189, 248, 0.15) 0%, rgba(0, 210, 180, 0.15) 100%);
   border: 1px solid var(--border-subtle, rgba(56, 189, 248, 0.35));
   display: flex;
   align-items: center;
   justify-content: center;
-  font-size: 1.15rem;
+  font-size: 1.05rem;
 }
 
 .wizard-title {
   margin: 0;
-  font-size: 1.12rem;
+  font-size: 1.05rem;
   font-weight: 700;
   color: var(--text-primary, #f8fafc);
   letter-spacing: -0.01em;
@@ -78,7 +78,7 @@
 
 .wizard-subtitle {
   margin: 1px 0 0 0;
-  font-size: 0.76rem;
+  font-size: 0.72rem;
   color: var(--text-muted, #94a3b8);
 }
 
@@ -204,38 +204,38 @@
 
 /* ─── Wizard Body ─── */
 .wizard-body {
-  padding: 18px 20px;
+  padding: 12px 18px;
   overflow-y: auto;
   flex: 1;
 }
 
 .wizard-step-title {
-  font-size: 1.15rem;
+  font-size: 1.05rem;
   font-weight: 700;
   color: var(--text-primary, #f8fafc);
-  margin: 0 0 6px 0;
+  margin: 0 0 4px 0;
 }
 
 .wizard-step-desc {
-  font-size: 0.85rem;
+  font-size: 0.8rem;
   color: var(--text-muted, #94a3b8);
-  margin: 0 0 22px 0;
-  line-height: 1.5;
+  margin: 0 0 14px 0;
+  line-height: 1.4;
 }
 
 /* Form inputs */
 .wizard-field-group {
-  margin-bottom: 18px;
+  margin-bottom: 12px;
 }
 
 .wizard-field-label {
   display: flex;
   justify-content: space-between;
   align-items: center;
-  font-size: 0.82rem;
+  font-size: 0.78rem;
   font-weight: 600;
   color: var(--text-primary, #cbd5e1);
-  margin-bottom: 6px;
+  margin-bottom: 5px;
 }
 
 .wizard-input-wrap {
@@ -248,9 +248,9 @@
   width: 100%;
   background: var(--surface-raised, rgba(15, 23, 42, 0.7));
   border: 1px solid var(--border, rgba(255, 255, 255, 0.12));
-  border-radius: 12px;
-  padding: 12px 16px;
-  font-size: 0.92rem;
+  border-radius: 9px;
+  padding: 9px 13px;
+  font-size: 0.86rem;
   color: var(--text-primary, #f8fafc);
   outline: none;
   transition: all 0.2s;

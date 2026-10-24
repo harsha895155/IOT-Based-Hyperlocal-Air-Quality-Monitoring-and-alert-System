@@ -650,7 +650,7 @@ export default function Dashboard({ readingsData, onNavigateTab }) {
           </div>
           <div className="env-metric-content compass-layout">
             <div className="compass-widget">
-              <WeatherIcons.compass degrees={cw.windDirectionDeg || 0} size={54} />
+              <WeatherIcons.compass degrees={cw.windDirectionDeg || 0} size={40} />
             </div>
             <div>
               <div className="env-metric-num mono">{cw.windSpeedKmh ?? '—'} <span className="unit">km/h</span></div>

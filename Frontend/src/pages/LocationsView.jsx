@@ -338,9 +338,9 @@ export default function LocationsView() {
 
   return (
     <div className="location-weather-page">
-      {/* ─── 1. PAGE HEADER ─── */}
-      <div className="loc-header">
-        <div>
+      {/* ─── 1. PAGE HEADER (TITLE & COMPACT TOP-RIGHT WEATHER DISCLAIMER) ─── */}
+      <div className="loc-header" style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', gap: '20px', flexWrap: 'wrap', marginBottom: '20px' }}>
+        <div style={{ flex: '1 1 540px', minWidth: '280px' }}>
           <div className="loc-title-row" style={{ display: 'flex', alignItems: 'center', gap: '10px', flexWrap: 'wrap', marginBottom: '4px' }}>
             <h1 className="loc-title" style={{ margin: 0 }}>Location Weather Search</h1>
             <div className="loc-badge-row" style={{ margin: 0, display: 'flex', alignItems: 'center', gap: '6px', flexWrap: 'nowrap' }}>
@@ -351,17 +351,17 @@ export default function LocationsView() {
               <span className="loc-scope-pill">EXTERNAL METEOROLOGICAL SOURCE</span>
             </div>
           </div>
-          <p className="loc-subtitle">
+          <p className="loc-subtitle" style={{ margin: 0, fontSize: '0.88rem' }}>
             Search any city, town, district, or region worldwide to inspect real-time atmospheric conditions, 24-hour trends, and 7-day meteorological forecasts.
           </p>
         </div>
 
-        <div className="loc-header-meta">
-          <div className="loc-disclaimer-box">
-            <span className="disclaimer-icon">ℹ️</span>
+        <div className="loc-header-meta" style={{ flex: '0 0 auto', maxWidth: '380px' }}>
+          <div className="loc-disclaimer-box" style={{ padding: '8px 12px', gap: '8px', background: 'rgba(56, 189, 248, 0.06)', borderColor: 'rgba(56, 189, 248, 0.25)', borderRadius: '10px' }}>
+            <span className="disclaimer-icon" style={{ fontSize: '1rem', lineHeight: 1 }}>ℹ️</span>
             <div>
-              <div className="disclaimer-title">Independent Weather Stream</div>
-              <div className="disclaimer-text">
+              <div className="disclaimer-title" style={{ fontSize: '0.75rem', fontWeight: 700, color: '#38bdf8' }}>Independent Weather Stream</div>
+              <div className="disclaimer-text" style={{ fontSize: '0.7rem', color: '#94a3b8', lineHeight: 1.35 }}>
                 Weather results are fetched from external meteorological sources and are completely independent from your private AirGuard IoT hardware sensing nodes.
               </div>
             </div>
