@@ -20,6 +20,10 @@ class NodeNetworkManager {
     void saveWiFiCredentials(const String &ssid, const String &password);
     String getSavedSSID();
 
+    // Save and load Device ID to ESP32 non-volatile storage (NVS)
+    void saveDeviceId(const String &devId);
+    String getDeviceId();
+
     // Starts mobile phone captive portal hotspot "AirGuard-Setup" (IP 192.168.4.1)
     bool startCaptivePortal(unsigned long timeoutMs = 180000UL);
 

@@ -98,6 +98,15 @@ void handleSerialCommands() {
         }
         if (WiFi.status() == WL_CONNECTED) {
           network.saveWiFiCredentials(newSsid, newPass);
+          int devStart = input.indexOf("\"deviceId\":\"");
+          if (devStart >= 0) {
+            devStart += 12;
+            int devEnd = input.indexOf("\"", devStart);
+            if (devEnd > devStart) {
+              String newDev = input.substring(devStart, devEnd);
+              network.saveDeviceId(newDev);
+            }
+          }
           Serial.printf("\n{\"status\":\"PROVISIONED\",\"ip\":\"%s\"}\n", WiFi.localIP().toString().c_str());
         } else {
           Serial.println("\n{\"status\":\"WIFI_FAILED\",\"error\":\"Authentication timeout\"}");

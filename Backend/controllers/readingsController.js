@@ -226,10 +226,9 @@ async function createReading(req, res, next) {
         io.to(`device_${device.deviceId}`).emit('reading', reading);
         io.to(`user_${device.userId}`).emit('device_status', statusPayload);
         io.to(`device_${device.deviceId}`).emit('device_status', statusPayload);
-      } else {
-        io.emit('reading', reading);
-        io.emit('device_status', statusPayload);
       }
+      io.emit('reading', reading);
+      io.emit('device_status', statusPayload);
       io.to('admin_room').emit('reading', reading);
       io.to('admin_room').emit('device_status', statusPayload);
     }

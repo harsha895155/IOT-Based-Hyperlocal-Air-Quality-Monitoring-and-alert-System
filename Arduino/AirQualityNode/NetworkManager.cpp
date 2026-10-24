@@ -27,6 +27,26 @@ String NodeNetworkManager::getSavedSSID() {
   return ssid;
 }
 
+void NodeNetworkManager::saveDeviceId(const String &devId) {
+  if (devId.length() == 0) return;
+  Preferences prefs;
+  if (prefs.begin("airguard", false)) {
+    prefs.putString("device_id", devId);
+    prefs.end();
+    Serial.printf("[NVS] Device ID saved to flash: \"%s\"\n", devId.c_str());
+  }
+}
+
+String NodeNetworkManager::getDeviceId() {
+  Preferences prefs;
+  String id = DEVICE_ID;
+  if (prefs.begin("airguard", true)) {
+    id = prefs.getString("device_id", DEVICE_ID);
+    prefs.end();
+  }
+  return id;
+}
+
 bool NodeNetworkManager::startCaptivePortal(unsigned long timeoutMs) {
   Serial.println("\n==============================================");
   Serial.println("  AirGuard — Mobile Phone Hotspot Activated   ");
@@ -308,7 +328,7 @@ bool NodeNetworkManager::sendReading(const SensorReading &reading) {
   // Build JSON manually — avoids pulling in ArduinoJson for a payload
   // this small and keeps flash usage down.
   String payload = "{";
-  payload += "\"deviceId\":\"" + String(DEVICE_ID) + "\",";
+  payload += "\"deviceId\":\"" + getDeviceId() + "\",";
   payload += "\"temperature\":" + String(reading.temperature, 2) + ",";
   payload += "\"humidity\":" + String(reading.humidity, 2) + ",";
   payload += "\"gasPPM\":" + String(reading.gasPPM, 2) + ",";
