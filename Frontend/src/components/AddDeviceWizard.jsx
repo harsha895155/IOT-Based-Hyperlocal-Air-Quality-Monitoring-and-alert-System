@@ -72,21 +72,37 @@ export default function AddDeviceWizard({
       client.get('/devices').then((res) => {
         if (Array.isArray(res.data) && res.data.length > 0) {
           setUserDeviceList(res.data);
-          // If no target device was provided and no deviceId is selected, default to first device
-          setFormData((prev) => {
-            if (!prev.deviceId && !targetDevice) {
-              const first = res.data[0];
-              const dId = first.deviceId || first.id;
-              return {
-                ...prev,
-                deviceId: dId,
-                name: first.name || dId,
-                location: first.location || prev.location,
-                wifiSsid: first.wifiSSID || prev.wifiSsid,
-              };
-            }
-            return prev;
-          });
+          // If in reconfig mode and no target was specified, default to first device
+          if (initialMode === 'reconfig' || targetDevice) {
+            setFormData((prev) => {
+              if (!prev.deviceId && !targetDevice) {
+                const first = res.data[0];
+                const dId = first.deviceId || first.id;
+                return {
+                  ...prev,
+                  deviceId: dId,
+                  name: first.name || dId,
+                  location: first.location || prev.location,
+                  wifiSsid: first.wifiSSID || prev.wifiSsid,
+                };
+              }
+              return prev;
+            });
+          } else {
+            // In onboarding mode: suggest the next available node ID (e.g. esp32-node-02)
+            const nextIdx = res.data.length + 1;
+            const nextSuggestedId = `esp32-node-${nextIdx < 10 ? '0' + nextIdx : nextIdx}`;
+            setFormData((prev) => {
+              if (!prev.deviceId) {
+                return {
+                  ...prev,
+                  deviceId: nextSuggestedId,
+                  name: prev.name || `AirGuard Node ${nextIdx < 10 ? '0' + nextIdx : nextIdx}`,
+                };
+              }
+              return prev;
+            });
+          }
         }
       }).catch(() => {});
     }
