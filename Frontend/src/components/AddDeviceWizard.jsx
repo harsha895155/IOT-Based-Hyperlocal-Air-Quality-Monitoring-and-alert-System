@@ -773,8 +773,12 @@ export default function AddDeviceWizard({
     try {
       // 1. Create registration session on backend
       const fullLoc = [formData.locality, formData.city, formData.state].filter(Boolean).join(', ') || formData.location;
+      const targetDevId = formData.deviceId?.trim() || detectedHardware?.hardwareId || 'esp32-node-01';
+      if (!formData.deviceId?.trim()) {
+        setFormData((prev) => ({ ...prev, deviceId: targetDevId }));
+      }
       const sessionRes = await client.post('/devices/provision-session', {
-        deviceId: formData.deviceId,
+        deviceId: targetDevId,
         name: formData.name,
         location: fullLoc,
         locality: formData.locality,
@@ -2139,7 +2143,13 @@ export default function AddDeviceWizard({
                 <button
                   type="button"
                   className="wizard-btn-primary"
-                  onClick={() => setStep(2)}
+                  onClick={() => {
+                    if (!formData.deviceId?.trim()) {
+                      const fallbackId = detectedHardware?.hardwareId || 'esp32-node-01';
+                      setFormData((prev) => ({ ...prev, deviceId: fallbackId }));
+                    }
+                    setStep(2);
+                  }}
                   disabled={!formData.wifiSsid.trim() || (!serialConnected && !detectedHardware)}
                 >
                   Next: Location & Deployment →

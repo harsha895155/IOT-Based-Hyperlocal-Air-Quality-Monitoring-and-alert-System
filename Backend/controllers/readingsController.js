@@ -51,11 +51,10 @@ async function createReading(req, res, next) {
     const now = new Date();
 
     if (!device) {
-      // Auto-provision newly flashed / connected hardware
-      const defaultUser = (await User.findOne({ role: 'admin' })) || (await User.findOne());
+      // Auto-provision newly flashed / connected hardware as unclaimed until onboarded by a user
       device = await Device.create({
         deviceId: cleanId,
-        userId: defaultUser ? defaultUser._id : null,
+        userId: null,
         name: `AirGuard Node (${cleanId})`,
         location: 'Gangavaram, Andhra Pradesh',
         type: 'AirGuard ESP32 Sensing Node',
