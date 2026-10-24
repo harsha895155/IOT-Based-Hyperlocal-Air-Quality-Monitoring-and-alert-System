@@ -186,6 +186,8 @@ router.post('/provision-session', protect, async (req, res, next) => {
       });
     }
 
+    req.app.get('io')?.emit('device_updated', { device: existing.toObject({ virtuals: true }) });
+
     res.json({
       success: true,
       deviceId: cleanId,

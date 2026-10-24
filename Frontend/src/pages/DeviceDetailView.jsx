@@ -1,6 +1,7 @@
 import React, { useState, useEffect, useMemo } from 'react';
 import { useParams, Link, useNavigate } from 'react-router-dom';
 import client from '../api/client';
+import { getSocket } from '../api/socket';
 import { classifyAQI, healthRecommendation } from '../utils/aqi';
 import { formatTimeAgo } from '../hooks/useReadings';
 import { AreaChart, Area, XAxis, YAxis, Tooltip, ResponsiveContainer, ComposedChart, Line, CartesianGrid, Legend } from 'recharts';
@@ -52,6 +53,21 @@ export default function DeviceDetailView({ readingsData }) {
 
   useEffect(() => {
     fetchDeviceData();
+
+    const socket = getSocket();
+    if (!socket) return;
+
+    const handleDeviceUpdated = (data) => {
+      const updated = data?.device;
+      if (updated && (updated.deviceId === id || updated.id === id)) {
+        setDevice((prev) => (prev ? { ...prev, ...updated } : updated));
+      }
+    };
+
+    socket.on('device_updated', handleDeviceUpdated);
+    return () => {
+      socket.off('device_updated', handleDeviceUpdated);
+    };
   }, [id]);
 
   // Echo Ping Diagnostic

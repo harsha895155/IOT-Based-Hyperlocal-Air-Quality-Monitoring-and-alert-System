@@ -81,10 +81,10 @@ async function createReading(req, res, next) {
     });
 
     // 3. Update device telemetry
-    const now = new Date();
     device.lastSeen = now;
     device.latestReading = reading._id;
     await device.save();
+    req.app.get('io')?.emit('device_updated', { device: device.toObject({ virtuals: true }) });
 
     // 3. Alert deduplication & multi-channel dispatching with CAP-v1.2 Protocols (R7)
     let alert = null;

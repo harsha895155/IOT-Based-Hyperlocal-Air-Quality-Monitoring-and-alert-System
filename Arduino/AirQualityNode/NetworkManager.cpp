@@ -33,13 +33,14 @@ bool NodeNetworkManager::startCaptivePortal(unsigned long timeoutMs) {
   Serial.println("  Connect phone Wi-Fi to: AirGuard-Setup      ");
   Serial.println("  Portal URL: http://192.168.4.1 (Auto-Popup) ");
   Serial.println("==============================================");  // Scan local 2.4GHz networks before enabling AP
-  WiFi.mode(WIFI_AP_STA);
+  // 1. Scan nearby 2.4GHz Wi-Fi networks in STA mode before launching AP
+  WiFi.mode(WIFI_STA);
   WiFi.disconnect();
-  delay(200);
-  int n = WiFi.scanNetworks(false, true);
+  delay(150);
+  int n = WiFi.scanNetworks(false, false);
   if (n <= 0) {
-    delay(300);
-    n = WiFi.scanNetworks(false, true);
+    delay(250);
+    n = WiFi.scanNetworks(false, false);
   }
   
   String networkOptions = "";
@@ -52,6 +53,7 @@ bool NodeNetworkManager::startCaptivePortal(unsigned long timeoutMs) {
   WiFi.scanDelete();
 
   IPAddress apIP(192, 168, 4, 1);
+  WiFi.mode(WIFI_AP_STA);
   WiFi.softAPConfig(apIP, apIP, IPAddress(255, 255, 255, 0));
   WiFi.softAP("AirGuard-Setup");
 
@@ -72,39 +74,58 @@ bool NodeNetworkManager::startCaptivePortal(unsigned long timeoutMs) {
     html += ".logo{font-size:2.4rem;text-align:center;margin-bottom:8px;}";
     html += "h2{font-size:1.35rem;margin:0 0 6px 0;text-align:center;color:#38bdf8;}";
     html += "p{font-size:0.86rem;color:#94a3b8;text-align:center;margin:0 0 16px 0;line-height:1.4;}";
-    html += "label{font-size:0.78rem;font-weight:700;color:#cbd5e1;display:block;margin-bottom:6px;text-transform:uppercase;letter-spacing:0.06em;}";
+    html += "label{font-size:0.78rem;font-weight:700;color:#cbd5e1;display:block;text-transform:uppercase;letter-spacing:0.06em;}";
     html += "select,input{width:100%;box-sizing:border-box;background:#0f172a;border:1px solid #334155;border-radius:12px;padding:12px 14px;font-size:0.95rem;color:#f8fafc;margin-bottom:16px;outline:none;}";
     html += "select:focus,input:focus{border-color:#00d2b4;}";
-    html += "button{width:100%;background:linear-gradient(135deg,#0284c7 0%,#00d2b4 100%);border:none;border-radius:12px;padding:14px;font-size:1rem;font-weight:700;color:#ffffff;cursor:pointer;box-shadow:0 4px 14px rgba(0,210,180,0.3);}";
+    html += "button.btn-save{width:100%;background:linear-gradient(135deg,#0284c7 0%,#00d2b4 100%);border:none;border-radius:12px;padding:14px;font-size:1rem;font-weight:700;color:#ffffff;cursor:pointer;box-shadow:0 4px 14px rgba(0,210,180,0.3);}";
+    html += ".rescan-btn{background:#1e293b;border:1px solid #38bdf8;color:#38bdf8;padding:4px 10px;border-radius:6px;font-size:0.75rem;cursor:pointer;}";
     html += ".footer{font-size:0.75rem;color:#64748b;text-align:center;margin-top:16px;}";
-    html += "</style></head><body><div class=\"card\"><div class=\"logo\">📡</div><h2>AirGuard Wi-Fi Setup</h2>";
+    html += "</style></head><body><div class=\"card\"><div class=\"logo\">&#128225;</div><h2>AirGuard Wi-Fi Setup</h2>";
     html += "<p>Connect this sensing node to your home or office 2.4 GHz Wi-Fi network.</p>";
-    html += "<form action=\"/save\" method=\"POST\"><label>Select Wi-Fi Network</label>";
+    html += "<form action=\"/save\" method=\"POST\">";
+    html += "<div style=\"display:flex;justify-content:space-between;align-items:center;margin-bottom:6px;\"><label>Select Wi-Fi Network</label><button type=\"button\" id=\"rescan-btn\" class=\"rescan-btn\" onclick=\"rescan();\">&#128257; Rescan</button></div>";
     html += "<select name=\"ssid\" id=\"ssid\" onchange=\"updateManual();\">";
     html += networkOptions;
     html += "<option value=\"__custom__\"" + String(networkOptions.length() == 0 ? " selected" : "") + ">-- Enter Wi-Fi Name Manually --</option></select>";
     html += "<input type=\"text\" name=\"manual_ssid\" id=\"manual\" placeholder=\"Enter your 2.4 GHz Wi-Fi Name (SSID)\" style=\"" + String(networkOptions.length() == 0 ? "display:block;" : "display:none;") + "\">";
-    html += "<label>Wi-Fi Password</label><input type=\"password\" name=\"password\" placeholder=\"Enter Wi-Fi Password\" required>";
-    html += "<button type=\"submit\">Save & Connect Node</button></form>";
-    html += "<script>function updateManual(){var s=document.getElementById('ssid');var m=document.getElementById('manual');if(!s||s.value==='__custom__'){m.style.display='block';m.required=true;}else{m.style.display='none';m.required=false;}}updateManual();</script>";
+    html += "<label style=\"margin-bottom:6px;\">Wi-Fi Password</label><input type=\"password\" name=\"password\" placeholder=\"Enter Wi-Fi Password\" required>";
+    html += "<button type=\"submit\" class=\"btn-save\">Save & Connect Node</button></form>";
+    html += "<script>function updateManual(){var s=document.getElementById('ssid');var m=document.getElementById('manual');if(!s||s.value==='__custom__'){m.style.display='block';m.required=true;}else{m.style.display='none';m.required=false;}}updateManual();";
+    html += "function rescan(){var b=document.getElementById('rescan-btn');if(b)b.innerText='Scanning...';fetch('/scan').then(function(r){return r.json();}).then(function(list){var s=document.getElementById('ssid');if(!s)return;var cur=s.value;s.innerHTML='';if(list&&list.length>0){for(var i=0;i<list.length;i++){var o=document.createElement('option');o.value=list[i].ssid;o.innerText=list[i].ssid+' ('+list[i].rssi+' dBm)';if(list[i].ssid===cur)o.selected=true;s.appendChild(o);}}var c=document.createElement('option');c.value='__custom__';c.innerText='-- Enter Wi-Fi Name Manually --';if(!list||list.length===0)c.selected=true;s.appendChild(c);updateManual();if(b)b.innerText='&#128257; Rescan';}).catch(function(){if(b)b.innerText='&#128257; Rescan';});}";
+    html += "window.addEventListener('load',function(){var s=document.getElementById('ssid');if(!s||s.options.length<=1){setTimeout(rescan,800);}});</script>";
     html += "<div class=\"footer\">AirGuard IoT Sensing Node &bull; Hyperlocal Monitor</div></div></body></html>";
     return html;
   };
 
   webServer.on("/", [&]() {
-    webServer.send(200, "text/html", getPortalHtml());
+    webServer.send(200, "text/html; charset=utf-8", getPortalHtml());
   });
 
   webServer.on("/hotspot-detect.html", [&]() {
-    webServer.send(200, "text/html", getPortalHtml());
+    webServer.send(200, "text/html; charset=utf-8", getPortalHtml());
   });
 
   webServer.on("/generate_204", [&]() {
-    webServer.send(200, "text/html", getPortalHtml());
+    webServer.send(200, "text/html; charset=utf-8", getPortalHtml());
   });
 
   webServer.on("/gen_204", [&]() {
-    webServer.send(200, "text/html", getPortalHtml());
+    webServer.send(200, "text/html; charset=utf-8", getPortalHtml());
+  });
+
+  webServer.on("/scan", [&]() {
+    int count = WiFi.scanNetworks(false, false);
+    String json = "[";
+    for (int i = 0; i < count; ++i) {
+      String net = WiFi.SSID(i);
+      if (net.length() > 0) {
+        if (json.length() > 1) json += ",";
+        json += "{\"ssid\":\"" + net + "\",\"rssi\":" + String(WiFi.RSSI(i)) + "}";
+      }
+    }
+    json += "]";
+    WiFi.scanDelete();
+    webServer.send(200, "application/json; charset=utf-8", json);
   });
 
   webServer.on("/save", HTTP_POST, [&]() {
@@ -132,14 +153,14 @@ bool NodeNetworkManager::startCaptivePortal(unsigned long timeoutMs) {
       successHtml += "<p>You can now disconnect from <strong>AirGuard-Setup</strong> and view your dashboard.</p>";
       successHtml += "</div></body></html>";
 
-      webServer.send(200, "text/html", successHtml);
+      webServer.send(200, "text/html; charset=utf-8", successHtml);
     } else {
       webServer.send(400, "text/plain", "Invalid Wi-Fi SSID provided.");
     }
   });
 
   webServer.onNotFound([&]() {
-    webServer.send(200, "text/html", getPortalHtml());
+    webServer.send(200, "text/html; charset=utf-8", getPortalHtml());
   });
 
   webServer.begin();
