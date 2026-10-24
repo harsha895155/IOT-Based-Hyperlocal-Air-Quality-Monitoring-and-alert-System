@@ -522,6 +522,68 @@ async function deleteAccount(req, res, next) {
   }
 }
 
+// DELETE /api/auth/activity/:id
+async function deleteActivityItem(req, res, next) {
+  try {
+    const authHeader = req.headers.authorization;
+    if (!authHeader || !authHeader.startsWith('Bearer ')) {
+      return res.status(401).json({ error: 'Not authorized.' });
+    }
+
+    const token = authHeader.split(' ')[1];
+    const decoded = jwt.verify(token, process.env.JWT_SECRET || 'airguard_default_secret_key_2026');
+    const user = await User.findById(decoded.id);
+    if (!user) {
+      return res.status(404).json({ error: 'User not found.' });
+    }
+
+    const targetId = req.params.id;
+    if (user.activityLog && user.activityLog.length > 0) {
+      user.activityLog = user.activityLog.filter((log) => {
+        const idStr = log._id?.toString();
+        const timeMs = log.timestamp ? new Date(log.timestamp).getTime().toString() : '';
+        const timeIso = log.timestamp ? new Date(log.timestamp).toISOString() : '';
+        return (
+          idStr !== targetId &&
+          log.id !== targetId &&
+          timeMs !== targetId &&
+          timeIso !== targetId &&
+          String(log.timestamp) !== targetId
+        );
+      });
+      await user.save();
+    }
+
+    res.json({ success: true, message: 'Activity record removed successfully.', remaining: user.activityLog.length });
+  } catch (err) {
+    next(err);
+  }
+}
+
+// DELETE /api/auth/activity
+async function clearAllActivity(req, res, next) {
+  try {
+    const authHeader = req.headers.authorization;
+    if (!authHeader || !authHeader.startsWith('Bearer ')) {
+      return res.status(401).json({ error: 'Not authorized.' });
+    }
+
+    const token = authHeader.split(' ')[1];
+    const decoded = jwt.verify(token, process.env.JWT_SECRET || 'airguard_default_secret_key_2026');
+    const user = await User.findById(decoded.id);
+    if (!user) {
+      return res.status(404).json({ error: 'User not found.' });
+    }
+
+    user.activityLog = [];
+    await user.save();
+
+    res.json({ success: true, message: 'All account activity logs cleared successfully.' });
+  } catch (err) {
+    next(err);
+  }
+}
+
 module.exports = {
   register,
   login,
@@ -533,5 +595,7 @@ module.exports = {
   resetPassword,
   googleLogin,
   getActivity,
+  deleteActivityItem,
+  clearAllActivity,
   deleteAccount,
 };

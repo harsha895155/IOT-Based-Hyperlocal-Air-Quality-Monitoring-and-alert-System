@@ -9,41 +9,54 @@
 
 .report-controls-bar {
   display: flex;
-  flex-wrap: wrap;
+  flex-wrap: nowrap;
   align-items: center;
-  justify-content: space-between;
-  gap: 16px;
+  justify-content: flex-start;
+  gap: 10px;
   background: var(--bg-card);
   border: 1px solid var(--border-subtle);
-  border-radius: 14px;
-  padding: 14px 20px;
-  margin-bottom: 24px;
+  border-radius: 9px;
+  padding: 6px 12px;
+  margin-bottom: 14px;
   box-shadow: var(--shadow-card);
+  overflow-x: auto;
 }
 
 .report-controls-group {
   display: flex;
   flex-wrap: wrap;
   align-items: center;
-  gap: 14px;
+  gap: 10px;
 }
 
 .report-range-wrap {
   display: flex;
   align-items: center;
-  gap: 10px;
+  gap: 6px;
+  flex-shrink: 0;
+}
+
+.report-range-control .segmented-control__btn {
+  padding: 4px 8px;
+  font-size: 0.74rem;
+  height: 28px;
+  line-height: 1;
 }
 
 .report-dropdowns-row {
   display: flex;
   align-items: center;
-  gap: 14px;
+  gap: 8px;
+  flex-shrink: 0;
 }
 
 .report-audit-row {
+  margin-left: auto;
   display: flex;
   align-items: center;
-  gap: 12px;
+  gap: 6px;
+  flex-shrink: 0;
+  white-space: nowrap;
 }
 
 .report-btn-short {
@@ -53,24 +66,26 @@
 .report-filter-item {
   display: flex;
   align-items: center;
-  gap: 8px;
+  gap: 5px;
 }
 
 .report-filter-label {
-  font-size: 0.75rem;
-  font-weight: 600;
+  font-size: 0.68rem;
+  font-weight: 700;
   text-transform: uppercase;
-  letter-spacing: 0.05em;
+  letter-spacing: 0.04em;
   color: var(--text-faint);
+  white-space: nowrap;
 }
 
 .report-select {
   background: var(--bg-surface);
   color: var(--text-primary);
   border: 1px solid var(--border-subtle);
-  border-radius: 8px;
-  padding: 6px 12px;
-  font-size: 0.85rem;
+  border-radius: 6px;
+  padding: 3px 8px;
+  font-size: 0.74rem;
+  height: 28px;
   font-family: inherit;
   cursor: pointer;
   outline: none;
@@ -84,33 +99,43 @@
 .audit-meta-pill {
   display: inline-flex;
   align-items: center;
-  gap: 8px;
+  gap: 5px;
   background: rgba(0, 210, 180, 0.1);
   border: 1px solid rgba(0, 210, 180, 0.25);
   border-radius: 20px;
-  padding: 4px 12px;
-  font-size: 0.75rem;
+  padding: 3px 8px;
+  font-size: 0.72rem;
   color: #00d2b4;
   font-family: var(--font-mono, monospace);
+  white-space: nowrap;
 }
 
 /* ─── Executive KPI Grid ─── */
 .compliance-kpi-grid {
   display: grid;
-  grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
-  gap: 16px;
-  margin-bottom: 24px;
+  grid-template-columns: repeat(6, minmax(0, 1fr));
+  gap: 8px;
+  margin-bottom: 16px;
+}
+
+@media (max-width: 1100px) {
+  .compliance-kpi-grid {
+    grid-template-columns: repeat(3, minmax(0, 1fr));
+  }
 }
 
 .compliance-kpi-card {
   background: var(--bg-card);
   border: 1px solid var(--border-subtle);
-  border-radius: 14px;
-  padding: 18px 20px;
+  border-radius: 9px;
+  padding: 8px 10px;
   box-shadow: var(--shadow-card);
   position: relative;
   overflow: hidden;
   transition: transform 0.2s, border-color 0.2s, box-shadow 0.2s;
+  display: flex;
+  flex-direction: column;
+  justify-content: space-between;
 }
 
 .compliance-kpi-card:hover {
@@ -133,22 +158,27 @@
   display: flex;
   align-items: center;
   justify-content: space-between;
-  margin-bottom: 8px;
+  margin-bottom: 4px;
+  gap: 4px;
 }
 
 .compliance-kpi-title {
-  font-size: 0.72rem;
+  font-size: 0.65rem;
   font-weight: 700;
   text-transform: uppercase;
-  letter-spacing: 0.06em;
+  letter-spacing: 0.04em;
   color: var(--text-faint);
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
 }
 
 .compliance-kpi-badge {
-  font-size: 0.7rem;
+  font-size: 0.62rem;
   font-weight: 700;
-  padding: 2px 8px;
-  border-radius: 6px;
+  padding: 1px 5px;
+  border-radius: 4px;
+  white-space: nowrap;
 }
 
 .compliance-kpi-badge.is-good {
@@ -167,16 +197,21 @@
 }
 
 .compliance-kpi-val {
-  font-size: 1.8rem;
+  font-size: 1.25rem;
   font-weight: 800;
   font-family: var(--font-mono, monospace);
   color: var(--text-primary);
-  margin-bottom: 4px;
+  line-height: 1.2;
+  margin-bottom: 2px;
 }
 
 .compliance-kpi-sub {
-  font-size: 0.75rem;
+  font-size: 0.66rem;
   color: var(--text-muted);
+  line-height: 1.25;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
 }
 
 /* ─── Breakdown & Distribution ─── */

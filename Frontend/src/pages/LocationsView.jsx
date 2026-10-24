@@ -371,121 +371,123 @@ export default function LocationsView() {
 
       {toastMessage && <div className="loc-toast-banner">{toastMessage}</div>}
 
-      {/* ─── 2. SEARCH INTERFACE & QUICK CHIPS ─── */}
-      <div className="loc-search-card">
-        <div className="loc-search-bar-wrap" ref={searchContainerRef}>
-          <div className="loc-search-input-box">
-            <svg className="loc-search-icon" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.2">
-              <circle cx="11" cy="11" r="8" />
-              <line x1="21" y1="21" x2="16.65" y2="16.65" />
-            </svg>
-            <input
-              type="text"
-              className="loc-search-input"
-              placeholder="Search any city worldwide (e.g. Hyderabad, London, Tokyo, New York)..."
-              value={searchQuery}
-              onChange={(e) => setSearchQuery(e.target.value)}
-              onFocus={() => searchResults.length > 0 && setDropdownOpen(true)}
-            />
-            {isSearching && <span className="loc-search-spinner" />}
-            {searchQuery && (
-              <button
-                type="button"
-                className="loc-clear-btn"
-                onClick={() => {
-                  setSearchQuery('');
-                  setSearchResults([]);
-                }}
-              >
-                ✕
-              </button>
-            )}
-          </div>
-
-          <button
-            type="button"
-            className="loc-btn-gps"
-            title="Use My Current GPS Location"
-            onClick={handleUseCurrentLocation}
-          >
-            <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.2">
-              <polygon points="3 11 22 2 13 21 11 13 3 11" />
-            </svg>
-            <span>My Location</span>
-          </button>
-
-          {/* Autocomplete Dropdown */}
-          {dropdownOpen && searchResults.length > 0 && (
-            <div className="loc-autocomplete-dropdown">
-              <div className="loc-dropdown-header">MATCHING LOCATIONS (GOOGLE WEATHER)</div>
-              {searchResults.map((res, i) => (
-                <button
-                  key={`${res.name}-${res.latitude}-${i}`}
-                  type="button"
-                  className="loc-dropdown-item"
-                  onClick={() => handleSelectLocation(res)}
-                >
-                  <div className="loc-item-pin">📍</div>
-                  <div className="loc-item-text">
-                    <span className="loc-item-name">{res.name}</span>
-                    <span className="loc-item-sub">
-                      {[res.admin1, res.country].filter(Boolean).join(', ')}
-                    </span>
-                  </div>
-                  <span className="loc-item-arrow">→</span>
-                </button>
-              ))}
-            </div>
-          )}
-        </div>
-
-      </div>
-
-      {/* ─── 3. SAVED & RECENT LOCATIONS BAR ─── */}
-      <div className="loc-saved-section">
-        <div className="loc-saved-header">
-          <div className="loc-saved-title">
-            <span>⭐ YOUR SAVED LOCATIONS</span>
-            <span className="loc-saved-count">({savedLocations.length})</span>
-          </div>
-          <button
-            type="button"
-            className={`loc-save-current-btn ${isCurrentSaved ? 'is-saved' : ''}`}
-            onClick={handleToggleSaveLocation}
-          >
-            {isCurrentSaved ? '★ Saved to Favorites' : '☆ Save Current Location'}
-          </button>
-        </div>
-
-        {savedLocations.length > 0 ? (
-          <div className="loc-saved-chips-grid">
-            {savedLocations.map((item, idx) => (
-              <div
-                key={`${item.name}-${idx}`}
-                className={`loc-saved-card ${currentLocation.name.toLowerCase() === item.name.toLowerCase() ? 'is-active' : ''}`}
-                onClick={() => handleSelectLocation(item)}
-              >
-                <div className="loc-saved-card-info">
-                  <span className="loc-saved-pin">📍</span>
-                  <span className="loc-saved-name">{item.name}</span>
-                  {item.country && <span className="loc-saved-country">{item.country}</span>}
-                </div>
+      {/* ─── 2. SEARCH & SAVED TOOLBAR ROW (SIDE BY SIDE) ─── */}
+      <div className="loc-toolbar-row">
+        {/* Search Card */}
+        <div className="loc-search-card">
+          <div className="loc-search-bar-wrap" ref={searchContainerRef}>
+            <div className="loc-search-input-box">
+              <svg className="loc-search-icon" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.2">
+                <circle cx="11" cy="11" r="8" />
+                <line x1="21" y1="21" x2="16.65" y2="16.65" />
+              </svg>
+              <input
+                type="text"
+                className="loc-search-input"
+                placeholder="Search any city worldwide (e.g. Hyderabad, London, Tokyo)..."
+                value={searchQuery}
+                onChange={(e) => setSearchQuery(e.target.value)}
+                onFocus={() => searchResults.length > 0 && setDropdownOpen(true)}
+              />
+              {isSearching && <span className="loc-search-spinner" />}
+              {searchQuery && (
                 <button
                   type="button"
-                  className="loc-saved-remove"
-                  title="Remove saved location"
-                  onClick={(e) => handleRemoveSavedItem(e, item)}
+                  className="loc-clear-btn"
+                  onClick={() => {
+                    setSearchQuery('');
+                    setSearchResults([]);
+                  }}
                 >
                   ✕
                 </button>
+              )}
+            </div>
+
+            <button
+              type="button"
+              className="loc-btn-gps"
+              title="Use My Current GPS Location"
+              onClick={handleUseCurrentLocation}
+            >
+              <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.2">
+                <polygon points="3 11 22 2 13 21 11 13 3 11" />
+              </svg>
+              <span>My Location</span>
+            </button>
+
+            {/* Autocomplete Dropdown */}
+            {dropdownOpen && searchResults.length > 0 && (
+              <div className="loc-autocomplete-dropdown">
+                <div className="loc-dropdown-header">MATCHING LOCATIONS (GOOGLE WEATHER)</div>
+                {searchResults.map((res, i) => (
+                  <button
+                    key={`${res.name}-${res.latitude}-${i}`}
+                    type="button"
+                    className="loc-dropdown-item"
+                    onClick={() => handleSelectLocation(res)}
+                  >
+                    <div className="loc-item-pin">📍</div>
+                    <div className="loc-item-text">
+                      <span className="loc-item-name">{res.name}</span>
+                      <span className="loc-item-sub">
+                        {[res.admin1, res.country].filter(Boolean).join(', ')}
+                      </span>
+                    </div>
+                    <span className="loc-item-arrow">→</span>
+                  </button>
+                ))}
               </div>
-            ))}
+            )}
           </div>
-        ) : (
-          <div className="loc-saved-empty">
-            No saved locations yet. Click <strong>"☆ Save Current Location"</strong> above to pin your favorite cities.
+        </div>
+
+        {/* Saved & Recent Locations Bar */}
+        <div className="loc-saved-section">
+          <div className="loc-saved-header">
+            <div className="loc-saved-title">
+              <span>⭐ YOUR SAVED LOCATIONS</span>
+              <span className="loc-saved-count">({savedLocations.length})</span>
+            </div>
+            <button
+              type="button"
+              className={`loc-save-current-btn ${isCurrentSaved ? 'is-saved' : ''}`}
+              onClick={handleToggleSaveLocation}
+            >
+              {isCurrentSaved ? '★ Saved to Favorites' : '☆ Save Current Location'}
+            </button>
           </div>
-        )}
+
+          {savedLocations.length > 0 ? (
+            <div className="loc-saved-chips-grid">
+              {savedLocations.map((item, idx) => (
+                <div
+                  key={`${item.name}-${idx}`}
+                  className={`loc-saved-card ${currentLocation.name.toLowerCase() === item.name.toLowerCase() ? 'is-active' : ''}`}
+                  onClick={() => handleSelectLocation(item)}
+                >
+                  <div className="loc-saved-card-info">
+                    <span className="loc-saved-pin">📍</span>
+                    <span className="loc-saved-name">{item.name}</span>
+                    {item.country && <span className="loc-saved-country">{item.country}</span>}
+                  </div>
+                  <button
+                    type="button"
+                    className="loc-saved-remove"
+                    title="Remove saved location"
+                    onClick={(e) => handleRemoveSavedItem(e, item)}
+                  >
+                    ✕
+                  </button>
+                </div>
+              ))}
+            </div>
+          ) : (
+            <div className="loc-saved-empty">
+              No saved locations yet. Click <strong>"☆ Save Current Location"</strong> above to pin your favorite cities.
+            </div>
+          )}
+        </div>
       </div>
 
       {/* ─── 4. ERROR / LOADING STATES ─── */}

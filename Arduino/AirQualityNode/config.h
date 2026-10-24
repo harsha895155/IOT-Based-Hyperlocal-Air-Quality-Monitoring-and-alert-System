@@ -8,8 +8,9 @@
 // ============================================================
 
 // ---- Wi-Fi credentials ----
-#define WIFI_SSID "AI+ Nova 1 5G"
-#define WIFI_PASSWORD "12345678"
+// Left empty by default — credentials are provided during onboarding and written into NVS/Flash
+#define WIFI_SSID ""
+#define WIFI_PASSWORD ""
 
 // ---- Backend endpoint ----
 // Live Cloud Deployment (Render):

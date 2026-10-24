@@ -8,7 +8,8 @@ export default function SystemHealthView() {
   const { user } = useAuth();
 
   const [health, setHealth] = useState(null);
-  const [deviceStats, setDeviceStats] = useState({ total: 1, online: 1, offline: 0 });
+  const [deviceStats, setDeviceStats] = useState({ total: 0, online: 0, offline: 0 });
+  const [deviceList, setDeviceList] = useState([]);
   const [loading, setLoading] = useState(true);
   const [latency, setLatency] = useState(24);
   const [refreshInterval, setRefreshInterval] = useState(10); // 5 | 10 | 30 | 0 (paused)
@@ -25,7 +26,6 @@ export default function SystemHealthView() {
     { time: new Date().toLocaleTimeString(), tag: 'HTTP', text: 'GET /api/system/health - Status 200 OK (22ms)' },
     { time: new Date().toLocaleTimeString(), tag: 'DB', text: 'MongoDB Atlas heartbeat confirmed on replica set' },
     { time: new Date().toLocaleTimeString(), tag: 'SOCKET', text: 'WebSocket push channel active with 1 connected client' },
-    { time: new Date().toLocaleTimeString(), tag: 'NODE', text: 'Telemetry packet received from AIRGUARD-001 (AQI: 68)' },
   ]);
 
   const addLog = useCallback((tag, text) => {
@@ -55,10 +55,11 @@ export default function SystemHealthView() {
       if (devRes.status === 'fulfilled' && Array.isArray(devRes.value.data)) {
         const devs = devRes.value.data;
         const online = devs.filter((d) => d.status === 'Online').length;
+        setDeviceList(devs);
         setDeviceStats({
-          total: devs.length || 3,
-          online: online || 3,
-          offline: Math.max(0, (devs.length || 3) - (online || 3)),
+          total: devs.length,
+          online: online,
+          offline: Math.max(0, devs.length - online),
         });
       }
     } catch (e) {
@@ -326,7 +327,9 @@ export default function SystemHealthView() {
             </div>
             <div className="health-infra-stat-row">
               <span className="health-infra-label">Micro-Zone Radars</span>
-              <span className="health-infra-val">3 Zones Active</span>
+              <span className="health-infra-val">
+                {deviceList.length > 0 ? `${new Set(deviceList.map(d => d.location || 'Site')).size} Zones Active` : '0 Zones Active'}
+              </span>
             </div>
             <div className="health-infra-stat-row">
               <span className="health-infra-label">Telemetry Integrity</span>
@@ -342,9 +345,11 @@ export default function SystemHealthView() {
           <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', flexWrap: 'wrap', gap: '10px' }}>
             <div>
               <h2 style={{ fontSize: '1.15rem', fontWeight: 600, margin: 0 }}>Fleet Hardware Node Health &amp; Ingestion Inspector</h2>
-              <p className="text-muted fs-xs" style={{ margin: '4px 0 0 0' }}>Live heartbeat telemetry, RSSI signal strength, and firmware status for all deployed IoT stations</p>
+              <p className="text-muted fs-xs" style={{ margin: '4px 0 0 0' }}>
+                Live heartbeat telemetry, RSSI signal strength, and firmware status for {user?.role === 'admin' ? 'all registered IoT stations across all users' : 'your registered IoT stations'}
+              </p>
             </div>
-            <span className="settings-tag">Sensing Nodes</span>
+            <span className="settings-tag">{deviceList.length} {deviceList.length === 1 ? 'Node' : 'Nodes'}</span>
           </div>
 
           <div className="node-health-table-wrap">
@@ -357,66 +362,62 @@ export default function SystemHealthView() {
                   <th>Wi-Fi Signal (RSSI)</th>
                   <th>Ingestion Cycle</th>
                   <th>Firmware Version</th>
+                  {user?.role === 'admin' && <th>Added By (Owner)</th>}
                   <th>Action</th>
                 </tr>
               </thead>
               <tbody>
-                <tr>
-                  <td><strong style={{ color: 'var(--text-primary)' }}>AIRGUARD-001</strong></td>
-                  <td>GIST Campus (Main Environmental Lab)</td>
-                  <td><span className="health-status-badge health-status-badge--online">● Online (Streaming)</span></td>
-                  <td><span className="mono" style={{ color: '#10b981' }}>-62 dBm (Excellent)</span></td>
-                  <td>15 Seconds</td>
-                  <td><span className="mono fs-xs">AirGuard v2.4 (ESP32)</span></td>
-                  <td>
-                    <button
-                      type="button"
-                      className="btn btn--ghost"
-                      style={{ fontSize: '0.72rem', padding: '3px 8px' }}
-                      onClick={() => handlePingNode('AIRGUARD-001')}
-                    >
-                      Echo Ping
-                    </button>
-                  </td>
-                </tr>
-
-                <tr>
-                  <td><strong style={{ color: 'var(--text-primary)' }}>AIRGUARD-002</strong></td>
-                  <td>Library Block (Zone B)</td>
-                  <td><span className="health-status-badge health-status-badge--online">● Online (Streaming)</span></td>
-                  <td><span className="mono" style={{ color: '#38bdf8' }}>-68 dBm (Good)</span></td>
-                  <td>15 Seconds</td>
-                  <td><span className="mono fs-xs">AirGuard v2.4 (ESP32)</span></td>
-                  <td>
-                    <button
-                      type="button"
-                      className="btn btn--ghost"
-                      style={{ fontSize: '0.72rem', padding: '3px 8px' }}
-                      onClick={() => handlePingNode('AIRGUARD-002')}
-                    >
-                      Echo Ping
-                    </button>
-                  </td>
-                </tr>
-
-                <tr>
-                  <td><strong style={{ color: 'var(--text-primary)' }}>AIRGUARD-003</strong></td>
-                  <td>Research Park West (Zone C)</td>
-                  <td><span className="health-status-badge health-status-badge--online">● Online (Streaming)</span></td>
-                  <td><span className="mono" style={{ color: '#f59e0b' }}>-74 dBm (Fair)</span></td>
-                  <td>15 Seconds</td>
-                  <td><span className="mono fs-xs">AirGuard v2.4 (ESP32)</span></td>
-                  <td>
-                    <button
-                      type="button"
-                      className="btn btn--ghost"
-                      style={{ fontSize: '0.72rem', padding: '3px 8px' }}
-                      onClick={() => handlePingNode('AIRGUARD-003')}
-                    >
-                      Echo Ping
-                    </button>
-                  </td>
-                </tr>
+                {deviceList.length === 0 ? (
+                  <tr>
+                    <td colSpan={user?.role === 'admin' ? 8 : 7} style={{ textAlign: 'center', padding: '28px 14px', color: 'var(--text-muted)' }}>
+                      No physical sensing nodes registered yet. Use the <strong>+ Add Device</strong> wizard to connect and onboard an ESP32 node.
+                    </td>
+                  </tr>
+                ) : (
+                  deviceList.map((dev) => {
+                    const isOnline = dev.status === 'Online';
+                    return (
+                      <tr key={dev.deviceId || dev.id}>
+                        <td><strong style={{ color: 'var(--text-primary)' }}>{dev.deviceId}</strong></td>
+                        <td>{dev.name ? `${dev.name} (${dev.location || 'Site'})` : (dev.location || 'Site')}</td>
+                        <td>
+                          <span className={`health-status-badge ${isOnline ? 'health-status-badge--online' : 'health-status-badge--offline'}`}>
+                            ● {isOnline ? 'Online (Streaming)' : 'Offline (Awaiting Ping)'}
+                          </span>
+                        </td>
+                        <td>
+                          <div style={{ display: 'flex', flexDirection: 'column', gap: '2px' }}>
+                            <span className="mono" style={{ color: isOnline ? '#10b981' : '#64748b' }}>
+                              {dev.rssi != null ? `${dev.rssi} dBm` : isOnline ? '-65 dBm' : '—'}
+                            </span>
+                            <span style={{ fontSize: '0.72rem', color: dev.wifiSSID ? '#00d2b4' : '#f59e0b', fontWeight: 600 }}>
+                              📶 {dev.wifiSSID || 'Awaiting Hardware Sync'}
+                            </span>
+                          </div>
+                        </td>
+                        <td>15 Seconds</td>
+                        <td><span className="mono fs-xs">AirGuard v2.4 (ESP32)</span></td>
+                        {user?.role === 'admin' && (
+                          <td>
+                            <span style={{ fontSize: '0.8rem', color: '#38bdf8', fontWeight: 600 }}>
+                              {dev.addedBy || (dev.owner?.name ? `${dev.owner.name} (${dev.owner.email})` : 'System Legacy')}
+                            </span>
+                          </td>
+                        )}
+                        <td>
+                          <button
+                            type="button"
+                            className="btn btn--ghost"
+                            style={{ fontSize: '0.72rem', padding: '3px 8px' }}
+                            onClick={() => handlePingNode(dev.deviceId)}
+                          >
+                            Echo Ping
+                          </button>
+                        </td>
+                      </tr>
+                    );
+                  })
+                )}
               </tbody>
             </table>
           </div>

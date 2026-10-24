@@ -108,19 +108,35 @@
   font-weight: 600;
 }
 
-/* ─── 2. SEARCH BAR & QUICK CHIPS ─── */
+/* ─── 2. SEARCH BAR & SAVED LOCATIONS ROW (SIDE BY SIDE) ─── */
+.loc-toolbar-row {
+  display: grid;
+  grid-template-columns: 1.15fr 1fr;
+  gap: 10px;
+  align-items: stretch;
+  margin-bottom: 12px;
+}
+
+@media (max-width: 960px) {
+  .loc-toolbar-row {
+    grid-template-columns: 1fr;
+  }
+}
+
 .loc-search-card {
   background: var(--bg-card);
   border: 1px solid var(--border-subtle);
-  border-radius: 16px;
-  padding: 18px 22px;
-  margin-bottom: 24px;
+  border-radius: 10px;
+  padding: 6px 10px;
+  margin-bottom: 0;
   box-shadow: var(--shadow-card);
+  display: flex;
+  align-items: center;
 }
 
 .loc-search-bar-wrap {
   display: flex;
-  gap: 12px;
+  gap: 8px;
   align-items: center;
   position: relative;
   width: 100%;
@@ -130,11 +146,11 @@
   flex: 1;
   display: flex;
   align-items: center;
-  gap: 12px;
+  gap: 6px;
   background: var(--bg-surface);
   border: 1px solid var(--border-subtle);
-  border-radius: 12px;
-  padding: 10px 16px;
+  border-radius: 7px;
+  padding: 4px 10px;
   position: relative;
   transition: border-color 0.2s, box-shadow 0.2s;
 }
@@ -154,12 +170,14 @@
   background: transparent;
   border: none;
   outline: none;
-  font-size: 0.98rem;
+  font-size: 0.84rem;
+  height: 28px;
   color: var(--text-primary, #f8fafc);
 }
 
 .loc-search-input::placeholder {
   color: #64748b;
+  font-size: 0.82rem;
 }
 
 .loc-clear-btn {
@@ -188,13 +206,14 @@
 .loc-btn-gps {
   display: flex;
   align-items: center;
-  gap: 8px;
+  gap: 6px;
   background: rgba(56, 189, 248, 0.12);
   color: #38bdf8;
   border: 1px solid rgba(56, 189, 248, 0.3);
-  padding: 10px 18px;
-  border-radius: 12px;
-  font-size: 0.88rem;
+  padding: 5px 12px;
+  height: 36px;
+  border-radius: 8px;
+  font-size: 0.8rem;
   font-weight: 600;
   cursor: pointer;
   white-space: nowrap;
@@ -269,33 +288,36 @@
   font-size: 0.9rem;
 }
 
-/* ─── 3. SAVED LOCATIONS SECTION ─── */
+/* ─── 3. SAVED LOCATIONS SECTION (COMPACT) ─── */
 .loc-saved-section {
   background: var(--bg-card);
   border: 1px solid var(--border-subtle);
-  border-radius: 16px;
-  padding: 16px 20px;
-  margin-bottom: 24px;
+  border-radius: 10px;
+  padding: 6px 12px;
+  margin-bottom: 0;
   box-shadow: var(--shadow-card);
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
 }
 
 .loc-saved-header {
   display: flex;
   justify-content: space-between;
   align-items: center;
-  margin-bottom: 12px;
+  margin-bottom: 3px;
   flex-wrap: wrap;
-  gap: 10px;
+  gap: 4px;
 }
 
 .loc-saved-title {
-  font-size: 0.78rem;
+  font-size: 0.68rem;
   font-weight: 700;
   letter-spacing: 0.05em;
   color: var(--text-faint);
   display: flex;
   align-items: center;
-  gap: 6px;
+  gap: 4px;
 }
 
 .loc-saved-count {
@@ -306,9 +328,9 @@
   background: var(--surface-raised);
   border: 1px solid var(--border-soft);
   color: var(--text-primary);
-  padding: 5px 14px;
-  border-radius: 8px;
-  font-size: 0.8rem;
+  padding: 3px 8px;
+  border-radius: 5px;
+  font-size: 0.7rem;
   font-weight: 600;
   cursor: pointer;
   transition: all 0.2s;
@@ -383,9 +405,10 @@
 }
 
 .loc-saved-empty {
-  font-size: 0.82rem;
+  font-size: 0.74rem;
   color: #64748b;
-  padding: 6px 0;
+  padding: 2px 0;
+  margin: 0;
 }
 
 /* ─── 4. HERO WEATHER CARD ─── */

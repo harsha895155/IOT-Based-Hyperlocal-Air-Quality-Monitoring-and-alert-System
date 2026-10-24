@@ -132,6 +132,19 @@ export default function DeviceDetailView({ readingsData }) {
     }
   };
 
+  const handleSaveWifi = async (ssid) => {
+    try {
+      const devId = device.deviceId || device.id;
+      await client.post('/devices/provision-session', {
+        deviceId: devId,
+        wifiSSID: ssid,
+      });
+      setDevice((prev) => ({ ...prev, wifiSSID: ssid }));
+    } catch (err) {
+      alert(`Failed to update Wi-Fi: ${err.message}`);
+    }
+  };
+
   const handleDeleteDevice = async () => {
     const devId = device.deviceId || device.id;
     const confirmed = window.confirm(
@@ -752,8 +765,21 @@ export default function DeviceDetailView({ readingsData }) {
               <div className="dd-spec-label">
                 <span>📶</span> Connected Wi-Fi
               </div>
-              <div className="dd-spec-value mono" style={{ color: '#00d2b4', fontWeight: 700 }}>
-                {device.wifiSSID || 'Awaiting Hardware Sync'}
+              <div className="dd-spec-value mono" style={{ color: device.wifiSSID ? '#00d2b4' : '#f59e0b', fontWeight: 700, display: 'flex', alignItems: 'center', gap: '8px' }}>
+                <span>{device.wifiSSID || 'Awaiting Hardware Sync'}</span>
+                <button
+                  type="button"
+                  onClick={() => {
+                    const newSsid = window.prompt('Enter Wi-Fi network SSID (name) for this station:', device.wifiSSID || '');
+                    if (newSsid !== null && newSsid.trim()) {
+                      handleSaveWifi(newSsid.trim());
+                    }
+                  }}
+                  style={{ background: 'rgba(0, 210, 180, 0.12)', border: '1px solid rgba(0, 210, 180, 0.3)', color: '#00d2b4', borderRadius: '4px', fontSize: '0.68rem', padding: '2px 7px', cursor: 'pointer' }}
+                  title="Update connected Wi-Fi network name"
+                >
+                  {device.wifiSSID ? '✏️ Edit' : '+ Set Wi-Fi'}
+                </button>
               </div>
             </div>
 

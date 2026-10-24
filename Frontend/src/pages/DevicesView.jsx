@@ -180,6 +180,23 @@ export default function DevicesView({
     showToast('✓ Fleet manifest JSON exported.');
   };
 
+  // Save / Update Device Wi-Fi SSID
+  const handleSaveDeviceWifi = async (devId, ssid) => {
+    try {
+      await client.post('/devices/provision-session', {
+        deviceId: devId,
+        wifiSSID: ssid,
+      });
+      setSelectedModalDevice((prev) => (prev ? { ...prev, wifiSSID: ssid } : null));
+      setDeviceList((prev) =>
+        prev.map((d) => (d.deviceId === devId || d.id === devId ? { ...d, wifiSSID: ssid } : d))
+      );
+      showToast(`✓ Wi-Fi network registered as "${ssid}" for ${devId}!`);
+    } catch (err) {
+      showToast(`Failed to update Wi-Fi: ${err.message}`);
+    }
+  };
+
   // Filtered devices
   const filteredDevices = useMemo(() => {
     return deviceList.filter((d) => {
@@ -699,7 +716,7 @@ export default function DevicesView({
                 <div className="device-card-chips">
                   <span className="hardware-pill">ESP32-WROOM-32</span>
                   <span className="hardware-pill">MQ135 + DHT22</span>
-                  <span className="signal-pill">📶 {device.wifiSSID || 'Wi-Fi Standalone'}</span>
+                  <span className="signal-pill">📶 {device.wifiSSID || 'Awaiting Wi-Fi Sync'}</span>
                   {isAdmin && (
                     <span className="hardware-pill" style={{ color: '#38bdf8', borderColor: 'rgba(56, 189, 248, 0.35)' }}>
                       👤 {device.addedBy || 'System'}
@@ -716,15 +733,16 @@ export default function DevicesView({
                     <button
                       type="button"
                       className="btn-secondary btn-sm"
-                      style={{ padding: '3px 8px', fontSize: '0.72rem' }}
+                      style={{ padding: '5px 10px', fontSize: '0.76rem', borderRadius: '7px' }}
                       onClick={(e) => handlePingSingle(devId, e)}
+                      title="Ping Node"
                     >
-                      Ping
+                      ⚡ Ping
                     </button>
                     <button
                       type="button"
                       className="btn-secondary btn-sm"
-                      style={{ padding: '3px 8px', fontSize: '0.72rem' }}
+                      style={{ padding: '5px 10px', fontSize: '0.76rem', borderRadius: '7px' }}
                       onClick={(e) => {
                         e.stopPropagation();
                         setEditingDevice({ ...device });
@@ -737,20 +755,21 @@ export default function DevicesView({
                       type="button"
                       className="btn-secondary btn-sm"
                       style={{
-                        padding: '3px 8px',
-                        fontSize: '0.72rem',
+                        padding: '5px 10px',
+                        fontSize: '0.76rem',
+                        borderRadius: '7px',
                         color: 'var(--status-danger, #ef4444)',
                         borderColor: 'rgba(239, 68, 68, 0.3)',
                       }}
                       onClick={(e) => handleDeleteDevice(devId, device.name, e)}
                       title="Remove Node (Admin)"
                     >
-                      🗑️
+                      🗑️ Delete
                     </button>
                     <Link
                       to={`/devices/${devId}`}
                       className="btn-primary btn-sm"
-                      style={{ padding: '3px 10px', fontSize: '0.72rem', textDecoration: 'none' }}
+                      style={{ padding: '5px 12px', fontSize: '0.76rem', borderRadius: '7px', textDecoration: 'none' }}
                     >
                       Inspect →
                     </Link>
@@ -821,8 +840,33 @@ export default function DevicesView({
               </div>
               <div className="device-modal-item">
                 <span className="device-modal-label">Connected Wi-Fi (SSID)</span>
-                <span className="device-modal-val" style={{ color: '#00d2b4', fontWeight: 700 }}>
-                  📶 {selectedModalDevice.wifiSSID || 'Awaiting Hardware Sync'}
+                <span className="device-modal-val" style={{ color: selectedModalDevice.wifiSSID ? '#00d2b4' : '#f59e0b', fontWeight: 700, display: 'flex', alignItems: 'center', justifyContent: 'space-between', gap: '6px' }}>
+                  <span>📶 {selectedModalDevice.wifiSSID || 'Awaiting Hardware Sync'}</span>
+                  <button
+                    type="button"
+                    onClick={() => {
+                      const newSsid = window.prompt(
+                        'Enter the Wi-Fi network SSID (name) that this ESP32 station connects to:',
+                        selectedModalDevice.wifiSSID || ''
+                      );
+                      if (newSsid !== null && newSsid.trim()) {
+                        handleSaveDeviceWifi(selectedModalDevice.deviceId || selectedModalDevice.id, newSsid.trim());
+                      }
+                    }}
+                    style={{
+                      background: 'rgba(0, 210, 180, 0.12)',
+                      border: '1px solid rgba(0, 210, 180, 0.3)',
+                      color: '#00d2b4',
+                      borderRadius: '5px',
+                      fontSize: '0.68rem',
+                      padding: '2px 7px',
+                      cursor: 'pointer',
+                      whiteSpace: 'nowrap',
+                    }}
+                    title="Click to specify or update the Wi-Fi SSID for this node"
+                  >
+                    {selectedModalDevice.wifiSSID ? '✏️ Edit' : '+ Set Wi-Fi'}
+                  </button>
                 </span>
               </div>
               {selectedModalDevice.addedBy && (
@@ -841,10 +885,10 @@ export default function DevicesView({
               </div>
             </div>
 
-            <div style={{ display: 'flex', gap: '8px', justifyContent: 'flex-end', marginTop: '16px', flexWrap: 'wrap' }}>
+            <div className="device-modal-actions">
               <button
                 type="button"
-                className="btn-secondary"
+                className="btn-secondary device-modal-btn"
                 onClick={() => {
                   const id = selectedModalDevice.deviceId || selectedModalDevice.id;
                   setSelectedModalDevice(null);
@@ -855,7 +899,7 @@ export default function DevicesView({
               </button>
               <button
                 type="button"
-                className="btn-secondary"
+                className="btn-secondary device-modal-btn"
                 onClick={() => {
                   setWizardMode('reconfig');
                   setWizardTargetDevice(selectedModalDevice);
@@ -871,12 +915,7 @@ export default function DevicesView({
                 return (
                   <button
                     type="button"
-                    className="btn-primary"
-                    style={
-                      isAlreadyActive
-                        ? { background: 'linear-gradient(135deg, #059669 0%, #10b981 100%)', borderColor: '#10b981' }
-                        : {}
-                    }
+                    className={`device-modal-btn ${isAlreadyActive ? 'btn-active-station' : 'btn-primary'}`}
                     onClick={() => {
                       if (onSelectDevice) onSelectDevice(modalId);
                       showToast(`✓ "${selectedModalDevice.name || modalId}" is now your active dashboard station!`);

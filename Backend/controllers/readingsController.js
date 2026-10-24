@@ -17,6 +17,9 @@ const ALERT_DEDUPLICATION_WINDOW_MS = 30 * 60 * 1000;
 async function createReading(req, res, next) {
   try {
     const { deviceId, temperature, humidity, gasPPM, airQuality, wifiSSID, ip, rssi } = req.body;
+    const incomingWifi = wifiSSID || req.body.wifiSsid || req.body.ssid || req.body.wifi_ssid || req.body.wifi;
+    const incomingIp = ip || req.body.ipAddress || req.body.ip_address;
+    const incomingRssi = rssi != null ? rssi : (req.body.signal != null ? req.body.signal : null);
 
     // Strict validation of payload types & physiological/sensor ranges
     if (
@@ -56,16 +59,18 @@ async function createReading(req, res, next) {
         name: `AirGuard Node (${cleanId})`,
         location: 'Gangavaram, Andhra Pradesh',
         type: 'AirGuard ESP32 Sensing Node',
-        wifiSSID: wifiSSID || '',
-        ipAddress: ip || '',
-        rssi: rssi != null ? rssi : null,
+        wifiSSID: incomingWifi ? String(incomingWifi).trim() : '',
+        ipAddress: incomingIp ? String(incomingIp).trim() : '',
+        rssi: incomingRssi != null ? Number(incomingRssi) : null,
         lastSeen: now,
       });
       req.app.get('io')?.emit('device_created', { device: device.toObject({ virtuals: true }) });
     } else {
-      if (wifiSSID) device.wifiSSID = wifiSSID;
-      if (ip) device.ipAddress = ip;
-      if (rssi != null) device.rssi = rssi;
+      if (incomingWifi && String(incomingWifi).trim()) {
+        device.wifiSSID = String(incomingWifi).trim();
+      }
+      if (incomingIp) device.ipAddress = String(incomingIp).trim();
+      if (incomingRssi != null) device.rssi = Number(incomingRssi);
     }
 
     const { category } = classifyAQI(airQuality);

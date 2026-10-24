@@ -173,7 +173,7 @@ export default function ReportsView() {
           </div>
           <button
             className="btn-secondary"
-            style={{ padding: '6px 14px', fontSize: '0.8rem' }}
+            style={{ padding: '4px 10px', fontSize: '0.76rem', height: '28px', whiteSpace: 'nowrap' }}
             onClick={() => fetchSummary(true)}
             disabled={refreshing}
           >

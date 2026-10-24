@@ -634,7 +634,14 @@
   background: var(--surface-raised);
   border: 1px solid var(--border-soft);
   border-radius: 12px;
-  align-items: flex-start;
+  align-items: center;
+  position: relative;
+  transition: all 0.2s ease;
+}
+
+.profile-timeline-item:hover {
+  border-color: var(--border-subtle);
+  background: var(--bg-surface);
 }
 
 .profile-timeline-icon {
@@ -652,6 +659,7 @@
 
 .profile-timeline-content {
   flex: 1;
+  min-width: 0;
 }
 
 .profile-timeline-title {
@@ -664,6 +672,7 @@
   font-size: 0.78rem;
   color: var(--text-muted);
   margin-top: 2px;
+  word-break: break-word;
 }
 
 .profile-timeline-time {
@@ -671,6 +680,52 @@
   color: var(--text-faint);
   font-family: var(--font-mono, monospace);
   margin-top: 4px;
+}
+
+.profile-activity-del-btn {
+  background: rgba(255, 255, 255, 0.04);
+  border: 1px solid var(--border-subtle, rgba(255, 255, 255, 0.1));
+  color: var(--text-faint, #64748b);
+  border-radius: 6px;
+  width: 30px;
+  height: 30px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 0.85rem;
+  cursor: pointer;
+  transition: all 0.2s ease;
+  flex-shrink: 0;
+  margin-left: 8px;
+  padding: 0;
+}
+
+.profile-activity-del-btn:hover {
+  background: rgba(239, 68, 68, 0.15);
+  border-color: rgba(239, 68, 68, 0.4);
+  color: #ef4444;
+  transform: scale(1.05);
+}
+
+.profile-activity-clear-btn {
+  display: inline-flex;
+  align-items: center;
+  gap: 5px;
+  background: rgba(239, 68, 68, 0.08);
+  border: 1px solid rgba(239, 68, 68, 0.25);
+  color: #f87171;
+  font-size: 0.76rem;
+  font-weight: 600;
+  padding: 5px 10px;
+  border-radius: 8px;
+  cursor: pointer;
+  transition: all 0.2s ease;
+}
+
+.profile-activity-clear-btn:hover {
+  background: rgba(239, 68, 68, 0.2);
+  border-color: rgba(239, 68, 68, 0.5);
+  color: #ef4444;
 }
 
 /* Danger Zone */

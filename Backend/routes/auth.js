@@ -11,6 +11,8 @@ const {
   resetPassword,
   googleLogin,
   getActivity,
+  deleteActivityItem,
+  clearAllActivity,
   deleteAccount,
 } = require('../controllers/authController');
 
@@ -25,6 +27,8 @@ router.patch('/profile', updateProfile);
 router.patch('/preferences', updatePreferences);
 router.patch('/change-password', changePassword);
 router.get('/activity', getActivity);
+router.delete('/activity/:id', deleteActivityItem);
+router.delete('/activity', clearAllActivity);
 router.delete('/account', deleteAccount);
 
 module.exports = router;

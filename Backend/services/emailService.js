@@ -484,8 +484,229 @@ async function sendAirQualityAlertEmail({ to, name, deviceName, location, aqi, c
   return await trySendViaVercelRelay(mailPayload);
 }
 
+/**
+ * Sends a notification email to the website support email (airguard396@gmail.com)
+ * when a user submits an inquiry on the Help & Support page.
+ */
+async function sendSupportInquiryEmail({ inquiryId, name, email, category, nodeId, message }) {
+  const supportEmail = (process.env.SUPPORT_EMAIL || process.env.EMAIL_USER || 'airguard396@gmail.com').trim();
+  const from = `"AirGuard Portal Inquiry" <${supportEmail}>`;
+  const subject = `📬 [Inquiry #${inquiryId}] [${(category || 'GENERAL').toUpperCase()}] from ${name || 'User'} (${email})`;
+
+  const htmlContent = `
+    <!DOCTYPE html>
+    <html>
+    <head><meta charset="utf-8"><style>
+      body { font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif; background: #0b1120; color: #f8fafc; margin: 0; padding: 20px; }
+      .card { max-width: 620px; margin: 0 auto; background: #0f172a; border: 1px solid rgba(56, 189, 248, 0.3); border-radius: 14px; padding: 28px; }
+      .header { border-bottom: 1px solid rgba(255,255,255,0.1); padding-bottom: 16px; margin-bottom: 20px; }
+      .title { color: #38bdf8; font-size: 20px; font-weight: 800; margin: 0 0 6px 0; }
+      .badge { display: inline-block; padding: 3px 10px; border-radius: 6px; font-size: 12px; font-weight: 700; background: rgba(56, 189, 248, 0.15); color: #38bdf8; }
+      .field { margin-bottom: 14px; }
+      .label { font-size: 11px; text-transform: uppercase; color: #94a3b8; font-weight: 700; letter-spacing: 0.05em; }
+      .val { font-size: 14px; color: #f1f5f9; margin-top: 3px; font-weight: 600; }
+      .msg-box { background: rgba(255,255,255,0.04); border-left: 3px solid #38bdf8; padding: 14px; border-radius: 6px; font-size: 14px; color: #e2e8f0; line-height: 1.5; white-space: pre-wrap; margin-top: 6px; }
+      .footer { margin-top: 24px; padding-top: 16px; border-top: 1px solid rgba(255,255,255,0.1); font-size: 12px; color: #64748b; text-align: center; }
+      .btn { display: inline-block; background: #0284c7; color: #fff; text-decoration: none; padding: 8px 16px; border-radius: 6px; font-weight: 700; font-size: 13px; margin-top: 14px; }
+    </style></head>
+    <body>
+      <div class="card">
+        <div class="header">
+          <div class="badge">TICKET #${inquiryId}</div>
+          <h1 class="title">New Platform Inquiry Submitted</h1>
+          <p style="margin: 4px 0 0 0; color: #94a3b8; font-size: 13px;">Received via AirGuard Hyperlocal Help & Support Desk</p>
+        </div>
+        <div class="field">
+          <div class="label">Sender Name & Email</div>
+          <div class="val">${name || 'Anonymous User'} (<a href="mailto:${email}" style="color: #38bdf8;">${email}</a>)</div>
+        </div>
+        <div class="field">
+          <div class="label">Target IoT Station Node</div>
+          <div class="val">${nodeId || 'All / Fleet-wide'}</div>
+        </div>
+        <div class="field">
+          <div class="label">Inquiry Category</div>
+          <div class="val" style="text-transform: capitalize;">${category || 'General'}</div>
+        </div>
+        <div class="field">
+          <div class="label">User Inquiry Message</div>
+          <div class="msg-box">${message}</div>
+        </div>
+        <div style="text-align: center;">
+          <a class="btn" href="mailto:${email}?subject=Re:%20AirGuard%20Support%20Inquiry%20%23${inquiryId}%20[${(category || 'General').toUpperCase()}]">
+            Reply to ${name || 'User'} ➔
+          </a>
+        </div>
+        <div class="footer">
+          AirGuard Environmental Intelligence System · Automated Ingestion Dispatch
+        </div>
+      </div>
+    </body></html>
+  `;
+
+  const textContent = `New AirGuard Inquiry #${inquiryId}\nFrom: ${name} (${email})\nNode: ${nodeId}\nCategory: ${category}\nMessage:\n${message}`;
+
+  const mailPayload = {
+    from,
+    to: supportEmail,
+    subject,
+    text: textContent,
+    html: htmlContent,
+  };
+
+  const transporter = getTransporter();
+  if (transporter) {
+    try {
+      const info = await transporter.sendMail(mailPayload);
+      console.log(`[SupportService] ✅ Support inquiry dispatched to website mail ${supportEmail} (ID: ${info.messageId})`);
+      return { success: true, delivered: true, messageId: info.messageId };
+    } catch (e) {
+      console.warn(`[SupportService] Direct SMTP to admin failed (${e.message}). Falling back to relay...`);
+    }
+  }
+
+  return await trySendViaVercelRelay(mailPayload);
+}
+
+/**
+ * Sends an automated diagnostic response / answer back to the user's email
+ * answering the user's inquiry based on the inquiry category.
+ */
+async function sendSupportAutoReplyEmail({ inquiryId, name, email, category, nodeId, message }) {
+  const supportEmail = (process.env.SUPPORT_EMAIL || process.env.EMAIL_USER || 'airguard396@gmail.com').trim();
+  const from = `"AirGuard Support Desk" <${supportEmail}>`;
+  const subject = `🛡️ AirGuard Support: Response to Your Inquiry #${inquiryId} [${(category || 'GENERAL').toUpperCase()}]`;
+
+  // Technical diagnostic guidance customized to the user's inquiry topic
+  let answerGuidance = '';
+  const cat = (category || '').toLowerCase();
+
+  if (cat === 'hardware') {
+    answerGuidance = `
+      <div style="background: rgba(16, 185, 129, 0.1); border-left: 3px solid #10b981; padding: 14px; border-radius: 6px; margin: 14px 0;">
+        <h4 style="color: #10b981; margin: 0 0 6px 0; font-size: 14px;">🔧 Technical Hardware Diagnostics for ${nodeId || 'ESP32 Node'}:</h4>
+        <ul style="margin: 0; padding-left: 20px; color: #cbd5e1; font-size: 13px; line-height: 1.6;">
+          <li><strong>Power Supply Requirements:</strong> MQ-135 sensors require a stable 5.0V VCC with up to 180mA heater current. If connected only to 3.3V, sensitivity to ambient gases will drop by >60%.</li>
+          <li><strong>ADC Configuration:</strong> On ESP32, connect the analog output (AOUT) to GPIO 34 (ADC1_CH6). Set attenuation to <code>11dB</code> in firmware for a 0–3.3V reading range.</li>
+          <li><strong>DHT22 Pull-Up Resistor:</strong> Ensure a 4.7kΩ–10kΩ pull-up resistor is placed between VCC and Data (GPIO 4) to prevent sensor read timeouts (NaN).</li>
+        </ul>
+      </div>
+    `;
+  } else if (cat === 'calibration') {
+    answerGuidance = `
+      <div style="background: rgba(245, 158, 11, 0.1); border-left: 3px solid #f59e0b; padding: 14px; border-radius: 6px; margin: 14px 0;">
+        <h4 style="color: #f59e0b; margin: 0 0 6px 0; font-size: 14px;">⚖️ Calibration & Baseline Verification Guide:</h4>
+        <ul style="margin: 0; padding-left: 20px; color: #cbd5e1; font-size: 13px; line-height: 1.6;">
+          <li><strong>24–48h Burn-In Period:</strong> Metal oxide sensors (SnO2) require a minimum 24-hour continuous pre-heating cycle before analog readings stabilize.</li>
+          <li><strong>Fresh-Air Baseline R0:</strong> Baseline fresh air resistance R0 is calibrated to <strong>76.63 kΩ</strong> at standard temperature (20°C) and 55% RH.</li>
+          <li><strong>Dynamic Temperature Compensation:</strong> AirGuard automatically applies correction formula: <code>Rs_corrected = Rs / (1.0 - 0.015*(T - 20) + 0.005*(H - 55))</code>.</li>
+        </ul>
+      </div>
+    `;
+  } else if (cat === 'connection' || cat === 'wifi') {
+    answerGuidance = `
+      <div style="background: rgba(56, 189, 248, 0.1); border-left: 3px solid #38bdf8; padding: 14px; border-radius: 6px; margin: 14px 0;">
+        <h4 style="color: #38bdf8; margin: 0 0 6px 0; font-size: 14px;">📶 Wi-Fi & Telemetry Connectivity Checklist:</h4>
+        <ul style="margin: 0; padding-left: 20px; color: #cbd5e1; font-size: 13px; line-height: 1.6;">
+          <li><strong>2.4 GHz Band Only:</strong> ESP32 modules do not support 5 GHz Wi-Fi. Ensure your router broadcasts a separate 2.4 GHz SSID.</li>
+          <li><strong>Station Wi-Fi Registration:</strong> You can set or update your device's connected Wi-Fi SSID directly in the <em>Devices View</em> modal using the <em>"+ Set Wi-Fi"</em> button.</li>
+          <li><strong>Ingestion Interval:</strong> Telemetry packets are accepted every 15 seconds. If connection is lost, the node will buffer and retry automatically.</li>
+        </ul>
+      </div>
+    `;
+  } else if (cat === 'collaboration' || cat === 'research') {
+    answerGuidance = `
+      <div style="background: rgba(168, 85, 247, 0.1); border-left: 3px solid #a855f7; padding: 14px; border-radius: 6px; margin: 14px 0;">
+        <h4 style="color: #a855f7; margin: 0 0 6px 0; font-size: 14px;">📚 Academic & Research Collaboration Guidelines:</h4>
+        <ul style="margin: 0; padding-left: 20px; color: #cbd5e1; font-size: 13px; line-height: 1.6;">
+          <li><strong>Telemetry Data Export:</strong> Full dataset exports in CSV and JSON formats are available directly from the Analytics and Reports views.</li>
+          <li><strong>IEEE Citation Format:</strong> <em>Harshavardhan et al., "IoT-Based Hyperlocal Air Quality Monitoring and Alert System", 2026.</em></li>
+          <li><strong>API Access:</strong> Contact support for research batch ingestion tokens or academic webhook subscriptions.</li>
+        </ul>
+      </div>
+    `;
+  } else {
+    answerGuidance = `
+      <div style="background: rgba(56, 189, 248, 0.08); border-left: 3px solid #38bdf8; padding: 14px; border-radius: 6px; margin: 14px 0;">
+        <p style="margin: 0; color: #cbd5e1; font-size: 13px; line-height: 1.6;">
+          Our environmental engineering team has logged your inquiry regarding <strong>${category}</strong> for node <strong>${nodeId || 'General Deployment'}</strong>. All tickets are actively monitored and assigned to an engineer within 1–2 hours.
+        </p>
+      </div>
+    `;
+  }
+
+  const htmlContent = `
+    <!DOCTYPE html>
+    <html>
+    <head><meta charset="utf-8"><style>
+      body { font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif; background: #0b1120; color: #f8fafc; margin: 0; padding: 20px; }
+      .card { max-width: 620px; margin: 0 auto; background: #0f172a; border: 1px solid rgba(56, 189, 248, 0.3); border-radius: 14px; padding: 28px; }
+      .header { border-bottom: 1px solid rgba(255,255,255,0.1); padding-bottom: 16px; margin-bottom: 20px; }
+      .title { color: #38bdf8; font-size: 20px; font-weight: 800; margin: 0 0 6px 0; }
+      .badge { display: inline-block; padding: 3px 10px; border-radius: 6px; font-size: 12px; font-weight: 700; background: rgba(16, 185, 129, 0.15); color: #10b981; }
+      .greeting { font-size: 15px; color: #f1f5f9; margin-bottom: 12px; }
+      .msg-box { background: rgba(255,255,255,0.04); border-left: 3px solid #64748b; padding: 12px; border-radius: 6px; font-size: 13px; color: #94a3b8; font-style: italic; margin: 10px 0; }
+      .footer { margin-top: 24px; padding-top: 16px; border-top: 1px solid rgba(255,255,255,0.1); font-size: 12px; color: #64748b; text-align: center; }
+    </style></head>
+    <body>
+      <div class="card">
+        <div class="header">
+          <div class="badge">TICKET #${inquiryId} CONFIRMED</div>
+          <h1 class="title">AirGuard Support Desk Response</h1>
+          <p style="margin: 4px 0 0 0; color: #94a3b8; font-size: 13px;">Official inquiry confirmation and technical guidance</p>
+        </div>
+        <div class="greeting">
+          Hello <strong>${name || 'AirGuard User'}</strong>,
+        </div>
+        <p style="font-size: 14px; color: #cbd5e1; line-height: 1.6; margin: 0 0 12px 0;">
+          Thank you for contacting the AirGuard Environmental Intelligence team. We have successfully registered your inquiry regarding <strong>${category}</strong> for station <strong>${nodeId || 'AirGuard Node'}</strong>.
+        </p>
+
+        <div style="font-size: 12px; font-weight: 700; color: #94a3b8; text-transform: uppercase;">Your Submitted Question:</div>
+        <div class="msg-box">"${message}"</div>
+
+        ${answerGuidance}
+
+        <p style="font-size: 13px; color: #94a3b8; line-height: 1.5; margin: 16px 0 0 0;">
+          If this addresses your inquiry, no further action is needed. If you require further assistance or custom firmware builds, you can reply directly to this email at <a href="mailto:${supportEmail}" style="color: #38bdf8;">${supportEmail}</a> referencing Ticket <strong>#${inquiryId}</strong>.
+        </p>
+
+        <div class="footer">
+          AirGuard Environmental Intelligence System · Hyperlocal IoT Monitoring<br>
+          GIST Environmental Research Lab · Support Desk (${supportEmail})
+        </div>
+      </div>
+    </body></html>
+  `;
+
+  const textContent = `AirGuard Support Response (Ticket #${inquiryId})\n\nHello ${name},\n\nThank you for your inquiry regarding ${category} on node ${nodeId}.\n\nYour message:\n"${message}"\n\nOur engineering team has received your ticket and dispatched this initial response. You can reply directly to this email (${supportEmail}) with any further questions.`;
+
+  const mailPayload = {
+    from,
+    to: email,
+    subject,
+    text: textContent,
+    html: htmlContent,
+  };
+
+  const transporter = getTransporter();
+  if (transporter) {
+    try {
+      const info = await transporter.sendMail(mailPayload);
+      console.log(`[SupportService] ✅ Auto-reply dispatched to user ${email} (ID: ${info.messageId})`);
+      return { success: true, delivered: true, messageId: info.messageId };
+    } catch (e) {
+      console.warn(`[SupportService] Direct SMTP auto-reply failed (${e.message}). Falling back to relay...`);
+    }
+  }
+
+  return await trySendViaVercelRelay(mailPayload);
+}
+
 module.exports = {
   sendPasswordResetEmail,
   sendAirQualityAlertEmail,
+  sendSupportInquiryEmail,
+  sendSupportAutoReplyEmail,
 };
 

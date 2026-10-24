@@ -803,14 +803,14 @@
 }
 
 .env-metric-card {
-  padding: 12px 14px;
-  border-radius: 12px;
+  padding: 8px 12px;
+  border-radius: 10px;
   background: var(--surface);
   border: 1px solid var(--border);
   display: flex;
   flex-direction: column;
   justify-content: space-between;
-  gap: 8px;
+  gap: 4px;
 }
 
 .env-metric-header {
@@ -820,46 +820,61 @@
 }
 
 .env-metric-title {
-  font-size: 0.68rem;
+  font-size: 0.65rem;
   font-weight: 700;
   letter-spacing: 0.06em;
   color: var(--text-faint);
 }
 
 .env-metric-num {
-  font-size: 1.32rem;
+  font-size: 1.15rem;
   font-weight: 700;
   color: var(--text-primary);
-  line-height: 1;
-  margin-bottom: 4px;
+  line-height: 1.1;
+  margin-bottom: 2px;
 }
 
 .env-metric-num .unit {
-  font-size: 0.78rem;
+  font-size: 0.72rem;
   font-weight: 500;
   color: var(--text-muted);
 }
 
 .env-metric-sub {
-  font-size: 0.72rem;
+  font-size: 0.68rem;
   color: var(--text-muted);
-  line-height: 1.3;
+  line-height: 1.25;
 }
 
 .env-metric-foot {
-  margin-top: 4px;
+  margin-top: 2px;
+  font-size: 0.66rem;
 }
 
 .compass-layout {
   display: flex;
   align-items: center;
-  gap: 12px;
+  gap: 10px;
+}
+
+.sun-arc-wrap {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  max-height: 38px;
+  overflow: hidden;
+  margin: 0 auto;
+}
+
+.sun-arc-svg {
+  max-height: 38px;
+  width: auto !important;
 }
 
 .sun-times-row {
   display: flex;
   justify-content: space-between;
-  margin-top: 10px;
+  margin-top: 2px;
 }
 
 .correlation-card {
@@ -1481,12 +1496,12 @@
 /* 3. Humidity & Dew Point Liquid Wave Bar */
 .humidity-liquid-bar {
   width: 100%;
-  height: 7px;
+  height: 5px;
   background: rgba(56, 189, 248, 0.12);
   border-radius: 999px;
   overflow: hidden;
   position: relative;
-  margin-top: 10px;
+  margin-top: 4px;
 }
 
 .humidity-liquid-fill {
@@ -1506,12 +1521,12 @@
 /* 4. UV Index Dynamic Risk Meter */
 .uv-meter-bar {
   width: 100%;
-  height: 7px;
+  height: 5px;
   background: rgba(255, 255, 255, 0.08);
   border-radius: 999px;
   overflow: hidden;
   position: relative;
-  margin-top: 10px;
+  margin-top: 4px;
 }
 
 [data-theme='light'] .uv-meter-bar {

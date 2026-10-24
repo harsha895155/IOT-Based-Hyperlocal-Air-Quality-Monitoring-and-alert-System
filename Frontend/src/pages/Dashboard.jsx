@@ -650,7 +650,7 @@ export default function Dashboard({ readingsData, onNavigateTab }) {
           </div>
           <div className="env-metric-content compass-layout">
             <div className="compass-widget">
-              <WeatherIcons.compass degrees={cw.windDirectionDeg || 0} size={40} />
+              <WeatherIcons.compass degrees={cw.windDirectionDeg || 0} size={32} />
             </div>
             <div>
               <div className="env-metric-num mono">{cw.windSpeedKmh ?? '—'} <span className="unit">km/h</span></div>
@@ -676,7 +676,7 @@ export default function Dashboard({ readingsData, onNavigateTab }) {
                 style={{ width: `${Math.min(100, Math.max(8, sensorHumidity ?? cw.humidity ?? 50))}%` }}
               />
             </div>
-            <div className="env-metric-sub" style={{ marginTop: '8px' }}>The dew point is {cw.dewPoint != null ? `${cw.dewPoint}°C` : 'N/A'} right now.</div>
+            <div className="env-metric-sub" style={{ marginTop: '3px' }}>The dew point is {cw.dewPoint != null ? `${cw.dewPoint}°C` : 'N/A'} right now.</div>
             <div className="env-metric-foot text-faint fs-xs">
               Comfort Level: {(sensorHumidity ?? cw.humidity ?? 50) > 70 ? 'High Humidity' : (sensorHumidity ?? cw.humidity ?? 50) < 30 ? 'Dry' : 'Comfortable'}
             </div>
@@ -700,7 +700,7 @@ export default function Dashboard({ readingsData, onNavigateTab }) {
                 }}
               />
             </div>
-            <div className="env-metric-sub" style={{ marginTop: '8px' }}>
+            <div className="env-metric-sub" style={{ marginTop: '3px' }}>
               {(cw.uvIndex || 0) <= 2 ? 'Low risk' : (cw.uvIndex || 0) <= 5 ? 'Moderate' : (cw.uvIndex || 0) <= 7 ? 'High' : 'Very High'}
             </div>
             <div className="env-metric-foot text-faint fs-xs">

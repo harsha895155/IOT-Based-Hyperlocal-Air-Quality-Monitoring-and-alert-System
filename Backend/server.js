@@ -18,6 +18,7 @@ const analyticsRoutes = require('./routes/analytics');
 const reportsRoutes = require('./routes/reports');
 const systemRoutes = require('./routes/system');
 const weatherRoutes = require('./routes/weather');
+const supportRoutes = require('./routes/support');
 const { notFound, errorHandler } = require('./middleware/errorHandler');
 
 const app = express();
@@ -91,6 +92,7 @@ app.use('/api/analytics', analyticsRoutes);
 app.use('/api/reports', reportsRoutes);
 app.use('/api/system', systemRoutes);
 app.use('/api/weather', weatherRoutes);
+app.use('/api/support', supportRoutes);
 
 // ---- Socket.IO: dashboard/mobile clients join to receive live pushes ----
 const jwt = require('jsonwebtoken');

@@ -2,6 +2,8 @@ import React, { useState, useMemo } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { useReadings } from '../hooks/useReadings';
 import { classifyAQI } from '../utils/aqi';
+import client from '../api/client';
+import { useAuth } from '../context/AuthContext';
 import AddDeviceWizard from '../components/AddDeviceWizard';
 import './HelpSupportView.css';
 
@@ -57,11 +59,29 @@ export default function HelpSupportView() {
   // FAQ Accordion open set
   const [openFaqs, setOpenFaqs] = useState(new Set([0, 1]));
 
+  const { user } = useAuth() || {};
+
   // Support inquiry form state
+  const [supportName, setSupportName] = useState(user?.name || '');
+  const [supportEmail, setSupportEmail] = useState(user?.email || '');
   const [supportCategory, setSupportCategory] = useState('hardware');
-  const [supportNodeId, setSupportNodeId] = useState('AIRGUARD-001');
+  const [supportNodeId, setSupportNodeId] = useState('');
   const [supportMsg, setSupportMsg] = useState('');
+  const [supportSubmitting, setSupportSubmitting] = useState(false);
   const [supportTicket, setSupportTicket] = useState(null);
+  const [supportError, setSupportError] = useState(null);
+
+  // Sync user email and first real device
+  React.useEffect(() => {
+    if (user?.email && !supportEmail) setSupportEmail(user.email);
+    if (user?.name && !supportName) setSupportName(user.name);
+  }, [user]);
+
+  React.useEffect(() => {
+    if (devices && devices.length > 0 && !supportNodeId) {
+      setSupportNodeId(devices[0].deviceId || devices[0].id);
+    }
+  }, [devices, supportNodeId]);
 
   // Copy code / bibtex status
   const [copiedCode, setCopiedCode] = useState(false);
@@ -76,18 +96,43 @@ export default function HelpSupportView() {
     });
   };
 
-  const handleSupportSubmit = (e) => {
+  const handleSupportSubmit = async (e) => {
     e.preventDefault();
     if (!supportMsg.trim()) return;
 
-    const ticketNum = Date.now().toString().slice(-6);
-    setSupportTicket({
-      id: `AG-SUP-${ticketNum}`,
-      category: supportCategory,
-      nodeId: supportNodeId,
-      time: new Date().toLocaleTimeString(),
-    });
-    setSupportMsg('');
+    const emailToUse = (supportEmail || user?.email || '').trim();
+    if (!emailToUse || !emailToUse.includes('@')) {
+      setSupportError('Please provide a valid email address so the answer can be delivered to you.');
+      return;
+    }
+
+    setSupportSubmitting(true);
+    setSupportError(null);
+
+    try {
+      const res = await client.post('/support/inquiry', {
+        name: supportName || user?.name || emailToUse.split('@')[0],
+        email: emailToUse,
+        category: supportCategory,
+        nodeId: supportNodeId || 'All Stations',
+        message: supportMsg.trim(),
+      });
+
+      setSupportTicket({
+        id: res.data?.inquiryId || `AG-SUP-${Date.now().toString().slice(-6)}`,
+        category: supportCategory,
+        nodeId: supportNodeId || 'All Stations',
+        email: emailToUse,
+        time: new Date().toLocaleTimeString(),
+        message: res.data?.message || 'Inquiry successfully delivered to website mail (airguard396@gmail.com) and automated answer dispatched to your email!',
+      });
+      setSupportMsg('');
+    } catch (err) {
+      console.error('Support submission error:', err);
+      setSupportError(err.response?.data?.error || err.message || 'Failed to submit inquiry. Please try again.');
+    } finally {
+      setSupportSubmitting(false);
+    }
   };
 
   // Firmware customizable credentials (enables users to connect separate hardware devices)
@@ -177,12 +222,15 @@ void loop() {
     int calculatedAqi = map(rawGas, 0, 4095, 20, 350);
 
     // 4. Construct JSON payload
-    StaticJsonDocument<256> doc;
+    StaticJsonDocument<384> doc;
     doc["deviceId"] = deviceId;
     doc["temperature"] = round(temp * 10.0) / 10.0;
     doc["humidity"] = round(hum * 10.0) / 10.0;
     doc["gasPPM"] = calculatedPpm;
     doc["airQuality"] = calculatedAqi;
+    doc["wifiSSID"] = WiFi.SSID();
+    doc["ip"] = WiFi.localIP().toString();
+    doc["rssi"] = WiFi.RSSI();
 
     String payload;
     serializeJson(doc, payload);
@@ -554,21 +602,20 @@ void loop() {
 
         {/* ─── 3. How to Connect Your AirGuard Device & Developer Tools ─── */}
         {(activeTab === 'all' || activeTab === 'firmware') && (
-          <section className="card" style={{ padding: '28px' }}>
-            <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', flexWrap: 'wrap', gap: '10px', marginBottom: '20px' }}>
+          <section className="card connect-device-section">
+            <div className="connect-device-header">
               <div>
-                <h2 style={{ fontSize: '1.25rem', fontWeight: 700, margin: 0, color: 'var(--text-primary)' }}>
+                <h2 className="connect-device-title">
                   How to Connect Your AirGuard Device
                 </h2>
-                <p className="text-muted fs-xs" style={{ margin: '4px 0 0 0' }}>
+                <p className="text-muted connect-device-subtitle">
                   Guided consumer IoT onboarding process for connecting your sensing node to Wi-Fi and live monitoring.
                 </p>
               </div>
               <button
                 type="button"
-                className="btn btn--primary"
+                className="btn btn--primary connect-wizard-btn"
                 onClick={() => setShowAddWizard(true)}
-                style={{ padding: '10px 22px', fontSize: '0.88rem', fontWeight: 700 }}
               >
                 🔌 Start Add Device Wizard →
               </button>
@@ -576,52 +623,52 @@ void loop() {
 
             {/* Consumer IoT Step-By-Step Onboarding Guide */}
             <div className="connect-guide-card">
-              <div className="connect-steps-grid" style={{ gridTemplateColumns: 'repeat(auto-fit, minmax(280px, 1fr))' }}>
+              <div className="connect-steps-grid">
                 <div className="connect-step-item">
                   <div className="connect-step-num">1</div>
-                  <span className="connect-step-title">1. Add your device</span>
+                  <span className="connect-step-title">1. Connect & Flash Wi-Fi</span>
+                  <p className="connect-step-desc">
+                    Connect ESP32 via USB and flash firmware + local 2.4GHz Wi-Fi in one single click.
+                  </p>
+                </div>
+
+                <div className="connect-step-item">
+                  <div className="connect-step-num">2</div>
+                  <span className="connect-step-title">2. Device & Location</span>
                   <p className="connect-step-desc">
                     Enter the device name and choose where the device is physically installed.
                   </p>
                 </div>
 
                 <div className="connect-step-item">
-                  <div className="connect-step-num">2</div>
-                  <span className="connect-step-title">2. Connect your device</span>
-                  <p className="connect-step-desc">
-                    Connect your AirGuard ESP32 to your phone or computer using a USB cable.
-                  </p>
-                </div>
-
-                <div className="connect-step-item">
                   <div className="connect-step-num">3</div>
-                  <span className="connect-step-title">3. Connect to Wi-Fi</span>
+                  <span className="connect-step-title">3. Provision AirGuard</span>
                   <p className="connect-step-desc">
-                    Select your local 2.4GHz Wi-Fi network and enter the network password.
+                    AirGuard securely registers the node and pairs it to your personal account.
                   </p>
                 </div>
 
                 <div className="connect-step-item">
                   <div className="connect-step-num">4</div>
-                  <span className="connect-step-title">4. Configure AirGuard</span>
+                  <span className="connect-step-title">4. Wait for Connection</span>
                   <p className="connect-step-desc">
-                    AirGuard securely sends the required Wi-Fi and connection configuration to your device.
+                    The device connects to Wi-Fi and establishes connection to the AirGuard cloud server.
                   </p>
                 </div>
 
                 <div className="connect-step-item">
                   <div className="connect-step-num">5</div>
-                  <span className="connect-step-title">5. Wait for connection</span>
+                  <span className="connect-step-title">5. Live Sensor Readings</span>
                   <p className="connect-step-desc">
-                    The device connects to Wi-Fi and then establishes connection to the AirGuard cloud server.
+                    Real-time telemetry and gas sensor data begin streaming directly to your session.
                   </p>
                 </div>
 
                 <div className="connect-step-item">
                   <div className="connect-step-num">6</div>
-                  <span className="connect-step-title">6. Start monitoring</span>
+                  <span className="connect-step-title">6. Start Monitoring</span>
                   <p className="connect-step-desc">
-                    Once the first sensor reading is received, your device is ready and streams live telemetry!
+                    Your sensing node is ready, verified, and visible on your live dashboard!
                   </p>
                 </div>
               </div>
@@ -862,19 +909,38 @@ void loop() {
             </div>
 
             {supportTicket && (
-              <div className="settings-alert settings-alert--success" style={{ marginTop: '16px' }}>
-                <span>✓</span>
+              <div className="settings-alert settings-alert--success" style={{ marginTop: '16px', background: 'rgba(16, 185, 129, 0.12)', border: '1px solid rgba(16, 185, 129, 0.3)', padding: '14px 18px', borderRadius: '10px' }}>
+                <span style={{ fontSize: '1.2rem', color: '#10b981' }}>✓</span>
                 <div>
-                  <strong>Ticket #{supportTicket.id} Created Successfully!</strong>
-                  <p style={{ margin: '2px 0 0 0', fontSize: '0.82rem' }}>
-                    Logged for node <strong>{supportTicket.nodeId}</strong> ({supportTicket.category}) at {supportTicket.time}. A laboratory research engineer will follow up shortly.
+                  <strong style={{ color: '#10b981', fontSize: '0.92rem' }}>Ticket #{supportTicket.id} Submitted & Answer Sent!</strong>
+                  <p style={{ margin: '4px 0 0 0', fontSize: '0.82rem', color: '#cbd5e1', lineHeight: 1.5 }}>
+                    Your inquiry was forwarded to the official website support desk (<strong>airguard396@gmail.com</strong>). An automated technical answer has been dispatched directly to <strong>{supportTicket.email}</strong>!
                   </p>
                 </div>
               </div>
             )}
 
+            {supportError && (
+              <div className="settings-alert settings-alert--error" style={{ marginTop: '16px', background: 'rgba(239, 68, 68, 0.12)', border: '1px solid rgba(239, 68, 68, 0.3)', padding: '12px 16px', borderRadius: '10px', color: '#f87171', fontSize: '0.84rem' }}>
+                ⚠️ {supportError}
+              </div>
+            )}
+
             <form onSubmit={handleSupportSubmit} style={{ marginTop: '16px' }}>
               <div className="support-form-grid">
+                <div className="settings-field">
+                  <label className="settings-field-label">Your Email Address (For Direct Answer)</label>
+                  <input
+                    type="email"
+                    className="settings-input"
+                    value={supportEmail}
+                    onChange={(e) => setSupportEmail(e.target.value)}
+                    placeholder="e.g. user@example.com"
+                    required
+                    style={{ background: 'var(--bg-surface)', border: '1px solid var(--border-subtle)', borderRadius: '7px', padding: '8px 12px', color: 'var(--text-primary)', fontSize: '0.85rem' }}
+                  />
+                </div>
+
                 <div className="settings-field">
                   <label className="settings-field-label">Inquiry Category</label>
                   <select
@@ -884,8 +950,9 @@ void loop() {
                   >
                     <option value="hardware">Hardware Wiring & Pinout Issue</option>
                     <option value="calibration">MQ135 Gas Sensor Calibration</option>
-                    <option value="network">ESP32 Wi-Fi & Ingestion Connectivity</option>
-                    <option value="research">Academic Research & Dataset Export</option>
+                    <option value="connection">ESP32 Wi-Fi & Telemetry Connectivity</option>
+                    <option value="collaboration">Academic Research & Dataset Export</option>
+                    <option value="general">General Support / Operational Question</option>
                   </select>
                 </div>
 
@@ -896,10 +963,16 @@ void loop() {
                     value={supportNodeId}
                     onChange={(e) => setSupportNodeId(e.target.value)}
                   >
-                    <option value="AIRGUARD-001">AIRGUARD-001 (Main Environmental Lab)</option>
-                    <option value="AIRGUARD-002">AIRGUARD-002 (Library Block Zone B)</option>
-                    <option value="AIRGUARD-003">AIRGUARD-003 (Research Park West)</option>
-                    <option value="GENERAL">General Platform Question</option>
+                    {devices && devices.length > 0 ? (
+                      devices.map((d) => (
+                        <option key={d.deviceId || d.id} value={d.deviceId || d.id}>
+                          📡 {d.name || d.deviceId || d.id} ({d.location || 'Site'})
+                        </option>
+                      ))
+                    ) : (
+                      <option value="esp32-node-01">📡 esp32-node-01 (Primary AirGuard Station)</option>
+                    )}
+                    <option value="GENERAL">🌐 General Platform / Laboratory Question</option>
                   </select>
                 </div>
 
@@ -916,8 +989,13 @@ void loop() {
               </div>
 
               <div style={{ display: 'flex', justifyContent: 'flex-end', marginTop: '14px' }}>
-                <button type="submit" className="btn btn--primary" style={{ minWidth: '180px' }}>
-                  Submit Inquiry Ticket ➔
+                <button
+                  type="submit"
+                  className="btn btn--primary"
+                  style={{ minWidth: '180px', height: '36px', fontSize: '0.84rem' }}
+                  disabled={supportSubmitting}
+                >
+                  {supportSubmitting ? 'Dispatching Inquiry...' : 'Submit Inquiry Ticket ➔'}
                 </button>
               </div>
             </form>

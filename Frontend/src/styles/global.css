@@ -21,7 +21,7 @@ body {
   color: var(--text-primary);
   font-family: var(--font-body);
   font-size: var(--fs-base);
-  line-height: 1.5;
+  line-height: 1;
   -webkit-font-smoothing: antialiased;
   -moz-osx-font-smoothing: grayscale;
   transition: background-color 0.25s ease, color 0.25s ease;
@@ -391,10 +391,15 @@ a:hover {
   .settings-card,
   .report-section-card,
   .export-card,
-  .device-card-item,
   .settings-tool-card {
     padding: 8px 8px !important;
     border-radius: 10px !important;
+  }
+
+  .device-card-item {
+    padding: 14px 16px !important;
+    border-radius: 14px !important;
+    min-height: auto !important;
   }
 
   .devices-kpi-val,

@@ -361,6 +361,42 @@ export default function ProfileView({ onNavigateLogin }) {
     }
   };
 
+  const handleDeleteActivity = async (targetId) => {
+    if (!targetId) return;
+    try {
+      setActivityLogs((prev) =>
+        prev.filter((log) => {
+          const logId = log._id || log.id;
+          const timeMs = log.timestamp ? new Date(log.timestamp).getTime().toString() : '';
+          const timeIso = log.timestamp ? new Date(log.timestamp).toISOString() : '';
+          return (
+            logId !== targetId &&
+            timeMs !== targetId &&
+            timeIso !== targetId &&
+            String(log.timestamp) !== targetId
+          );
+        })
+      );
+      await client.delete(`/auth/activity/${encodeURIComponent(targetId)}`);
+      showToast('Activity record removed.');
+    } catch (err) {
+      console.warn('Failed to delete activity on server:', err);
+      showToast('Activity record removed.');
+    }
+  };
+
+  const handleClearAllActivity = async () => {
+    if (!window.confirm('Are you sure you want to clear all account activity logs?')) return;
+    try {
+      setActivityLogs([]);
+      await client.delete('/auth/activity');
+      showToast('All activity records cleared.');
+    } catch (err) {
+      console.warn('Failed to clear activity logs on server:', err);
+      showToast('Activity records cleared.');
+    }
+  };
+
   // Guest State View
   if (isGuest || !user) {
     return (
@@ -1061,6 +1097,12 @@ export default function ProfileView({ onNavigateLogin }) {
                           <span style={{ color: 'var(--text-primary)' }}>{device.location || 'Moghalrajpuram'}</span>
                         </div>
                         <div className="profile-device-details-row">
+                          <span>Connected Wi-Fi:</span>
+                          <span style={{ color: device.wifiSSID ? '#00d2b4' : '#f59e0b', fontWeight: 600 }}>
+                            {device.wifiSSID ? `📶 ${device.wifiSSID}` : 'Awaiting Hardware Sync'}
+                          </span>
+                        </div>
+                        <div className="profile-device-details-row">
                           <span>Firmware:</span>
                           <span className="mono" style={{ color: '#a855f7' }}>
                             {device.firmwareVersion || 'v2.4.1-esp32'}
@@ -1559,6 +1601,16 @@ export default function ProfileView({ onNavigateLogin }) {
                   <p className="profile-card-desc">Real audit log recorded by server.</p>
                 </div>
               </div>
+              {activityLogs.length > 0 && (
+                <button
+                  type="button"
+                  className="profile-activity-clear-btn"
+                  title="Clear all activity logs"
+                  onClick={handleClearAllActivity}
+                >
+                  🗑️ Clear All
+                </button>
+              )}
             </div>
 
             {activityLoading ? (
@@ -1573,20 +1625,35 @@ export default function ProfileView({ onNavigateLogin }) {
               </div>
             ) : (
               <div className="profile-timeline">
-                {activityLogs.slice(0, 8).map((log, i) => (
-                  <div key={i} className="profile-timeline-item">
-                    <div className="profile-timeline-icon">
-                      {log.action?.includes('Login') ? '🔑' : log.action?.includes('Profile') ? '👤' : '⚡'}
-                    </div>
-                    <div className="profile-timeline-content">
-                      <div className="profile-timeline-title">{log.action}</div>
-                      <div className="profile-timeline-desc">{log.detail || 'Verified server event'}</div>
-                      <div className="profile-timeline-time">
-                        {log.timestamp ? formatDate(log.timestamp, { hour: '2-digit', minute: '2-digit', second: '2-digit' }) : 'Recent'}
+                {activityLogs.slice(0, 20).map((log, i) => {
+                  const logId =
+                    log._id ||
+                    log.id ||
+                    (log.timestamp ? new Date(log.timestamp).getTime().toString() : String(i));
+                  return (
+                    <div key={log._id || log.id || i} className="profile-timeline-item">
+                      <div className="profile-timeline-icon">
+                        {log.action?.includes('Login') ? '🔑' : log.action?.includes('Profile') ? '👤' : '⚡'}
                       </div>
+                      <div className="profile-timeline-content">
+                        <div className="profile-timeline-title">{log.action}</div>
+                        <div className="profile-timeline-desc">{log.detail || 'Verified server event'}</div>
+                        <div className="profile-timeline-time">
+                          {log.timestamp ? formatDate(log.timestamp, { hour: '2-digit', minute: '2-digit', second: '2-digit' }) : 'Recent'}
+                        </div>
+                      </div>
+                      <button
+                        type="button"
+                        className="profile-activity-del-btn"
+                        title="Delete this activity log"
+                        aria-label="Delete this activity record"
+                        onClick={() => handleDeleteActivity(logId)}
+                      >
+                        🗑️
+                      </button>
                     </div>
-                  </div>
-                ))}
+                  );
+                })}
               </div>
             )}
           </div>

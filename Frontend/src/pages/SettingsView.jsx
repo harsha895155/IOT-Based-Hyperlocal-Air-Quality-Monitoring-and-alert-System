@@ -1,12 +1,68 @@
 import React, { useState, useEffect } from 'react';
+import client from '../api/client';
 import { useAuth } from '../context/AuthContext';
 import { useTheme } from '../context/ThemeContext';
 import ChangePasswordCard from '../components/ChangePasswordCard';
 import './SettingsView.css';
 
+export const VULNERABILITY_PROFILES = {
+  standard: {
+    id: 'standard',
+    name: 'Standard General Population',
+    warnAQI: 100,
+    critAQI: 150,
+    heatThreshold: 38,
+    desc: 'Standard EPA/NAAQS thresholds for typical healthy adults.'
+  },
+  asthma: {
+    id: 'asthma',
+    name: 'Asthma & Respiratory Sensitivities (Stricter Warnings)',
+    warnAQI: 60,
+    critAQI: 100,
+    heatThreshold: 35,
+    desc: 'Lower thresholds for hyper-sensitive airways, chronic bronchitis, and COPD.'
+  },
+  pediatric: {
+    id: 'pediatric',
+    name: 'Children, Schools & Elderly High-Care Group',
+    warnAQI: 50,
+    critAQI: 90,
+    heatThreshold: 34,
+    desc: 'High-care standards for infants, classrooms, nurseries, and senior care homes.'
+  },
+  sports: {
+    id: 'sports',
+    name: 'Athletes & Outdoor Training (Exercise Guidance)',
+    warnAQI: 75,
+    critAQI: 120,
+    heatThreshold: 36,
+    desc: 'Optimized for high minute-ventilation aerobic exertion and sports training.'
+  },
+  industrial: {
+    id: 'industrial',
+    name: 'Industrial / Workshop / Chemical Workplace',
+    warnAQI: 120,
+    critAQI: 180,
+    heatThreshold: 40,
+    desc: 'Tailored for fabrication zones, machine shops, and manufacturing facilities.'
+  },
+  custom: {
+    id: 'custom',
+    name: 'Custom User Configuration',
+    warnAQI: 100,
+    critAQI: 150,
+    heatThreshold: 38,
+    desc: 'Manual operator-defined thresholds.'
+  }
+};
+
 export default function SettingsView() {
   const { user, isGuest, preferences, updatePreferences } = useAuth();
   const { theme, setTheme, presets } = useTheme();
+
+  // Device & Profile targeting state
+  const [deviceList, setDeviceList] = useState([]);
+  const [selectedDevice, setSelectedDevice] = useState('global');
 
   // 1. Profile / Identity state
   const [name, setName] = useState(user?.name || '');
@@ -20,7 +76,7 @@ export default function SettingsView() {
 
   // 3. Telemetry & IoT Controls
   const [refreshRate, setRefreshRate] = useState(preferences?.refreshRate ?? 15);
-  const [defaultStation, setDefaultStation] = useState(preferences?.defaultStation || 'AIRGUARD-001');
+  const [defaultStation, setDefaultStation] = useState(preferences?.defaultStation || '');
   const [timeoutSec, setTimeoutSec] = useState(preferences?.timeoutSec ?? 60);
   const [smoothCharts, setSmoothCharts] = useState(preferences?.smoothCharts ?? true);
 
@@ -64,7 +120,65 @@ export default function SettingsView() {
       if (preferences.dailyDigest !== undefined) setDailyDigest(preferences.dailyDigest);
       if (preferences.weeklyPdfReport !== undefined) setWeeklyPdfReport(preferences.weeklyPdfReport);
     }
+
+    // Fetch user devices for per-device threshold customization & real-time primary station
+    client.get('/devices').then((res) => {
+      if (Array.isArray(res.data) && res.data.length > 0) {
+        setDeviceList(res.data);
+        setDefaultStation((prev) => {
+          const exists = res.data.some((d) => (d.deviceId || d.id) === prev);
+          return exists ? prev : (res.data[0].deviceId || res.data[0].id);
+        });
+      }
+    }).catch(() => {});
   }, [preferences, user]);
+
+  // Handle Health Vulnerability Profile selection with auto-adapting threshold values
+  const handleProfileChange = (profileKey) => {
+    setSensitivityProfile(profileKey);
+    const profile = VULNERABILITY_PROFILES[profileKey];
+    if (profile && profileKey !== 'custom') {
+      setAqiWarnThreshold(profile.warnAQI);
+      setAqiCriticalThreshold(profile.critAQI);
+      setExtremeHeatThreshold(profile.heatThreshold);
+    }
+  };
+
+  // Handle Device Selection (switch thresholds according to the device location)
+  const handleDeviceChange = (devId) => {
+    setSelectedDevice(devId);
+    if (devId === 'global') {
+      setSensitivityProfile(preferences?.sensitivityProfile || 'standard');
+      setAqiWarnThreshold(preferences?.aqiWarnThreshold ?? 100);
+      setAqiCriticalThreshold(preferences?.aqiCriticalThreshold ?? 150);
+      setExtremeHeatThreshold(preferences?.extremeHeatThreshold ?? 38);
+    } else {
+      const saved = localStorage.getItem(`airguard_device_thresholds_${devId}`);
+      if (saved) {
+        try {
+          const parsed = JSON.parse(saved);
+          if (parsed.sensitivityProfile) setSensitivityProfile(parsed.sensitivityProfile);
+          if (parsed.aqiWarnThreshold != null) setAqiWarnThreshold(parsed.aqiWarnThreshold);
+          if (parsed.aqiCriticalThreshold != null) setAqiCriticalThreshold(parsed.aqiCriticalThreshold);
+          if (parsed.extremeHeatThreshold != null) setExtremeHeatThreshold(parsed.extremeHeatThreshold);
+          return;
+        } catch (e) {}
+      }
+
+      // Auto-suggest default profile based on device location or name
+      const dev = deviceList.find((d) => (d.deviceId || d.id) === devId);
+      const loc = (dev?.name || dev?.location || '').toLowerCase();
+      let autoProfile = 'standard';
+      if (loc.includes('school') || loc.includes('nursery') || loc.includes('hospital') || loc.includes('pediatric')) {
+        autoProfile = 'pediatric';
+      } else if (loc.includes('gym') || loc.includes('ground') || loc.includes('court') || loc.includes('stadium')) {
+        autoProfile = 'sports';
+      } else if (loc.includes('factory') || loc.includes('workshop') || loc.includes('plant') || loc.includes('industry')) {
+        autoProfile = 'industrial';
+      }
+      handleProfileChange(autoProfile);
+    }
+  };
 
   // Save all settings handler
   const handleSaveAll = async (e) => {
@@ -95,9 +209,23 @@ export default function SettingsView() {
       };
 
       await updatePreferences(payload);
+
+      // Persist per-device threshold profile if a specific hardware node was selected
+      if (selectedDevice !== 'global') {
+        localStorage.setItem(`airguard_device_thresholds_${selectedDevice}`, JSON.stringify({
+          sensitivityProfile,
+          aqiWarnThreshold: Number(aqiWarnThreshold),
+          aqiCriticalThreshold: Number(aqiCriticalThreshold),
+          extremeHeatThreshold: Number(extremeHeatThreshold),
+          deviceId: selectedDevice,
+        }));
+      }
+
       setSaveStatus({
         type: 'success',
-        message: 'Settings saved and synchronized with database successfully!',
+        message: selectedDevice !== 'global'
+          ? `Settings & custom thresholds saved for device ${selectedDevice}!`
+          : 'Settings saved and synchronized with database successfully!',
       });
       setTimeout(() => setSaveStatus({ type: 'idle', message: '' }), 4500);
     } catch (err) {
@@ -448,9 +576,19 @@ export default function SettingsView() {
                 value={defaultStation}
                 onChange={(e) => setDefaultStation(e.target.value)}
               >
-                <option value="AIRGUARD-001">AIRGUARD-001 — Main Environmental Lab (GIST)</option>
-                <option value="AIRGUARD-002">AIRGUARD-002 — Library & Study Block</option>
-                <option value="AIRGUARD-003">AIRGUARD-003 — Research Park West</option>
+                {deviceList.length === 0 ? (
+                  <option value="">No Active Hardware Nodes Connected</option>
+                ) : (
+                  deviceList.map((d) => {
+                    const dId = d.deviceId || d.id;
+                    const label = d.name ? `${dId} — ${d.name}` : dId;
+                    return (
+                      <option key={dId} value={dId}>
+                        {label} {d.location ? `(${d.location})` : ''}
+                      </option>
+                    );
+                  })
+                )}
               </select>
             </div>
 
@@ -490,26 +628,60 @@ export default function SettingsView() {
         {/* ─── 4. Environmental Alert Thresholds & Sensitive Groups ─── */}
         <section className="card settings-card">
           <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '16px', flexWrap: 'wrap', gap: '10px' }}>
-            <h2 className="settings-card__title" style={{ margin: 0 }}>Alert Thresholds & Sensitive Group Profile</h2>
+            <div>
+              <h2 className="settings-card__title" style={{ margin: 0 }}>Alert Thresholds & Sensitive Group Profile</h2>
+              <p className="text-muted fs-xs" style={{ margin: '3px 0 0 0' }}>
+                Values dynamically adjust based on vulnerable populations. Configure global defaults or tailor thresholds per device location.
+              </p>
+            </div>
             <span className="settings-tag" style={{ color: '#f59e0b', borderColor: 'rgba(245, 158, 11, 0.3)' }}>Health Protection</span>
+          </div>
+
+          {/* Per-Device Targeting Bar */}
+          <div style={{ background: 'var(--surface-raised)', border: '1px solid var(--border-soft)', borderRadius: '10px', padding: '10px 14px', marginBottom: '16px', display: 'flex', alignItems: 'center', justifyContent: 'space-between', flexWrap: 'wrap', gap: '10px' }}>
+            <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
+              <span style={{ fontSize: '1.1rem' }}>📍</span>
+              <div>
+                <span style={{ fontSize: '0.8rem', fontWeight: 700, color: 'var(--text-primary)' }}>Configure Target Device:</span>
+                <span style={{ fontSize: '0.72rem', color: 'var(--text-muted)', display: 'block' }}>Each device can have different thresholds tailored to its installation site</span>
+              </div>
+            </div>
+            <select
+              className="settings-select"
+              value={selectedDevice}
+              onChange={(e) => handleDeviceChange(e.target.value)}
+              style={{ minWidth: '220px', padding: '6px 12px', fontSize: '0.82rem' }}
+            >
+              <option value="global">🌐 All Deployed Devices (Global Defaults)</option>
+              {deviceList.map((dev) => (
+                <option key={dev.deviceId || dev.id} value={dev.deviceId || dev.id}>
+                  📟 {dev.name || dev.deviceId} ({dev.location || 'Site'})
+                </option>
+              ))}
+            </select>
           </div>
 
           <div className="settings-grid-2">
             <div className="settings-field">
               <label className="settings-field-label" htmlFor="settings-sens">
-                Health Vulnerability Profile
+                <span>Health Vulnerability Profile</span>
+                <span style={{ fontSize: '0.7rem', color: '#38bdf8', fontWeight: 600 }}>Auto-configures thresholds</span>
               </label>
               <select
                 id="settings-sens"
                 className="settings-select"
                 value={sensitivityProfile}
-                onChange={(e) => setSensitivityProfile(e.target.value)}
+                onChange={(e) => handleProfileChange(e.target.value)}
               >
-                <option value="standard">Standard General Population</option>
-                <option value="asthma">Asthma & Respiratory Sensitivities (Stricter Warnings)</option>
-                <option value="sports">Athletes & Outdoor Training (Exercise Guidance)</option>
-                <option value="pediatric">Children & Elderly High-Care Group</option>
+                {Object.values(VULNERABILITY_PROFILES).map((p) => (
+                  <option key={p.id} value={p.id}>
+                    {p.name}
+                  </option>
+                ))}
               </select>
+              <span style={{ fontSize: '0.72rem', color: 'var(--text-muted)', marginTop: '4px', display: 'block' }}>
+                💡 {VULNERABILITY_PROFILES[sensitivityProfile]?.desc || 'Thresholds customized for site.'}
+              </span>
             </div>
 
             <div className="settings-field">
@@ -520,18 +692,24 @@ export default function SettingsView() {
               <div className="settings-threshold-row">
                 <input
                   type="range"
-                  min="50"
+                  min="30"
                   max="150"
                   step="5"
                   className="settings-slider"
                   value={aqiWarnThreshold}
-                  onChange={(e) => setAqiWarnThreshold(Number(e.target.value))}
+                  onChange={(e) => {
+                    setAqiWarnThreshold(Number(e.target.value));
+                    setSensitivityProfile('custom');
+                  }}
                 />
                 <input
                   type="number"
                   className="settings-num-input"
                   value={aqiWarnThreshold}
-                  onChange={(e) => setAqiWarnThreshold(Number(e.target.value))}
+                  onChange={(e) => {
+                    setAqiWarnThreshold(Number(e.target.value));
+                    setSensitivityProfile('custom');
+                  }}
                 />
               </div>
             </div>
@@ -544,18 +722,24 @@ export default function SettingsView() {
               <div className="settings-threshold-row">
                 <input
                   type="range"
-                  min="120"
+                  min="80"
                   max="300"
                   step="5"
                   className="settings-slider"
                   value={aqiCriticalThreshold}
-                  onChange={(e) => setAqiCriticalThreshold(Number(e.target.value))}
+                  onChange={(e) => {
+                    setAqiCriticalThreshold(Number(e.target.value));
+                    setSensitivityProfile('custom');
+                  }}
                 />
                 <input
                   type="number"
                   className="settings-num-input"
                   value={aqiCriticalThreshold}
-                  onChange={(e) => setAqiCriticalThreshold(Number(e.target.value))}
+                  onChange={(e) => {
+                    setAqiCriticalThreshold(Number(e.target.value));
+                    setSensitivityProfile('custom');
+                  }}
                 />
               </div>
             </div>
@@ -568,18 +752,24 @@ export default function SettingsView() {
               <div className="settings-threshold-row">
                 <input
                   type="range"
-                  min="30"
+                  min="28"
                   max="48"
                   step="1"
                   className="settings-slider"
                   value={extremeHeatThreshold}
-                  onChange={(e) => setExtremeHeatThreshold(Number(e.target.value))}
+                  onChange={(e) => {
+                    setExtremeHeatThreshold(Number(e.target.value));
+                    setSensitivityProfile('custom');
+                  }}
                 />
                 <input
                   type="number"
                   className="settings-num-input"
                   value={extremeHeatThreshold}
-                  onChange={(e) => setExtremeHeatThreshold(Number(e.target.value))}
+                  onChange={(e) => {
+                    setExtremeHeatThreshold(Number(e.target.value));
+                    setSensitivityProfile('custom');
+                  }}
                 />
               </div>
             </div>

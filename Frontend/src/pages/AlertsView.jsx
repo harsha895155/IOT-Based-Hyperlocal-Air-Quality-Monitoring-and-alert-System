@@ -11,6 +11,7 @@ import {
   playSoundProfile,
   playHighAlertSound,
 } from '../utils/audioAlert';
+import { VULNERABILITY_PROFILES } from './SettingsView';
 import './AlertsView.css';
 
 export default function AlertsView({
@@ -70,6 +71,8 @@ export default function AlertsView({
   });
 
   // Threshold rules config (saved to local storage)
+  const [ruleStation, setRuleStation] = useState('all');
+  const [ruleProfile, setRuleProfile] = useState('standard');
   const [rules, setRules] = useState(() => {
     return {
       warningAQI: Number(localStorage.getItem('airguard_alert_warn_aqi')) || 101,
@@ -77,6 +80,50 @@ export default function AlertsView({
       gasBurstPPM: Number(localStorage.getItem('airguard_alert_gas_ppm')) || 1000,
     };
   });
+
+  const handleRuleProfileChange = (profKey) => {
+    setRuleProfile(profKey);
+    const p = VULNERABILITY_PROFILES[profKey];
+    if (p && profKey !== 'custom') {
+      setRules((prev) => ({
+        ...prev,
+        warningAQI: p.warnAQI,
+        criticalAQI: p.critAQI,
+      }));
+    }
+  };
+
+  const handleRuleStationChange = (stId) => {
+    setRuleStation(stId);
+    if (stId === 'all') {
+      setRules({
+        warningAQI: Number(localStorage.getItem('airguard_alert_warn_aqi')) || 101,
+        criticalAQI: Number(localStorage.getItem('airguard_alert_crit_aqi')) || 151,
+        gasBurstPPM: Number(localStorage.getItem('airguard_alert_gas_ppm')) || 1000,
+      });
+      setRuleProfile('standard');
+    } else {
+      const devSaved = localStorage.getItem(`airguard_device_thresholds_${stId}`);
+      if (devSaved) {
+        try {
+          const parsed = JSON.parse(devSaved);
+          if (parsed.sensitivityProfile) setRuleProfile(parsed.sensitivityProfile);
+          if (parsed.aqiWarnThreshold) setRules((prev) => ({ ...prev, warningAQI: parsed.aqiWarnThreshold }));
+          if (parsed.aqiCriticalThreshold) setRules((prev) => ({ ...prev, criticalAQI: parsed.aqiCriticalThreshold }));
+          return;
+        } catch (e) {}
+      }
+      const stWarn = Number(localStorage.getItem(`airguard_alert_warn_aqi_${stId}`));
+      const stCrit = Number(localStorage.getItem(`airguard_alert_crit_aqi_${stId}`));
+      if (stWarn || stCrit) {
+        setRules((prev) => ({
+          ...prev,
+          warningAQI: stWarn || prev.warningAQI,
+          criticalAQI: stCrit || prev.criticalAQI,
+        }));
+      }
+    }
+  };
 
   const showToast = (msg) => {
     setToastMessage(msg);
@@ -110,11 +157,22 @@ export default function AlertsView({
 
   const handleSaveRules = (e) => {
     e.preventDefault();
-    localStorage.setItem('airguard_alert_warn_aqi', rules.warningAQI);
-    localStorage.setItem('airguard_alert_crit_aqi', rules.criticalAQI);
-    localStorage.setItem('airguard_alert_gas_ppm', rules.gasBurstPPM);
+    if (ruleStation === 'all') {
+      localStorage.setItem('airguard_alert_warn_aqi', rules.warningAQI);
+      localStorage.setItem('airguard_alert_crit_aqi', rules.criticalAQI);
+      localStorage.setItem('airguard_alert_gas_ppm', rules.gasBurstPPM);
+    } else {
+      localStorage.setItem(`airguard_alert_warn_aqi_${ruleStation}`, rules.warningAQI);
+      localStorage.setItem(`airguard_alert_crit_aqi_${ruleStation}`, rules.criticalAQI);
+      localStorage.setItem(`airguard_alert_gas_ppm_${ruleStation}`, rules.gasBurstPPM);
+      localStorage.setItem(`airguard_device_thresholds_${ruleStation}`, JSON.stringify({
+        sensitivityProfile: ruleProfile,
+        aqiWarnThreshold: rules.warningAQI,
+        aqiCriticalThreshold: rules.criticalAQI,
+      }));
+    }
     setShowRulesConfig(false);
-    showToast('✓ Alert trigger rules saved to telemetry profile.');
+    showToast(`✓ Alert trigger rules saved for ${ruleStation === 'all' ? 'all fleet stations' : ruleStation}.`);
   };
 
   const handleSaveNote = (alertId, text) => {
@@ -342,7 +400,12 @@ export default function AlertsView({
       {showRulesConfig && (
         <form className="rules-config-card" onSubmit={handleSaveRules}>
           <div className="rules-config-header">
-            <span className="rules-config-title">⚙️ Threshold Rules & Notification Triggers</span>
+            <div>
+              <span className="rules-config-title">⚙️ Threshold Rules & Sensitive Group Profiles</span>
+              <p style={{ margin: '3px 0 0 0', fontSize: '0.74rem', color: 'var(--text-muted)' }}>
+                Values dynamically adjust based on vulnerable populations. Configure global limits or tailor per device station.
+              </p>
+            </div>
             <button
               type="button"
               className="btn-secondary"
@@ -352,30 +415,77 @@ export default function AlertsView({
               ✕ Close
             </button>
           </div>
+
+          {/* Per-Station Targeting & Vulnerability Profile Selectors */}
+          <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(220px, 1fr))', gap: '12px', marginBottom: '14px', background: 'var(--surface-raised)', padding: '10px 12px', borderRadius: '10px', border: '1px solid var(--border-soft)' }}>
+            <div>
+              <label style={{ fontSize: '0.72rem', fontWeight: 700, color: '#38bdf8', textTransform: 'uppercase', display: 'block', marginBottom: '4px' }}>
+                📍 Target Station
+              </label>
+              <select
+                className="rules-input"
+                value={ruleStation}
+                onChange={(e) => handleRuleStationChange(e.target.value)}
+                style={{ cursor: 'pointer', padding: '6px 10px', fontSize: '0.82rem' }}
+              >
+                <option value="all">🌐 All Stations (Fleet-Wide Default)</option>
+                {devices.map((d) => (
+                  <option key={d.deviceId} value={d.deviceId}>
+                    📟 {d.name || d.deviceId} ({d.location || 'Site'})
+                  </option>
+                ))}
+              </select>
+            </div>
+
+            <div>
+              <label style={{ fontSize: '0.72rem', fontWeight: 700, color: '#38bdf8', textTransform: 'uppercase', display: 'block', marginBottom: '4px' }}>
+                🛡️ Health Vulnerability Profile
+              </label>
+              <select
+                className="rules-input"
+                value={ruleProfile}
+                onChange={(e) => handleRuleProfileChange(e.target.value)}
+                style={{ cursor: 'pointer', padding: '6px 10px', fontSize: '0.82rem' }}
+              >
+                {Object.values(VULNERABILITY_PROFILES).map((p) => (
+                  <option key={p.id} value={p.id}>
+                    {p.name}
+                  </option>
+                ))}
+              </select>
+            </div>
+          </div>
+
           <div className="rules-inputs-grid">
             <div className="rules-field">
               <label className="rules-label">Warning Threshold (AQI)</label>
               <input
                 type="number"
-                min="50"
+                min="30"
                 max="200"
                 className="rules-input"
                 value={rules.warningAQI}
-                onChange={(e) => setRules({ ...rules, warningAQI: Number(e.target.value) })}
+                onChange={(e) => {
+                  setRules({ ...rules, warningAQI: Number(e.target.value) });
+                  setRuleProfile('custom');
+                }}
               />
-              <span className="fs-xs text-muted">Triggers amber advisory (Default: 101)</span>
+              <span className="fs-xs text-muted">Triggers amber advisory</span>
             </div>
             <div className="rules-field">
               <label className="rules-label">Emergency Threshold (AQI)</label>
               <input
                 type="number"
-                min="100"
+                min="80"
                 max="500"
                 className="rules-input"
                 value={rules.criticalAQI}
-                onChange={(e) => setRules({ ...rules, criticalAQI: Number(e.target.value) })}
+                onChange={(e) => {
+                  setRules({ ...rules, criticalAQI: Number(e.target.value) });
+                  setRuleProfile('custom');
+                }}
               />
-              <span className="fs-xs text-muted">Triggers critical siren badge (Default: 151)</span>
+              <span className="fs-xs text-muted">Triggers critical siren badge</span>
             </div>
             <div className="rules-field">
               <label className="rules-label">Gas Surge Spike (PPM)</label>

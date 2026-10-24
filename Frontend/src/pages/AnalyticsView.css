@@ -13,17 +13,18 @@
 }
 
 /* ─── Filter Controls Bar ─── */
+/* ─── Filter Controls Bar (Side-by-Side & Compact) ─── */
 .analytics-controls-bar {
   display: flex;
   flex-wrap: wrap;
   align-items: center;
-  justify-content: space-between;
-  gap: 16px;
+  justify-content: flex-start;
+  gap: 12px;
   background: var(--bg-card);
   border: 1px solid var(--border-subtle);
-  border-radius: 14px;
-  padding: 14px 20px;
-  margin-bottom: 24px;
+  border-radius: 10px;
+  padding: 8px 14px;
+  margin-bottom: 16px;
   box-shadow: var(--shadow-card);
 }
 
@@ -31,30 +32,30 @@
   display: flex;
   flex-wrap: wrap;
   align-items: center;
-  gap: 14px;
+  gap: 10px;
 }
 
 .analytics-horizon-wrap {
   display: flex;
   align-items: center;
-  gap: 10px;
+  gap: 8px;
 }
 
 .analytics-dropdowns-row {
   display: flex;
   align-items: center;
-  gap: 16px;
+  gap: 12px;
 }
 
 .analytics-filter-item {
   display: flex;
   align-items: center;
-  gap: 8px;
+  gap: 6px;
 }
 
 .analytics-filter-label {
-  font-size: 0.74rem;
-  font-weight: 600;
+  font-size: 0.7rem;
+  font-weight: 700;
   text-transform: uppercase;
   letter-spacing: 0.04em;
   color: var(--text-faint);
@@ -64,9 +65,9 @@
   background: var(--bg-surface);
   color: var(--text-primary);
   border: 1px solid var(--border-subtle);
-  border-radius: 8px;
-  padding: 6px 12px;
-  font-size: 0.82rem;
+  border-radius: 7px;
+  padding: 4px 10px;
+  font-size: 0.78rem;
   font-family: inherit;
   cursor: pointer;
   outline: none;
@@ -77,23 +78,29 @@
   border-color: var(--accent);
 }
 
+.analytics-pipeline-meta {
+  margin-left: auto;
+  display: flex;
+  align-items: center;
+}
+
 /* ─── Statistical KPI Matrix ─── */
 .analytics-kpi-grid {
   display: grid;
-  grid-template-columns: repeat(auto-fit, minmax(190px, 1fr));
-  gap: 14px;
-  margin-bottom: 24px;
+  grid-template-columns: repeat(6, minmax(0, 1fr));
+  gap: 8px;
+  margin-bottom: 16px;
 }
 
 .analytics-kpi-card {
   background: var(--bg-card);
   border: 1px solid var(--border-subtle);
-  border-radius: 12px;
-  padding: 16px 18px;
+  border-radius: 9px;
+  padding: 8px 10px;
   box-shadow: var(--shadow-card);
   display: flex;
   flex-direction: column;
-  gap: 4px;
+  gap: 2px;
   position: relative;
   overflow: hidden;
   transition: transform 0.2s, border-color 0.2s, box-shadow 0.2s;
@@ -110,16 +117,16 @@
   position: absolute;
   top: 0;
   left: 0;
-  width: 4px;
+  width: 3px;
   height: 100%;
   background: var(--kpi-accent, var(--accent));
 }
 
 .analytics-kpi-title {
-  font-size: 0.72rem;
+  font-size: 0.65rem;
   font-weight: 700;
   text-transform: uppercase;
-  letter-spacing: 0.05em;
+  letter-spacing: 0.04em;
   color: var(--text-faint);
   display: flex;
   align-items: center;
@@ -127,15 +134,34 @@
 }
 
 .analytics-kpi-val {
-  font-size: 1.7rem;
+  font-size: 1.25rem;
   font-weight: 800;
   font-family: var(--font-mono, monospace);
   color: var(--text-primary);
+  line-height: 1.2;
 }
 
 .analytics-kpi-sub {
-  font-size: 0.74rem;
+  font-size: 0.66rem;
   color: var(--text-muted);
+  line-height: 1.25;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+@media (max-width: 1024px) {
+  .analytics-kpi-grid {
+    grid-template-columns: repeat(3, minmax(0, 1fr));
+    gap: 8px;
+  }
+}
+
+@media (max-width: 600px) {
+  .analytics-kpi-grid {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+    gap: 6px;
+  }
 }
 
 /* ─── Charts & Trends Row ─── */
