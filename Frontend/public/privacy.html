@@ -1,0 +1,93 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>AirGuard — Privacy Policy</title>
+    <style>
+      :root {
+        --bg: #070a10;
+        --card-bg: #0d131f;
+        --border: #1e293b;
+        --text: #f8fafc;
+        --text-sub: #94a3b8;
+        --accent: #0284c7;
+      }
+      body {
+        margin: 0;
+        padding: 40px 20px 80px;
+        font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+        background: var(--bg);
+        color: var(--text);
+        line-height: 1.7;
+      }
+      .container {
+        max-width: 800px;
+        margin: 0 auto;
+        background: var(--card-bg);
+        border: 1px solid var(--border);
+        border-radius: 18px;
+        padding: 36px 28px;
+        box-shadow: 0 20px 40px rgba(0,0,0,0.4);
+      }
+      h1 { font-size: 26px; margin: 0 0 6px; color: #38bdf8; }
+      .meta { font-size: 13px; color: var(--text-sub); margin-bottom: 24px; }
+      h2 { font-size: 18px; color: #38bdf8; margin-top: 28px; border-bottom: 1px solid var(--border); padding-bottom: 6px; }
+      p, li { font-size: 14.5px; color: #cbd5e1; }
+      ul { padding-left: 20px; }
+      .badge {
+        display: inline-block;
+        background: rgba(34, 197, 94, 0.15);
+        color: #86efac;
+        border: 1px solid rgba(34, 197, 94, 0.3);
+        padding: 6px 14px;
+        border-radius: 8px;
+        font-size: 13px;
+        font-weight: 600;
+        margin: 12px 0;
+      }
+      a { color: #38bdf8; text-decoration: none; }
+      a:hover { text-decoration: underline; }
+    </style>
+  </head>
+  <body>
+    <div class="container">
+      <h1>AirGuard Privacy Policy</h1>
+      <div class="meta">Last Updated: October 25, 2026 • Effective Date: October 25, 2026</div>
+
+      <p>
+        Welcome to <strong>AirGuard</strong> ("we", "our", or "us"). We are committed to protecting your privacy and delivering clear transparency regarding how your data is handled across our environmental monitoring web platform and Android mobile application (the "Service").
+      </p>
+
+      <h2>1. Information We Collect</h2>
+      <ul>
+        <li><strong>Approximate Location:</strong> Used solely to fetch localized micro-climate forecasts via Open-Meteo. We do not track continuous GPS movement or store background location histories.</li>
+        <li><strong>Hardware Telemetry:</strong> Real-time MQ135 gas concentrations, Air Quality Index (AQI), and DHT11/22 temperature and humidity values transmitted by your connected ESP32 sensor hardware.</li>
+        <li><strong>Account Data:</strong> If registering or signing in via Google OAuth, we store your name and verified email address solely to associate your hardware nodes and alert configurations.</li>
+      </ul>
+
+      <h2>2. No Third-Party Ads or Data Sales</h2>
+      <div class="badge">Zero Advertising • No Data Monetization</div>
+      <p>
+        AirGuard does not show third-party ads, contains no tracking advertising SDKs, and will never sell, rent, or trade your personal or environmental telemetry records.
+      </p>
+
+      <h2>3. Data Security & Storage</h2>
+      <p>
+        All communication between hardware nodes, our servers, and client applications is encrypted in transit via TLS 1.3 (HTTPS). Authentication tokens are cryptographically secured using JWT.
+      </p>
+
+      <h2>4. User Rights & Account Deletion</h2>
+      <p>
+        You have the right to request deletion of your account, device telemetry records, and personal information at any time. Simply use the in-app profile settings or contact our support team.
+      </p>
+
+      <h2>5. Contact Information</h2>
+      <p>
+        For inquiries regarding this Privacy Policy, contact us at:<br />
+        <strong>Website:</strong> <a href="https://airguard-hyperlocal.vercel.app">https://airguard-hyperlocal.vercel.app</a><br />
+        <strong>Email:</strong> support@airguard-hyperlocal.vercel.app
+      </p>
+    </div>
+  </body>
+</html>

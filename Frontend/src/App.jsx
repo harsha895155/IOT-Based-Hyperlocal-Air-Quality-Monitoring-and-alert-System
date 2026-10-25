@@ -53,6 +53,7 @@ import ReportsView from './pages/ReportsView';
 import SystemHealthView from './pages/SystemHealthView';
 import HelpSupportView from './pages/HelpSupportView';
 import ProfileView from './pages/ProfileView';
+import PrivacyPolicyView from './pages/PrivacyPolicyView';
 import {
   LiveMonitoringView,
   AirQualityView,
@@ -139,9 +140,10 @@ function AppRoutes() {
       {/* ─── 1. PUBLIC WELCOME / LANDING PAGE ─── */}
       <Route path="/" element={<WelcomePage />} />
 
-      {/* ─── 2. DEDICATED LOGIN / REGISTER / RESET ─── */}
+      {/* ─── 2. DEDICATED LOGIN / REGISTER / RESET / PRIVACY ─── */}
       <Route path="/login" element={<LoginView />} />
       <Route path="/reset-password" element={<LoginView />} />
+      <Route path="/privacy" element={<PrivacyPolicyView />} />
 
       {/* ─── 3. MONITORING PLATFORM APPLICATION (WITH APP SHELL) ─── */}
       <Route element={<AppLayout readingsData={readingsData} />}>

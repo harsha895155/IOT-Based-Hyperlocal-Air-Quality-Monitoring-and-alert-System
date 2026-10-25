@@ -1,0 +1,12 @@
+[
+  {
+    "relation": ["delegate_permission/common.handle_all_urls"],
+    "target": {
+      "namespace": "android_app",
+      "package_name": "app.vercel.airguard_hyperlocal.twa",
+      "sha256_cert_fingerprints": [
+        "14:6D:E9:7F:0E:52:D7:11:86:EC:F6:1F:EB:35:60:0B:E6:3B:70:42:A4:44:00:26:50:3B:18:AE:CC:B0:1B:32"
+      ]
+    }
+  }
+]
