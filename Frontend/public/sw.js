@@ -4,10 +4,13 @@
  * and secure handling of real-time sensor streams without caching sensitive credentials.
  */
 
-const CACHE_NAME = 'airguard-v1.0.4';
+const CACHE_NAME = 'airguard-v1.0.5';
+const OFFLINE_FALLBACK_PAGE = '/offline.html';
 const PRECACHE_ASSETS = [
   '/',
   '/index.html',
+  '/offline.html',
+  '/dashboard',
   '/favicon.ico',
   '/favicon.svg',
   '/site.webmanifest',
@@ -97,12 +100,23 @@ self.addEventListener('fetch', (event) => {
     return;
   }
 
-  // 4. SPA Navigation Requests (HTML Pages): Network-First, falling back to cached index.html
-  if (request.mode === 'navigate') {
+  // 4. SPA Navigation Requests (HTML Pages): Network-First, falling back to cached index.html or offline.html
+  if (request.mode === 'navigate' || (request.method === 'GET' && request.headers.get('accept')?.includes('text/html'))) {
     event.respondWith(
-      fetch(request).catch(() => {
-        return caches.match('/index.html').then((res) => res || caches.match('/'));
-      })
+      fetch(request)
+        .then((response) => {
+          if (response && response.status === 200) {
+            safeCachePut(CACHE_NAME, request, response);
+          }
+          return response;
+        })
+        .catch(() => {
+          return caches.match(request)
+            .then((res) => res || caches.match('/index.html'))
+            .then((res) => res || caches.match(OFFLINE_FALLBACK_PAGE))
+            .then((res) => res || caches.match('/offline.html'))
+            .then((res) => res || caches.match('/'));
+        })
     );
     return;
   }
