@@ -133,3 +133,77 @@ self.addEventListener('fetch', (event) => {
     })
   );
 });
+
+// 6. Background Sync API: Queued Telemetry & Offline Reading Ingestion
+self.addEventListener('sync', (event) => {
+  if (event.tag === 'airguard-sync-telemetry') {
+    event.waitUntil(
+      caches.open(CACHE_NAME).then((cache) => {
+        return fetch('/api/readings/latest').catch(() => null);
+      })
+    );
+  }
+});
+
+// 7. Periodic Background Sync API: Scheduled Environmental Monitoring Check
+self.addEventListener('periodicsync', (event) => {
+  if (event.tag === 'airguard-periodic-telemetry') {
+    event.waitUntil(
+      caches.open(CACHE_NAME).then((cache) => {
+        return fetch('/api/readings/latest')
+          .then((res) => {
+            if (res && res.status === 200) cache.put('/api/readings/latest', res.clone());
+          })
+          .catch(() => null);
+      })
+    );
+  }
+});
+
+// 8. Web Push Notifications API: Real-Time Air Quality & Threshold Alerting
+self.addEventListener('push', (event) => {
+  let payload = {
+    title: 'AirGuard Environmental Alert',
+    body: 'Hyperlocal air quality or weather telemetry update.',
+    icon: '/android-chrome-192x192.png',
+    badge: '/favicon-96x96.png',
+  };
+
+  try {
+    if (event.data) {
+      payload = Object.assign(payload, event.data.json());
+    }
+  } catch (e) {
+    if (event.data) {
+      payload.body = event.data.text();
+    }
+  }
+
+  event.waitUntil(
+    self.registration.showNotification(payload.title, {
+      body: payload.body,
+      icon: payload.icon || '/android-chrome-192x192.png',
+      badge: payload.badge || '/favicon-96x96.png',
+      vibrate: [200, 100, 200],
+      data: { url: '/dashboard' },
+    })
+  );
+});
+
+// 9. Notification Click Handler
+self.addEventListener('notificationclick', (event) => {
+  event.notification.close();
+  const targetUrl = event.notification.data?.url || '/dashboard';
+  event.waitUntil(
+    clients.matchAll({ type: 'window', includeUncontrolled: true }).then((windowClients) => {
+      for (const client of windowClients) {
+        if (client.url.includes('/dashboard') && 'focus' in client) {
+          return client.focus();
+        }
+      }
+      if (clients.openWindow) {
+        return clients.openWindow(targetUrl);
+      }
+    })
+  );
+});
