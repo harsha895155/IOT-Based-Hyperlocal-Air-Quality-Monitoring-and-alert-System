@@ -107,11 +107,11 @@ export default function WeatherHero3DCanvas({
 
     if (isLight) {
       // Subtle Cyberpunk Neon Electric Emerald & Violet pearlescent rim lighting
-      const emeraldRim = new THREE.DirectionalLight(0x10b981, 0.45);
+      const emeraldRim = new THREE.DirectionalLight(0x059669, 0.65);
       emeraldRim.position.set(-60, 40, 35);
       scene.add(emeraldRim);
 
-      const violetRim = new THREE.DirectionalLight(0x8b5cf6, 0.4);
+      const violetRim = new THREE.DirectionalLight(0x7c3aed, 0.6);
       violetRim.position.set(60, -25, 35);
       scene.add(violetRim);
     }
@@ -219,7 +219,7 @@ export default function WeatherHero3DCanvas({
       const rainMat = new THREE.LineBasicMaterial({
         color: isLight ? 0x0284c7 : 0x7dd3fc,
         transparent: true,
-        opacity: isLight ? 0.32 : 0.45,
+        opacity: isLight ? 0.65 : 0.45,
       });
       const rainLines = new THREE.LineSegments(rainGeo, rainMat);
       rootGroup.add(rainLines);
@@ -382,7 +382,7 @@ export default function WeatherHero3DCanvas({
       const rainMat = new THREE.LineBasicMaterial({
         color: isLight ? 0x0284c7 : 0x38bdf8,
         transparent: true,
-        opacity: isLight ? 0.3 : 0.42,
+        opacity: isLight ? 0.65 : 0.42,
       });
       const rainLines = new THREE.LineSegments(rainGeo, rainMat);
       rootGroup.add(rainLines);
@@ -457,10 +457,10 @@ export default function WeatherHero3DCanvas({
       flakeGeo.setAttribute('position', new THREE.BufferAttribute(flakePos, 3));
 
       const flakeMat = new THREE.PointsMaterial({
-        size: 3.5,
+        size: isLight ? 5.0 : 3.5,
         map: circleTexture,
         transparent: true,
-        opacity: isLight ? 0.6 : 0.8,
+        opacity: isLight ? 0.85 : 0.8,
         color: isLight ? 0x0284c7 : 0xffffff,
         depthWrite: false,
       });
@@ -496,16 +496,16 @@ export default function WeatherHero3DCanvas({
 
       const sunCore = new THREE.Mesh(
         new THREE.SphereGeometry(8.5, 24, 24),
-        new THREE.MeshBasicMaterial({ color: 0xfbbf24 })
+        new THREE.MeshBasicMaterial({ color: isLight ? 0xf59e0b : 0xfbbf24 })
       );
       sunGroup.add(sunCore);
 
       const corona1 = new THREE.Mesh(
         new THREE.RingGeometry(9.5, 14, 32),
         new THREE.MeshBasicMaterial({
-          color: 0xf59e0b,
+          color: isLight ? 0xd97706 : 0xf59e0b,
           transparent: true,
-          opacity: isLight ? 0.25 : 0.38,
+          opacity: isLight ? 0.55 : 0.38,
           side: THREE.DoubleSide,
         })
       );
@@ -514,9 +514,9 @@ export default function WeatherHero3DCanvas({
       const corona2 = new THREE.Mesh(
         new THREE.RingGeometry(15, 21, 32),
         new THREE.MeshBasicMaterial({
-          color: 0xfb923c,
+          color: isLight ? 0xe11d48 : 0xfb923c,
           transparent: true,
-          opacity: isLight ? 0.15 : 0.2,
+          opacity: isLight ? 0.42 : 0.2,
           side: THREE.DoubleSide,
         })
       );
@@ -533,11 +533,11 @@ export default function WeatherHero3DCanvas({
       }
       dustGeo.setAttribute('position', new THREE.BufferAttribute(dustPos, 3));
       const dustMat = new THREE.PointsMaterial({
-        size: 3.5,
+        size: isLight ? 5.5 : 3.5,
         map: circleTexture,
         transparent: true,
-        opacity: isLight ? 0.32 : 0.48,
-        color: 0xfbbf24,
+        opacity: isLight ? 0.78 : 0.48,
+        color: isLight ? 0xd97706 : 0xfbbf24,
         depthWrite: false,
       });
       const dustPoints = new THREE.Points(dustGeo, dustMat);
@@ -740,8 +740,8 @@ export default function WeatherHero3DCanvas({
       const cloudMat = new THREE.MeshBasicMaterial({
         map: cloudTexture,
         transparent: true,
-        opacity: isLight ? 0.15 : 0.32,
-        color: isLight ? 0xffffff : (isDay ? 0x94a3b8 : 0x334155),
+        opacity: isLight ? 0.42 : 0.32,
+        color: isLight ? 0x0284c7 : (isDay ? 0x94a3b8 : 0x334155),
         depthWrite: false,
       });
 
@@ -771,11 +771,11 @@ export default function WeatherHero3DCanvas({
           pts.push(new THREE.Vector3(x, baseY + Math.sin(x * 0.06 + r) * 3.5, -2));
         }
         const curve = new THREE.CatmullRomCurve3(pts);
-        const tubeGeo = new THREE.TubeGeometry(curve, 48, 0.45, 6, false);
+        const tubeGeo = new THREE.TubeGeometry(curve, 48, isLight ? 0.8 : 0.45, 6, false);
         const tubeMat = new THREE.MeshBasicMaterial({
           color: isLight ? 0x0284c7 : 0x38bdf8,
           transparent: true,
-          opacity: isLight ? 0.18 : 0.25,
+          opacity: isLight ? 0.65 : 0.25,
         });
         const ribbon = new THREE.Mesh(tubeGeo, tubeMat);
         rootGroup.add(ribbon);

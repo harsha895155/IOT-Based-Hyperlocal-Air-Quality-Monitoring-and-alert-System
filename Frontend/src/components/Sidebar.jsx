@@ -227,15 +227,17 @@ export default function Sidebar({ isOpen, setIsOpen, isCollapsed = false, unread
           {!isGuest && user && (
             <div className="sidebar__section">
               <div className="sidebar__section-title">SYSTEM</div>
-              <NavLink
-                to="/system-health"
-                className={({ isActive }) => `sidebar__item ${isActive ? 'is-active' : ''}`}
-                onClick={handleLinkClick}
-                title="System Health"
-              >
-                <Icons.SystemHealth />
-                <span>System Health</span>
-              </NavLink>
+              {user?.role === 'admin' && (
+                <NavLink
+                  to="/system-health"
+                  className={({ isActive }) => `sidebar__item ${isActive ? 'is-active' : ''}`}
+                  onClick={handleLinkClick}
+                  title="System Health (Admin)"
+                >
+                  <Icons.SystemHealth />
+                  <span>System Health</span>
+                </NavLink>
+              )}
               <NavLink
                 to="/settings"
                 className={({ isActive }) => `sidebar__item ${isActive ? 'is-active' : ''}`}

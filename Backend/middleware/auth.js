@@ -39,4 +39,11 @@ async function optionalAuth(req, res, next) {
   next();
 }
 
-module.exports = { protect, optionalAuth };
+function adminOnly(req, res, next) {
+  if (!req.user || req.user.role !== 'admin') {
+    return res.status(403).json({ error: 'Access denied. Administrator privileges required.' });
+  }
+  next();
+}
+
+module.exports = { protect, optionalAuth, adminOnly };

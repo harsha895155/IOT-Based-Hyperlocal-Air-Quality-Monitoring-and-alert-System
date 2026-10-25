@@ -19,6 +19,8 @@ const reportsRoutes = require('./routes/reports');
 const systemRoutes = require('./routes/system');
 const weatherRoutes = require('./routes/weather');
 const supportRoutes = require('./routes/support');
+const notificationsRoutes = require('./routes/notifications');
+const { initScheduler } = require('./services/schedulerService');
 const { notFound, errorHandler } = require('./middleware/errorHandler');
 
 const app = express();
@@ -106,6 +108,7 @@ app.use('/api/reports', reportsRoutes);
 app.use('/api/system', systemRoutes);
 app.use('/api/weather', weatherRoutes);
 app.use('/api/support', supportRoutes);
+app.use('/api/notifications', notificationsRoutes);
 
 // ---- Socket.IO: dashboard/mobile clients join to receive live pushes ----
 const jwt = require('jsonwebtoken');
@@ -143,6 +146,7 @@ const PORT = process.env.PORT || 5000;
 
 async function start() {
   await connectDB();
+  initScheduler();
   server.listen(PORT, () => {
     console.log(`[Server] Listening on port ${PORT} (${process.env.NODE_ENV || 'development'})`);
   });

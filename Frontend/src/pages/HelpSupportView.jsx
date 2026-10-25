@@ -333,11 +333,33 @@ void loop() {
     searchQuery ? f.q.toLowerCase().includes(searchQuery.toLowerCase()) || f.a.toLowerCase().includes(searchQuery.toLowerCase()) : true
   );
 
+  const isAdmin = user?.role === 'admin';
+
+  const helpTabs = useMemo(() => {
+    const list = [{ id: 'all', label: 'All Guides' }];
+    if (isAdmin) {
+      list.push({ id: 'hardware', label: '🔌 Hardware Wiring & Pinouts (Admin)' });
+    }
+    list.push({ id: 'calibration', label: '🧪 Sensor Calibration & Physics' });
+    if (isAdmin) {
+      list.push({ id: 'firmware', label: '📡 ESP32 Firmware & Ingestion (Admin)' });
+    } else {
+      list.push({ id: 'consumer-setup', label: '📖 Device Connection Guide' });
+    }
+    list.push({ id: 'faq', label: '❓ Troubleshooting & FAQs' });
+    list.push({ id: 'contact', label: '📞 Research & Support Desk' });
+    return list;
+  }, [isAdmin]);
+
   return (
     <div className="help-page">
       <div className="page-header" style={{ marginBottom: '20px' }}>
         <h1 className="page-title">Help & Documentation Center</h1>
-        <p className="page-subtitle">Hardware wiring schematics, calibration physics, ESP32 firmware, and engineering reference guide.</p>
+        <p className="page-subtitle">
+          {isAdmin
+            ? 'Hardware wiring schematics, calibration physics, ESP32 firmware, and administrative engineering guide.'
+            : 'Sensor calibration physics, atmospheric science, troubleshooting FAQs, and user onboarding guide.'}
+        </p>
       </div>
 
       {/* ─── Search Bar ─── */}
@@ -364,14 +386,7 @@ void loop() {
 
       {/* ─── Category Filter Tabs ─── */}
       <div className="help-tabs-row">
-        {[
-          { id: 'all', label: 'All Guides' },
-          { id: 'hardware', label: '🔌 Hardware Wiring & Pinouts' },
-          { id: 'calibration', label: '🧪 Sensor Calibration & Physics' },
-          { id: 'firmware', label: '📡 ESP32 Firmware & Ingestion' },
-          { id: 'faq', label: '❓ Troubleshooting & FAQs' },
-          { id: 'contact', label: '📞 Research & Support Desk' },
-        ].map((tab) => (
+        {helpTabs.map((tab) => (
           <button
             key={tab.id}
             type="button"
@@ -384,15 +399,35 @@ void loop() {
       </div>
 
       <div style={{ display: 'flex', flexDirection: 'column', gap: '24px' }}>
-        {/* ─── 1. Hardware Pinouts & Circuit Schematics ─── */}
-        {(activeTab === 'all' || activeTab === 'hardware') && (
+        {/* ─── Access Restricted Banner for non-admins attempting to view admin tabs ─── */}
+        {!isAdmin && (activeTab === 'hardware' || activeTab === 'firmware') && (
+          <section className="card" style={{ padding: '36px 24px', textAlign: 'center' }}>
+            <div style={{ fontSize: '2.5rem', marginBottom: '12px' }}>🔒</div>
+            <h2 style={{ fontSize: '1.25rem', fontWeight: 700, margin: '0 0 8px 0', color: 'var(--text-primary)' }}>
+              Restricted to System Administrators
+            </h2>
+            <p className="text-muted" style={{ maxWidth: '520px', margin: '0 auto 20px', fontSize: '0.9rem', lineHeight: 1.5 }}>
+              Hardware pinout schematics, SoC circuit diagrams, and low-level firmware flashing tools are classified as sensitive engineering infrastructure and accessible only to administrator accounts.
+            </p>
+            <button
+              type="button"
+              className="btn btn--primary"
+              onClick={() => setActiveTab('all')}
+            >
+              ← Return to Public Guides
+            </button>
+          </section>
+        )}
+
+        {/* ─── 1. Hardware Pinouts & Circuit Schematics (ADMIN ONLY) ─── */}
+        {isAdmin && (activeTab === 'all' || activeTab === 'hardware') && (
           <section className="card" style={{ padding: '28px' }}>
             <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', flexWrap: 'wrap', gap: '10px' }}>
               <div>
                 <h2 style={{ fontSize: '1.2rem', fontWeight: 600, margin: 0 }}>ESP32 Hardware Pinouts & Wiring Matrix</h2>
-                <p className="text-muted fs-xs" style={{ margin: '4px 0 0 0' }}>Electrical connections between ESP32 SoC and environmental sensing modules</p>
+                <p className="text-muted fs-xs" style={{ margin: '4px 0 0 0' }}>Electrical connections between ESP32 SoC and environmental sensing modules (Admin Only)</p>
               </div>
-              <span className="settings-tag">Schematics</span>
+              <span className="settings-tag" style={{ background: 'rgba(239, 68, 68, 0.15)', color: '#f87171' }}>Admin Restricted</span>
             </div>
 
             <div className="pinout-grid">
@@ -601,7 +636,7 @@ void loop() {
         )}
 
         {/* ─── 3. How to Connect Your AirGuard Device & Developer Tools ─── */}
-        {(activeTab === 'all' || activeTab === 'firmware') && (
+        {(activeTab === 'all' || activeTab === 'firmware' || activeTab === 'consumer-setup') && (
           <section className="card connect-device-section">
             <div className="connect-device-header">
               <div>
@@ -674,17 +709,18 @@ void loop() {
               </div>
             </div>
 
-            {/* ─── Developer & Advanced Hardware Setup (Collapsible / Advanced) ─── */}
-            <div style={{ marginTop: '24px', borderTop: '1px solid rgba(255, 255, 255, 0.08)', paddingTop: '20px' }}>
-              <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', flexWrap: 'wrap', gap: '12px' }}>
-                <div>
-                  <h3 style={{ fontSize: '1rem', fontWeight: 600, margin: 0, color: '#94a3b8' }}>
-                    🛠️ Developer / Advanced Hardware Setup
-                  </h3>
-                  <p className="text-muted fs-xs" style={{ margin: '2px 0 0 0' }}>
-                    For firmware engineers, factory flashing, hardware debugging, and custom firmware compilation.
-                  </p>
-                </div>
+            {/* ─── Developer & Advanced Hardware Setup (ADMIN ONLY) ─── */}
+            {isAdmin && (
+              <div style={{ marginTop: '24px', borderTop: '1px solid rgba(255, 255, 255, 0.08)', paddingTop: '20px' }}>
+                <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', flexWrap: 'wrap', gap: '12px' }}>
+                  <div>
+                    <h3 style={{ fontSize: '1rem', fontWeight: 600, margin: 0, color: '#94a3b8' }}>
+                      🛠️ Developer / Advanced Hardware Setup (Admin Only)
+                    </h3>
+                    <p className="text-muted fs-xs" style={{ margin: '2px 0 0 0' }}>
+                      For firmware engineers, factory flashing, hardware debugging, and custom firmware compilation.
+                    </p>
+                  </div>
                 <button
                   type="button"
                   className="btn btn--secondary"
@@ -829,8 +865,9 @@ void loop() {
                 </div>
               )}
             </div>
-          </section>
-        )}
+          )}
+        </section>
+      )}
 
         {/* ─── 4. Interactive FAQs & Troubleshooting ─── */}
         {(activeTab === 'all' || activeTab === 'faq') && (

@@ -96,6 +96,35 @@ export default function SettingsView() {
   // Status feedback states
   const [saveStatus, setSaveStatus] = useState({ type: 'idle', message: '' }); // idle | saving | success | error
   const [cacheStatus, setCacheStatus] = useState({ type: 'idle', message: '' });
+  const [dispatchingType, setDispatchingType] = useState(null);
+  const [dispatchStatus, setDispatchStatus] = useState({ type: 'idle', message: '' });
+
+  const handleSendInstantNotification = async (type) => {
+    if (isGuest) {
+      setDispatchStatus({
+        type: 'error',
+        message: 'Guest accounts cannot receive email dispatches. Please sign in with a registered account.'
+      });
+      return;
+    }
+    try {
+      setDispatchingType(type);
+      setDispatchStatus({ type: 'idle', message: '' });
+      const endpoint = type === 'daily' ? '/notifications/dispatch-daily' : '/notifications/dispatch-weekly';
+      const res = await client.post(endpoint);
+      setDispatchStatus({
+        type: 'success',
+        message: res.data?.message || `Dispatched successfully to ${user?.email || 'your email'}! Check your inbox.`
+      });
+    } catch (err) {
+      setDispatchStatus({
+        type: 'error',
+        message: err.response?.data?.error || 'Failed to dispatch email. Please check server configuration.'
+      });
+    } finally {
+      setDispatchingType(null);
+    }
+  };
 
   // Sync initial preferences when user context loads
   useEffect(() => {
@@ -915,6 +944,60 @@ export default function SettingsView() {
                 onChange={(e) => setWeeklyPdfReport(e.target.checked)}
               />
             </label>
+          </div>
+
+          {/* Instant On-Demand Email Dispatch Triggers */}
+          <div style={{ marginTop: '20px', paddingTop: '16px', borderTop: '1px solid var(--border-soft)' }}>
+            <div style={{ marginBottom: '12px' }}>
+              <span style={{ fontSize: '0.88rem', fontWeight: 600, color: 'var(--text-primary)' }}>
+                ⚡ On-Demand Notification Dispatches
+              </span>
+              <p className="text-muted fs-xs" style={{ margin: '3px 0 0 0' }}>
+                Instantly trigger a live email to {user?.email ? <strong>{user.email}</strong> : 'your registered address'} using current real-time station sensor readings.
+              </p>
+            </div>
+
+            <div style={{ display: 'flex', gap: '12px', flexWrap: 'wrap', alignItems: 'center' }}>
+              <button
+                type="button"
+                className="btn btn--secondary"
+                onClick={() => handleSendInstantNotification('daily')}
+                disabled={dispatchingType !== null}
+                style={{ fontSize: '0.82rem', padding: '7px 14px' }}
+              >
+                {dispatchingType === 'daily' ? '⏳ Dispatching Daily Briefing...' : '📧 Send Daily Briefing Email Now'}
+              </button>
+
+              <button
+                type="button"
+                className="btn btn--secondary"
+                onClick={() => handleSendInstantNotification('weekly')}
+                disabled={dispatchingType !== null}
+                style={{ fontSize: '0.82rem', padding: '7px 14px' }}
+              >
+                {dispatchingType === 'weekly' ? '⏳ Dispatching Weekly Digest...' : '📊 Send Weekly Analytics Email Now'}
+              </button>
+            </div>
+
+            {dispatchStatus.message && (
+              <div
+                style={{
+                  marginTop: '12px',
+                  padding: '10px 14px',
+                  borderRadius: '8px',
+                  fontSize: '0.82rem',
+                  display: 'flex',
+                  alignItems: 'center',
+                  gap: '8px',
+                  background: dispatchStatus.type === 'success' ? 'rgba(16, 185, 129, 0.12)' : 'rgba(239, 68, 68, 0.12)',
+                  color: dispatchStatus.type === 'success' ? '#10b981' : '#f87171',
+                  border: `1px solid ${dispatchStatus.type === 'success' ? 'rgba(16, 185, 129, 0.25)' : 'rgba(239, 68, 68, 0.25)'}`
+                }}
+              >
+                <span>{dispatchStatus.type === 'success' ? '✓' : '⚠️'}</span>
+                <span>{dispatchStatus.message}</span>
+              </div>
+            )}
           </div>
         </section>
 

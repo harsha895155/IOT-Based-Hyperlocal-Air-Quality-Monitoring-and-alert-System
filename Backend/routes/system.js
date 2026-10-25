@@ -1,12 +1,12 @@
 const express = require('express');
 const router = express.Router();
 const mongoose = require('mongoose');
-const { protect } = require('../middleware/auth');
+const { protect, adminOnly } = require('../middleware/auth');
 const { Device } = require('../models/Device');
 const Reading = require('../models/Reading');
 
-// GET /api/system/health - Protected system health check for registered users only
-router.get('/health', protect, async (req, res, next) => {
+// GET /api/system/health - Protected system health check for administrators only
+router.get('/health', protect, adminOnly, async (req, res, next) => {
   try {
     const dbState = mongoose.connection.readyState;
     const stateLabels = { 0: 'disconnected', 1: 'connected', 2: 'connecting', 3: 'disconnecting' };

@@ -49,10 +49,10 @@ export default function AirAmbient3DCanvas({ theme = 'obsidian', routePath = '/d
     container.appendChild(renderer.domElement);
 
     // 2. Color Palette for Particles & Atmospheric Geometry (Vibrant Cyberpunk Daylight)
-    const emerald = new THREE.Color(0x10b981); // Bright Electric Emerald Green
-    const violet = new THREE.Color(0x8b5cf6);  // Radiant Cyberpunk Purple / Violet
-    const cyan = new THREE.Color(0x06b6d4);    // Luminous Aqua Cyan
-    const amber = new THREE.Color(0xf59e0b);   // Solar Amber
+    const emerald = isLight ? new THREE.Color(0x059669) : new THREE.Color(0x10b981); // Deep Electric Emerald Green
+    const violet = isLight ? new THREE.Color(0x7c3aed) : new THREE.Color(0x8b5cf6);  // Deep Radiant Purple / Violet
+    const cyan = isLight ? new THREE.Color(0x0284c7) : new THREE.Color(0x06b6d4);    // Deep Aqua Cyan / Ocean Blue
+    const amber = isLight ? new THREE.Color(0xd97706) : new THREE.Color(0xf59e0b);   // Deep Solar Amber
 
     // Pure radial glow texture for sharp, vivid, colorful particles
     const createGlowTexture = () => {
@@ -63,7 +63,7 @@ export default function AirAmbient3DCanvas({ theme = 'obsidian', routePath = '/d
       const gradient = ctx.createRadialGradient(32, 32, 0, 32, 32, 32);
       gradient.addColorStop(0, 'rgba(255, 255, 255, 1)');
       gradient.addColorStop(0.35, isLight ? 'rgba(255, 255, 255, 0.98)' : 'rgba(255, 255, 255, 0.85)');
-      gradient.addColorStop(0.7, isLight ? 'rgba(240, 240, 255, 0.5)' : 'rgba(255, 255, 255, 0.25)');
+      gradient.addColorStop(0.7, isLight ? 'rgba(240, 240, 255, 0.65)' : 'rgba(255, 255, 255, 0.25)');
       gradient.addColorStop(1, 'rgba(255, 255, 255, 0)');
       ctx.fillStyle = gradient;
       ctx.fillRect(0, 0, 64, 64);
@@ -76,18 +76,18 @@ export default function AirAmbient3DCanvas({ theme = 'obsidian', routePath = '/d
     scene.add(orbGroup);
 
     const orb1Mat = new THREE.MeshBasicMaterial({
-      color: 0x10b981,
+      color: isLight ? 0x059669 : 0x10b981,
       transparent: true,
-      opacity: isLight ? 0.22 : 0.12,
+      opacity: isLight ? 0.35 : 0.12,
     });
     const orb1 = new THREE.Mesh(new THREE.SphereGeometry(38, 20, 20), orb1Mat);
     orb1.position.set(-60, 32, -35);
     orbGroup.add(orb1);
 
     const orb2Mat = new THREE.MeshBasicMaterial({
-      color: 0x8b5cf6,
+      color: isLight ? 0x7c3aed : 0x8b5cf6,
       transparent: true,
-      opacity: isLight ? 0.24 : 0.14,
+      opacity: isLight ? 0.38 : 0.14,
     });
     const orb2 = new THREE.Mesh(new THREE.SphereGeometry(44, 20, 20), orb2Mat);
     orb2.position.set(72, -26, -40);
@@ -128,11 +128,11 @@ export default function AirAmbient3DCanvas({ theme = 'obsidian', routePath = '/d
       pGeo.setAttribute('color', new THREE.BufferAttribute(pCol, 3));
 
       const pMat = new THREE.PointsMaterial({
-        size: isLight ? 4.8 : 2.8,
+        size: isLight ? 6.2 : 2.8,
         vertexColors: true,
         map: glowMap,
         transparent: true,
-        opacity: isLight ? 0.78 : 0.55,
+        opacity: isLight ? 0.92 : 0.55,
         blending: THREE.NormalBlending,
         depthWrite: false,
       });
@@ -150,11 +150,11 @@ export default function AirAmbient3DCanvas({ theme = 'obsidian', routePath = '/d
           points.push(new THREE.Vector3(x, y, -10 + r * 5));
         }
         const curve = new THREE.CatmullRomCurve3(points);
-        const tubeGeo = new THREE.TubeGeometry(curve, 54, isLight ? 0.8 : 0.45, 8, false);
+        const tubeGeo = new THREE.TubeGeometry(curve, 54, isLight ? 1.4 : 0.45, 8, false);
         const tubeMat = new THREE.MeshBasicMaterial({
           color: r === 0 ? emerald : r === 1 ? violet : cyan,
           transparent: true,
-          opacity: isLight ? 0.38 : 0.18,
+          opacity: isLight ? 0.65 : 0.18,
         });
         const ribbon = new THREE.Mesh(tubeGeo, tubeMat);
         modeGroup.add(ribbon);
@@ -215,9 +215,9 @@ export default function AirAmbient3DCanvas({ theme = 'obsidian', routePath = '/d
       const lineGeo = new THREE.BufferGeometry();
       lineGeo.setAttribute('position', new THREE.Float32BufferAttribute(lineCoords, 3));
       const lineMat = new THREE.LineBasicMaterial({
-        color: isLight ? 0x10b981 : 0x38bdf8,
+        color: isLight ? 0x059669 : 0x38bdf8,
         transparent: true,
-        opacity: isLight ? 0.34 : 0.18,
+        opacity: isLight ? 0.55 : 0.18,
       });
       const lines = new THREE.LineSegments(lineGeo, lineMat);
       modeGroup.add(lines);
@@ -228,10 +228,10 @@ export default function AirAmbient3DCanvas({ theme = 'obsidian', routePath = '/d
     if (pageMode === 'analytics') {
       const planeGeo = new THREE.PlaneGeometry(185, 115, 34, 26);
       const planeMat = new THREE.MeshBasicMaterial({
-        color: isLight ? 0x8b5cf6 : 0x38bdf8,
+        color: isLight ? 0x7c3aed : 0x38bdf8,
         wireframe: true,
         transparent: true,
-        opacity: isLight ? 0.32 : 0.14,
+        opacity: isLight ? 0.55 : 0.14,
       });
       wavePlane = new THREE.Mesh(planeGeo, planeMat);
       wavePlane.rotation.x = -Math.PI / 3;

@@ -205,7 +205,7 @@ function AppRoutes() {
         <Route
           path="/system-health"
           element={
-            <ProtectedRoute>
+            <ProtectedRoute requireAdmin={true}>
               <SystemHealthView />
             </ProtectedRoute>
           }

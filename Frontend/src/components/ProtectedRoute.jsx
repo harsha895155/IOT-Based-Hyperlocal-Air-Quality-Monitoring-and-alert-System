@@ -8,12 +8,16 @@ import { useAuth } from '../context/AuthContext';
  * profile, and administrative features.
  * Guests and unauthenticated users are redirected to login with return destination.
  */
-export default function ProtectedRoute({ children }) {
+export default function ProtectedRoute({ children, requireAdmin = false }) {
   const { user, isGuest } = useAuth();
   const location = useLocation();
 
   if (isGuest || !user) {
     return <Navigate to="/login" state={{ from: location, message: 'This section requires a registered AirGuard account.' }} replace />;
+  }
+
+  if (requireAdmin && user.role !== 'admin') {
+    return <Navigate to="/dashboard" state={{ message: 'Administrator privileges required to access this infrastructure view.' }} replace />;
   }
 
   return children;

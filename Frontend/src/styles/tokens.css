@@ -568,9 +568,40 @@
 
 [data-theme='light'] .segmented-control__btn.is-active,
 [data-theme='light'] .profile-tab-btn.is-active {
+  background: linear-gradient(135deg, #0284c7 0%, #00b4d8 100%) !important;
+  color: #ffffff !important;
+  font-weight: 700 !important;
+  box-shadow: 0 3px 12px rgba(2, 132, 199, 0.35) !important;
+  border-radius: var(--radius-sm);
+}
+
+[data-theme='light'] .segmented-control__btn:hover:not(.is-active),
+[data-theme='light'] .profile-tab-btn:hover:not(.is-active) {
+  color: #0284c7 !important;
+  background: rgba(2, 132, 199, 0.08) !important;
+}
+
+/* Light Theme Settings Checkboxes (High-Contrast & Clearly Defined) */
+[data-theme='light'] .settings-checkbox {
   background: #ffffff !important;
-  color: #0f172a !important;
-  box-shadow: 0 1px 4px rgba(15, 23, 42, 0.08) !important;
+  border: 2px solid #64748b !important;
+  box-shadow: 0 1px 3px rgba(15, 23, 42, 0.08) !important;
+}
+
+[data-theme='light'] .settings-checkbox:hover {
+  border-color: #0284c7 !important;
+  background: #f0f9ff !important;
+  box-shadow: 0 0 0 3px rgba(2, 132, 199, 0.18) !important;
+}
+
+[data-theme='light'] .settings-checkbox:checked {
+  background: linear-gradient(135deg, #0284c7 0%, #00b4d8 100%) !important;
+  border-color: #0284c7 !important;
+  box-shadow: 0 2px 10px rgba(2, 132, 199, 0.35) !important;
+}
+
+[data-theme='light'] .settings-checkbox:checked::after {
+  border-color: #ffffff !important;
 }
 
 /* Light Theme Subpage & Dashboard Headings */
