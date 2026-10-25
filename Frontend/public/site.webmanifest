@@ -82,12 +82,7 @@
   },
   "scope_extensions": [
     {
-      "type": "origin",
-      "origin": "https://airguard-backend.onrender.com"
-    },
-    {
-      "type": "origin",
-      "origin": "https://*.vercel.app"
+      "origin": "https://iot-based-hyperlocal-air-quality.onrender.com"
     }
   ],
   "orientation": "any",

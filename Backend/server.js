@@ -54,7 +54,20 @@ app.use(
   })
 );
 
-app.use(morgan(process.env.NODE_ENV === 'production' ? 'combined' : 'dev'));
+// ---- W3C Scope Extensions Origin Association ----
+app.get('/.well-known/web-app-origin-association', (_req, res) => {
+  res.setHeader('Content-Type', 'application/json; charset=utf-8');
+  res.json({
+    web_apps: [
+      {
+        manifest: 'https://airguard-hyperlocal.vercel.app/site.webmanifest',
+        details: {
+          paths: ['/*'],
+        },
+      },
+    ],
+  });
+});
 
 // ---- Detailed Health check (R4, R11, R13, Section 13) ----
 app.get('/api/health', (_req, res) => {
