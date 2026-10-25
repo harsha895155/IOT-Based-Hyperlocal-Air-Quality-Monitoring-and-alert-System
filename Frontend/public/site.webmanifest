@@ -61,18 +61,41 @@
   ],
   "screenshots": [
     {
-      "src": "/og-image.png",
-      "sizes": "1200x630",
+      "src": "/screenshot-desktop.png",
+      "sizes": "1376x768",
       "type": "image/png",
       "form_factor": "wide",
       "label": "AirGuard Hyperlocal Air Quality & Atmospheric Telemetry Dashboard"
     },
     {
-      "src": "/og-image.png",
-      "sizes": "1200x630",
+      "src": "/screenshot-mobile.png",
+      "sizes": "720x1280",
       "type": "image/png",
       "form_factor": "narrow",
       "label": "AirGuard Mobile Air Quality Station & Live Atmospheric Readings"
+    }
+  ],
+  "shortcuts": [
+    {
+      "name": "Live Dashboard",
+      "short_name": "Dashboard",
+      "description": "View real-time air quality & weather",
+      "url": "/dashboard",
+      "icons": [{ "src": "/favicon-96x96.png", "sizes": "96x96" }]
+    },
+    {
+      "name": "Weather Search",
+      "short_name": "Weather",
+      "description": "Search global weather forecasts",
+      "url": "/locations",
+      "icons": [{ "src": "/favicon-96x96.png", "sizes": "96x96" }]
+    },
+    {
+      "name": "Connected Devices",
+      "short_name": "Devices",
+      "description": "Manage IoT sensing hardware",
+      "url": "/devices",
+      "icons": [{ "src": "/favicon-96x96.png", "sizes": "96x96" }]
     }
   ]
 }

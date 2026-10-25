@@ -1,7 +1,7 @@
 {
   "rewrites": [
     {
-      "source": "/((?!api/|\\.well-known/.*|robots\\.txt|sitemap\\.xml|site\\.webmanifest|sw\\.js|favicon.*|android-chrome.*|apple-touch-icon.*|og-image\\.png|google.*\\.html|assets/).*)",
+      "source": "/((?!api/|\\.well-known/.*|robots\\.txt|sitemap\\.xml|site\\.webmanifest|sw\\.js|favicon.*|android-chrome.*|apple-touch-icon.*|og-image\\.png|screenshot-.*\\.png|google.*\\.html|assets/).*)",
       "destination": "/index.html"
     }
   ],
