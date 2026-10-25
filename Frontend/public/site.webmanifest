@@ -80,6 +80,16 @@
   "note_taking": {
     "new_note_url": "/dashboard?action=new-log"
   },
+  "scope_extensions": [
+    {
+      "type": "origin",
+      "origin": "https://airguard-backend.onrender.com"
+    },
+    {
+      "type": "origin",
+      "origin": "https://*.vercel.app"
+    }
+  ],
   "orientation": "any",
   "background_color": "#070a10",
   "theme_color": "#0284c7",

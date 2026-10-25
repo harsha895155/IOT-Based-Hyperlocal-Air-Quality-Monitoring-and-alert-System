@@ -7,7 +7,7 @@
   ],
   "headers": [
     {
-      "source": "/.well-known/assetlinks.json",
+      "source": "/.well-known/(.*)",
       "headers": [
         {
           "key": "Content-Type",
