@@ -1,11 +1,24 @@
 {
   "rewrites": [
     {
-      "source": "/((?!api/|robots\\.txt|sitemap\\.xml|site\\.webmanifest|sw\\.js|favicon.*|android-chrome.*|apple-touch-icon.*|og-image\\.png|google.*\\.html|assets/).*)",
+      "source": "/((?!api/|\\.well-known/.*|robots\\.txt|sitemap\\.xml|site\\.webmanifest|sw\\.js|favicon.*|android-chrome.*|apple-touch-icon.*|og-image\\.png|google.*\\.html|assets/).*)",
       "destination": "/index.html"
     }
   ],
   "headers": [
+    {
+      "source": "/.well-known/assetlinks.json",
+      "headers": [
+        {
+          "key": "Content-Type",
+          "value": "application/json; charset=utf-8"
+        },
+        {
+          "key": "Access-Control-Allow-Origin",
+          "value": "*"
+        }
+      ]
+    },
     {
       "source": "/sw.js",
       "headers": [
