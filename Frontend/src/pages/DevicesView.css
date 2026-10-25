@@ -809,14 +809,23 @@
     padding: 4px 9px !important;
   }
 
+  .device-modal-backdrop {
+    padding: 10px 10px calc(76px + env(safe-area-inset-bottom, 12px)) 10px !important;
+    align-items: flex-start !important;
+    overflow-y: auto !important;
+  }
+
   .device-modal {
-    padding: 16px 12px !important;
-    border-radius: 12px !important;
-    max-width: 95vw !important;
+    padding: 16px 14px !important;
+    border-radius: 14px !important;
+    max-width: 100% !important;
+    max-height: calc(100dvh - 84px - env(safe-area-inset-bottom, 12px)) !important;
+    overflow-y: auto !important;
+    margin: auto 0 !important;
   }
 
   .device-modal-grid {
     grid-template-columns: repeat(2, minmax(0, 1fr)) !important;
-    gap: 6px !important;
+    gap: 8px !important;
   }
 }

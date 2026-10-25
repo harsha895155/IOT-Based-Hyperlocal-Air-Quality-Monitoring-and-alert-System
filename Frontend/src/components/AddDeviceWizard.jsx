@@ -1062,52 +1062,20 @@ export default function AddDeviceWizard({
           </div>
 
           {/* Mode Switcher Tabs */}
-          <div className="wizard-mode-tabs" style={{ display: 'flex', gap: '8px', margin: '6px 0 12px 0', background: 'rgba(0,0,0,0.25)', padding: '4px', borderRadius: '10px' }}>
+          <div className="wizard-mode-tabs">
             <button
               type="button"
-              className={`wizard-mode-tab-btn ${activeMode === 'reconfig' ? 'active' : ''}`}
+              className={`wizard-mode-tab-btn ${activeMode === 'reconfig' ? 'active reconfig' : ''}`}
               onClick={() => setActiveMode('reconfig')}
-              style={{
-                flex: 1,
-                padding: '8px 12px',
-                borderRadius: '8px',
-                border: activeMode === 'reconfig' ? '1px solid #00d2b4' : '1px solid transparent',
-                background: activeMode === 'reconfig' ? 'rgba(0, 210, 180, 0.15)' : 'transparent',
-                color: activeMode === 'reconfig' ? '#00d2b4' : '#94a3b8',
-                fontWeight: 600,
-                fontSize: '0.82rem',
-                cursor: 'pointer',
-                display: 'flex',
-                alignItems: 'center',
-                justifyContent: 'center',
-                gap: '6px',
-                transition: 'all 0.2s',
-              }}
             >
-              <span>⚡ Fast Wi-Fi Change / Re-Flash</span>
+              <span>⚡ Fast Wi-Fi Update</span>
             </button>
             <button
               type="button"
-              className={`wizard-mode-tab-btn ${activeMode === 'onboard' ? 'active' : ''}`}
+              className={`wizard-mode-tab-btn ${activeMode === 'onboard' ? 'active onboard' : ''}`}
               onClick={() => setActiveMode('onboard')}
-              style={{
-                flex: 1,
-                padding: '8px 12px',
-                borderRadius: '8px',
-                border: activeMode === 'onboard' ? '1px solid #38bdf8' : '1px solid transparent',
-                background: activeMode === 'onboard' ? 'rgba(56, 189, 248, 0.15)' : 'transparent',
-                color: activeMode === 'onboard' ? '#38bdf8' : '#94a3b8',
-                fontWeight: 600,
-                fontSize: '0.82rem',
-                cursor: 'pointer',
-                display: 'flex',
-                alignItems: 'center',
-                justifyContent: 'center',
-                gap: '6px',
-                transition: 'all 0.2s',
-              }}
             >
-              <span>🛠️ Full Setup Wizard (6 Steps)</span>
+              <span>🛠️ Setup Wizard (6 Steps)</span>
             </button>
           </div>
 
@@ -1449,7 +1417,7 @@ export default function AddDeviceWizard({
                       className="wizard-input"
                       value={formData.wifiSsid}
                       onChange={(e) => setFormData({ ...formData, wifiSsid: e.target.value })}
-                      placeholder="Type your 2.4GHz Wi-Fi name (e.g. Home_WiFi_2.4G)"
+                      placeholder="e.g. Home_WiFi_2.4G"
                     />
                   )}
                 </div>
@@ -1465,7 +1433,7 @@ export default function AddDeviceWizard({
                       className="wizard-input"
                       value={formData.wifiPassword}
                       onChange={(e) => setFormData({ ...formData, wifiPassword: e.target.value })}
-                      placeholder="Enter Wi-Fi password (leave blank if open)"
+                      placeholder="Wi-Fi Password (leave blank if open)"
                     />
                     <button
                       type="button"
@@ -1667,7 +1635,7 @@ export default function AddDeviceWizard({
               </div>
 
               {/* Device Custom Name & Unique Identifier */}
-              <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '14px', marginBottom: '16px' }}>
+              <div className="wizard-two-col-grid">
                 <div className="wizard-field-group">
                   <label className="wizard-field-label">Device Station Name</label>
                   <input

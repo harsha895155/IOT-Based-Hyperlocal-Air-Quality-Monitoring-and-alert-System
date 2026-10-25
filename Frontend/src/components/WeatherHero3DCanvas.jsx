@@ -137,6 +137,23 @@ export default function WeatherHero3DCanvas({
     };
     const circleTexture = createCircleTexture();
 
+    // Soft Gaussian volumetric cloud texture helper (silky, smooth, zero polygonal facets)
+    const createCloudTexture = () => {
+      const cvs = document.createElement('canvas');
+      cvs.width = 128;
+      cvs.height = 128;
+      const ctx = cvs.getContext('2d');
+      const grad = ctx.createRadialGradient(64, 64, 0, 64, 64, 64);
+      grad.addColorStop(0, 'rgba(255, 255, 255, 0.9)');
+      grad.addColorStop(0.35, 'rgba(240, 249, 255, 0.6)');
+      grad.addColorStop(0.7, 'rgba(224, 242, 254, 0.18)');
+      grad.addColorStop(1, 'rgba(224, 242, 254, 0)');
+      ctx.fillStyle = grad;
+      ctx.fillRect(0, 0, 128, 128);
+      return new THREE.CanvasTexture(cvs);
+    };
+    const cloudTexture = createCloudTexture();
+
     let updateFn = null;
 
     // ══════════════════════════════════════════════════════════════════════════
@@ -543,26 +560,54 @@ export default function WeatherHero3DCanvas({
     }
 
     // ══════════════════════════════════════════════════════════════════════════
-    // E. CLEAR NIGHT: LUMINOUS MOON & FULL-WIDTH COSMIC STARFIELD
+    // E. CLEAR NIGHT: LUMINOUS CRESCENT MOON, TWINKLING STARS & METEORS
     // ══════════════════════════════════════════════════════════════════════════
     else if (weatherMode === 'clear-night') {
       const moonGroup = new THREE.Group();
-      moonGroup.position.set(frustum.halfW * 0.65, frustum.halfH * 0.25, -6);
+      moonGroup.position.set(frustum.halfW * 0.68, frustum.halfH * 0.28, -6);
       rootGroup.add(moonGroup);
 
+      // 1. Glowing 3D Moon Core
+      const moonRadius = 7.5;
       const moon = new THREE.Mesh(
-        new THREE.SphereGeometry(7.5, 24, 24),
+        new THREE.SphereGeometry(moonRadius, 32, 32),
         new THREE.MeshStandardMaterial({
-          color: 0xe2e8f0,
-          roughness: 0.8,
-          emissive: 0x94a3b8,
-          emissiveIntensity: 0.3,
+          color: 0xf8fafc,
+          roughness: 0.55,
+          metalness: 0.1,
+          emissive: 0x93c5fd,
+          emissiveIntensity: isLight ? 0.45 : 0.35,
         })
       );
       moonGroup.add(moon);
 
-      const halo = new THREE.Mesh(
-        new THREE.RingGeometry(8.5, 13, 32),
+      // Crescent shadow cutout sphere (creates authentic, photorealistic crescent phase)
+      const shadowSphere = new THREE.Mesh(
+        new THREE.SphereGeometry(moonRadius * 0.96, 24, 24),
+        new THREE.MeshBasicMaterial({
+          color: isLight ? 0x090e1a : 0x070a10,
+          transparent: true,
+          opacity: 0.88,
+        })
+      );
+      shadowSphere.position.set(-2.8, 1.2, 1.6);
+      moonGroup.add(shadowSphere);
+
+      // Inner soft pearl halo
+      const innerHalo = new THREE.Mesh(
+        new THREE.RingGeometry(moonRadius + 0.3, moonRadius + 3.8, 32),
+        new THREE.MeshBasicMaterial({
+          color: 0xbae6fd,
+          transparent: true,
+          opacity: 0.38,
+          side: THREE.DoubleSide,
+        })
+      );
+      moonGroup.add(innerHalo);
+
+      // Outer ethereal sapphire corona
+      const outerCorona = new THREE.Mesh(
+        new THREE.RingGeometry(moonRadius + 2.5, moonRadius + 7.5, 32),
         new THREE.MeshBasicMaterial({
           color: 0x38bdf8,
           transparent: true,
@@ -570,82 +615,167 @@ export default function WeatherHero3DCanvas({
           side: THREE.DoubleSide,
         })
       );
-      moonGroup.add(halo);
+      moonGroup.add(outerCorona);
 
-      // Starfield across full card
-      const starCount = Math.max(130, Math.round(frustum.vWidth * 0.8));
+      // 2. Full-Width Cosmic Sparkling Starfield with Individual Scintillation
+      const starCount = Math.max(160, Math.round(frustum.vWidth * 1.1));
       const starGeo = new THREE.BufferGeometry();
       const starPos = new Float32Array(starCount * 3);
+      const starPhases = new Float32Array(starCount);
+      const starBaseZ = new Float32Array(starCount);
+
       for (let i = 0; i < starCount; i++) {
-        starPos[i * 3] = (Math.random() - 0.5) * (frustum.vWidth + 20);
-        starPos[i * 3 + 1] = (Math.random() - 0.5) * (frustum.vHeight + 10);
-        starPos[i * 3 + 2] = -15 + (Math.random() - 0.5) * 15;
+        starPos[i * 3] = (Math.random() - 0.5) * (frustum.vWidth + 30);
+        starPos[i * 3 + 1] = (Math.random() - 0.5) * (frustum.vHeight + 16);
+        const z = -12 + (Math.random() - 0.5) * 18;
+        starPos[i * 3 + 2] = z;
+        starBaseZ[i] = z;
+        starPhases[i] = Math.random() * Math.PI * 2;
       }
       starGeo.setAttribute('position', new THREE.BufferAttribute(starPos, 3));
       const starMat = new THREE.PointsMaterial({
-        size: 2.8,
+        size: 3.2,
         map: circleTexture,
         transparent: true,
-        opacity: 0.75,
-        color: 0xf8fafc,
+        opacity: isLight ? 0.85 : 0.88,
+        color: 0xffffff,
         depthWrite: false,
       });
       const stars = new THREE.Points(starGeo, starMat);
       rootGroup.add(stars);
 
-      updateFn = (elapsed) => {
-        halo.rotation.z = elapsed * 0.06;
-        const pulse = (Math.sin(elapsed * 1.5) + 1) / 2;
-        halo.material.opacity = 0.15 + pulse * 0.12;
+      // 3. Dynamic Shooting Star / Meteor Streaks
+      const meteorGeo = new THREE.BufferGeometry();
+      const meteorPos = new Float32Array(6); // 2 points: head and tail
+      meteorGeo.setAttribute('position', new THREE.BufferAttribute(meteorPos, 3));
+      const meteorMat = new THREE.LineBasicMaterial({
+        color: 0x7dd3fc,
+        transparent: true,
+        opacity: 0,
+      });
+      const meteorLine = new THREE.Line(meteorGeo, meteorMat);
+      rootGroup.add(meteorLine);
+
+      let meteorActive = false;
+      let meteorProgress = 0;
+      let meteorCooldown = 1.5;
+      let mStartX = 0;
+      let mStartY = 0;
+      const mLen = 14;
+
+      // 4. Ethereal Cosmic Aurora Wave across the horizon
+      const auroraCurvePts = [];
+      const auroraBoundX = frustum.halfW + 10;
+      for (let x = -auroraBoundX; x <= auroraBoundX; x += 15) {
+        auroraCurvePts.push(new THREE.Vector3(x, -frustum.halfH * 0.45 + Math.sin(x * 0.08) * 3, -10));
+      }
+      const auroraCurve = new THREE.CatmullRomCurve3(auroraCurvePts);
+      const auroraGeo = new THREE.TubeGeometry(auroraCurve, 40, 1.2, 8, false);
+      const auroraMat = new THREE.MeshBasicMaterial({
+        color: 0x38bdf8,
+        transparent: true,
+        opacity: isLight ? 0.16 : 0.24,
+      });
+      const auroraMesh = new THREE.Mesh(auroraGeo, auroraMat);
+      rootGroup.add(auroraMesh);
+
+      updateFn = (elapsed, delta) => {
+        // Moon corona breathing
+        innerHalo.rotation.z = elapsed * 0.05;
+        outerCorona.rotation.z = -elapsed * 0.03;
+        const breath = (Math.sin(elapsed * 1.8) + 1) / 2;
+        innerHalo.material.opacity = 0.28 + breath * 0.15;
+        outerCorona.material.opacity = 0.14 + breath * 0.12;
+
+        // Twinkling stars
+        const pos = stars.geometry.attributes.position.array;
+        for (let i = 0; i < starCount; i++) {
+          const ph = starPhases[i];
+          pos[i * 3 + 2] = starBaseZ[i] + Math.sin(elapsed * 2.5 + ph) * 1.8;
+        }
+        stars.geometry.attributes.position.needsUpdate = true;
+
+        // Shooting Star updates
+        if (!meteorActive) {
+          meteorCooldown -= delta;
+          if (meteorCooldown <= 0) {
+            meteorActive = true;
+            meteorProgress = 0;
+            meteorCooldown = 3.5 + Math.random() * 3.5;
+            mStartX = (Math.random() - 0.2) * frustum.halfW;
+            mStartY = frustum.halfH * 0.6 + Math.random() * 4;
+          }
+        } else {
+          meteorProgress += delta * 1.8;
+          if (meteorProgress > 1) {
+            meteorActive = false;
+            meteorMat.opacity = 0;
+          } else {
+            const curX = mStartX - meteorProgress * 38;
+            const curY = mStartY - meteorProgress * 22;
+            const mPos = meteorLine.geometry.attributes.position.array;
+            mPos[0] = curX;
+            mPos[1] = curY;
+            mPos[2] = 2;
+            mPos[3] = curX + mLen * 0.85;
+            mPos[4] = curY + mLen * 0.5;
+            mPos[5] = 1;
+            meteorLine.geometry.attributes.position.needsUpdate = true;
+            meteorMat.opacity = Math.sin(meteorProgress * Math.PI) * 0.85;
+          }
+        }
+
+        // Aurora sway
+        auroraMesh.position.y = Math.sin(elapsed * 0.8) * 1.5;
       };
     }
 
     // ══════════════════════════════════════════════════════════════════════════
-    // F. CLOUDY / OVERCAST / FOG / WINDY: FULL-WIDTH VOLUMETRIC DRIFT & WIND
+    // F. CLOUDY / OVERCAST / FOG / WINDY: SILKY VOLUMETRIC BILLOWING PUFFS & WIND
     // ══════════════════════════════════════════════════════════════════════════
     else {
-      const cloudPuffs = [];
-      const puffGeo = new THREE.DodecahedronGeometry(10, 1);
-      const puffMat = new THREE.MeshStandardMaterial({
-        color: isLight ? 0xbae6fd : (isDay ? 0x334155 : 0x1e293b),
-        roughness: 0.95,
-        metalness: 0.05,
+      // Clean, silky soft cloud planes using procedural Gaussian texture (NO jagged dark dodecahedrons)
+      const cloudBillboards = [];
+      const cloudGeo = new THREE.PlaneGeometry(38, 24);
+      const cloudMat = new THREE.MeshBasicMaterial({
+        map: cloudTexture,
         transparent: true,
-        opacity: isLight ? 0.22 : 0.45,
+        opacity: isLight ? 0.15 : 0.32,
+        color: isLight ? 0xffffff : (isDay ? 0x94a3b8 : 0x334155),
+        depthWrite: false,
       });
 
-      const puffCount = Math.max(20, Math.round(frustum.vWidth / 15));
-      const startX = -frustum.halfW - 20;
-      const stepX = (frustum.vWidth + 40) / puffCount;
+      const cloudCount = Math.max(12, Math.round(frustum.vWidth / 22));
+      const boundX = frustum.halfW + 25;
+      const stepX = (frustum.vWidth + 50) / cloudCount;
 
-      for (let i = 0; i < puffCount; i++) {
-        const puff = new THREE.Mesh(puffGeo, puffMat);
-        const px = startX + i * stepX + (Math.random() - 0.5) * 10;
-        const py = frustum.halfH * 0.35 + (Math.random() - 0.5) * 10;
-        const pz = -6 + (Math.random() - 0.5) * 12;
-        puff.position.set(px, py, pz);
+      for (let i = 0; i < cloudCount; i++) {
+        const cloud = new THREE.Mesh(cloudGeo, cloudMat);
+        const px = -boundX + i * stepX + (Math.random() - 0.5) * 12;
+        const py = frustum.halfH * 0.25 + (Math.random() - 0.5) * 8;
+        const pz = -4 + (Math.random() - 0.5) * 8;
+        cloud.position.set(px, py, pz);
 
-        const s = 1.3 + Math.random() * 1.0;
-        puff.scale.set(s * 1.8, s, s);
-        rootGroup.add(puff);
-        cloudPuffs.push({ mesh: puff, speed: 0.02 + Math.random() * 0.02 });
+        const s = 1.1 + Math.random() * 0.7;
+        cloud.scale.set(s, s * 0.75, 1);
+        rootGroup.add(cloud);
+        cloudBillboards.push({ mesh: cloud, speed: 0.035 + Math.random() * 0.03 });
       }
 
-      // Streamlined wind ribbons across entire width
+      // Aerodynamic aerodynamic wind ribbons across entire width
       const ribbons = [];
-      const boundX = frustum.halfW + 15;
       for (let r = 0; r < 3; r++) {
         const pts = [];
-        const baseY = -frustum.halfH * 0.3 + r * 10;
+        const baseY = -frustum.halfH * 0.25 + r * 9;
         for (let x = -boundX; x <= boundX; x += 15) {
-          pts.push(new THREE.Vector3(x, baseY + Math.sin(x * 0.06 + r) * 4, -2));
+          pts.push(new THREE.Vector3(x, baseY + Math.sin(x * 0.06 + r) * 3.5, -2));
         }
         const curve = new THREE.CatmullRomCurve3(pts);
-        const tubeGeo = new THREE.TubeGeometry(curve, 48, 0.4, 6, false);
+        const tubeGeo = new THREE.TubeGeometry(curve, 48, 0.45, 6, false);
         const tubeMat = new THREE.MeshBasicMaterial({
           color: isLight ? 0x0284c7 : 0x38bdf8,
           transparent: true,
-          opacity: isLight ? 0.2 : 0.25,
+          opacity: isLight ? 0.18 : 0.25,
         });
         const ribbon = new THREE.Mesh(tubeGeo, tubeMat);
         rootGroup.add(ribbon);
@@ -653,13 +783,13 @@ export default function WeatherHero3DCanvas({
       }
 
       updateFn = (elapsed) => {
-        cloudPuffs.forEach(({ mesh, speed }) => {
+        cloudBillboards.forEach(({ mesh, speed }) => {
           mesh.position.x += speed;
           if (mesh.position.x > boundX) mesh.position.x = -boundX;
         });
 
         ribbons.forEach(({ mesh, offset }) => {
-          mesh.position.y = Math.sin(elapsed * 1.2 + offset) * 1.4;
+          mesh.position.y = Math.sin(elapsed * 1.2 + offset) * 1.3;
         });
       };
     }
@@ -729,6 +859,7 @@ export default function WeatherHero3DCanvas({
       }
       renderer.dispose();
       circleTexture.dispose();
+      cloudTexture.dispose();
     };
   }, [weatherMode, isLight, isDay]);
 

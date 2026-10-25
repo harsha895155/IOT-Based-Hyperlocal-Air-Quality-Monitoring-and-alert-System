@@ -43,6 +43,10 @@ function healthRecommendation(aqi) {
     case 'Hazardous':
       return 'Health emergency: the entire population is at risk. Stay indoors and keep windows closed.';
     default:
+      return 'Monitor air quality index.';
+  }
+}
+
 /** Accurately computes EPA/CPCB AQI from MQ135 gas PPM, temperature, and humidity */
 function calculateAQIFromSensors(gasPPM, temperature = 25, humidity = 50) {
   const ppm = Math.max(0, Number(gasPPM) || 0);

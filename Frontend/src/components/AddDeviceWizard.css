@@ -24,23 +24,67 @@
 
 .wizard-card {
   width: 100%;
-  max-width: 530px;
+  max-width: 580px;
   background: var(--bg-card, #13192b);
   border: 1px solid var(--border-subtle, rgba(56, 189, 248, 0.25));
-  border-radius: 16px;
+  border-radius: 18px;
   box-shadow: var(--shadow-card-hover, 0 24px 60px rgba(0, 0, 0, 0.35));
   display: flex;
   flex-direction: column;
   overflow: hidden;
   position: relative;
-  max-height: 86vh;
+  max-height: 88vh;
 }
 
 /* ─── Header & Progress Stepper ─── */
 .wizard-header {
-  padding: 12px 18px 10px;
+  padding: 14px 18px 10px;
   border-bottom: 1px solid var(--border-soft, rgba(255, 255, 255, 0.08));
   background: var(--bg-surface, rgba(15, 23, 42, 0.4));
+  flex-shrink: 0;
+}
+
+/* ─── Mode Switcher Tabs ─── */
+.wizard-mode-tabs {
+  display: flex;
+  gap: 6px;
+  margin: 6px 0 12px 0;
+  background: rgba(0, 0, 0, 0.28);
+  padding: 4px;
+  border-radius: 10px;
+  border: 1px solid var(--border-soft, rgba(255, 255, 255, 0.08));
+}
+
+.wizard-mode-tab-btn {
+  flex: 1;
+  padding: 8px 12px;
+  border-radius: 8px;
+  border: 1px solid transparent;
+  background: transparent;
+  color: var(--text-muted, #94a3b8);
+  font-weight: 600;
+  font-size: 0.82rem;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 6px;
+  transition: all 0.2s;
+  white-space: nowrap;
+}
+
+.wizard-mode-tab-btn.active.reconfig {
+  border-color: #00d2b4;
+  background: rgba(0, 210, 180, 0.15);
+  color: #00d2b4;
+  box-shadow: 0 0 12px rgba(0, 210, 180, 0.2);
+}
+
+.wizard-mode-tab-btn.active.onboard {
+  border-color: #38bdf8;
+  background: rgba(56, 189, 248, 0.15);
+  color: #38bdf8;
+  box-shadow: 0 0 12px rgba(56, 189, 248, 0.2);
 }
 
 .wizard-header-top {
@@ -587,14 +631,26 @@
   color: var(--accent, #38bdf8);
 }
 
+/* ─── Responsive Grid ─── */
+.wizard-two-col-grid {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 12px;
+  margin-bottom: 14px;
+}
+
 /* ─── Footer Controls ─── */
 .wizard-footer {
   padding: 12px 20px 14px;
   border-top: 1px solid var(--border-soft, rgba(255, 255, 255, 0.08));
-  background: var(--bg-surface, rgba(15, 23, 42, 0.5));
+  background: var(--bg-card, #13192b);
   display: flex;
   justify-content: space-between;
   align-items: center;
+  flex-shrink: 0;
+  position: relative;
+  z-index: 10;
+  box-shadow: 0 -4px 18px rgba(0, 0, 0, 0.25);
 }
 
 .wizard-btn-secondary {
@@ -821,47 +877,67 @@
 /* ─── Mobile Responsiveness ─── */
 @media (max-width: 640px) {
   .wizard-overlay {
-    padding: 8px;
+    padding: 8px 8px calc(76px + env(safe-area-inset-bottom, 12px)) 8px;
+    align-items: flex-start;
+    justify-content: center;
+    overflow-y: auto;
   }
 
   .wizard-card {
+    width: 100%;
     max-width: 100%;
-    max-height: 85vh;
-    border-radius: 18px;
+    max-height: calc(100dvh - 84px - env(safe-area-inset-bottom, 12px));
+    border-radius: 16px;
+    margin: auto 0;
+    display: flex;
+    flex-direction: column;
+    box-shadow: 0 12px 40px rgba(0, 0, 0, 0.45);
   }
 
   .wizard-header {
-    padding: 12px 14px 10px;
+    padding: 10px 14px 8px;
+    flex-shrink: 0;
   }
 
   .wizard-header-top {
-    margin-bottom: 10px;
+    margin-bottom: 8px;
   }
 
   .wizard-title {
-    font-size: 1.02rem;
+    font-size: 0.98rem;
   }
 
   .wizard-subtitle {
-    font-size: 0.72rem;
+    font-size: 0.68rem;
   }
 
   .wizard-icon-badge {
-    width: 30px;
-    height: 30px;
-    font-size: 1rem;
+    width: 28px;
+    height: 28px;
+    font-size: 0.95rem;
     border-radius: 8px;
   }
 
-  /* Stepper on Mobile: Hide squished text labels, show clean indicator */
+  .wizard-mode-tabs {
+    margin: 4px 0 8px 0;
+    gap: 4px;
+    padding: 3px;
+  }
+
+  .wizard-mode-tab-btn {
+    padding: 6px 8px;
+    font-size: 0.74rem;
+    gap: 4px;
+  }
+
   .wizard-stepper {
     padding: 2px 2px 0;
   }
 
   .wizard-stepper::before {
-    top: 12px;
-    left: 12px;
-    right: 12px;
+    top: 11px;
+    left: 10px;
+    right: 10px;
   }
 
   .wizard-step-circle {
@@ -878,38 +954,70 @@
     display: inline-flex !important;
     align-items: center;
     gap: 4px;
-    font-size: 0.74rem;
-    margin-top: 8px;
-    padding: 3px 10px;
+    font-size: 0.72rem;
+    margin-top: 6px;
+    padding: 2px 10px;
   }
 
   .wizard-body {
-    padding: 12px 14px;
+    padding: 10px 12px;
+    flex: 1 1 auto;
+    overflow-y: auto;
+    -webkit-overflow-scrolling: touch;
   }
 
   .wizard-step-title {
-    font-size: 0.95rem;
+    font-size: 0.92rem;
     margin-bottom: 3px;
   }
 
   .wizard-step-desc {
-    font-size: 0.76rem;
+    font-size: 0.74rem;
     margin-bottom: 10px;
+    line-height: 1.35;
+  }
+
+  .wizard-two-col-grid {
+    grid-template-columns: 1fr;
+    gap: 10px;
+    margin-bottom: 10px;
+  }
+
+  .wizard-field-group {
+    margin-bottom: 10px;
+  }
+
+  .wizard-field-label {
+    font-size: 0.76rem;
+    margin-bottom: 4px;
+  }
+
+  .wizard-input,
+  .wizard-text-input {
+    font-size: 16px !important;
+    padding: 8px 12px !important;
+    border-radius: 8px !important;
   }
 
   .wizard-connection-diagram {
-    padding: 10px 12px;
+    padding: 6px 10px;
     margin-bottom: 10px;
+    border-radius: 10px;
   }
 
   .diagram-icon-box {
-    width: 36px;
-    height: 36px;
-    font-size: 1.15rem;
+    width: 30px;
+    height: 30px;
+    font-size: 0.95rem;
+    border-radius: 8px;
   }
 
   .diagram-cable-line {
-    width: 40px;
+    width: 32px;
+  }
+
+  .diagram-cable-lbl {
+    font-size: 0.62rem;
   }
 
   .diagram-device-lbl {
@@ -917,33 +1025,189 @@
   }
 
   .diagram-device-sub {
-    font-size: 0.62rem;
+    display: none;
   }
 
   .wizard-flasher-card {
     padding: 10px 12px;
     margin: 8px 0;
+    border-radius: 10px;
+  }
+
+  .flasher-badge {
+    font-size: 0.64rem;
+    padding: 2px 7px;
+    margin-bottom: 6px;
   }
 
   .flasher-heading {
     font-size: 0.86rem;
+    margin-bottom: 4px;
   }
 
   .flasher-desc {
     font-size: 0.72rem;
     margin-bottom: 8px;
+    line-height: 1.35;
+  }
+
+  .flasher-actions-row {
+    flex-direction: column;
+    gap: 6px;
+  }
+
+  .wizard-btn-flash {
+    width: 100%;
+    justify-content: center;
+    padding: 10px 14px;
+    font-size: 0.82rem;
+  }
+
+  .wizard-btn-download-bin {
+    width: 100%;
+    justify-content: center;
+    padding: 7px 12px;
+    font-size: 0.74rem;
   }
 
   .wizard-footer {
-    padding: 10px 14px 12px;
+    padding: 8px 12px 10px;
+    flex-shrink: 0;
+    background: var(--bg-card, #13192b);
+    border-top: 1px solid var(--border-soft, rgba(255, 255, 255, 0.08));
+    box-shadow: 0 -4px 18px rgba(0, 0, 0, 0.35);
+    z-index: 10;
   }
 
   .wizard-btn-primary,
   .wizard-btn-secondary,
   .wizard-btn-success {
-    padding: 8px 16px;
+    padding: 8px 14px;
     font-size: 0.82rem;
     border-radius: 8px;
+    min-height: 40px;
   }
 }
+
+/* ─── Light Mode Overrides ─── */
+[data-theme='light'] .wizard-card {
+  background: #ffffff;
+  border: 1px solid rgba(203, 213, 225, 0.8);
+  box-shadow: 0 20px 50px rgba(15, 23, 42, 0.15);
+}
+
+[data-theme='light'] .wizard-header {
+  background: #f8fafc;
+  border-bottom: 1px solid #e2e8f0;
+}
+
+[data-theme='light'] .wizard-footer {
+  background: #ffffff;
+  border-top: 1px solid #e2e8f0;
+  box-shadow: 0 -4px 16px rgba(15, 23, 42, 0.06);
+}
+
+[data-theme='light'] .wizard-title {
+  color: #0f172a;
+}
+
+[data-theme='light'] .wizard-subtitle {
+  color: #64748b;
+}
+
+[data-theme='light'] .wizard-step-title {
+  color: #0f172a;
+}
+
+[data-theme='light'] .wizard-step-desc {
+  color: #64748b;
+}
+
+[data-theme='light'] .wizard-mode-tabs {
+  background: #f1f5f9;
+  border: 1px solid #e2e8f0;
+}
+
+[data-theme='light'] .wizard-mode-tab-btn {
+  color: #64748b;
+}
+
+[data-theme='light'] .wizard-mode-tab-btn.active.reconfig {
+  background: rgba(0, 210, 180, 0.15);
+  border-color: #0d9488;
+  color: #0d9488;
+}
+
+[data-theme='light'] .wizard-mode-tab-btn.active.onboard {
+  background: rgba(2, 132, 199, 0.12);
+  border-color: #0284c7;
+  color: #0284c7;
+}
+
+[data-theme='light'] .wizard-input,
+[data-theme='light'] .wizard-text-input {
+  background: #f8fafc;
+  border: 1px solid #cbd5e1;
+  color: #0f172a;
+}
+
+[data-theme='light'] .wizard-input:focus,
+[data-theme='light'] .wizard-text-input:focus {
+  background: #ffffff;
+  border-color: #0284c7;
+  box-shadow: 0 0 0 3px rgba(2, 132, 199, 0.15);
+}
+
+[data-theme='light'] .wizard-input::placeholder,
+[data-theme='light'] .wizard-text-input::placeholder {
+  color: #94a3b8;
+}
+
+[data-theme='light'] .wizard-field-label {
+  color: #334155;
+}
+
+[data-theme='light'] .wizard-connection-diagram {
+  background: #f8fafc;
+  border: 1px solid #e2e8f0;
+}
+
+[data-theme='light'] .diagram-device-lbl {
+  color: #0f172a;
+}
+
+[data-theme='light'] .diagram-device-sub {
+  color: #64748b;
+}
+
+[data-theme='light'] .wizard-flasher-card {
+  background: linear-gradient(135deg, rgba(2, 132, 199, 0.05) 0%, rgba(16, 185, 129, 0.05) 100%);
+  border: 1px solid rgba(2, 132, 199, 0.2);
+}
+
+[data-theme='light'] .flasher-heading {
+  color: #0f172a;
+}
+
+[data-theme='light'] .flasher-desc {
+  color: #475569;
+}
+
+[data-theme='light'] .wizard-btn-secondary {
+  background: #f1f5f9;
+  border: 1px solid #cbd5e1;
+  color: #334155;
+}
+
+[data-theme='light'] .wizard-btn-secondary:hover:not(:disabled) {
+  background: #e2e8f0;
+  color: #0f172a;
+}
+
+[data-theme='light'] .wizard-step-circle {
+  background: #f1f5f9;
+  border-color: #cbd5e1;
+  color: #64748b;
+}
+
 

@@ -214,7 +214,7 @@
 
   /* Atmospheric Hero Card - Layered Electric Emerald & Lavender Violet Daylight Gradient */
   --hero-card-bg-day: linear-gradient(135deg, rgba(236, 253, 245, 0.95) 0%, rgba(245, 243, 255, 0.95) 50%, rgba(240, 253, 250, 0.95) 100%);
-  --hero-card-bg-night: linear-gradient(135deg, #f1f5f9 0%, #e2e8f0 100%);
+  --hero-card-bg-night: linear-gradient(135deg, #090e1a 0%, #151a3a 52%, #0e1322 100%);
   --hero-card-text: #0f172a;
   --hero-card-sub: #475569;
   --dial-bg: #ffffff;
