@@ -38,6 +38,11 @@ Thumbs.db
 # Scratch and temporary directories
 scratch/
 */scratch/
+
+# Android Package Large Binaries
+Android-Package/*.zip
+Android-Package/**/.gradle/
+Android-Package/**/build/
 Backend/scratch/
 .gradle/
 */.gradle/
