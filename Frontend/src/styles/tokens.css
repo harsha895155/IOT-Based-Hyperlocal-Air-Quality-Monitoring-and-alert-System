@@ -604,6 +604,46 @@
   border-color: #ffffff !important;
 }
 
+/* Form Select & Option High-Contrast Contrast Protection */
+select,
+.settings-select {
+  color: var(--text-primary) !important;
+  background-color: var(--surface-raised) !important;
+}
+
+select option,
+.settings-select option {
+  background-color: #ffffff !important;
+  color: #0f172a !important;
+  padding: 8px 12px;
+}
+
+[data-theme='obsidian'] select option,
+[data-theme='slate'] select option,
+[data-theme='neon'] select option {
+  background-color: #1e293b !important;
+  color: #f8fafc !important;
+}
+
+[data-theme='light'] select,
+[data-theme='light'] .settings-select {
+  background-color: #ffffff !important;
+  border-color: #cbd5e1 !important;
+  color: #0f172a !important;
+}
+
+[data-theme='light'] select option,
+[data-theme='light'] .settings-select option {
+  background-color: #ffffff !important;
+  color: #0f172a !important;
+}
+
+[data-theme='light'] select option:checked,
+[data-theme='light'] .settings-select option:checked {
+  background: #0284c7 !important;
+  color: #ffffff !important;
+}
+
 /* Light Theme Subpage & Dashboard Headings */
 [data-theme='light'] .page-title,
 [data-theme='light'] .loc-title,
