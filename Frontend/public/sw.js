@@ -1,16 +1,25 @@
 /**
- * AirGuard PWA Service Worker (v1.0.1)
- * Provides offline navigation resilience, static asset caching,
- * and secure handling of real-time sensor streams without caching sensitive credentials.
+ * AirGuard PWA Service Worker (v1.1.0)
+ * Features:
+ * 1. Background Mobile Web Push Notifications for Critical Environmental Hazards.
+ * 2. High-urgency haptic vibration cadences and immediate red danger alarm triggers.
+ * 3. Offline-First Caching for static assets, application shell, and historical telemetry.
+ * 4. Resilient fallback navigation: All views remain accessible offline.
  */
 
-const CACHE_NAME = 'airguard-v1.0.5';
+const CACHE_NAME = 'airguard-v1.1.0';
 const OFFLINE_FALLBACK_PAGE = '/offline.html';
 const PRECACHE_ASSETS = [
   '/',
   '/index.html',
   '/offline.html',
   '/dashboard',
+  '/analytics',
+  '/alerts',
+  '/stations',
+  '/weather',
+  '/hardware-setup',
+  '/docs',
   '/favicon.ico',
   '/favicon.svg',
   '/site.webmanifest',
@@ -20,12 +29,10 @@ const PRECACHE_ASSETS = [
 
 // Helper to safely cache a valid response
 function safeCachePut(cacheName, request, response) {
-  // Cache API only supports http: and https: schemes
   if (!request.url.startsWith('http://') && !request.url.startsWith('https://')) {
     return Promise.resolve();
   }
 
-  // Only cache successful standard/CORS GET responses
   if (!response || response.status !== 200 || (response.type !== 'basic' && response.type !== 'cors')) {
     return Promise.resolve();
   }
@@ -34,7 +41,6 @@ function safeCachePut(cacheName, request, response) {
     .open(cacheName)
     .then((cache) => cache.put(request, response.clone()))
     .catch((err) => {
-      // Gracefully ignore cache put errors (e.g. quota, aborted requests)
       console.debug('[SW] Cache put ignored:', err.message);
     });
 }
@@ -77,17 +83,22 @@ self.addEventListener('fetch', (event) => {
     return;
   }
 
-  // 2. Never cache non-GET requests or sensitive auth/login endpoints
   const url = new URL(request.url);
+
+  // 2. Never cache auth sessions or mutable write requests
   if (request.method !== 'GET' || url.pathname.startsWith('/api/auth')) {
     return;
   }
 
-  // 3. Dynamic Sensor Telemetry & Weather API: Network-First with Cache Fallback
+  // 3. Dynamic Sensor Telemetry, Alerts, Analytics & Weather: Network-First with Cache Fallback
+  // When offline, cached historical telemetry and alerts load seamlessly!
   if (
     url.pathname.startsWith('/api/readings') ||
     url.pathname.startsWith('/api/devices') ||
-    url.pathname.startsWith('/api/weather')
+    url.pathname.startsWith('/api/weather') ||
+    url.pathname.startsWith('/api/alerts') ||
+    url.pathname.startsWith('/api/analytics') ||
+    url.pathname.startsWith('/api/locations')
   ) {
     event.respondWith(
       fetch(request)
@@ -100,7 +111,7 @@ self.addEventListener('fetch', (event) => {
     return;
   }
 
-  // 4. SPA Navigation Requests (HTML Pages): Network-First, falling back to cached index.html or offline.html
+  // 4. SPA Navigation Requests (HTML Pages): Network-First, falling back to cached index.html
   if (request.mode === 'navigate' || (request.method === 'GET' && request.headers.get('accept')?.includes('text/html'))) {
     event.respondWith(
       fetch(request)
@@ -148,7 +159,7 @@ self.addEventListener('fetch', (event) => {
   );
 });
 
-// 6. Background Sync API: Queued Telemetry & Offline Reading Ingestion
+// 6. Background Sync API: Queued Telemetry
 self.addEventListener('sync', (event) => {
   if (event.tag === 'airguard-sync-telemetry') {
     event.waitUntil(
@@ -174,13 +185,16 @@ self.addEventListener('periodicsync', (event) => {
   }
 });
 
-// 8. Web Push Notifications API: Real-Time Air Quality & Threshold Alerting
+// 8. Mobile Background Web Push Notifications: Red Danger Flash & Alert Trigger
 self.addEventListener('push', (event) => {
   let payload = {
-    title: 'AirGuard Environmental Alert',
-    body: 'Hyperlocal air quality or weather telemetry update.',
+    title: '🚨 AirGuard Danger Alert',
+    body: 'Critical pollution or atmospheric spike detected.',
     icon: '/android-chrome-192x192.png',
     badge: '/favicon-96x96.png',
+    isDanger: true,
+    url: '/dashboard?danger=true',
+    tag: 'airguard-danger-alert',
   };
 
   try {
@@ -193,28 +207,75 @@ self.addEventListener('push', (event) => {
     }
   }
 
+  // Emergency red danger strobe vibration pattern (SOS pulse rhythm)
+  const dangerVibration = [500, 150, 500, 150, 500, 200, 800, 200, 800];
+  const standardVibration = [250, 100, 250];
+
+  const notificationOptions = {
+    body: payload.body,
+    icon: payload.icon || '/android-chrome-192x192.png',
+    badge: payload.badge || '/favicon-96x96.png',
+    vibrate: payload.isDanger ? dangerVibration : standardVibration,
+    tag: payload.tag || 'airguard-danger-alert',
+    renotify: true,
+    requireInteraction: payload.isDanger !== false, // Stays visible until user acknowledges
+    data: {
+      url: payload.url || '/dashboard?danger=true',
+      isDanger: payload.isDanger,
+      alert: payload,
+    },
+    actions: [
+      {
+        action: 'open_danger',
+        title: '🚨 View Danger Alert',
+      },
+      {
+        action: 'dismiss',
+        title: '✕ Dismiss',
+      },
+    ],
+  };
+
   event.waitUntil(
-    self.registration.showNotification(payload.title, {
-      body: payload.body,
-      icon: payload.icon || '/android-chrome-192x192.png',
-      badge: payload.badge || '/favicon-96x96.png',
-      vibrate: [200, 100, 200],
-      data: { url: '/dashboard' },
-    })
+    Promise.all([
+      self.registration.showNotification(payload.title, notificationOptions),
+      // Broadcast to any active client windows to trigger the live red danger flash strobe immediately
+      self.clients.matchAll({ type: 'window', includeUncontrolled: true }).then((windowClients) => {
+        windowClients.forEach((client) => {
+          client.postMessage({
+            type: 'AIRGUARD_DANGER_ALERT',
+            payload: payload,
+          });
+        });
+      }),
+    ])
   );
 });
 
-// 9. Notification Click Handler
+// 9. Notification Click Handler: Open/focus mobile window and activate Red Danger Flash
 self.addEventListener('notificationclick', (event) => {
   event.notification.close();
-  const targetUrl = event.notification.data?.url || '/dashboard';
+
+  if (event.action === 'dismiss') {
+    return;
+  }
+
+  const targetUrl = event.notification.data?.url || '/dashboard?danger=true';
+
   event.waitUntil(
     clients.matchAll({ type: 'window', includeUncontrolled: true }).then((windowClients) => {
       for (const client of windowClients) {
-        if (client.url.includes('/dashboard') && 'focus' in client) {
-          return client.focus();
+        if ('focus' in client) {
+          // If a tab is already open, focus it and tell it to trigger the danger flash
+          client.focus();
+          client.postMessage({
+            type: 'AIRGUARD_TRIGGER_DANGER_FLASH',
+            payload: event.notification.data?.alert || {},
+          });
+          return client;
         }
       }
+      // If no tab is open, open the full dashboard in danger flash mode
       if (clients.openWindow) {
         return clients.openWindow(targetUrl);
       }

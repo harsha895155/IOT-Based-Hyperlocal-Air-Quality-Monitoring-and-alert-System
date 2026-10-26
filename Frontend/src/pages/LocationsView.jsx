@@ -50,9 +50,16 @@ export default function LocationsView() {
   const [dropdownOpen, setDropdownOpen] = useState(false);
   const searchContainerRef = useRef(null);
 
-  // Weather data states
-  const [weatherData, setWeatherData] = useState(null);
-  const [loadingWeather, setLoadingWeather] = useState(true);
+  // Weather data states (Offline-First cached fallback)
+  const [weatherData, setWeatherData] = useState(() => {
+    try {
+      const cached = localStorage.getItem('airguard_cached_weather_latest');
+      return cached ? JSON.parse(cached) : null;
+    } catch {
+      return null;
+    }
+  });
+  const [loadingWeather, setLoadingWeather] = useState(false);
   const [weatherError, setWeatherError] = useState(null);
 
   // User-specific saved locations
@@ -122,12 +129,28 @@ export default function LocationsView() {
           location: locName,
         },
       });
-      setWeatherData(res.data);
+      if (res.data) {
+        setWeatherData(res.data);
+        try {
+          localStorage.setItem(`airguard_cached_weather_${lat}_${lng}`, JSON.stringify(res.data));
+          localStorage.setItem('airguard_cached_weather_latest', JSON.stringify(res.data));
+        } catch (e) {}
+      }
     } catch (err) {
-      console.error('Weather fetch error:', err);
-      setWeatherError(
-        err.response?.data?.message || err.response?.data?.error || 'Unable to retrieve weather data for this location right now. Please try again.'
-      );
+      console.warn('Weather network fetch error, attempting offline cache recovery...', err.message);
+      try {
+        const cached =
+          localStorage.getItem(`airguard_cached_weather_${lat}_${lng}`) ||
+          localStorage.getItem('airguard_cached_weather_latest');
+        if (cached) {
+          setWeatherData(JSON.parse(cached));
+          setWeatherError(null);
+        } else {
+          setWeatherError('Weather data is not cached for these coordinates. Please connect to internet to fetch new regional weather.');
+        }
+      } catch (cacheErr) {
+        setWeatherError('Unable to retrieve weather data while offline.');
+      }
     } finally {
       setLoadingWeather(false);
     }

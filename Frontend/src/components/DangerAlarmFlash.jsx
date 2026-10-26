@@ -1,22 +1,24 @@
 import React, { useState, useEffect } from 'react';
-import { stopCurrentSound } from '../utils/audioAlert';
+import { stopCurrentSound, playHighAlertSound } from '../utils/audioAlert';
 import './DangerAlarmFlash.css';
 
 /**
  * DangerAlarmFlash
  * Full-viewport emergency red flashing light overlay that triggers automatically
- * whenever high-alert sirens sound anywhere on the AirGuard website.
+ * whenever high-alert sirens sound, background push alerts arrive, or when opened
+ * via emergency push notification on mobile.
  */
 export default function DangerAlarmFlash() {
   const [isActive, setIsActive] = useState(false);
-  const [alertInfo, setAlertInfo] = useState({ title: 'HAZARDOUS THRESHOLD DETECTED', soundId: 'smoke_alarm' });
+  const [alertInfo, setAlertInfo] = useState({
+    title: 'HAZARDOUS THRESHOLD DETECTED',
+    soundId: 'smoke_alarm',
+  });
 
   useEffect(() => {
     let timer = null;
 
-    const handleSirenTrigger = (event) => {
-      const { duration = 4.0, soundId = 'siren', title } = event?.detail || {};
-      
+    const triggerAlarm = ({ duration = 6.0, soundId = 'siren', title }) => {
       setAlertInfo({
         title: title || 'HAZARDOUS AIR QUALITY THRESHOLD DETECTED',
         soundId,
@@ -27,13 +29,29 @@ export default function DangerAlarmFlash() {
         document.body.classList.add('danger-mode-active');
       }
 
+      // Trigger mobile haptic vibration motor if supported
+      try {
+        if (typeof navigator !== 'undefined' && 'vibrate' in navigator) {
+          navigator.vibrate([500, 150, 500, 150, 500, 200, 800, 200, 800]);
+        }
+      } catch (e) {}
+
+      // Play emergency siren audio
+      try {
+        playHighAlertSound();
+      } catch (e) {}
+
       if (timer) clearTimeout(timer);
       timer = setTimeout(() => {
         setIsActive(false);
         if (document.body) {
           document.body.classList.remove('danger-mode-active');
         }
-      }, Math.max(3500, (duration + 1.2) * 1000));
+      }, Math.max(5000, (duration + 1.5) * 1000));
+    };
+
+    const handleSirenTrigger = (event) => {
+      triggerAlarm(event?.detail || {});
     };
 
     const handleSirenStop = () => {
@@ -44,13 +62,49 @@ export default function DangerAlarmFlash() {
       }
     };
 
+    // 1. Listen for custom window events dispatched by socket or UI
     window.addEventListener('airguard:danger-siren-trigger', handleSirenTrigger);
     window.addEventListener('airguard:danger-siren-stop', handleSirenStop);
+
+    // 2. Listen for Service Worker background push broadcast messages
+    const handleServiceWorkerMessage = (event) => {
+      if (
+        event.data?.type === 'AIRGUARD_DANGER_ALERT' ||
+        event.data?.type === 'AIRGUARD_TRIGGER_DANGER_FLASH'
+      ) {
+        const payload = event.data.payload || {};
+        triggerAlarm({
+          title: payload.title || payload.body || 'EMERGENCY: Toxic Atmospheric Hazard Detected!',
+          duration: 8.0,
+        });
+      }
+    };
+
+    if ('serviceWorker' in navigator) {
+      navigator.serviceWorker.addEventListener('message', handleServiceWorkerMessage);
+    }
+
+    // 3. Check if app was opened with ?danger=true (from mobile push notification tap)
+    try {
+      const searchParams = new URLSearchParams(window.location.search);
+      if (searchParams.get('danger') === 'true') {
+        triggerAlarm({
+          title: 'MOBILE EMERGENCY PUSH: Critical Pollution Threshold Exceeded!',
+          duration: 8.0,
+        });
+        // Clean URL parameter without reloading page
+        const cleanUrl = window.location.pathname + window.location.hash;
+        window.history.replaceState({}, document.title, cleanUrl);
+      }
+    } catch (e) {}
 
     return () => {
       if (timer) clearTimeout(timer);
       window.removeEventListener('airguard:danger-siren-trigger', handleSirenTrigger);
       window.removeEventListener('airguard:danger-siren-stop', handleSirenStop);
+      if ('serviceWorker' in navigator) {
+        navigator.serviceWorker.removeEventListener('message', handleServiceWorkerMessage);
+      }
       if (document.body) {
         document.body.classList.remove('danger-mode-active');
       }
@@ -79,9 +133,9 @@ export default function DangerAlarmFlash() {
         <span className="danger-siren-beacon">🚨</span>
         <div className="danger-alarm-text">
           <div className="danger-alarm-title">
-            <span>DANGER MODE ACTIVE</span>
+            <span>DANGER ALERT ACTIVE</span>
             <span style={{ opacity: 0.6 }}>•</span>
-            <span style={{ fontSize: '0.78rem', color: '#fef08a' }}>HIGH-DECIBEL SIREN SOUNDING</span>
+            <span style={{ fontSize: '0.78rem', color: '#fef08a' }}>RED FLASH STROBE SOUNDING</span>
           </div>
           <div className="danger-alarm-sub">{alertInfo.title}</div>
         </div>
@@ -91,7 +145,7 @@ export default function DangerAlarmFlash() {
           onClick={handleDismiss}
           title="Silence siren and exit danger mode"
         >
-          ✕ Silence Siren
+          ✕ Silence Alert
         </button>
       </div>
     </div>

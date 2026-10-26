@@ -5,6 +5,7 @@ const { Device } = require('../models/Device');
 const { classifyAQI, requiresAlert, healthRecommendation, calculateAQIFromSensors } = require('../utils/aqi');
 const { sendAirQualityAlertEmail } = require('../services/emailService');
 const { getWeatherForCoordinates } = require('../services/weatherService');
+const { broadcastAlert } = require('../services/pushService');
 
 // 30-minute alert deduplication window for continuous conditions
 const ALERT_DEDUPLICATION_WINDOW_MS = 30 * 60 * 1000;
@@ -183,12 +184,28 @@ async function createReading(req, res, next) {
         io.to(`device_${device.deviceId}`).emit('alert', alert);
       }
 
+      // Web Push Protocol: Real-time background delivery to installed mobile devices even when closed
+      if (isNewAlert || severity === 'Severe' || severity === 'Extreme' || airQuality >= 150) {
+        broadcastAlert(alert, reading, device.userId, device.deviceId)
+          .then((pRes) => {
+            if (pRes && pRes.count > 0) {
+              Alert.findByIdAndUpdate(alert._id, { $addToSet: { channelsDelivered: 'push' } }).catch(() => {});
+            }
+          })
+          .catch((pErr) => console.warn('[Alert Engine] Push dispatch notice:', pErr.message));
+      }
+
       // Multi-channel dispatch (SMTP Email Protocol) on new exceedance or severe spike
       if (isNewAlert && device.userId) {
         User.findById(device.userId)
           .select('email name preferences')
           .then((owner) => {
             if (owner && owner.email && owner.preferences?.emailAlerts !== false) {
+              const aqi = airQuality;
+              if (aqi >= 100 && aqi < 150 && owner.preferences?.highAqiAlert === false) return;
+              if (aqi >= 150 && aqi < 200 && owner.preferences?.unhealthyAlert === false) return;
+              if (aqi >= 200 && owner.preferences?.hazardousAlert === false) return;
+
               const userThreshold = owner.preferences?.aqiWarnThreshold || 100;
               if (airQuality >= userThreshold) {
                 sendAirQualityAlertEmail({

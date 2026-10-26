@@ -64,6 +64,7 @@ import { ThemeProvider, useTheme } from './context/ThemeContext';
 import AirAmbient3DCanvas from './components/AirAmbient3DCanvas';
 import DangerAlarmFlash from './components/DangerAlarmFlash';
 import { useReadings } from './hooks/useReadings';
+import { subscribeToEmergencyPush, isPushSupported } from './utils/pushManager';
 import './App.css';
 
 /**
@@ -113,6 +114,15 @@ function AppLayout({ readingsData }) {
         />
 
         <main className="app-content">
+          {readingsData?.isOffline && (
+            <div className="offline-mode-pill-banner" role="status">
+              <span className="offline-pulse-dot" />
+              <span className="offline-banner-title">📡 OFFLINE CACHE ACTIVE:</span>
+              <span className="offline-banner-desc">
+                Displaying cached environmental telemetry, historical trends & station diagnostics. Only live IoT node streaming requires internet connection.
+              </span>
+            </div>
+          )}
           <Outlet />
         </main>
 
@@ -133,7 +143,20 @@ function AppLayout({ readingsData }) {
 function AppRoutes() {
   const navigate = useNavigate();
   const readingsData = useReadings();
-  const { alerts, devices, acknowledgeAlert } = readingsData;
+  const { alerts, devices, acknowledgeAlert, selectedDevice } = readingsData;
+
+  // Background Web Push synchronization: only when user enabled permission in Settings
+  useEffect(() => {
+    const isPushAllowedInSettings = localStorage.getItem('airguard_push_active') === 'true';
+    if (
+      isPushAllowedInSettings &&
+      isPushSupported() &&
+      typeof Notification !== 'undefined' &&
+      Notification.permission === 'granted'
+    ) {
+      subscribeToEmergencyPush(selectedDevice).catch(() => {});
+    }
+  }, [selectedDevice]);
 
   return (
     <Routes>

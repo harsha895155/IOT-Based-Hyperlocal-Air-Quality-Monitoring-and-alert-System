@@ -42,6 +42,16 @@ export function formatTimeAgo(dateString) {
   return `${Math.floor(hours / 24)}d ago`;
 }
 
+// Safe localStorage JSON reader
+function getCachedJson(key, fallback = null) {
+  try {
+    const raw = localStorage.getItem(key);
+    return raw ? JSON.parse(raw) : fallback;
+  } catch (e) {
+    return fallback;
+  }
+}
+
 export function useReadings() {
   const { user, isGuest, preferences, updatePreferences } = useAuth() || {};
 
@@ -74,25 +84,52 @@ export function useReadings() {
   }, [accountKey, preferences?.defaultStation, user?.preferences?.defaultStation]);
 
   const [selectedDevice, setSelectedDeviceRaw] = useState(getInitialDevice);
+
+  // Offline-First: Hydrate all initial state from persistent local storage
   const [devices, setDevices] = useState(() => {
     if (isGuest || !user) return [];
-    try {
-      const cached = localStorage.getItem(`airguard_devices_cache_${accountKey}`);
-      if (cached) {
-        const parsed = JSON.parse(cached);
-        if (Array.isArray(parsed) && parsed.length > 0) return parsed;
-      }
-    } catch (e) {}
-    return [];
+    return getCachedJson(`airguard_devices_cache_${accountKey}`, []);
   });
-  const [locations, setLocations] = useState([]);
-  const [latest, setLatest] = useState(null);
-  const [trend, setTrend] = useState([]);
-  const [alerts, setAlerts] = useState([]);
+
+  const [locations, setLocations] = useState(() => {
+    return getCachedJson('airguard_cached_locations', []);
+  });
+
+  const [latest, setLatest] = useState(() => {
+    return getCachedJson(`airguard_cached_latest_${getInitialDevice()}`, null);
+  });
+
+  const [trend, setTrend] = useState(() => {
+    return getCachedJson(`airguard_cached_trend_${getInitialDevice()}`, []);
+  });
+
+  const [alerts, setAlerts] = useState(() => {
+    return getCachedJson(`airguard_cached_alerts_${getInitialDevice()}`, []);
+  });
+
   const [connected, setConnected] = useState(false);
   const [loading, setLoading] = useState(true);
   const [loadError, setLoadError] = useState(null);
+  const [isOffline, setIsOffline] = useState(() => (typeof navigator !== 'undefined' ? !navigator.onLine : false));
   const [, setTick] = useState(0);
+
+  // Network connectivity state listeners
+  useEffect(() => {
+    const handleOnline = () => {
+      setIsOffline(false);
+    };
+    const handleOffline = () => {
+      setIsOffline(true);
+      setConnected(false);
+    };
+
+    window.addEventListener('online', handleOnline);
+    window.addEventListener('offline', handleOffline);
+    return () => {
+      window.removeEventListener('online', handleOnline);
+      window.removeEventListener('offline', handleOffline);
+    };
+  }, []);
 
   // Sync active device whenever the authenticated user or account changes
   useEffect(() => {
@@ -100,6 +137,19 @@ export function useReadings() {
     const resolved = resolveDeviceId(saved, devices);
     setSelectedDeviceRaw((curr) => (curr !== resolved ? resolved : curr));
   }, [accountKey, preferences?.defaultStation, user?.preferences?.defaultStation]);
+
+  // When selectedDevice changes, load its cached metrics immediately for zero offline latency
+  useEffect(() => {
+    if (!selectedDevice) return;
+    const cachedLatest = getCachedJson(`airguard_cached_latest_${selectedDevice}`);
+    if (cachedLatest) setLatest(cachedLatest);
+
+    const cachedTrend = getCachedJson(`airguard_cached_trend_${selectedDevice}`);
+    if (cachedTrend && Array.isArray(cachedTrend)) setTrend(cachedTrend);
+
+    const cachedAlerts = getCachedJson(`airguard_cached_alerts_${selectedDevice}`);
+    if (cachedAlerts && Array.isArray(cachedAlerts)) setAlerts(cachedAlerts);
+  }, [selectedDevice]);
 
   // Dynamic setter: saves per account in localStorage AND syncs to MongoDB Atlas
   const setSelectedDevice = useCallback(
@@ -117,8 +167,8 @@ export function useReadings() {
         console.warn('Failed to save station preference in localStorage:', e);
       }
 
-      // If logged in, sync with user preferences in MongoDB Atlas
-      if (!isGuest && user && updatePreferences) {
+      // If logged in and online, sync with user preferences in MongoDB Atlas
+      if (!isGuest && user && updatePreferences && navigator.onLine) {
         updatePreferences({ defaultStation: resolved }).catch((err) => {
           console.warn('Failed to sync defaultStation to backend:', err.message);
         });
@@ -133,71 +183,105 @@ export function useReadings() {
     return () => clearInterval(timer);
   }, []);
 
-  const loadData = useCallback(async (isSilent = false) => {
-    if (!isSilent) {
-      setLoading(true);
-    }
-    setLoadError(null);
-    try {
-      const [latestRes, historyRes, alertsRes, devicesRes, locationsRes] = await Promise.allSettled([
-        client.get('/readings/latest', { params: { deviceId: selectedDevice } }),
-        client.get('/readings/history', { params: { deviceId: selectedDevice, limit: MAX_TREND_POINTS } }),
-        client.get('/alerts', { params: { deviceId: selectedDevice } }),
-        client.get('/devices'),
-        client.get('/locations'),
-      ]);
-
-      if (isGuest || !user) {
-        setDevices([]);
-      } else if (devicesRes.status === 'fulfilled' && Array.isArray(devicesRes.value.data)) {
-        const loadedDevs = devicesRes.value.data;
-        setDevices(loadedDevs);
-        try {
-          localStorage.setItem(`airguard_devices_cache_${accountKey}`, JSON.stringify(loadedDevs));
-        } catch (e) {}
-        setSelectedDeviceRaw((curr) => resolveDeviceId(curr, loadedDevs));
-      }
-
-      if (locationsRes.status === 'fulfilled' && Array.isArray(locationsRes.value.data)) {
-        setLocations(locationsRes.value.data);
-      }
-
-      if (latestRes.status === 'fulfilled' && latestRes.value.data) {
-        setLatest(latestRes.value.data);
-      } else if (!isSilent) {
-        setLatest(null);
-      }
-
-      if (historyRes.status === 'fulfilled' && historyRes.value.data?.data) {
-        setTrend([...historyRes.value.data.data].reverse());
-      } else if (!isSilent) {
-        setTrend([]);
-      }
-
-      if (alertsRes.status === 'fulfilled' && Array.isArray(alertsRes.value.data)) {
-        setAlerts(alertsRes.value.data);
-      } else if (!isSilent) {
-        setAlerts([]);
-      }
-    } catch (err) {
+  const loadData = useCallback(
+    async (isSilent = false) => {
       if (!isSilent) {
-        setLoadError('Failed to fetch telemetry from backend.');
+        setLoading(true);
       }
-    } finally {
-      if (!isSilent) {
-        setLoading(false);
+      setLoadError(null);
+
+      // If browser is explicitly offline, do not clear state — preserve all cached telemetry!
+      if (typeof navigator !== 'undefined' && !navigator.onLine) {
+        setIsOffline(true);
+        setConnected(false);
+        if (!isSilent) setLoading(false);
+        return;
       }
-    }
-  }, [selectedDevice, accountKey]);
+
+      try {
+        const [latestRes, historyRes, alertsRes, devicesRes, locationsRes] = await Promise.allSettled([
+          client.get('/readings/latest', { params: { deviceId: selectedDevice } }),
+          client.get('/readings/history', { params: { deviceId: selectedDevice, limit: MAX_TREND_POINTS } }),
+          client.get('/alerts', { params: { deviceId: selectedDevice } }),
+          client.get('/devices'),
+          client.get('/locations'),
+        ]);
+
+        if (isGuest || !user) {
+          setDevices([]);
+        } else if (devicesRes.status === 'fulfilled' && Array.isArray(devicesRes.value.data)) {
+          const loadedDevs = devicesRes.value.data;
+          setDevices(loadedDevs);
+          try {
+            localStorage.setItem(`airguard_devices_cache_${accountKey}`, JSON.stringify(loadedDevs));
+          } catch (e) {}
+          setSelectedDeviceRaw((curr) => resolveDeviceId(curr, loadedDevs));
+        }
+
+        if (locationsRes.status === 'fulfilled' && Array.isArray(locationsRes.value.data)) {
+          setLocations(locationsRes.value.data);
+          try {
+            localStorage.setItem('airguard_cached_locations', JSON.stringify(locationsRes.value.data));
+          } catch (e) {}
+        }
+
+        // Offline-First Latest Telemetry: Cache on success, preserve existing on failure
+        if (latestRes.status === 'fulfilled' && latestRes.value.data) {
+          setLatest(latestRes.value.data);
+          try {
+            localStorage.setItem(`airguard_cached_latest_${selectedDevice}`, JSON.stringify(latestRes.value.data));
+          } catch (e) {}
+        } else if (latestRes.status === 'rejected') {
+          // Fallback to cache without blanking the screen
+          const cached = getCachedJson(`airguard_cached_latest_${selectedDevice}`);
+          if (cached) setLatest(cached);
+        }
+
+        // Offline-First History & Trends
+        if (historyRes.status === 'fulfilled' && historyRes.value.data?.data) {
+          const trendPoints = [...historyRes.value.data.data].reverse();
+          setTrend(trendPoints);
+          try {
+            localStorage.setItem(`airguard_cached_trend_${selectedDevice}`, JSON.stringify(trendPoints));
+          } catch (e) {}
+        } else if (historyRes.status === 'rejected') {
+          const cached = getCachedJson(`airguard_cached_trend_${selectedDevice}`);
+          if (cached && Array.isArray(cached)) setTrend(cached);
+        }
+
+        // Offline-First Alerts Log
+        if (alertsRes.status === 'fulfilled' && Array.isArray(alertsRes.value.data)) {
+          setAlerts(alertsRes.value.data);
+          try {
+            localStorage.setItem(`airguard_cached_alerts_${selectedDevice}`, JSON.stringify(alertsRes.value.data));
+          } catch (e) {}
+        } else if (alertsRes.status === 'rejected') {
+          const cached = getCachedJson(`airguard_cached_alerts_${selectedDevice}`);
+          if (cached && Array.isArray(cached)) setAlerts(cached);
+        }
+      } catch (err) {
+        if (!isSilent) {
+          setLoadError('Operating in offline cached mode. Live IoT connection requires internet.');
+        }
+      } finally {
+        if (!isSilent) {
+          setLoading(false);
+        }
+      }
+    },
+    [selectedDevice, accountKey, isGuest, user]
+  );
 
   useEffect(() => {
     loadData(false);
   }, [loadData]);
 
-  // Periodic polling for live connected hardware telemetry (every 15 seconds)
+  // Periodic polling for live connected hardware telemetry (every 15 seconds when online)
   useEffect(() => {
     const pollInterval = setInterval(() => {
-      loadData(true);
+      if (typeof navigator !== 'undefined' && navigator.onLine) {
+        loadData(true);
+      }
     }, 15000);
     return () => clearInterval(pollInterval);
   }, [loadData]);
@@ -225,18 +309,34 @@ export function useReadings() {
     [accountKey]
   );
 
-  // Real-time Socket.IO listener for live telemetry updates (R4, R5, R7)
+  // Real-time Socket.IO listener for live telemetry updates
   useEffect(() => {
     const socket = getSocket();
 
-    const onConnect = () => setConnected(true);
-    const onDisconnect = () => setConnected(false);
+    const onConnect = () => {
+      setConnected(true);
+      setIsOffline(false);
+    };
+    const onDisconnect = () => {
+      setConnected(false);
+    };
 
     const onReading = (reading) => {
       setConnected(true);
+      setIsOffline(false);
       if (reading.deviceId === selectedDevice) {
         setLatest(reading);
-        setTrend((prev) => [...prev.slice(-(MAX_TREND_POINTS - 1)), reading]);
+        try {
+          localStorage.setItem(`airguard_cached_latest_${selectedDevice}`, JSON.stringify(reading));
+        } catch (e) {}
+
+        setTrend((prev) => {
+          const updated = [...prev.slice(-(MAX_TREND_POINTS - 1)), reading];
+          try {
+            localStorage.setItem(`airguard_cached_trend_${selectedDevice}`, JSON.stringify(updated));
+          } catch (e) {}
+          return updated;
+        });
       }
       setDevices((prev) =>
         prev.map((d) =>
@@ -267,7 +367,13 @@ export function useReadings() {
 
     const onAlert = (alert) => {
       setConnected(true);
-      setAlerts((prev) => [alert, ...prev.filter((a) => a._id !== alert._id)].slice(0, 100));
+      setAlerts((prev) => {
+        const updated = [alert, ...prev.filter((a) => a._id !== alert._id)].slice(0, 100);
+        try {
+          localStorage.setItem(`airguard_cached_alerts_${selectedDevice}`, JSON.stringify(updated));
+        } catch (e) {}
+        return updated;
+      });
 
       // 1. Synthesize high-decibel emergency audio siren via Web Audio API
       playHighAlertSound();
@@ -278,7 +384,7 @@ export function useReadings() {
           if (Notification.permission === 'granted') {
             new Notification(`🚨 AirGuard: ${alert.category || 'Air Quality Alert'} (AQI ${alert.airQuality})`, {
               body: `${alert.location || alert.deviceId}: ${alert.message || 'Pollution threshold exceeded.'}`,
-              icon: '/favicon.ico',
+              icon: '/android-chrome-192x192.png',
               tag: `airguard-alert-${alert._id || alert.deviceId}`,
             });
           } else if (Notification.permission === 'default') {
@@ -313,23 +419,39 @@ export function useReadings() {
 
   const acknowledgeAlert = useCallback(async (id) => {
     try {
-      await client.patch(`/alerts/${id}/acknowledge`);
-      setAlerts((prev) => prev.map((a) => (a._id === id ? { ...a, acknowledged: true } : a)));
+      if (navigator.onLine) {
+        await client.patch(`/alerts/${id}/acknowledge`);
+      }
+      setAlerts((prev) => {
+        const updated = prev.map((a) => (a._id === id ? { ...a, acknowledged: true } : a));
+        try {
+          localStorage.setItem(`airguard_cached_alerts_${selectedDevice}`, JSON.stringify(updated));
+        } catch (e) {}
+        return updated;
+      });
     } catch (e) {
       console.error('Failed to acknowledge alert:', e.message);
     }
-  }, []);
+  }, [selectedDevice]);
 
   const acknowledgeAllAlerts = useCallback(async (deviceId) => {
     try {
-      await client.patch('/alerts/acknowledge-all', { deviceId });
-      setAlerts((prev) =>
-        prev.map((a) => (!deviceId || deviceId === 'all' || a.deviceId === deviceId ? { ...a, acknowledged: true } : a))
-      );
+      if (navigator.onLine) {
+        await client.patch('/alerts/acknowledge-all', { deviceId });
+      }
+      setAlerts((prev) => {
+        const updated = prev.map((a) =>
+          !deviceId || deviceId === 'all' || a.deviceId === deviceId ? { ...a, acknowledged: true } : a
+        );
+        try {
+          localStorage.setItem(`airguard_cached_alerts_${selectedDevice}`, JSON.stringify(updated));
+        } catch (e) {}
+        return updated;
+      });
     } catch (e) {
       console.error('Failed to acknowledge all alerts:', e.message);
     }
-  }, []);
+  }, [selectedDevice]);
 
   const unreadAlertsCount = useMemo(() => {
     return alerts.filter((a) => !a.acknowledged).length;
@@ -352,6 +474,7 @@ export function useReadings() {
     connected,
     loading,
     loadError,
+    isOffline,
     acknowledgeAlert,
     acknowledgeAllAlerts,
     removeDevice,

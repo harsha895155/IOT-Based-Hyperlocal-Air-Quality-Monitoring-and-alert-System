@@ -1426,14 +1426,20 @@ export default function ProfileView({ onNavigateLogin }) {
                   <button
                     className={`profile-btn-${theme !== 'light' ? 'primary' : 'secondary'}`}
                     style={{ padding: '6px 14px', fontSize: '0.8rem' }}
-                    onClick={() => setTheme('dark')}
+                    onClick={() => {
+                      setTheme('obsidian');
+                      handleTogglePreference('theme', 'obsidian');
+                    }}
                   >
                     🌙 Dark
                   </button>
                   <button
                     className={`profile-btn-${theme === 'light' ? 'primary' : 'secondary'}`}
                     style={{ padding: '6px 14px', fontSize: '0.8rem' }}
-                    onClick={() => setTheme('light')}
+                    onClick={() => {
+                      setTheme('light');
+                      handleTogglePreference('theme', 'light');
+                    }}
                   >
                     ☀️ Light
                   </button>
@@ -1529,7 +1535,19 @@ export default function ProfileView({ onNavigateLogin }) {
                   <span className="profile-setting-title">Telemetry Auto-Refresh</span>
                   <span className="profile-setting-desc">Polling interval for historical chart endpoints</span>
                 </div>
-                <span className="mono" style={{ color: '#38bdf8' }}>{refreshRate}s interval</span>
+                <div style={{ display: 'flex', gap: '8px' }}>
+                  {[10, 15, 30, 60].map((rate) => (
+                    <button
+                      key={rate}
+                      type="button"
+                      className={`profile-btn-${refreshRate === rate ? 'primary' : 'secondary'}`}
+                      style={{ padding: '6px 12px', fontSize: '0.8rem' }}
+                      onClick={() => handleTogglePreference('refreshRate', rate)}
+                    >
+                      {rate}s
+                    </button>
+                  ))}
+                </div>
               </div>
             </div>
           </div>

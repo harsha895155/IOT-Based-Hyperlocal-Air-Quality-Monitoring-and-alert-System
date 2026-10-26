@@ -3,6 +3,12 @@ import client from '../api/client';
 import { useAuth } from '../context/AuthContext';
 import { useTheme } from '../context/ThemeContext';
 import ChangePasswordCard from '../components/ChangePasswordCard';
+import {
+  subscribeToEmergencyPush,
+  unsubscribeFromEmergencyPush,
+  isPushSupported,
+  getPushSubscriptionStatus,
+} from '../utils/pushManager';
 import './SettingsView.css';
 
 export const VULNERABILITY_PROFILES = {
@@ -89,9 +95,98 @@ export default function SettingsView() {
 
   // 5. Notification Channels
   const [emailAlerts, setEmailAlerts] = useState(preferences?.emailAlerts ?? true);
-  const [pushAlerts, setPushAlerts] = useState(preferences?.pushAlerts ?? true);
+  const [pushAlerts, setPushAlerts] = useState(() => {
+    return (
+      localStorage.getItem('airguard_push_active') === 'true' &&
+      typeof Notification !== 'undefined' &&
+      Notification.permission === 'granted'
+    );
+  });
   const [dailyDigest, setDailyDigest] = useState(preferences?.dailyDigest ?? false);
   const [weeklyPdfReport, setWeeklyPdfReport] = useState(preferences?.weeklyPdfReport ?? false);
+
+  // Synchronize actual mobile browser notification permission status on mount
+  useEffect(() => {
+    if (isPushSupported()) {
+      getPushSubscriptionStatus().then((status) => {
+        const isAllowed = status.subscribed && status.permission === 'granted';
+        setPushAlerts(isAllowed);
+        localStorage.setItem('airguard_push_active', isAllowed ? 'true' : 'false');
+      });
+    }
+  }, []);
+
+  // Explicit handler when user allows / disables notifications in settings
+  const handleTogglePushAlerts = async (e) => {
+    const shouldEnable = e.target.checked;
+    if (shouldEnable) {
+      if (!isPushSupported()) {
+        alert('Web Push is not supported on this browser or mobile device.');
+        return;
+      }
+      try {
+        setSaveStatus({ type: 'saving', message: 'Requesting notification permission from your mobile system...' });
+        await subscribeToEmergencyPush(defaultStation || 'esp32-node-01');
+        setPushAlerts(true);
+        localStorage.setItem('airguard_push_active', 'true');
+        if (!isGuest && updatePreferences) {
+          await updatePreferences({ pushAlerts: true });
+        }
+        setSaveStatus({
+          type: 'success',
+          message: '📲 Mobile background notifications enabled! Real-time danger alerts will be delivered over other apps.',
+        });
+        setTimeout(() => setSaveStatus({ type: 'idle', message: '' }), 5000);
+      } catch (err) {
+        setPushAlerts(false);
+        localStorage.setItem('airguard_push_active', 'false');
+        setSaveStatus({
+          type: 'error',
+          message: `Permission not granted: ${err.message}. Please allow notifications in your mobile browser settings.`,
+        });
+      }
+    } else {
+      try {
+        await unsubscribeFromEmergencyPush();
+        setPushAlerts(false);
+        localStorage.setItem('airguard_push_active', 'false');
+        if (!isGuest && updatePreferences) {
+          await updatePreferences({ pushAlerts: false });
+        }
+        setSaveStatus({
+          type: 'success',
+          message: 'Mobile background push notifications disabled.',
+        });
+        setTimeout(() => setSaveStatus({ type: 'idle', message: '' }), 4000);
+      } catch (err) {
+        console.warn('Failed to unsubscribe push:', err);
+      }
+    }
+  };
+
+  const handleToggleEmailAlerts = async (e) => {
+    const val = e.target.checked;
+    setEmailAlerts(val);
+    if (!isGuest && updatePreferences) {
+      await updatePreferences({ emailAlerts: val }).catch(() => {});
+    }
+  };
+
+  const handleToggleDailyDigest = async (e) => {
+    const val = e.target.checked;
+    setDailyDigest(val);
+    if (!isGuest && updatePreferences) {
+      await updatePreferences({ dailyDigest: val }).catch(() => {});
+    }
+  };
+
+  const handleToggleWeeklyPdfReport = async (e) => {
+    const val = e.target.checked;
+    setWeeklyPdfReport(val);
+    if (!isGuest && updatePreferences) {
+      await updatePreferences({ weeklyPdfReport: val }).catch(() => {});
+    }
+  };
 
   // Status feedback states
   const [saveStatus, setSaveStatus] = useState({ type: 'idle', message: '' }); // idle | saving | success | error
@@ -902,20 +997,22 @@ export default function SettingsView() {
                 type="checkbox"
                 className="settings-checkbox"
                 checked={emailAlerts}
-                onChange={(e) => setEmailAlerts(e.target.checked)}
+                onChange={handleToggleEmailAlerts}
               />
             </label>
 
             <label className="settings-checkbox-row">
               <div>
-                <span className="settings-checkbox-label">Desktop & Browser Push Notifications</span>
-                <p className="settings-row__desc">Display high-priority toast alerts on your desktop</p>
+                <span className="settings-checkbox-label">Real-Time Mobile Background & Push Danger Alerts</span>
+                <p className="settings-row__desc">
+                  Deliver high-priority emergency pollution notifications and red danger flash alarms over other apps on mobile even when the app is closed.
+                </p>
               </div>
               <input
                 type="checkbox"
                 className="settings-checkbox"
                 checked={pushAlerts}
-                onChange={(e) => setPushAlerts(e.target.checked)}
+                onChange={handleTogglePushAlerts}
               />
             </label>
 
@@ -928,7 +1025,7 @@ export default function SettingsView() {
                 type="checkbox"
                 className="settings-checkbox"
                 checked={dailyDigest}
-                onChange={(e) => setDailyDigest(e.target.checked)}
+                onChange={handleToggleDailyDigest}
               />
             </label>
 
@@ -941,7 +1038,7 @@ export default function SettingsView() {
                 type="checkbox"
                 className="settings-checkbox"
                 checked={weeklyPdfReport}
-                onChange={(e) => setWeeklyPdfReport(e.target.checked)}
+                onChange={handleToggleWeeklyPdfReport}
               />
             </label>
           </div>

@@ -56,6 +56,18 @@ async function login(req, res, next) {
       return res.status(403).json({ error: 'Your account has been suspended by an administrator.' });
     }
 
+    user.lastLogin = new Date();
+    if (user.preferences?.loginNotify !== false) {
+      if (!user.activityLog) user.activityLog = [];
+      user.activityLog.unshift({
+        action: 'Account Login',
+        detail: `Signed in from ${req.ip || 'web interface'}`,
+        timestamp: new Date(),
+      });
+      if (user.activityLog.length > 50) user.activityLog = user.activityLog.slice(0, 50);
+    }
+    await user.save();
+
     const token = generateToken(user._id, user.role);
 
     res.json({
@@ -162,6 +174,15 @@ async function changePassword(req, res, next) {
     }
 
     user.password = newPassword;
+    if (user.preferences?.securityNotify !== false) {
+      if (!user.activityLog) user.activityLog = [];
+      user.activityLog.unshift({
+        action: 'Security: Password Changed',
+        detail: 'Account credentials successfully updated',
+        timestamp: new Date(),
+      });
+      if (user.activityLog.length > 50) user.activityLog = user.activityLog.slice(0, 50);
+    }
     await user.save();
 
     res.json({ message: 'Password updated successfully.' });
