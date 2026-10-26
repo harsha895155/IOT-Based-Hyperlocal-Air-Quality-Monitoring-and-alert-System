@@ -87,6 +87,7 @@
 .loading-3d-wrapper.theme-dark .loading-brand-title {
   background: linear-gradient(135deg, #ffffff 0%, #38bdf8 55%, #10b981 100%);
   -webkit-background-clip: text;
+  background-clip: text;
   -webkit-text-fill-color: transparent;
 }
 
@@ -172,6 +173,7 @@
 .loading-3d-wrapper.theme-light .loading-brand-title {
   background: linear-gradient(135deg, #0f172a 0%, #0284c7 60%, #059669 100%);
   -webkit-background-clip: text;
+  background-clip: text;
   -webkit-text-fill-color: transparent;
 }
 
