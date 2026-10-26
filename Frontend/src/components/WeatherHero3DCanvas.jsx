@@ -573,25 +573,14 @@ export default function WeatherHero3DCanvas({
         new THREE.SphereGeometry(moonRadius, 32, 32),
         new THREE.MeshStandardMaterial({
           color: 0xf8fafc,
-          roughness: 0.55,
+          roughness: 0.45,
           metalness: 0.1,
-          emissive: 0x93c5fd,
-          emissiveIntensity: isLight ? 0.45 : 0.35,
+          emissive: 0xc7d2fe,
+          emissiveIntensity: 0.6,
         })
       );
       moonGroup.add(moon);
 
-      // Crescent shadow cutout sphere (creates authentic, photorealistic crescent phase)
-      const shadowSphere = new THREE.Mesh(
-        new THREE.SphereGeometry(moonRadius * 0.96, 24, 24),
-        new THREE.MeshBasicMaterial({
-          color: isLight ? 0x090e1a : 0x070a10,
-          transparent: true,
-          opacity: 0.88,
-        })
-      );
-      shadowSphere.position.set(-2.8, 1.2, 1.6);
-      moonGroup.add(shadowSphere);
 
       // Inner soft pearl halo
       const innerHalo = new THREE.Mesh(
@@ -599,7 +588,7 @@ export default function WeatherHero3DCanvas({
         new THREE.MeshBasicMaterial({
           color: 0xbae6fd,
           transparent: true,
-          opacity: 0.38,
+          opacity: 0.45,
           side: THREE.DoubleSide,
         })
       );
@@ -611,14 +600,14 @@ export default function WeatherHero3DCanvas({
         new THREE.MeshBasicMaterial({
           color: 0x38bdf8,
           transparent: true,
-          opacity: 0.22,
+          opacity: 0.28,
           side: THREE.DoubleSide,
         })
       );
       moonGroup.add(outerCorona);
 
       // 2. Full-Width Cosmic Sparkling Starfield with Individual Scintillation
-      const starCount = Math.max(160, Math.round(frustum.vWidth * 1.1));
+      const starCount = Math.max(180, Math.round(frustum.vWidth * 1.2));
       const starGeo = new THREE.BufferGeometry();
       const starPos = new Float32Array(starCount * 3);
       const starPhases = new Float32Array(starCount);
@@ -637,7 +626,7 @@ export default function WeatherHero3DCanvas({
         size: 3.2,
         map: circleTexture,
         transparent: true,
-        opacity: isLight ? 0.85 : 0.88,
+        opacity: 0.9,
         color: 0xffffff,
         depthWrite: false,
       });

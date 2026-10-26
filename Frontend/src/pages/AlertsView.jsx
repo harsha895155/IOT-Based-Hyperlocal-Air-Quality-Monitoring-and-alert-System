@@ -416,16 +416,15 @@ export default function AlertsView({
           </div>
 
           {/* Per-Station Targeting & Vulnerability Profile Selectors */}
-          <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(220px, 1fr))', gap: '12px', marginBottom: '14px', background: 'var(--surface-raised)', padding: '10px 12px', borderRadius: '10px', border: '1px solid var(--border-soft)' }}>
-            <div>
-              <label style={{ fontSize: '0.72rem', fontWeight: 700, color: '#38bdf8', textTransform: 'uppercase', display: 'block', marginBottom: '4px' }}>
+          <div className="station-profile-config-bar">
+            <div className="station-profile-col">
+              <label className="station-profile-label">
                 📍 Target Station
               </label>
               <select
-                className="rules-input"
+                className="rules-input station-profile-select"
                 value={ruleStation}
                 onChange={(e) => handleRuleStationChange(e.target.value)}
-                style={{ cursor: 'pointer', padding: '6px 10px', fontSize: '0.82rem' }}
               >
                 <option value="all">🌐 All Stations (Fleet-Wide Default)</option>
                 {devices.map((d) => (
@@ -436,15 +435,14 @@ export default function AlertsView({
               </select>
             </div>
 
-            <div>
-              <label style={{ fontSize: '0.72rem', fontWeight: 700, color: '#38bdf8', textTransform: 'uppercase', display: 'block', marginBottom: '4px' }}>
+            <div className="station-profile-col">
+              <label className="station-profile-label">
                 🛡️ Health Vulnerability Profile
               </label>
               <select
-                className="rules-input"
+                className="rules-input station-profile-select"
                 value={ruleProfile}
                 onChange={(e) => handleRuleProfileChange(e.target.value)}
-                style={{ cursor: 'pointer', padding: '6px 10px', fontSize: '0.82rem' }}
               >
                 {Object.values(VULNERABILITY_PROFILES).map((p) => (
                   <option key={p.id} value={p.id}>

@@ -389,45 +389,95 @@
   background: var(--hero-card-bg-day);
 }
 
-.weather-hero-card.is-nighttime {
-  background: linear-gradient(135deg, #090e1a 0%, #151a3a 52%, #0e1322 100%);
-  border: 1px solid rgba(129, 140, 248, 0.35);
-  box-shadow: 0 16px 36px -10px rgba(15, 23, 42, 0.4), 0 0 25px rgba(99, 102, 241, 0.18);
-  color: #f8fafc;
-}
-
+.weather-hero-card.is-nighttime,
 [data-theme='light'] .weather-hero-card.is-nighttime {
-  background: linear-gradient(135deg, #090e1a 0%, #151a3a 52%, #0e1322 100%) !important;
-  border: 1px solid rgba(129, 140, 248, 0.35) !important;
-  box-shadow: 0 16px 36px -10px rgba(15, 23, 42, 0.3), 0 0 25px rgba(99, 102, 241, 0.15) !important;
+  background: linear-gradient(135deg, #090f22 0%, #111a38 45%, #182245 80%, #0d152c 100%) !important;
+  border: 1px solid rgba(129, 140, 248, 0.4) !important;
+  box-shadow: 0 16px 36px -10px rgba(10, 15, 35, 0.5), 0 0 28px rgba(99, 102, 241, 0.25) !important;
   color: #f8fafc !important;
+  --hero-card-text: #ffffff !important;
+  --hero-card-sub: #cbd5e1 !important;
 }
 
+.weather-hero-card.is-nighttime .aqi-hero-dial,
 [data-theme='light'] .weather-hero-card.is-nighttime .aqi-hero-dial {
-  background: rgba(15, 23, 42, 0.88) !important;
-  border-color: rgba(129, 140, 248, 0.35) !important;
+  background: rgba(12, 19, 39, 0.88) !important;
+  border-color: rgba(129, 140, 248, 0.4) !important;
+  box-shadow: 0 4px 18px rgba(0, 0, 0, 0.4) !important;
 }
 
+.weather-hero-card.is-nighttime .aqi-hero-num,
 [data-theme='light'] .weather-hero-card.is-nighttime .aqi-hero-num {
   color: #f8fafc !important;
 }
 
-[data-theme='light'] .weather-hero-card.is-nighttime .aqi-hero-advice {
-  color: #cbd5e1 !important;
+.weather-hero-card.is-nighttime .aqi-hero-tag,
+[data-theme='light'] .weather-hero-card.is-nighttime .aqi-hero-tag {
+  color: #94a3b8 !important;
 }
 
+.weather-hero-card.is-nighttime .aqi-hero-advice,
+[data-theme='light'] .weather-hero-card.is-nighttime .aqi-hero-advice {
+  color: #e2e8f0 !important;
+}
+
+.weather-hero-card.is-nighttime .aqi-source-pill,
+[data-theme='light'] .weather-hero-card.is-nighttime .aqi-source-pill {
+  background: rgba(15, 23, 42, 0.65) !important;
+  border: 1px solid rgba(255, 255, 255, 0.14) !important;
+  color: #f1f5f9 !important;
+}
+
+.weather-hero-card.is-nighttime .weather-hero-tracking-sub,
 [data-theme='light'] .weather-hero-card.is-nighttime .weather-hero-tracking-sub {
   color: #94a3b8 !important;
 }
 
+.weather-hero-card.is-nighttime .weather-hero-tracking-sub .sep,
+[data-theme='light'] .weather-hero-card.is-nighttime .weather-hero-tracking-sub .sep {
+  color: #64748b !important;
+}
+
+.weather-hero-card.is-nighttime .weather-temp-num,
+[data-theme='light'] .weather-hero-card.is-nighttime .weather-temp-num {
+  color: #ffffff !important;
+  text-shadow: 0 2px 10px rgba(0, 0, 0, 0.4) !important;
+}
+
+.weather-hero-card.is-nighttime .weather-temp-unit,
+[data-theme='light'] .weather-hero-card.is-nighttime .weather-temp-unit {
+  color: #cbd5e1 !important;
+}
+
+.weather-hero-card.is-nighttime .weather-condition-name,
+[data-theme='light'] .weather-hero-card.is-nighttime .weather-condition-name {
+  color: #ffffff !important;
+  font-weight: 700 !important;
+  text-shadow: 0 2px 8px rgba(0, 0, 0, 0.3) !important;
+}
+
+.weather-hero-card.is-nighttime .weather-min-max-row,
+[data-theme='light'] .weather-hero-card.is-nighttime .weather-min-max-row {
+  color: #cbd5e1 !important;
+  font-weight: 500 !important;
+}
+
+.weather-hero-card.is-nighttime .weather-min-max-row .dot,
+[data-theme='light'] .weather-hero-card.is-nighttime .weather-min-max-row .dot {
+  color: #94a3b8 !important;
+}
+
+.weather-hero-card.is-nighttime .weather-hero-temp,
 [data-theme='light'] .weather-hero-card.is-nighttime .weather-hero-temp {
   color: #ffffff !important;
 }
 
+.weather-hero-card.is-nighttime .weather-hero-cond,
 [data-theme='light'] .weather-hero-card.is-nighttime .weather-hero-cond {
   color: #93c5fd !important;
 }
 
+.weather-hero-card.is-nighttime .weather-hero-sub,
 [data-theme='light'] .weather-hero-card.is-nighttime .weather-hero-sub {
   color: #cbd5e1 !important;
 }

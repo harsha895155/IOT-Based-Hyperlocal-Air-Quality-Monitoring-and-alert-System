@@ -442,6 +442,61 @@
   gap: 8px;
 }
 
+/* Station & Vulnerability Profile Selector Bar */
+.station-profile-config-bar {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 14px;
+  margin-bottom: 16px;
+  background: var(--surface-raised, #111827);
+  padding: 12px 14px;
+  border-radius: 12px;
+  border: 1px solid var(--border-soft, rgba(56, 189, 248, 0.2));
+  width: 100%;
+  box-sizing: border-box;
+}
+
+.station-profile-col {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+  min-width: 0;
+  width: 100%;
+}
+
+.station-profile-label {
+  font-size: 0.72rem;
+  font-weight: 700;
+  color: #38bdf8;
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+  display: block;
+}
+
+[data-theme='light'] .station-profile-label {
+  color: #0284c7 !important;
+}
+
+.station-profile-select {
+  width: 100% !important;
+  max-width: 100% !important;
+  box-sizing: border-box !important;
+  cursor: pointer;
+  overflow: hidden !important;
+  text-overflow: ellipsis !important;
+  white-space: nowrap !important;
+  padding: 8px 10px !important;
+  font-size: 0.82rem !important;
+}
+
+@media (max-width: 680px) {
+  .station-profile-config-bar {
+    grid-template-columns: 1fr;
+    gap: 10px;
+    padding: 10px 12px;
+  }
+}
+
 .rules-inputs-grid {
   display: grid;
   grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
@@ -464,12 +519,17 @@
 }
 
 .rules-input {
+  width: 100%;
+  max-width: 100%;
+  box-sizing: border-box;
   background: var(--bg-surface, #1e2438);
   border: 1px solid var(--border-subtle, rgba(255, 255, 255, 0.12));
   border-radius: 8px;
   padding: 8px 12px;
   color: var(--text-primary, #f8fafc);
   font-size: 0.85rem;
+  outline: none;
+  transition: all 0.2s ease;
 }
 
 /* ─── Alert Cards List ─── */
