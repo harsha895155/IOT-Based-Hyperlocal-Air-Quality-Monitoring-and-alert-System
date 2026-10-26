@@ -133,7 +133,123 @@
     </script>
   </head>
   <body>
-    <div id="root"></div>
+    <div id="root">
+      <div id="initial-loading-container" class="initial-3d-loader">
+        <style>
+          #initial-loading-container {
+            position: fixed;
+            inset: 0;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            font-family: 'Plus Jakarta Sans', system-ui, -apple-system, sans-serif;
+            z-index: 999999;
+            transition: background 0.3s;
+          }
+          #initial-loading-container.theme-dark {
+            background: radial-gradient(circle at 50% 45%, #081122 0%, #030712 70%, #02040a 100%);
+            color: #f8fafc;
+          }
+          #initial-loading-container.theme-light {
+            background: radial-gradient(circle at 50% 30%, #ffffff 0%, #f0f7ff 50%, #e2e8f0 100%);
+            color: #0f172a;
+          }
+          .loader-3d-gyro {
+            position: relative;
+            width: 90px;
+            height: 90px;
+            margin-bottom: 24px;
+            transform-style: preserve-3d;
+            perspective: 800px;
+          }
+          .gyro-ring {
+            position: absolute;
+            inset: 0;
+            border-radius: 50%;
+            border: 2.5px solid transparent;
+          }
+          .theme-dark .gyro-ring-1 {
+            border-top-color: #06b6d4;
+            border-bottom-color: #06b6d4;
+            animation: gyroSpin1 2s linear infinite;
+          }
+          .theme-dark .gyro-ring-2 {
+            border-left-color: #10b981;
+            border-right-color: #10b981;
+            animation: gyroSpin2 2.5s linear infinite reverse;
+          }
+          .theme-dark .gyro-ring-3 {
+            border-top-color: #a855f7;
+            border-right-color: #a855f7;
+            animation: gyroSpin3 3s linear infinite;
+          }
+          .theme-light .gyro-ring-1 {
+            border-top-color: #0284c7;
+            border-bottom-color: #0284c7;
+            animation: gyroSpin1 2s linear infinite;
+          }
+          .theme-light .gyro-ring-2 {
+            border-left-color: #059669;
+            border-right-color: #059669;
+            animation: gyroSpin2 2.5s linear infinite reverse;
+          }
+          .theme-light .gyro-ring-3 {
+            border-top-color: #7c3aed;
+            border-right-color: #7c3aed;
+            animation: gyroSpin3 3s linear infinite;
+          }
+          .gyro-core {
+            position: absolute;
+            inset: 26px;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 20px;
+            box-shadow: 0 0 20px rgba(14, 165, 233, 0.45);
+          }
+          .theme-dark .gyro-core { background: linear-gradient(135deg, #0284c7, #0d9488); }
+          .theme-light .gyro-core { background: linear-gradient(135deg, #0284c7, #059669); }
+          @keyframes gyroSpin1 { from { transform: rotateX(65deg) rotateY(0deg) rotateZ(0deg); } to { transform: rotateX(65deg) rotateY(360deg) rotateZ(360deg); } }
+          @keyframes gyroSpin2 { from { transform: rotateX(25deg) rotateY(65deg) rotateZ(0deg); } to { transform: rotateX(25deg) rotateY(65deg) rotateZ(360deg); } }
+          @keyframes gyroSpin3 { from { transform: rotateX(115deg) rotateY(25deg) rotateZ(0deg); } to { transform: rotateX(115deg) rotateY(25deg) rotateZ(360deg); } }
+          .loader-title {
+            font-size: 1.35rem;
+            font-weight: 800;
+            letter-spacing: 0.08em;
+            margin: 0 0 6px 0;
+          }
+          .theme-dark .loader-title { color: #f8fafc; }
+          .theme-light .loader-title { color: #0f172a; }
+          .loader-sub {
+            font-size: 0.82rem;
+            letter-spacing: 0.04em;
+            margin: 0;
+          }
+          .theme-dark .loader-sub { color: #94a3b8; }
+          .theme-light .loader-sub { color: #475569; }
+        </style>
+        <script>
+          (function() {
+            var savedTheme = localStorage.getItem('airguard_theme');
+            var isLight = savedTheme === 'light' || (!savedTheme && window.matchMedia && window.matchMedia('(prefers-color-scheme: light)').matches);
+            var container = document.getElementById('initial-loading-container');
+            if (container) {
+              container.className = isLight ? 'initial-3d-loader theme-light' : 'initial-3d-loader theme-dark';
+            }
+          })();
+        </script>
+        <div class="loader-3d-gyro">
+          <div class="gyro-ring gyro-ring-1"></div>
+          <div class="gyro-ring gyro-ring-2"></div>
+          <div class="gyro-ring gyro-ring-3"></div>
+          <div class="gyro-core">🍃</div>
+        </div>
+        <div class="loader-title">AIRGUARD</div>
+        <div class="loader-sub">Initializing 3D Environmental Atmospheric Sentinel...</div>
+      </div>
+    </div>
     <script type="module" src="/src/main.jsx"></script>
   </body>
 </html>

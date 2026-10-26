@@ -512,6 +512,14 @@ export default function ProfileView({ onNavigateLogin }) {
           </button>
           <button
             className="profile-btn-secondary"
+            onClick={() => window.dispatchEvent(new CustomEvent('airguard:open-permissions-wizard'))}
+            title="Configure or re-verify app requirements & hardware permissions"
+          >
+            <span>🛡️</span>
+            <span>App Setup Wizard</span>
+          </button>
+          <button
+            className="profile-btn-secondary"
             onClick={logout}
             title="Log out of current session"
           >

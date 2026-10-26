@@ -104,6 +104,10 @@ export default function SettingsView() {
   });
   const [dailyDigest, setDailyDigest] = useState(preferences?.dailyDigest ?? false);
   const [weeklyPdfReport, setWeeklyPdfReport] = useState(preferences?.weeklyPdfReport ?? false);
+  const [emergencyPhone, setEmergencyPhone] = useState(
+    () => user?.phone || preferences?.emergencyPhone || localStorage.getItem('airguard_emergency_phone') || ''
+  );
+  const [smsAlerts, setSmsAlerts] = useState(preferences?.smsAlerts !== false);
 
   // Synchronize actual mobile browser notification permission status on mount
   useEffect(() => {
@@ -330,7 +334,14 @@ export default function SettingsView() {
         pushAlerts,
         dailyDigest,
         weeklyPdfReport,
+        emergencyPhone,
+        phone: emergencyPhone,
+        smsAlerts,
       };
+
+      if (emergencyPhone.trim()) {
+        localStorage.setItem('airguard_emergency_phone', emergencyPhone.trim());
+      }
 
       await updatePreferences(payload);
 
@@ -1041,6 +1052,35 @@ export default function SettingsView() {
                 onChange={handleToggleWeeklyPdfReport}
               />
             </label>
+
+            <label className="settings-checkbox-row">
+              <div>
+                <span className="settings-checkbox-label">SMS Emergency Cellular Broadcast</span>
+                <p className="settings-row__desc">
+                  Direct SMS text alerts sent to mobile contact when offline or during extreme toxic air hazards.
+                </p>
+              </div>
+              <input
+                type="checkbox"
+                className="settings-checkbox"
+                checked={smsAlerts}
+                onChange={(e) => setSmsAlerts(e.target.checked)}
+              />
+            </label>
+
+            <div style={{ padding: '10px 14px', background: 'var(--surface-raised)', borderRadius: '8px', border: '1px solid var(--border-soft)', marginTop: '4px' }}>
+              <label style={{ fontSize: '0.82rem', fontWeight: 600, color: 'var(--text-primary)', display: 'block', marginBottom: '6px' }}>
+                📱 Emergency Mobile Contact (for Cellular SMS broadcasts):
+              </label>
+              <input
+                type="tel"
+                className="settings-input"
+                placeholder="+91 98765 43210"
+                value={emergencyPhone}
+                onChange={(e) => setEmergencyPhone(e.target.value)}
+                style={{ width: '100%', maxWidth: '360px', padding: '6px 10px', fontSize: '0.85rem' }}
+              />
+            </div>
           </div>
 
           {/* Instant On-Demand Email Dispatch Triggers */}
@@ -1113,6 +1153,21 @@ export default function SettingsView() {
           )}
 
           <div className="settings-tools-grid">
+            <div className="settings-tool-box" style={{ borderColor: 'rgba(56, 189, 248, 0.35)', background: 'rgba(14, 165, 233, 0.05)' }}>
+              <div className="settings-tool-info">
+                <h4 style={{ color: '#38bdf8' }}>App Permissions & Device Setup Wizard</h4>
+                <p>Review or re-request critical hardware permissions: Mobile Push Notifications, Hyperlocal GPS, SMS Cellular Fallback, Audio Siren, and Storage Persistence.</p>
+              </div>
+              <button
+                type="button"
+                className="btn btn--primary"
+                onClick={() => window.dispatchEvent(new CustomEvent('airguard:open-permissions-wizard'))}
+                style={{ alignSelf: 'flex-start', background: 'linear-gradient(135deg, #0284c7 0%, #0d9488 100%)', border: 'none' }}
+              >
+                ⚙️ Open Permissions Wizard
+              </button>
+            </div>
+
             <div className="settings-tool-box">
               <div className="settings-tool-info">
                 <h4>Purge Telemetry Cache</h4>

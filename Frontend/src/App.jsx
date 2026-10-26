@@ -63,6 +63,8 @@ import { AuthProvider } from './context/AuthContext';
 import { ThemeProvider, useTheme } from './context/ThemeContext';
 import AirAmbient3DCanvas from './components/AirAmbient3DCanvas';
 import DangerAlarmFlash from './components/DangerAlarmFlash';
+import InitialPermissionsModal from './components/InitialPermissionsModal';
+import Loading3DPage from './components/Loading3DPage';
 import { useReadings } from './hooks/useReadings';
 import { subscribeToEmergencyPush, isPushSupported } from './utils/pushManager';
 import './App.css';
@@ -268,14 +270,42 @@ function AppRoutes() {
   );
 }
 
+function AppContent() {
+  const [isAppLoading, setIsAppLoading] = useState(true);
+
+  useEffect(() => {
+    const handleTriggerLoading = (e) => {
+      setIsAppLoading(true);
+      const duration = e?.detail?.duration || 1800;
+      setTimeout(() => setIsAppLoading(false), duration);
+    };
+
+    window.addEventListener('airguard:trigger-loading', handleTriggerLoading);
+    return () => window.removeEventListener('airguard:trigger-loading', handleTriggerLoading);
+  }, []);
+
+  return (
+    <>
+      {isAppLoading && (
+        <Loading3DPage
+          minDuration={1600}
+          onLoaded={() => setIsAppLoading(false)}
+        />
+      )}
+      <ScrollToTop />
+      <DangerAlarmFlash />
+      <InitialPermissionsModal />
+      <AppRoutes />
+    </>
+  );
+}
+
 export default function App() {
   return (
     <AuthProvider>
       <ThemeProvider>
         <BrowserRouter>
-          <ScrollToTop />
-          <DangerAlarmFlash />
-          <AppRoutes />
+          <AppContent />
         </BrowserRouter>
       </ThemeProvider>
     </AuthProvider>
