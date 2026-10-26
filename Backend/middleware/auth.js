@@ -14,6 +14,9 @@ async function protect(req, res, next) {
     if (!user) {
       return res.status(401).json({ error: 'User not found or session revoked.' });
     }
+    if (user.isSuspended) {
+      return res.status(403).json({ error: 'Account suspended by Administrator. Contact security support.' });
+    }
 
     req.user = user;
     next();

@@ -77,6 +77,10 @@ const userSchema = new mongoose.Schema(
       enum: ['admin', 'researcher', 'user'],
       default: 'user',
     },
+    isSuspended: {
+      type: Boolean,
+      default: false,
+    },
     preferences: {
       emailAlerts: { type: Boolean, default: true },
       pushAlerts: { type: Boolean, default: true },

@@ -358,7 +358,13 @@ bool NodeNetworkManager::sendReading(const SensorReading &reading) {
       int statusCode = http.POST(payload);
       ok = (statusCode >= 200 && statusCode < 300);
       if (ok) {
+        String respBody = http.getString();
         Serial.printf("[HTTP] Sent reading. Status: %d\n", statusCode);
+        if (respBody.indexOf("\"REBOOT\"") != -1) {
+          Serial.println("[Command] Remote REBOOT command received from Cloud! Restarting in 2s...");
+          delay(2000);
+          ESP.restart();
+        }
       } else {
         Serial.printf("[HTTP] Send failed. Status: %d, Response: %s\n",
                       statusCode, http.getString().c_str());
@@ -374,7 +380,13 @@ bool NodeNetworkManager::sendReading(const SensorReading &reading) {
       int statusCode = http.POST(payload);
       ok = (statusCode >= 200 && statusCode < 300);
       if (ok) {
+        String respBody = http.getString();
         Serial.printf("[HTTP] Sent reading. Status: %d\n", statusCode);
+        if (respBody.indexOf("\"REBOOT\"") != -1) {
+          Serial.println("[Command] Remote REBOOT command received from Cloud! Restarting in 2s...");
+          delay(2000);
+          ESP.restart();
+        }
       } else {
         Serial.printf("[HTTP] Send failed. Status: %d, Response: %s\n",
                       statusCode, http.getString().c_str());

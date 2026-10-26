@@ -260,9 +260,36 @@ async function createReading(req, res, next) {
       io.emit('device_status', statusPayload);
       io.to('admin_room').emit('reading', reading);
       io.to('admin_room').emit('device_status', statusPayload);
+      io.to('admin_room').emit('admin_telemetry_packet', {
+        packetId: reading._id,
+        deviceId: device.deviceId,
+        deviceName: device.name,
+        location: device.location,
+        aqi: reading.airQuality,
+        temperature: reading.temperature,
+        humidity: reading.humidity,
+        gasPPM: reading.gasPPM,
+        wifiSSID: device.wifiSSID,
+        ipAddress: device.ipAddress,
+        rssi: device.rssi,
+        timestamp: reading.createdAt || new Date(),
+        rawPayload: req.body,
+      });
     }
 
-    res.status(201).json({ reading, alert });
+    let pendingCommands = [];
+    if (device.pendingCommands && device.pendingCommands.length > 0) {
+      pendingCommands = [...device.pendingCommands];
+      device.pendingCommands = [];
+      await device.save();
+    }
+
+    res.status(201).json({
+      reading,
+      alert,
+      pendingCommands,
+      turboMode: device.turboMode || false,
+    });
   } catch (err) {
     next(err);
   }

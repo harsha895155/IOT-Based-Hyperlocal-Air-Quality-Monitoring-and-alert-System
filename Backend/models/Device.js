@@ -106,6 +106,22 @@ const deviceSchema = new mongoose.Schema(
       enum: ['pending', 'provisioned', 'active'],
       default: 'active',
     },
+    pendingCommands: [
+      {
+        command: { type: String, required: true },
+        params: { type: mongoose.Schema.Types.Mixed, default: {} },
+        issuedBy: { type: String, default: 'Admin' },
+        issuedAt: { type: Date, default: Date.now },
+      },
+    ],
+    turboMode: {
+      type: Boolean,
+      default: false,
+    },
+    calibrationOffsetPPM: {
+      type: Number,
+      default: 0,
+    },
   },
   { timestamps: true, toJSON: { virtuals: true }, toObject: { virtuals: true } }
 );

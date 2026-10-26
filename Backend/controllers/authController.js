@@ -2,8 +2,8 @@ const jwt = require('jsonwebtoken');
 const User = require('../models/User');
 const { sendPasswordResetEmail } = require('../services/emailService');
 
-function generateToken(id) {
-  return jwt.sign({ id }, process.env.JWT_SECRET || 'airguard_default_secret_key_2026', {
+function generateToken(id, role = 'user') {
+  return jwt.sign({ id, role }, process.env.JWT_SECRET || 'airguard_default_secret_key_2026', {
     expiresIn: process.env.JWT_EXPIRES_IN || '7d',
   });
 }
@@ -22,7 +22,7 @@ async function register(req, res, next) {
     }
 
     const user = await User.create({ name, email, password });
-    const token = generateToken(user._id);
+    const token = generateToken(user._id, user.role);
 
     res.status(201).json({
       user: {
@@ -52,7 +52,11 @@ async function login(req, res, next) {
       return res.status(401).json({ error: 'Invalid email or password.' });
     }
 
-    const token = generateToken(user._id);
+    if (user.isSuspended) {
+      return res.status(403).json({ error: 'Your account has been suspended by an administrator.' });
+    }
+
+    const token = generateToken(user._id, user.role);
 
     res.json({
       user: {
