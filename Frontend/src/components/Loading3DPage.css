@@ -69,12 +69,9 @@
 }
 
 .loading-3d-wrapper.theme-dark .loading-3d-hud-card {
-  background: rgba(10, 17, 32, 0.82);
-  border: 1px solid rgba(56, 189, 248, 0.35);
-  box-shadow: 
-    0 30px 70px -15px rgba(0, 0, 0, 0.85),
-    0 0 40px rgba(6, 182, 212, 0.22),
-    inset 0 1px 0 rgba(255, 255, 255, 0.12);
+  background: transparent;
+  border: none;
+  box-shadow: none;
   color: #f8fafc;
 }
 
@@ -132,7 +129,7 @@
 
 .loading-3d-wrapper.theme-dark .loading-hud-footer {
   color: #64748b;
-  border-top: 1px solid rgba(255, 255, 255, 0.06);
+  border-top: none;
 }
 
 /* ==========================================================================
@@ -155,12 +152,9 @@
 }
 
 .loading-3d-wrapper.theme-light .loading-3d-hud-card {
-  background: rgba(255, 255, 255, 0.88);
-  border: 1px solid rgba(14, 165, 233, 0.35);
-  box-shadow: 
-    0 25px 60px -15px rgba(15, 23, 42, 0.14),
-    0 0 30px rgba(14, 165, 233, 0.18),
-    inset 0 1px 0 rgba(255, 255, 255, 1);
+  background: transparent;
+  border: none;
+  box-shadow: none;
   color: #0f172a;
 }
 
@@ -219,7 +213,7 @@
 
 .loading-3d-wrapper.theme-light .loading-hud-footer {
   color: #64748b;
-  border-top: 1px solid rgba(226, 232, 240, 0.85);
+  border-top: none;
 }
 
 /* ==========================================================================
@@ -230,10 +224,12 @@
   z-index: 10;
   width: 90%;
   max-width: 480px;
-  padding: 2.25rem 2rem 1.75rem;
-  border-radius: 1.5rem;
-  backdrop-filter: blur(20px);
-  -webkit-backdrop-filter: blur(20px);
+  padding: 0;
+  background: transparent;
+  border: none;
+  box-shadow: none;
+  backdrop-filter: none;
+  -webkit-backdrop-filter: none;
   display: flex;
   flex-direction: column;
   align-items: center;
