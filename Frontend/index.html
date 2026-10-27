@@ -159,7 +159,7 @@
             position: relative;
             width: 90px;
             height: 90px;
-            margin-bottom: 24px;
+            margin: 0;
             transform-style: preserve-3d;
             perspective: 800px;
           }
@@ -214,21 +214,6 @@
           @keyframes gyroSpin1 { from { transform: rotateX(65deg) rotateY(0deg) rotateZ(0deg); } to { transform: rotateX(65deg) rotateY(360deg) rotateZ(360deg); } }
           @keyframes gyroSpin2 { from { transform: rotateX(25deg) rotateY(65deg) rotateZ(0deg); } to { transform: rotateX(25deg) rotateY(65deg) rotateZ(360deg); } }
           @keyframes gyroSpin3 { from { transform: rotateX(115deg) rotateY(25deg) rotateZ(0deg); } to { transform: rotateX(115deg) rotateY(25deg) rotateZ(360deg); } }
-          .loader-title {
-            font-size: 1.35rem;
-            font-weight: 800;
-            letter-spacing: 0.08em;
-            margin: 0 0 6px 0;
-          }
-          .theme-dark .loader-title { color: #f8fafc; }
-          .theme-light .loader-title { color: #0f172a; }
-          .loader-sub {
-            font-size: 0.82rem;
-            letter-spacing: 0.04em;
-            margin: 0;
-          }
-          .theme-dark .loader-sub { color: #94a3b8; }
-          .theme-light .loader-sub { color: #475569; }
         </style>
         <script>
           (function() {
@@ -246,8 +231,6 @@
           <div class="gyro-ring gyro-ring-3"></div>
           <div class="gyro-core">🍃</div>
         </div>
-        <div class="loader-title">AIRGUARD</div>
-        <div class="loader-sub">Initializing 3D Environmental Atmospheric Sentinel...</div>
       </div>
     </div>
     <script type="module" src="/src/main.jsx"></script>

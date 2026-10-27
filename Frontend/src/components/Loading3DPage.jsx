@@ -13,71 +13,27 @@ import './Loading3DPage.css';
 export default function Loading3DPage({
   onLoaded = null,
   minDuration = 1800,
-  customMessage = null,
   fullScreen = true,
 }) {
   const mountRef = useRef(null);
   const { resolvedTheme } = useTheme() || {};
   const isLight = resolvedTheme === 'light';
 
-  const [progress, setProgress] = useState(15);
-  const [stepIndex, setStepIndex] = useState(0);
   const [isFadingOut, setIsFadingOut] = useState(false);
-  const [tickerMetrics, setTickerMetrics] = useState({
-    pm25: '8.4',
-    pm10: '16.2',
-    aqi: '38',
-    temp: '24.6',
-    co: '0.38',
-  });
 
-  const STEPS = [
-    'Calibrating ESP32 hardware telemetry stream...',
-    'Establishing secure Web Push & emergency alert socket...',
-    'Synthesizing hyperlocal EPA AQI matrix...',
-    'Synchronizing spatial atmospheric sensor maps...',
-    'Environmental Sentinel Initialized ✓',
-  ];
-
-  // Micro-fluctuations for live sensor ticker while loading
-  useEffect(() => {
-    const tickerInterval = setInterval(() => {
-      setTickerMetrics({
-        pm25: (8.2 + (Math.random() * 0.6 - 0.3)).toFixed(1),
-        pm10: (16.0 + (Math.random() * 1.0 - 0.5)).toFixed(1),
-        aqi: Math.round(36 + Math.random() * 4),
-        temp: (24.6 + (Math.random() * 0.4 - 0.2)).toFixed(1),
-        co: (0.38 + (Math.random() * 0.04 - 0.02)).toFixed(2),
-      });
-    }, 400);
-
-    return () => clearInterval(tickerInterval);
-  }, []);
-
-  // Smooth progress incrementation
+  // Smooth timing to allow full 3D animation before graceful fade-out
   useEffect(() => {
     const startTime = Date.now();
     const interval = setInterval(() => {
       const elapsed = Date.now() - startTime;
-      const pct = Math.min(100, Math.round((elapsed / minDuration) * 100));
-      setProgress(pct);
-
-      if (pct < 28) setStepIndex(0);
-      else if (pct < 55) setStepIndex(1);
-      else if (pct < 78) setStepIndex(2);
-      else if (pct < 98) setStepIndex(3);
-      else setStepIndex(4);
-
-      if (pct >= 100) {
+      if (elapsed >= minDuration) {
         clearInterval(interval);
+        setIsFadingOut(true);
         setTimeout(() => {
-          setIsFadingOut(true);
-          setTimeout(() => {
-            if (onLoaded) onLoaded();
-          }, 450);
-        }, 250);
+          if (onLoaded) onLoaded();
+        }, 450);
       }
-    }, 40);
+    }, 50);
 
     return () => clearInterval(interval);
   }, [minDuration, onLoaded]);
@@ -308,76 +264,6 @@ export default function Loading3DPage({
 
       {/* Ambient Radial Vignette & Glow */}
       <div className="loading-3d-glow-vignette" />
-
-      {/* Floating Holographic Center Card */}
-      <div className="loading-3d-hud-card">
-        {/* Top Logo & Pulse Ring */}
-        <div className="loading-logo-box">
-          <span className="loading-pulse-ring-outer" />
-          <span className="loading-pulse-ring-inner" />
-          <div className="loading-logo-emblem">
-            <span className="loading-logo-icon">🍃</span>
-          </div>
-        </div>
-
-        {/* Brand Title & Platform Tag */}
-        <div className="loading-header">
-          <span className="loading-theme-tag">
-            {isLight ? '☀️ DAYLIGHT ATMOSPHERE' : '🌙 OBSIDIAN MESH ACTIVE'}
-          </span>
-          <h1 className="loading-brand-title">AIRGUARD</h1>
-          <p className="loading-brand-sub">Hyperlocal Environmental Sentinel</p>
-        </div>
-
-        {/* Live Fluctuating Telemetry Ticker */}
-        <div className="loading-ticker-strip">
-          <div className="ticker-pill">
-            <span className="ticker-label">AQI</span>
-            <span className="ticker-val" style={{ color: isLight ? '#059669' : '#10b981' }}>
-              {tickerMetrics.aqi}
-            </span>
-          </div>
-          <span className="ticker-divider">•</span>
-          <div className="ticker-pill">
-            <span className="ticker-label">PM2.5</span>
-            <span className="ticker-val">{tickerMetrics.pm25} µg</span>
-          </div>
-          <span className="ticker-divider">•</span>
-          <div className="ticker-pill">
-            <span className="ticker-label">TEMP</span>
-            <span className="ticker-val">{tickerMetrics.temp}°C</span>
-          </div>
-          <span className="ticker-divider">•</span>
-          <div className="ticker-pill">
-            <span className="ticker-label">STATUS</span>
-            <span className="ticker-val status-ok">NOMINAL</span>
-          </div>
-        </div>
-
-        {/* Progress Bar & Percentage */}
-        <div className="loading-progress-container">
-          <div className="loading-progress-track">
-            <div
-              className="loading-progress-bar"
-              style={{ width: `${progress}%` }}
-            >
-              <span className="loading-progress-shimmer" />
-            </div>
-          </div>
-          <div className="loading-progress-labels">
-            <span className="loading-step-text">
-              {customMessage || STEPS[stepIndex]}
-            </span>
-            <span className="loading-percent-number">{progress}%</span>
-          </div>
-        </div>
-
-        {/* Footer Hardware Indicator */}
-        <div className="loading-hud-footer">
-          <span className="loading-dot-live" />
-          <span>ESP32 IoT Sensor Telemetry • Real-Time NAAQS/EPA Pipeline</span>
-        </div>
-      </div>
     </div>
   );
 }
