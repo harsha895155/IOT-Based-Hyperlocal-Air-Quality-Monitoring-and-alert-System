@@ -210,7 +210,7 @@
 }
 
 .settings-checkbox-row:hover {
-  background: rgba(255, 255, 255, 0.02);
+  background: var(--surface-hover, rgba(255, 255, 255, 0.04));
 }
 
 .settings-checkbox-label {
@@ -500,5 +500,79 @@
     padding: 8px 16px !important;
     white-space: normal !important;
   }
+  .segmented-control {
+    width: 100% !important;
+    display: flex !important;
+  }
+  .segmented-control__btn {
+    flex: 1 1 0 !important;
+    text-align: center !important;
+    padding: 6px 4px !important;
+    font-size: 0.76rem !important;
+  }
+  .theme-presets-grid {
+    grid-template-columns: 1fr !important;
+    gap: 8px !important;
+  }
 }
+
+/* ═════════════════════════════════════════════════════════════════════
+   Light Theme Polish for SettingsView
+   ═════════════════════════════════════════════════════════════════════ */
+[data-theme='light'] .settings-card {
+  background: #ffffff;
+  border-color: #e2e8f0;
+  box-shadow: 0 4px 16px rgba(15, 23, 42, 0.05);
+}
+
+[data-theme='light'] .settings-tool-box,
+[data-theme='light'] .theme-preset-card,
+[data-theme='light'] .segmented-control {
+  background: #f8fafc;
+  border-color: #e2e8f0;
+}
+
+[data-theme='light'] .segmented-control__btn {
+  color: #64748b;
+}
+
+[data-theme='light'] .segmented-control__btn:hover {
+  color: #0f172a;
+}
+
+[data-theme='light'] .segmented-control__btn.is-active {
+  background: #0284c7;
+  color: #ffffff;
+  box-shadow: 0 2px 8px rgba(2, 132, 199, 0.3);
+}
+
+[data-theme='light'] .theme-preset-card:hover {
+  background: #f1f5f9;
+  border-color: #cbd5e1;
+}
+
+[data-theme='light'] .theme-preset-card.is-selected {
+  background: #f0fdf4;
+  border-color: #10b981;
+  box-shadow: 0 0 0 1px #10b981, 0 4px 14px rgba(16, 185, 129, 0.15);
+}
+
+[data-theme='light'] .settings-select,
+[data-theme='light'] .settings-input,
+[data-theme='light'] .settings-num-input {
+  background: #ffffff;
+  border-color: #cbd5e1;
+  color: #0f172a;
+}
+
+[data-theme='light'] .settings-select:focus,
+[data-theme='light'] .settings-input:focus,
+[data-theme='light'] .settings-num-input:focus {
+  border-color: #10b981;
+}
+
+[data-theme='light'] .settings-checkbox-row:hover {
+  background: #f8fafc;
+}
+
 

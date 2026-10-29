@@ -11,6 +11,7 @@ import {
 } from 'recharts';
 import client from '../api/client';
 import { classifyAQI, healthRecommendation } from '../utils/aqi';
+import PredictiveForecastCard from '../components/PredictiveForecastCard';
 import './AnalyticsView.css';
 
 export default function AnalyticsView() {
@@ -299,6 +300,12 @@ export default function AnalyticsView() {
           <div className="analytics-kpi-sub">Verified MongoDB documents</div>
         </div>
       </div>
+
+      {/* AI Forward Predictive Extrapolation */}
+      <PredictiveForecastCard
+        currentAQI={summary.avgAQI || 45}
+        deviceName={selectedDevice !== 'all' ? selectedDevice : 'Aggregated Fleet'}
+      />
 
       {/* Main Grid: Hourly Diurnal Chart & Category Distribution */}
       <div className="analytics-main-grid">

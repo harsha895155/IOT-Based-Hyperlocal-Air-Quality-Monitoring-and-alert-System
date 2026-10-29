@@ -4,7 +4,7 @@ const dns = require('dns');
 // Fix querySrv ESERVFAIL on Windows/ISP DNS by forcing Google Public DNS for SRV resolution
 dns.setServers(['8.8.8.8', '8.8.4.4', '1.1.1.1']);
 
-async function connectDB() {
+async function connectDB(retries = 5, delayMs = 3000) {
   let uri = process.env.MONGO_URI;
 
   if (!uri) {
@@ -18,16 +18,22 @@ async function connectDB() {
     uri = uri.replace('mh1zjhz', '8q9noke');
   }
 
-  try {
-    await mongoose.connect(uri, {
-      // Modern mongoose (8.x) no longer needs useNewUrlParser/useUnifiedTopology,
-      // they're the default — kept out intentionally to avoid deprecation warnings.
-      serverSelectionTimeoutMS: 20000,
-    });
-    console.log(`[DB] MongoDB connected: ${mongoose.connection.host}`);
-  } catch (err) {
-    console.error('[DB] MongoDB connection failed:', err.message);
-    process.exit(1);
+  for (let attempt = 1; attempt <= retries; attempt++) {
+    try {
+      await mongoose.connect(uri, {
+        serverSelectionTimeoutMS: 25000,
+      });
+      console.log(`[DB] MongoDB connected: ${mongoose.connection.host}`);
+      break;
+    } catch (err) {
+      console.error(`[DB] MongoDB connection attempt ${attempt}/${retries} failed:`, err.message);
+      if (attempt < retries) {
+        console.log(`[DB] Retrying connection in ${delayMs / 1000}s...`);
+        await new Promise((res) => setTimeout(res, delayMs));
+      } else {
+        console.warn('[DB] Continuing with degraded database status — auto-reconnect active.');
+      }
+    }
   }
 
   mongoose.connection.on('disconnected', () => {

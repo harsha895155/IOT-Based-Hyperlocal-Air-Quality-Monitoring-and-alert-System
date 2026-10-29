@@ -555,3 +555,81 @@
     justify-content: center;
   }
 }
+
+/* ═════════════════════════════════════════════════════════════════════
+   Light Theme Polish for InitialPermissionsModal
+   ═════════════════════════════════════════════════════════════════════ */
+[data-theme='light'] .permissions-onboard-backdrop {
+  background: rgba(15, 23, 42, 0.45);
+}
+
+[data-theme='light'] .permissions-onboard-card {
+  background: #ffffff;
+  border-color: #cbd5e1;
+  box-shadow: 0 20px 50px rgba(15, 23, 42, 0.15), 0 0 0 1px rgba(226, 232, 240, 0.9);
+}
+
+[data-theme='light'] .permissions-header {
+  background: #f8fafc;
+  border-bottom-color: #e2e8f0;
+}
+
+[data-theme='light'] .permissions-title {
+  color: #0f172a;
+}
+
+[data-theme='light'] .permissions-subtitle {
+  color: #475569;
+}
+
+[data-theme='light'] .permission-item-card {
+  background: #f8fafc;
+  border-color: #e2e8f0;
+}
+
+[data-theme='light'] .permission-item-card:hover {
+  background: #f1f5f9;
+  border-color: #cbd5e1;
+}
+
+[data-theme='light'] .perm-item-title {
+  color: #0f172a;
+}
+
+[data-theme='light'] .perm-item-desc {
+  color: #475569;
+}
+
+[data-theme='light'] .perm-phone-input {
+  background: #ffffff;
+  border-color: #cbd5e1;
+  color: #0f172a;
+}
+
+[data-theme='light'] .perm-sms-toggle-label {
+  color: #334155;
+}
+
+[data-theme='light'] .permissions-footer {
+  background: #f8fafc;
+  border-top-color: #e2e8f0;
+}
+
+[data-theme='light'] .perm-skip-btn {
+  color: #64748b;
+}
+
+[data-theme='light'] .perm-skip-btn:hover {
+  color: #0f172a;
+}
+
+[data-theme='light'] .perm-finish-btn {
+  background: #f1f5f9;
+  border-color: #cbd5e1;
+  color: #0f172a;
+}
+
+[data-theme='light'] .perm-finish-btn:hover {
+  background: #e2e8f0;
+}
+

@@ -317,42 +317,26 @@ async function getLatestReading(req, res, next) {
   try {
     const { deviceId } = req.query;
     let filter = {};
-    if (deviceId) {
-      const dev = await Device.findOne({ deviceId: deviceId.trim() });
-      if (dev && dev.userId) {
-        if (!req.user || (req.user.role !== 'admin' && dev.userId.toString() !== req.user._id.toString())) {
-          return res.status(403).json({ error: 'Access forbidden. This device belongs to another user.' });
+    if (deviceId && deviceId !== 'all' && deviceId !== 'current-location') {
+      const trimmedDevId = deviceId.trim();
+      if (req.user && req.user.role !== 'admin') {
+        const targetDev = await Device.findOne({ deviceId: trimmedDevId }).select('userId');
+        if (targetDev && targetDev.userId && targetDev.userId.toString() !== req.user._id.toString()) {
+          return res.status(403).json({ error: 'Access denied: device belongs to another user' });
         }
       }
-      filter = { deviceId: deviceId.trim() };
+      filter = { deviceId: trimmedDevId };
     } else if (req.user && req.user.role !== 'admin') {
-      const userDevices = await Device.find({ userId: req.user._id }).select('deviceId');
-      if (userDevices.length === 0) {
-        return res.status(404).json({ error: 'No devices registered for this user.' });
+      const userDevices = await Device.find({ $or: [{ userId: req.user._id }, { userId: null }] }).select('deviceId');
+      if (userDevices.length > 0) {
+        filter = { deviceId: { $in: userDevices.map((d) => d.deviceId) } };
       }
-      filter = { deviceId: { $in: userDevices.map((d) => d.deviceId) } };
     }
 
     const readingDoc = await Reading.findOne(filter).sort({ createdAt: -1 });
     if (!readingDoc) return res.status(404).json({ error: 'No readings found.' });
 
-    let reading = readingDoc.toObject();
-
-    // Guard against static fallback (26°C / 50%): always substitute live location weather
-    if (Math.round(reading.temperature) === 26 && Math.round(reading.humidity) === 50) {
-      try {
-        const dev = await Device.findOne({ deviceId: reading.deviceId });
-        if (dev) {
-          const coords = dev.coordinates && dev.coordinates.lat != null ? dev.coordinates : { lat: 14.489, lng: 79.957 };
-          const weather = await getWeatherForCoordinates(coords.lat, coords.lng, dev.location);
-          if (weather && weather.temperature != null && weather.humidity != null) {
-            reading.temperature = weather.temperature;
-            reading.humidity = weather.humidity;
-          }
-        }
-      } catch (wErr) {}
-    }
-
+    const reading = readingDoc.toObject();
     res.json(reading);
   } catch (err) {
     next(err);
@@ -367,24 +351,24 @@ async function getReadingHistory(req, res, next) {
   try {
     const { deviceId, from, to, category, minAQI, maxAQI, sort = 'desc' } = req.query;
 
-    if (deviceId && deviceId !== 'all') {
-      const dev = await Device.findOne({ deviceId: deviceId.trim() });
-      if (dev && dev.userId) {
-        if (!req.user || (req.user.role !== 'admin' && dev.userId.toString() !== req.user._id.toString())) {
-          return res.status(403).json({ error: 'Access forbidden. This device belongs to another user.' });
-        }
-      }
-    }
-
     const page = Math.max(1, parseInt(req.query.page, 10) || 1);
     const limit = Math.min(500, Math.max(1, parseInt(req.query.limit, 10) || 20));
 
     const filter = {};
-    if (deviceId && deviceId !== 'all') {
-      filter.deviceId = deviceId.trim();
+    if (deviceId && deviceId !== 'all' && deviceId !== 'current-location') {
+      const trimmedDevId = deviceId.trim();
+      if (req.user && req.user.role !== 'admin') {
+        const targetDev = await Device.findOne({ deviceId: trimmedDevId }).select('userId');
+        if (targetDev && targetDev.userId && targetDev.userId.toString() !== req.user._id.toString()) {
+          return res.status(403).json({ error: 'Access denied: device belongs to another user' });
+        }
+      }
+      filter.deviceId = trimmedDevId;
     } else if (req.user && req.user.role !== 'admin') {
-      const userDevices = await Device.find({ userId: req.user._id }).select('deviceId');
-      filter.deviceId = { $in: userDevices.map((d) => d.deviceId) };
+      const userDevices = await Device.find({ $or: [{ userId: req.user._id }, { userId: null }] }).select('deviceId');
+      if (userDevices.length > 0) {
+        filter.deviceId = { $in: userDevices.map((d) => d.deviceId) };
+      }
     }
     if (category && category !== 'all') filter.category = category.trim();
 

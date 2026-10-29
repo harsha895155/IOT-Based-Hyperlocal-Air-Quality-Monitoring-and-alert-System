@@ -12,7 +12,7 @@ import * as THREE from 'three';
  * - /alerts: Concentric sentinel sonar pulse rings
  * - other: Calm isobaric atmospheric drift
  */
-export default function AirAmbient3DCanvas({ theme = 'obsidian', routePath = '/dashboard' }) {
+export default function AirAmbient3DCanvas({ theme = 'obsidian', routePath = '/dashboard', aqi = 45 }) {
   const mountRef = useRef(null);
   const isLight = theme === 'light';
 
@@ -53,6 +53,12 @@ export default function AirAmbient3DCanvas({ theme = 'obsidian', routePath = '/d
     const violet = isLight ? new THREE.Color(0x7c3aed) : new THREE.Color(0x8b5cf6);  // Deep Radiant Purple / Violet
     const cyan = isLight ? new THREE.Color(0x0284c7) : new THREE.Color(0x06b6d4);    // Deep Aqua Cyan / Ocean Blue
     const amber = isLight ? new THREE.Color(0xd97706) : new THREE.Color(0xf59e0b);   // Deep Solar Amber
+    const crimson = isLight ? new THREE.Color(0xdc2626) : new THREE.Color(0xef4444); // Warning Crimson
+
+    // Adaptive AQI Accent
+    const isWarningAQI = aqi > 100;
+    const isHazardousAQI = aqi > 150;
+    const primaryAtmosphereColor = isHazardousAQI ? crimson : isWarningAQI ? amber : emerald;
 
     // Pure radial glow texture for sharp, vivid, colorful particles
     const createGlowTexture = () => {
@@ -76,7 +82,7 @@ export default function AirAmbient3DCanvas({ theme = 'obsidian', routePath = '/d
     scene.add(orbGroup);
 
     const orb1Mat = new THREE.MeshBasicMaterial({
-      color: isLight ? 0x059669 : 0x10b981,
+      color: primaryAtmosphereColor,
       transparent: true,
       opacity: isLight ? 0.35 : 0.12,
     });
@@ -116,9 +122,14 @@ export default function AirAmbient3DCanvas({ theme = 'obsidian', routePath = '/d
 
         pSpeeds[i] = 0.09 + Math.random() * 0.16; // Horizontal wind drift speed
 
-        // Colorful distribution: 45% Emerald Green, 45% Radiant Purple, 10% Aqua Cyan
+        // Colorful distribution adaptive to live air quality status
         const rand = Math.random();
-        const col = rand > 0.55 ? emerald : rand > 0.1 ? violet : cyan;
+        let col = rand > 0.55 ? emerald : rand > 0.1 ? violet : cyan;
+        if (isHazardousAQI) {
+          col = rand > 0.4 ? crimson : rand > 0.2 ? amber : violet;
+        } else if (isWarningAQI) {
+          col = rand > 0.45 ? amber : rand > 0.2 ? cyan : emerald;
+        }
         pCol[idx] = col.r;
         pCol[idx + 1] = col.g;
         pCol[idx + 2] = col.b;

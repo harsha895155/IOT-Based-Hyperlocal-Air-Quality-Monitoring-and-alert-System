@@ -7,7 +7,7 @@ async function getAlerts(req, res, next) {
     const { deviceId, acknowledged } = req.query;
     const filter = {};
 
-    if (deviceId && deviceId !== 'all') {
+    if (deviceId && deviceId !== 'all' && deviceId !== 'current-location') {
       const dev = await Device.findOne({ deviceId: deviceId.trim() });
       if (dev && dev.userId) {
         if (!req.user || (req.user.role !== 'admin' && dev.userId.toString() !== req.user._id.toString())) {
@@ -60,7 +60,7 @@ async function acknowledgeAll(req, res, next) {
     const { deviceId } = req.body || {};
     const filter = { acknowledged: { $ne: true } };
 
-    if (deviceId && deviceId !== 'all') {
+    if (deviceId && deviceId !== 'all' && deviceId !== 'current-location') {
       if (req.user && req.user.role !== 'admin') {
         const dev = await Device.findOne({ deviceId: deviceId.trim() });
         if (dev && dev.userId && dev.userId.toString() !== req.user._id.toString()) {

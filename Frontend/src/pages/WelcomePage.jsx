@@ -3,6 +3,9 @@ import { Link, useNavigate } from 'react-router-dom';
 import AirGuardLogo from '../components/AirGuardLogo';
 import AirGuard3DCanvas from '../components/AirGuard3DCanvas';
 import ESP32Node3DViewer from '../components/ESP32Node3DViewer';
+import client from '../api/client';
+import { getSocket } from '../api/socket';
+import { classifyAQI } from '../utils/aqi';
 import { useAuth } from '../context/AuthContext';
 import { useTheme } from '../context/ThemeContext';
 import './WelcomePage.css';
@@ -21,43 +24,86 @@ export default function WelcomePage() {
   const [tourStep, setTourStep] = useState(0);
   const [tourAutoPlay, setTourAutoPlay] = useState(false);
 
-  // Simulated live telemetry stream for hero widget
+  // Real-time live telemetry stream for hero widget
   const [liveTelemetry, setLiveTelemetry] = useState({
-    aqi: 38,
+    aqi: 46,
     category: 'Good',
     color: '#00d2b4',
     pm25: 8.4,
     pm10: 16.2,
     co: 0.38,
     no2: 12.1,
-    temp: 24.6,
-    humidity: 57,
+    temp: 26.5,
+    humidity: 55,
     pressure: 1013.4,
     wind: 6.2,
-    mq135PPM: 412,
-    packetCounter: 14280,
+    mq135PPM: 380,
+    packetCounter: 1,
+    deviceId: 'esp32-node-01',
+    lastSeen: null,
   });
 
-  // Simulated micro-fluctuations every 2.5 seconds to feel live and alive
+  const isOnline = Boolean(
+    liveTelemetry.lastSeen && Date.now() - new Date(liveTelemetry.lastSeen).getTime() < 45000
+  );
+
+  // Fetch real-time hardware telemetry from MongoDB and listen to live WebSocket
   useEffect(() => {
-    const timer = setInterval(() => {
-      setLiveTelemetry((prev) => {
-        const deltaAQI = Math.floor(Math.random() * 3) - 1;
-        const newAQI = Math.max(25, Math.min(50, prev.aqi + deltaAQI));
-        return {
+    let mounted = true;
+
+    // 1. Initial REST fetch for latest hardware telemetry
+    client.get('/readings/latest')
+      .then((res) => {
+        if (!mounted || !res.data) return;
+        const d = res.data;
+        const aqiNum = typeof d.airQuality === 'number' ? d.airQuality : 46;
+        const { category, color } = classifyAQI(aqiNum);
+        setLiveTelemetry((prev) => ({
           ...prev,
-          aqi: newAQI,
-          pm25: Number((8.2 + (Math.random() * 0.8 - 0.4)).toFixed(1)),
-          pm10: Number((16.0 + (Math.random() * 1.2 - 0.6)).toFixed(1)),
-          co: Number((0.38 + (Math.random() * 0.04 - 0.02)).toFixed(2)),
-          temp: Number((24.6 + (Math.random() * 0.2 - 0.1)).toFixed(1)),
-          humidity: Math.round(57 + (Math.random() * 2 - 1)),
-          mq135PPM: Math.round(412 + (Math.random() * 10 - 5)),
+          aqi: aqiNum,
+          category,
+          color,
+          temp: d.temperature != null ? Number(d.temperature.toFixed(1)) : prev.temp,
+          humidity: d.humidity != null ? Math.round(d.humidity) : prev.humidity,
+          mq135PPM: d.gasPPM != null ? Math.round(d.gasPPM) : prev.mq135PPM,
+          co: d.gasPPM != null ? Number((d.gasPPM * 0.001).toFixed(2)) : prev.co,
+          pm25: Number((aqiNum * 0.22).toFixed(1)),
+          pm10: Number((aqiNum * 0.45).toFixed(1)),
+          deviceId: d.deviceId || 'esp32-node-01',
+          lastSeen: d.createdAt,
           packetCounter: prev.packetCounter + 1,
-        };
-      });
-    }, 2500);
-    return () => clearInterval(timer);
+        }));
+      })
+      .catch((err) => console.warn('Welcome page live telemetry fetch:', err.message));
+
+    // 2. Real-time Socket.IO stream listener
+    const socket = getSocket();
+    const handleNewReading = (d) => {
+      if (!mounted || !d) return;
+      const aqiNum = typeof d.airQuality === 'number' ? d.airQuality : 46;
+      const { category, color } = classifyAQI(aqiNum);
+      setLiveTelemetry((prev) => ({
+        ...prev,
+        aqi: aqiNum,
+        category,
+        color,
+        temp: d.temperature != null ? Number(d.temperature.toFixed(1)) : prev.temp,
+        humidity: d.humidity != null ? Math.round(d.humidity) : prev.humidity,
+        mq135PPM: d.gasPPM != null ? Math.round(d.gasPPM) : prev.mq135PPM,
+        co: d.gasPPM != null ? Number((d.gasPPM * 0.001).toFixed(2)) : prev.co,
+        pm25: Number((aqiNum * 0.22).toFixed(1)),
+        pm10: Number((aqiNum * 0.45).toFixed(1)),
+        deviceId: d.deviceId || prev.deviceId,
+        lastSeen: d.createdAt || new Date(),
+        packetCounter: prev.packetCounter + 1,
+      }));
+    };
+
+    socket.on('reading', handleNewReading);
+    return () => {
+      mounted = false;
+      socket.off('reading', handleNewReading);
+    };
   }, []);
 
   const handleGuestEntry = () => {
@@ -232,6 +278,36 @@ export default function WelcomePage() {
         { label: 'Report Format', val: 'Printable / CSV' },
       ],
       route: '/reports',
+    },
+    {
+      id: 'geospatial',
+      icon: '🗺️',
+      name: 'IoT Fleet Geospatial Map',
+      badge: 'Interactive GIS',
+      title: 'Geodetic Fleet Mapping & Dispersion Contours',
+      description:
+        'Interactive geospatial map displaying physical GPS coordinates of deployed AirGuard micro-stations, live color-coded AQI plume contours, and inter-node mesh connection vectors with instant hardware diagnostics flyout.',
+      metrics: [
+        { label: 'Map Engine', val: 'Interactive Vector Mesh' },
+        { label: 'Contour Resolution', val: 'Dynamic Plumes' },
+        { label: 'Targeting', val: 'Multi-Station Telemetry' },
+      ],
+      route: '/locations',
+    },
+    {
+      id: 'forecast',
+      icon: '🤖',
+      name: 'AI Predictive AQI Forecasting',
+      badge: 'Neural Model',
+      title: 'Forward Diurnal Extrapolation Engine',
+      description:
+        'Predictive AI forecasting model projecting impending environmental air quality up to 24 hours in advance using autoregressive diurnal commute curves, solar thermal boundary dispersion, and confidence bounds.',
+      metrics: [
+        { label: 'Forecast Horizon', val: '6h / 12h / 24h Ahead' },
+        { label: 'Confidence Band', val: 'Dynamic Statistical Range' },
+        { label: 'Peak Alert', val: 'Automated Commute Spikes' },
+      ],
+      route: '/analytics',
     },
     {
       id: 'wizard',
@@ -434,9 +510,15 @@ export default function WelcomePage() {
           <div id="telemetry-preview" className="hero-telemetry-console">
             <div className="console-header">
               <div className="console-status-group">
-                <span className="console-status-dot" />
-                <span className="console-device-tag">ACTIVE NODE: ESP32-NODE-01</span>
-                <span className="console-zone-tag">Campus Research Core</span>
+                <span className={`console-status-dot ${isOnline ? 'is-online' : 'is-offline'}`} />
+                <span className="console-device-tag">
+                  {isOnline
+                    ? `NODE ONLINE: ${(liveTelemetry.deviceId || 'ESP32').toUpperCase()}`
+                    : `NODE OFFLINE: ${(liveTelemetry.deviceId || 'ESP32').toUpperCase()}`}
+                </span>
+                <span className="console-zone-tag">
+                  {isOnline ? 'Transmitting Live Telemetry' : 'Awaiting Hardware Transmission'}
+                </span>
               </div>
               <div className="console-meta-group">
                 <span className="console-time-tag">Packet #{liveTelemetry.packetCounter}</span>

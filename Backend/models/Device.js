@@ -1,6 +1,6 @@
 const mongoose = require('mongoose');
 
-const OFFLINE_TIMEOUT_MS = 60000; // 60 seconds centralized timeout
+const OFFLINE_TIMEOUT_MS = 45000; // 45 seconds (3 missed 15s telemetry cycles = Offline)
 
 const deviceSchema = new mongoose.Schema(
   {
@@ -126,14 +126,12 @@ const deviceSchema = new mongoose.Schema(
   { timestamps: true, toJSON: { virtuals: true }, toObject: { virtuals: true } }
 );
 
-// Derived status property per R4 & Section 7 (never trust a manually set boolean)
+// Derived status property per R4 & Section 7 (strictly real-time, never trust a manually set boolean)
 deviceSchema.virtual('status').get(function () {
   if (!this.lastSeen) return 'Offline';
   const timeout = this.offlineTimeoutMs || OFFLINE_TIMEOUT_MS;
   const elapsed = Date.now() - new Date(this.lastSeen).getTime();
-  if (elapsed < timeout) return 'Online';
-  if (elapsed < timeout * 5) return 'Standby';
-  return 'Offline';
+  return elapsed < timeout ? 'Online' : 'Offline';
 });
 
 module.exports = {

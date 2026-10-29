@@ -4,6 +4,7 @@ import { useAuth } from '../context/AuthContext';
 import { useTheme } from '../context/ThemeContext';
 import WeatherIcons, { getWeatherIcon } from '../components/WeatherIcons';
 import WeatherHero3DCanvas from '../components/WeatherHero3DCanvas';
+import IoTFleetMap from '../components/IoTFleetMap';
 import './LocationsView.css';
 
 // Popular quick-access metropolitan centers
@@ -22,6 +23,7 @@ const POPULAR_CITIES = [
 export default function LocationsView() {
   const { user, isGuest } = useAuth();
   const { resolvedTheme } = useTheme() || {};
+  const [activeTab, setActiveTab] = useState('map'); // 'map' | 'weather'
 
   // Active searched location state (Defaults to Current Location)
   const [currentLocation, setCurrentLocation] = useState(() => {
@@ -394,7 +396,33 @@ export default function LocationsView() {
 
       {toastMessage && <div className="loc-toast-banner">{toastMessage}</div>}
 
-      {/* ─── 2. SEARCH & SAVED TOOLBAR ROW (SIDE BY SIDE) ─── */}
+      {/* ─── TAB NAVIGATION: IOT MAP VS WEATHER INTELLIGENCE ─── */}
+      <div className="loc-view-mode-tabs" style={{ display: 'flex', gap: '10px', marginBottom: '20px', flexWrap: 'wrap' }}>
+        <button
+          type="button"
+          className={`btn-${activeTab === 'map' ? 'primary' : 'secondary'}`}
+          onClick={() => setActiveTab('map')}
+          style={{ display: 'inline-flex', alignItems: 'center', gap: '8px', padding: '10px 18px', borderRadius: '10px', fontWeight: 600, fontSize: '0.88rem' }}
+        >
+          <span>🗺️</span>
+          <span>IoT Fleet Geospatial Map</span>
+        </button>
+        <button
+          type="button"
+          className={`btn-${activeTab === 'weather' ? 'primary' : 'secondary'}`}
+          onClick={() => setActiveTab('weather')}
+          style={{ display: 'inline-flex', alignItems: 'center', gap: '8px', padding: '10px 18px', borderRadius: '10px', fontWeight: 600, fontSize: '0.88rem' }}
+        >
+          <span>🌤️</span>
+          <span>Global Weather Intelligence</span>
+        </button>
+      </div>
+
+      {activeTab === 'map' ? (
+        <IoTFleetMap />
+      ) : (
+        <>
+          {/* ─── 2. SEARCH & SAVED TOOLBAR ROW (SIDE BY SIDE) ─── */}
       <div className="loc-toolbar-row">
         {/* Search Card */}
         <div className="loc-search-card">
@@ -766,6 +794,8 @@ export default function LocationsView() {
             Type a city name above or select one of the popular quick cities like Hyderabad, London, New York, or Tokyo.
           </p>
         </div>
+      )}
+        </>
       )}
     </div>
   );

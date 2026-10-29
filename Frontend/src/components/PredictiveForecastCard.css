@@ -1,0 +1,351 @@
+/* PredictiveForecastCard.css */
+.predictive-forecast-card {
+  position: relative;
+  overflow: hidden;
+  border: 1px solid var(--border-color, rgba(255, 255, 255, 0.08));
+  background: var(--bg-card, rgba(15, 23, 42, 0.8));
+  backdrop-filter: blur(16px);
+  padding: 22px;
+  border-radius: 16px;
+  margin-bottom: 24px;
+  box-shadow: 0 10px 30px rgba(0, 0, 0, 0.25);
+  transition: transform 0.2s ease, box-shadow 0.2s ease;
+}
+
+.pfc-header {
+  display: flex;
+  align-items: flex-start;
+  justify-content: space-between;
+  gap: 16px;
+  flex-wrap: wrap;
+  margin-bottom: 16px;
+}
+
+.pfc-badge-pill {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  padding: 3px 10px;
+  border-radius: 999px;
+  font-size: 0.7rem;
+  font-weight: 700;
+  letter-spacing: 0.06em;
+  color: #a855f7;
+  background: rgba(168, 85, 247, 0.12);
+  border: 1px solid rgba(168, 85, 247, 0.25);
+  margin-bottom: 6px;
+}
+
+.pfc-title {
+  font-size: 1.15rem;
+  font-weight: 700;
+  color: var(--text-primary, #f8fafc);
+  margin: 0 0 4px 0;
+}
+
+.pfc-subtitle {
+  font-size: 0.82rem;
+  color: var(--text-muted, #94a3b8);
+  margin: 0;
+  max-width: 600px;
+}
+
+.pfc-insight-banner {
+  display: flex;
+  align-items: center;
+  gap: 14px;
+  padding: 12px 16px;
+  border-radius: 12px;
+  background: rgba(0, 240, 255, 0.05);
+  border: 1px solid rgba(0, 240, 255, 0.15);
+  margin-bottom: 18px;
+}
+
+.pfc-insight-icon {
+  font-size: 1.6rem;
+  flex-shrink: 0;
+}
+
+.pfc-insight-body {
+  flex: 1;
+  min-width: 0;
+}
+
+.pfc-insight-headline {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  flex-wrap: wrap;
+  margin-bottom: 4px;
+  color: var(--text-primary, #f8fafc);
+  font-size: 0.9rem;
+}
+
+.pfc-status-pill {
+  font-size: 0.72rem;
+  padding: 2px 8px;
+  border-radius: 6px;
+  font-weight: 600;
+}
+
+.pfc-status-pill.is-good {
+  background: rgba(16, 185, 129, 0.15);
+  color: #10b981;
+  border: 1px solid rgba(16, 185, 129, 0.3);
+}
+
+.pfc-status-pill.is-moderate {
+  background: rgba(245, 158, 11, 0.15);
+  color: #f59e0b;
+  border: 1px solid rgba(245, 158, 11, 0.3);
+}
+
+.pfc-status-pill.is-warning {
+  background: rgba(239, 68, 68, 0.15);
+  color: #ef4444;
+  border: 1px solid rgba(239, 68, 68, 0.3);
+}
+
+.pfc-insight-text {
+  font-size: 0.8rem;
+  color: var(--text-muted, #94a3b8);
+  margin: 0;
+  line-height: 1.4;
+}
+
+.pfc-chart-container {
+  margin-bottom: 16px;
+}
+
+.pfc-tooltip {
+  background: var(--bg-card, #0f172a);
+  border: 1px solid var(--border-color, rgba(255, 255, 255, 0.12));
+  border-radius: 8px;
+  padding: 8px 12px;
+  box-shadow: 0 8px 24px rgba(0, 0, 0, 0.5);
+}
+
+.pfc-tt-time {
+  font-size: 0.75rem;
+  color: var(--text-muted, #94a3b8);
+  margin-bottom: 4px;
+}
+
+.pfc-tt-row {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  font-weight: 700;
+  font-size: 0.92rem;
+  margin-bottom: 4px;
+}
+
+.pfc-tt-range {
+  font-size: 0.7rem;
+  color: var(--text-muted, #94a3b8);
+}
+
+.pfc-timeline-strip {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(76px, 1fr));
+  gap: 8px;
+  overflow-x: auto;
+  padding-top: 6px;
+}
+
+.pfc-step-card {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  text-align: center;
+  background: rgba(255, 255, 255, 0.03);
+  border: 1px solid var(--border-color, rgba(255, 255, 255, 0.06));
+  border-radius: 10px;
+  padding: 8px 4px;
+  gap: 3px;
+  transition: all 0.2s ease;
+}
+
+.pfc-step-card:hover {
+  background: rgba(255, 255, 255, 0.06);
+  transform: translateY(-2px);
+}
+
+.pfc-step-card.is-baseline {
+  background: rgba(0, 240, 255, 0.06);
+  border-color: rgba(0, 240, 255, 0.25);
+}
+
+.pfc-step-hour {
+  font-size: 0.75rem;
+  font-weight: 700;
+  color: var(--text-primary, #f8fafc);
+}
+
+.pfc-step-time {
+  font-size: 0.65rem;
+  color: var(--text-muted, #94a3b8);
+}
+
+.pfc-step-circle {
+  width: 32px;
+  height: 32px;
+  border-radius: 50%;
+  border: 2px solid currentColor;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 0.8rem;
+  font-weight: 700;
+  margin: 2px 0;
+}
+
+.pfc-step-category {
+  font-size: 0.66rem;
+  font-weight: 600;
+  text-transform: uppercase;
+}
+
+.pfc-step-conf {
+  font-size: 0.62rem;
+  color: var(--text-muted, #94a3b8);
+}
+
+/* ═════════════════════════════════════════════════════════════════════
+   Light Theme Polish for PredictiveForecastCard
+   ═════════════════════════════════════════════════════════════════════ */
+[data-theme='light'] .predictive-forecast-card {
+  background: #ffffff;
+  border-color: #e2e8f0;
+  box-shadow: 0 4px 20px rgba(15, 23, 42, 0.06);
+}
+
+[data-theme='light'] .pfc-badge-pill {
+  color: #7e22ce;
+  background: rgba(168, 85, 247, 0.1);
+  border-color: rgba(168, 85, 247, 0.25);
+}
+
+[data-theme='light'] .pfc-title {
+  color: #0f172a;
+}
+
+[data-theme='light'] .pfc-subtitle {
+  color: #475569;
+}
+
+[data-theme='light'] .pfc-insight-banner {
+  background: #f0fdf4;
+  border-color: #bbf7d0;
+}
+
+[data-theme='light'] .pfc-insight-headline {
+  color: #0f172a;
+}
+
+[data-theme='light'] .pfc-insight-text {
+  color: #475569;
+}
+
+[data-theme='light'] .pfc-tooltip {
+  background: #ffffff;
+  border-color: #cbd5e1;
+  color: #0f172a;
+  box-shadow: 0 10px 25px rgba(15, 23, 42, 0.12);
+}
+
+[data-theme='light'] .pfc-tt-time,
+[data-theme='light'] .pfc-tt-range {
+  color: #64748b;
+}
+
+[data-theme='light'] .pfc-step-card {
+  background: #f8fafc;
+  border-color: #e2e8f0;
+}
+
+[data-theme='light'] .pfc-step-card:hover {
+  background: #f1f5f9;
+}
+
+[data-theme='light'] .pfc-step-card.is-baseline {
+  background: #ecfeff;
+  border-color: #a5f3fc;
+}
+
+[data-theme='light'] .pfc-step-hour {
+  color: #0f172a;
+}
+
+[data-theme='light'] .pfc-step-time,
+[data-theme='light'] .pfc-step-conf {
+  color: #64748b;
+}
+
+/* ═════════════════════════════════════════════════════════════════════
+   Responsive Mobile & Laptop Tuning
+   ═════════════════════════════════════════════════════════════════════ */
+@media (max-width: 640px) {
+  .predictive-forecast-card {
+    padding: 14px 12px;
+    border-radius: 12px;
+    margin-bottom: 14px;
+  }
+
+  .pfc-header {
+    flex-direction: column;
+    align-items: flex-start;
+    gap: 8px;
+    margin-bottom: 12px;
+  }
+
+  .pfc-title {
+    font-size: 1.05rem;
+  }
+
+  .pfc-subtitle {
+    font-size: 0.76rem;
+  }
+
+  .pfc-insight-banner {
+    padding: 10px 12px;
+    gap: 10px;
+    margin-bottom: 14px;
+    border-radius: 10px;
+  }
+
+  .pfc-insight-icon {
+    font-size: 1.35rem;
+  }
+
+  .pfc-insight-headline {
+    font-size: 0.84rem;
+  }
+
+  .pfc-insight-text {
+    font-size: 0.74rem;
+  }
+
+  .pfc-timeline-strip {
+    display: flex;
+    overflow-x: auto;
+    -webkit-overflow-scrolling: touch;
+    scroll-snap-type: x mandatory;
+    gap: 6px;
+    padding-bottom: 8px;
+  }
+
+  .pfc-step-card {
+    flex: 0 0 74px;
+    scroll-snap-align: start;
+    padding: 6px 3px;
+  }
+
+  .pfc-step-circle {
+    width: 28px;
+    height: 28px;
+    font-size: 0.75rem;
+  }
+}
+
+

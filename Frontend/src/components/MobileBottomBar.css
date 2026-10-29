@@ -101,15 +101,16 @@
 .mobile-bottom-bar__item.is-active {
   color: var(--color-primary, #00f0ff);
   font-weight: 600;
+  background: rgba(0, 240, 255, 0.08);
 }
 
 .mobile-bottom-bar__item.is-active .mobile-bottom-bar__icon-wrap {
-  transform: translateY(-1px);
-  filter: drop-shadow(0 0 6px rgba(0, 240, 255, 0.45));
+  transform: translateY(-2px);
+  filter: drop-shadow(0 0 8px rgba(0, 240, 255, 0.55));
 }
 
 .mobile-bottom-bar__item.is-active .mobile-bottom-bar__icon-wrap svg {
-  stroke-width: 2.25;
+  stroke-width: 2.35;
 }
 
 /* Unread Alerts Badge */
@@ -132,3 +133,34 @@
   box-shadow: 0 0 8px rgba(239, 68, 68, 0.75);
   border: 1.5px solid var(--bg-card, #0f172a);
 }
+
+/* ═════════════════════════════════════════════════════════════════════
+   Light Theme Polish for MobileBottomBar
+   ═════════════════════════════════════════════════════════════════════ */
+[data-theme='light'] .mobile-bottom-bar {
+  background: rgba(255, 255, 255, 0.96);
+  border-top: 1px solid rgba(148, 163, 184, 0.35);
+  box-shadow: 0 -4px 20px rgba(15, 23, 42, 0.08);
+}
+
+[data-theme='light'] .mobile-bottom-bar__item {
+  color: #64748b;
+}
+
+[data-theme='light'] .mobile-bottom-bar__item:hover {
+  color: #0f172a;
+}
+
+[data-theme='light'] .mobile-bottom-bar__item.is-active {
+  color: #059669;
+  background: rgba(16, 185, 129, 0.1);
+}
+
+[data-theme='light'] .mobile-bottom-bar__item.is-active .mobile-bottom-bar__icon-wrap {
+  filter: drop-shadow(0 0 6px rgba(16, 185, 129, 0.4));
+}
+
+[data-theme='light'] .mobile-bottom-bar__badge {
+  border-color: #ffffff;
+}
+

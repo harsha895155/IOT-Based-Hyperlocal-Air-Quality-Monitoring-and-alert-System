@@ -98,7 +98,7 @@ function AppLayout({ readingsData }) {
   return (
     <div className={`app-layout ${isCollapsed ? 'is-collapsed' : ''}`}>
       {/* Page & Slide Specific 3D Atmospheric Background */}
-      <AirAmbient3DCanvas theme={resolvedTheme} routePath={location.pathname} />
+      <AirAmbient3DCanvas theme={resolvedTheme} routePath={location.pathname} aqi={readingsData?.latest?.airQuality} />
 
       <Sidebar
         isOpen={mobileOpen}
@@ -113,6 +113,8 @@ function AppLayout({ readingsData }) {
           isSidebarCollapsed={isCollapsed}
           connected={connected}
           unreadAlerts={unreadAlertsCount}
+          isDeviceOnline={readingsData?.isCurrentDeviceOnline}
+          activeDevicesCount={readingsData?.activeDevicesCount}
         />
 
         <main className="app-content">

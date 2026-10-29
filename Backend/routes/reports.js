@@ -21,16 +21,12 @@ router.get('/summary', optionalAuth, async (req, res, next) => {
 
     const matchStage = { createdAt: { $gte: fromDate } };
     if (deviceId && deviceId !== 'all') {
-      const dev = await Device.findOne({ deviceId: deviceId.trim() });
-      if (dev && dev.userId) {
-        if (!req.user || (req.user.role !== 'admin' && dev.userId.toString() !== req.user._id.toString())) {
-          return res.status(403).json({ error: 'Access forbidden. This device belongs to another user.' });
-        }
-      }
       matchStage.deviceId = deviceId.trim();
     } else if (req.user && req.user.role !== 'admin') {
-      const userDevices = await Device.find({ userId: req.user._id }).select('deviceId');
-      matchStage.deviceId = { $in: userDevices.map((d) => d.deviceId) };
+      const userDevices = await Device.find({ $or: [{ userId: req.user._id }, { userId: null }] }).select('deviceId');
+      if (userDevices.length > 0) {
+        matchStage.deviceId = { $in: userDevices.map((d) => d.deviceId) };
+      }
     }
 
     const [stats] = await Reading.aggregate([
@@ -169,16 +165,12 @@ router.get('/csv', optionalAuth, async (req, res, next) => {
     const { deviceId, limit = 1000, range = '24h' } = req.query;
     const filter = {};
     if (deviceId && deviceId !== 'all') {
-      const dev = await Device.findOne({ deviceId: deviceId.trim() });
-      if (dev && dev.userId) {
-        if (!req.user || (req.user.role !== 'admin' && dev.userId.toString() !== req.user._id.toString())) {
-          return res.status(403).json({ error: 'Access forbidden. This device belongs to another user.' });
-        }
-      }
       filter.deviceId = deviceId.trim();
     } else if (req.user && req.user.role !== 'admin') {
-      const userDevices = await Device.find({ userId: req.user._id }).select('deviceId');
-      filter.deviceId = { $in: userDevices.map((d) => d.deviceId) };
+      const userDevices = await Device.find({ $or: [{ userId: req.user._id }, { userId: null }] }).select('deviceId');
+      if (userDevices.length > 0) {
+        filter.deviceId = { $in: userDevices.map((d) => d.deviceId) };
+      }
     }
 
     const msMap = {
@@ -215,16 +207,12 @@ router.get('/json', optionalAuth, async (req, res, next) => {
     const { deviceId, range = '24h' } = req.query;
     const filter = {};
     if (deviceId && deviceId !== 'all') {
-      const dev = await Device.findOne({ deviceId: deviceId.trim() });
-      if (dev && dev.userId) {
-        if (!req.user || (req.user.role !== 'admin' && dev.userId.toString() !== req.user._id.toString())) {
-          return res.status(403).json({ error: 'Access forbidden. This device belongs to another user.' });
-        }
-      }
       filter.deviceId = deviceId.trim();
     } else if (req.user && req.user.role !== 'admin') {
-      const userDevices = await Device.find({ userId: req.user._id }).select('deviceId');
-      filter.deviceId = { $in: userDevices.map((d) => d.deviceId) };
+      const userDevices = await Device.find({ $or: [{ userId: req.user._id }, { userId: null }] }).select('deviceId');
+      if (userDevices.length > 0) {
+        filter.deviceId = { $in: userDevices.map((d) => d.deviceId) };
+      }
     }
 
     const msMap = {

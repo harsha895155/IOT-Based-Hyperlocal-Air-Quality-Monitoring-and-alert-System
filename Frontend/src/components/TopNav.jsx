@@ -19,7 +19,14 @@ const PATH_TITLES = {
   '/login': 'Account Access',
 };
 
-export default function TopNav({ onToggleSidebar, isSidebarCollapsed = false, connected, unreadAlerts = 0 }) {
+export default function TopNav({
+  onToggleSidebar,
+  isSidebarCollapsed = false,
+  connected,
+  unreadAlerts = 0,
+  isDeviceOnline = false,
+  activeDevicesCount = 0,
+}) {
   const { user, isGuest, logout } = useAuth();
   const { resolvedTheme, toggleTheme } = useTheme();
   const location = useLocation();
@@ -90,10 +97,17 @@ export default function TopNav({ onToggleSidebar, isSidebarCollapsed = false, co
       </div>
 
       <div className="topnav__right">
-        {/* Status pill: • ONLINE / • OFFLINE */}
-        <div className={`topnav__status-pill ${connected ? 'is-online' : 'is-offline'}`}>
+        {/* Status pill: strictly reflects physical IoT hardware transmission */}
+        <div
+          className={`topnav__status-pill ${isDeviceOnline ? 'is-online' : 'is-offline'}`}
+          title={
+            isDeviceOnline
+              ? `IoT Sensing Node Online (${activeDevicesCount} transmitting) • Cloud Connected`
+              : `IoT Hardware Offline • Awaiting physical sensor packets`
+          }
+        >
           <span className="topnav__status-dot" />
-          <span className="topnav__status-text">{connected ? 'ONLINE' : 'OFFLINE'}</span>
+          <span className="topnav__status-text">{isDeviceOnline ? 'IOT ONLINE' : 'IOT OFFLINE'}</span>
         </div>
 
         {/* Theme Toggle (Sun / Moon) */}

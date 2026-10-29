@@ -91,7 +91,7 @@ const userSchema = new mongoose.Schema(
       windUnit: { type: String, default: 'km/h' },
       pressureUnit: { type: String, default: 'hPa' },
       refreshRate: { type: Number, default: 15 },
-      defaultStation: { type: String, default: 'AIRGUARD-001' },
+      defaultStation: { type: String, default: 'current-location' },
       aqiWarnThreshold: { type: Number, default: 100 },
       aqiCriticalThreshold: { type: Number, default: 150 },
       sensitivityProfile: { type: String, default: 'standard' },

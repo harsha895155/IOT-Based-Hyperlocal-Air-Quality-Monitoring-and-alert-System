@@ -11,6 +11,14 @@ import './MobileBottomBar.css';
 export default function MobileBottomBar({ unreadAlerts = 0, onOpenMenu }) {
   const location = useLocation();
 
+  const handleTap = () => {
+    if (typeof navigator !== 'undefined' && navigator.vibrate) {
+      try {
+        navigator.vibrate(12);
+      } catch (e) {}
+    }
+  };
+
   // Test if devices group is active (e.g. /devices or /devices/:id)
   const isDevicesActive = location.pathname.startsWith('/devices');
 
@@ -20,6 +28,7 @@ export default function MobileBottomBar({ unreadAlerts = 0, onOpenMenu }) {
         {/* 1. Dashboard */}
         <NavLink
           to="/dashboard"
+          onClick={handleTap}
           className={({ isActive }) =>
             `mobile-bottom-bar__item ${isActive ? 'is-active' : ''}`
           }
@@ -38,6 +47,7 @@ export default function MobileBottomBar({ unreadAlerts = 0, onOpenMenu }) {
         {/* 2. Devices */}
         <NavLink
           to="/devices"
+          onClick={handleTap}
           className={`mobile-bottom-bar__item ${isDevicesActive ? 'is-active' : ''}`}
         >
           <div className="mobile-bottom-bar__icon-wrap">
@@ -56,6 +66,7 @@ export default function MobileBottomBar({ unreadAlerts = 0, onOpenMenu }) {
         {/* 3. Analytics */}
         <NavLink
           to="/analytics"
+          onClick={handleTap}
           className={({ isActive }) =>
             `mobile-bottom-bar__item ${isActive ? 'is-active' : ''}`
           }
@@ -73,6 +84,7 @@ export default function MobileBottomBar({ unreadAlerts = 0, onOpenMenu }) {
         {/* 4. Alerts with Badge */}
         <NavLink
           to="/alerts"
+          onClick={handleTap}
           className={({ isActive }) =>
             `mobile-bottom-bar__item ${isActive ? 'is-active' : ''}`
           }
@@ -93,7 +105,10 @@ export default function MobileBottomBar({ unreadAlerts = 0, onOpenMenu }) {
         <button
           type="button"
           className="mobile-bottom-bar__item mobile-bottom-bar__button"
-          onClick={onOpenMenu}
+          onClick={() => {
+            handleTap();
+            onOpenMenu();
+          }}
           aria-label="Open full navigation menu"
         >
           <div className="mobile-bottom-bar__icon-wrap">

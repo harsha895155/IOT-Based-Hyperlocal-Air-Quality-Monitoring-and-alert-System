@@ -7,47 +7,33 @@ const User = require('../models/User');
 const { protect, optionalAuth } = require('../middleware/auth');
 const { getWeatherForCoordinates } = require('../services/weatherService');
 
-// GET /api/devices — returns ONLY devices owned by the currently authenticated user
+// GET /api/devices — returns fleet devices for active monitoring
 router.get('/', optionalAuth, async (req, res, next) => {
   try {
-    // If user is not authenticated (e.g. guest), return an empty array.
-    if (!req.user) {
-      return res.json([]);
-    }
-
     let filter = {};
-    if (req.user.role === 'admin') {
+    if (req.user && req.user.role === 'admin') {
       // Admins view all fleet devices across all user accounts
       filter = {};
+    } else if (req.user) {
+      // Standard users view their own devices plus public/unclaimed active nodes
+      filter = { $or: [{ userId: req.user._id }, { userId: null }] };
     } else {
-      // Standard users can ONLY view their own devices
-      filter = { userId: req.user._id };
+      // Guests / Public visitors view all active sensing fleet devices
+      filter = {};
     }
 
     const devices = await Device.find(filter)
       .populate('userId', 'name email role')
       .sort({ createdAt: 1 });
 
-    // Attach latest reading metrics to each owned device
+    // Attach latest reading metrics to each device
     const enriched = await Promise.all(
       devices.map(async (doc) => {
         const dev = doc.toObject({ virtuals: true });
         const latest = await Reading.findOne({ deviceId: dev.deviceId }).sort({ createdAt: -1 });
 
-        let temp = latest ? latest.temperature : null;
-        let hum = latest ? latest.humidity : null;
-
-        // If reading has the constant fallback (26°C / 50%), always show the location's live weather
-        if (latest && Math.round(temp) === 26 && Math.round(hum) === 50) {
-          try {
-            const coords = dev.coordinates && dev.coordinates.lat != null ? dev.coordinates : { lat: 14.489, lng: 79.957 };
-            const weather = await getWeatherForCoordinates(coords.lat, coords.lng, dev.location);
-            if (weather && weather.temperature != null && weather.humidity != null) {
-              temp = weather.temperature;
-              hum = weather.humidity;
-            }
-          } catch (wErr) {}
-        }
+        const temp = latest ? latest.temperature : null;
+        const hum = latest ? latest.humidity : null;
 
         const ownerUser = doc.userId && typeof doc.userId === 'object' && doc.userId.name
           ? {

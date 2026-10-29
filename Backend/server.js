@@ -144,12 +144,56 @@ app.use(errorHandler);
 
 const PORT = process.env.PORT || 5000;
 
+// Device status watchdog: proactively detects and broadcasts offline transitions
+function initDeviceWatchdog(ioInstance) {
+  const { Device, OFFLINE_TIMEOUT_MS } = require('./models/Device');
+  const deviceStateMap = new Map();
+
+  setInterval(async () => {
+    try {
+      const devices = await Device.find({}, 'deviceId name location lastSeen offlineTimeoutMs userId').lean();
+      const now = Date.now();
+
+      for (const dev of devices) {
+        const timeout = dev.offlineTimeoutMs || OFFLINE_TIMEOUT_MS;
+        const elapsed = dev.lastSeen ? now - new Date(dev.lastSeen).getTime() : Infinity;
+        const isOnline = elapsed < timeout;
+        const currentStatus = isOnline ? 'Online' : 'Offline';
+
+        const prevStatus = deviceStateMap.get(dev.deviceId);
+
+        if (prevStatus !== undefined && prevStatus !== currentStatus) {
+          deviceStateMap.set(dev.deviceId, currentStatus);
+          const payload = {
+            deviceId: dev.deviceId,
+            name: dev.name,
+            location: dev.location,
+            status: currentStatus,
+            lastSeen: dev.lastSeen,
+          };
+          ioInstance.emit('device_status', payload);
+          if (dev.userId) {
+            ioInstance.to(`user_${dev.userId}`).emit('device_status', payload);
+          }
+          ioInstance.to(`device_${dev.deviceId}`).emit('device_status', payload);
+          console.log(`[Watchdog] Sensing Node ${dev.deviceId} status changed: ${prevStatus} -> ${currentStatus}`);
+        } else if (prevStatus === undefined) {
+          deviceStateMap.set(dev.deviceId, currentStatus);
+        }
+      }
+    } catch (err) {
+      // Ignore background transient database errors
+    }
+  }, 10000);
+}
+
 async function start() {
-  await connectDB();
-  initScheduler();
   server.listen(PORT, () => {
     console.log(`[Server] Listening on port ${PORT} (${process.env.NODE_ENV || 'development'})`);
   });
+  await connectDB();
+  initScheduler();
+  initDeviceWatchdog(io);
 }
 
 start();

@@ -1161,47 +1161,45 @@
     display: flex !important;
     justify-content: space-between !important;
     align-items: center !important;
-    gap: 6px !important;
-    flex-wrap: nowrap !important;
+    gap: 8px !important;
+    flex-wrap: wrap !important;
   }
 
   .weather-title-left {
     display: flex !important;
     align-items: center !important;
-    gap: 6px !important;
-    flex-wrap: nowrap !important;
+    gap: 8px !important;
+    flex-wrap: wrap !important;
     min-width: 0 !important;
     flex: 1 1 auto !important;
-    overflow: hidden !important;
   }
 
   .weather-location-title {
-    font-size: 1.2rem !important;
+    font-size: clamp(1.15rem, 3.8vw, 1.45rem) !important;
     white-space: nowrap !important;
     overflow: hidden !important;
     text-overflow: ellipsis !important;
   }
 
   .live-pulse-badge {
-    padding: 3px 6px !important;
-    font-size: 0.64rem !important;
+    padding: 3px 8px !important;
+    font-size: 0.66rem !important;
     flex-shrink: 0 !important;
     white-space: nowrap !important;
   }
 
   .device-quick-picker {
     width: auto !important;
-    max-width: 125px !important;
+    max-width: 210px !important;
     flex-shrink: 0 !important;
-    margin-left: auto !important;
   }
 
   .device-quick-picker .btn-glass-dropdown {
     width: auto !important;
     justify-content: space-between !important;
-    height: 28px !important;
-    padding: 2px 7px !important;
-    font-size: 0.70rem !important;
+    height: 30px !important;
+    padding: 3px 10px !important;
+    font-size: 0.72rem !important;
     white-space: nowrap !important;
     border-radius: 9999px !important;
   }
@@ -1210,16 +1208,16 @@
     overflow: hidden !important;
     text-overflow: ellipsis !important;
     white-space: nowrap !important;
-    max-width: 72px !important;
+    max-width: 140px !important;
   }
 
   .dashboard-current-mode-banner {
-    padding: 8px 10px !important;
-    font-size: 0.74rem !important;
-    gap: 6px !important;
-    margin-bottom: 8px !important;
+    padding: 8px 12px !important;
+    font-size: 0.76rem !important;
+    gap: 8px !important;
+    margin-bottom: 10px !important;
     border-radius: 10px !important;
-    flex-wrap: nowrap !important;
+    flex-wrap: wrap !important;
   }
 
   .current-mode-icon {
@@ -1458,7 +1456,8 @@
 }
 
 [data-theme='light'] .device-selector-btn,
-[data-theme='light'] .weather-gps-btn {
+[data-theme='light'] .weather-gps-btn,
+[data-theme='light'] .btn-glass-dropdown {
   background: #ffffff;
   border-color: #cbd5e1;
   color: #0f172a;
@@ -1466,7 +1465,8 @@
 }
 
 [data-theme='light'] .device-selector-btn:hover,
-[data-theme='light'] .weather-gps-btn:hover {
+[data-theme='light'] .weather-gps-btn:hover,
+[data-theme='light'] .btn-glass-dropdown:hover {
   background: #f8fafc;
   border-color: #10b981;
   color: #059669;

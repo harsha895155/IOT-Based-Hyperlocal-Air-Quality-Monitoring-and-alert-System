@@ -4,12 +4,12 @@ import { getSocket } from '../api/socket';
 import { useAuth } from '../context/AuthContext';
 import { playHighAlertSound } from '../utils/audioAlert';
 
-const DEFAULT_DEVICE_ID = 'esp32-node-01';
+const DEFAULT_DEVICE_ID = 'current-location';
 const MAX_TREND_POINTS = 30;
 
 // Resolve station identifier (deviceId or friendly name) to canonical deviceId
 export function resolveDeviceId(stationIdentifier, devicesList = []) {
-  if (!stationIdentifier) return DEFAULT_DEVICE_ID;
+  if (!stationIdentifier || stationIdentifier === 'current-location') return 'current-location';
   if (!devicesList || !devicesList.length) return stationIdentifier;
 
   // 1. Direct match on deviceId or id
@@ -63,32 +63,33 @@ export function useReadings() {
     return 'guest';
   }, [user, isGuest]);
 
-  // Initial station loader with fallback cascade
+  // Initial station loader: defaults to 'current-location'
   const getInitialDevice = useCallback(() => {
     try {
       // 1. Check account-scoped localStorage
       const accountSaved = localStorage.getItem(`airguard_station_pref_${accountKey}`);
-      if (accountSaved) return accountSaved;
+      if (accountSaved && accountSaved === 'current-location') return 'current-location';
+      if (accountSaved && accountSaved !== 'esp32-node-01') return accountSaved;
 
       // 2. Check user profile preferences from MongoDB Atlas
-      if (preferences?.defaultStation) return preferences.defaultStation;
-      if (user?.preferences?.defaultStation) return user.preferences.defaultStation;
+      if (preferences?.defaultStation && preferences.defaultStation !== 'esp32-node-01') return preferences.defaultStation;
+      if (user?.preferences?.defaultStation && user.preferences.defaultStation !== 'esp32-node-01') return user.preferences.defaultStation;
 
       // 3. Fallback generic station
       const fallback = localStorage.getItem('airguard_selected_device');
-      if (fallback) return fallback;
+      if (fallback && fallback === 'current-location') return 'current-location';
+      if (fallback && fallback !== 'esp32-node-01') return fallback;
     } catch (e) {
       console.warn('Storage read error for station preference:', e);
     }
-    return DEFAULT_DEVICE_ID;
+    return DEFAULT_DEVICE_ID; // 'current-location'
   }, [accountKey, preferences?.defaultStation, user?.preferences?.defaultStation]);
 
   const [selectedDevice, setSelectedDeviceRaw] = useState(getInitialDevice);
 
   // Offline-First: Hydrate all initial state from persistent local storage
   const [devices, setDevices] = useState(() => {
-    if (isGuest || !user) return [];
-    return getCachedJson(`airguard_devices_cache_${accountKey}`, []);
+    return getCachedJson(`airguard_devices_cache_${accountKey}`, []) || [];
   });
 
   const [locations, setLocations] = useState(() => {
@@ -111,7 +112,7 @@ export function useReadings() {
   const [loading, setLoading] = useState(true);
   const [loadError, setLoadError] = useState(null);
   const [isOffline, setIsOffline] = useState(() => (typeof navigator !== 'undefined' ? !navigator.onLine : false));
-  const [, setTick] = useState(0);
+  const [tick, setTick] = useState(0);
 
   // Network connectivity state listeners
   useEffect(() => {
@@ -177,9 +178,27 @@ export function useReadings() {
     [accountKey, devices, isGuest, user, updatePreferences]
   );
 
-  // Live timer tick to update relative timestamps without re-fetching
+  // Live timer tick to update relative timestamps & proactively expire offline hardware nodes
   useEffect(() => {
-    const timer = setInterval(() => setTick((t) => t + 1), 5000);
+    const timer = setInterval(() => {
+      setTick((t) => t + 1);
+      setDevices((prev) => {
+        let changed = false;
+        const now = Date.now();
+        const next = prev.map((d) => {
+          const timeout = d.offlineTimeoutMs || 45000;
+          const elapsed = d.lastSeen ? now - new Date(d.lastSeen).getTime() : Infinity;
+          const isOnline = elapsed < timeout;
+          const currentStatus = isOnline ? 'Online' : 'Offline';
+          if (d.status !== currentStatus) {
+            changed = true;
+            return { ...d, status: currentStatus, isOnline };
+          }
+          return d;
+        });
+        return changed ? next : prev;
+      });
+    }, 5000);
     return () => clearInterval(timer);
   }, []);
 
@@ -199,23 +218,25 @@ export function useReadings() {
       }
 
       try {
+        const queryParams = selectedDevice && selectedDevice !== 'current-location' ? { deviceId: selectedDevice } : {};
+        const historyParams = selectedDevice && selectedDevice !== 'current-location' ? { deviceId: selectedDevice, limit: MAX_TREND_POINTS } : { limit: MAX_TREND_POINTS };
+        const alertsParams = selectedDevice && selectedDevice !== 'current-location' ? { deviceId: selectedDevice } : {};
+
         const [latestRes, historyRes, alertsRes, devicesRes, locationsRes] = await Promise.allSettled([
-          client.get('/readings/latest', { params: { deviceId: selectedDevice } }),
-          client.get('/readings/history', { params: { deviceId: selectedDevice, limit: MAX_TREND_POINTS } }),
-          client.get('/alerts', { params: { deviceId: selectedDevice } }),
+          client.get('/readings/latest', { params: queryParams }),
+          client.get('/readings/history', { params: historyParams }),
+          client.get('/alerts', { params: alertsParams }),
           client.get('/devices'),
           client.get('/locations'),
         ]);
 
-        if (isGuest || !user) {
-          setDevices([]);
-        } else if (devicesRes.status === 'fulfilled' && Array.isArray(devicesRes.value.data)) {
+        if (devicesRes.status === 'fulfilled' && Array.isArray(devicesRes.value.data)) {
           const loadedDevs = devicesRes.value.data;
           setDevices(loadedDevs);
           try {
             localStorage.setItem(`airguard_devices_cache_${accountKey}`, JSON.stringify(loadedDevs));
           } catch (e) {}
-          setSelectedDeviceRaw((curr) => resolveDeviceId(curr, loadedDevs));
+          setSelectedDeviceRaw((curr) => (curr === 'current-location' ? 'current-location' : resolveDeviceId(curr, loadedDevs)));
         }
 
         if (locationsRes.status === 'fulfilled' && Array.isArray(locationsRes.value.data)) {
@@ -359,7 +380,7 @@ export function useReadings() {
       setDevices((prev) =>
         prev.map((d) =>
           d.id === statusUpdate.deviceId || d.deviceId === statusUpdate.deviceId
-            ? { ...d, ...statusUpdate }
+            ? { ...d, ...statusUpdate, isOnline: statusUpdate.status === 'Online' }
             : d
         )
       );
@@ -458,8 +479,21 @@ export function useReadings() {
   }, [alerts]);
 
   const activeDevicesCount = useMemo(() => {
-    return devices.filter((d) => d.status === 'Online').length;
-  }, [devices]);
+    const now = Date.now();
+    return devices.filter((d) => {
+      if (!d.lastSeen) return false;
+      const timeout = d.offlineTimeoutMs || 45000;
+      return now - new Date(d.lastSeen).getTime() < timeout;
+    }).length;
+  }, [devices, tick]);
+
+  const isCurrentDeviceOnline = useMemo(() => {
+    if (!selectedDevice || selectedDevice === 'current-location') return false;
+    const cur = devices.find((d) => d.id === selectedDevice || d.deviceId === selectedDevice);
+    if (!cur || !cur.lastSeen) return false;
+    const timeout = cur.offlineTimeoutMs || 45000;
+    return Date.now() - new Date(cur.lastSeen).getTime() < timeout;
+  }, [devices, selectedDevice, tick]);
 
   return {
     selectedDevice,
@@ -471,6 +505,7 @@ export function useReadings() {
     alerts,
     unreadAlertsCount,
     activeDevicesCount,
+    isCurrentDeviceOnline,
     connected,
     loading,
     loadError,

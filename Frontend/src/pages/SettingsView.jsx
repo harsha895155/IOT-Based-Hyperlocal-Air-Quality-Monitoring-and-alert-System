@@ -82,7 +82,7 @@ export default function SettingsView() {
 
   // 3. Telemetry & IoT Controls
   const [refreshRate, setRefreshRate] = useState(preferences?.refreshRate ?? 15);
-  const [defaultStation, setDefaultStation] = useState(preferences?.defaultStation || '');
+  const [defaultStation, setDefaultStation] = useState(preferences?.defaultStation || 'current-location');
   const [timeoutSec, setTimeoutSec] = useState(preferences?.timeoutSec ?? 60);
   const [smoothCharts, setSmoothCharts] = useState(preferences?.smoothCharts ?? true);
 
@@ -92,6 +92,7 @@ export default function SettingsView() {
   const [aqiCriticalThreshold, setAqiCriticalThreshold] = useState(preferences?.aqiCriticalThreshold ?? 150);
   const [extremeHeatThreshold, setExtremeHeatThreshold] = useState(preferences?.extremeHeatThreshold ?? 38);
   const [soundAlerts, setSoundAlerts] = useState(preferences?.soundAlerts ?? true);
+  const [sessionTimeout, setSessionTimeout] = useState(() => localStorage.getItem('airguard_session_timeout') || '30m');
 
   // 5. Notification Channels
   const [emailAlerts, setEmailAlerts] = useState(preferences?.emailAlerts ?? true);
@@ -254,8 +255,9 @@ export default function SettingsView() {
       if (Array.isArray(res.data) && res.data.length > 0) {
         setDeviceList(res.data);
         setDefaultStation((prev) => {
+          if (prev === 'current-location') return 'current-location';
           const exists = res.data.some((d) => (d.deviceId || d.id) === prev);
-          return exists ? prev : (res.data[0].deviceId || res.data[0].id);
+          return exists ? prev : 'current-location';
         });
       }
     }).catch(() => {});
@@ -437,7 +439,7 @@ export default function SettingsView() {
       setPressureUnit('hPa');
       setTimeFormat('12h');
       setRefreshRate(15);
-      setDefaultStation('AIRGUARD-001');
+      setDefaultStation('current-location');
       setTimeoutSec(60);
       setSmoothCharts(true);
       setSensitivityProfile('standard');
@@ -711,19 +713,16 @@ export default function SettingsView() {
                 value={defaultStation}
                 onChange={(e) => setDefaultStation(e.target.value)}
               >
-                {deviceList.length === 0 ? (
-                  <option value="">No Active Hardware Nodes Connected</option>
-                ) : (
-                  deviceList.map((d) => {
-                    const dId = d.deviceId || d.id;
-                    const label = d.name ? `${dId} — ${d.name}` : dId;
-                    return (
-                      <option key={dId} value={dId}>
-                        {label} {d.location ? `(${d.location})` : ''}
-                      </option>
-                    );
-                  })
-                )}
+                <option value="current-location">📍 Current Location (Live GPS Weather & AQI)</option>
+                {deviceList.map((d) => {
+                  const dId = d.deviceId || d.id;
+                  const label = d.name ? `${dId} — ${d.name}` : dId;
+                  return (
+                    <option key={dId} value={dId}>
+                      {label} {d.location ? `(${d.location})` : ''}
+                    </option>
+                  );
+                })}
               </select>
             </div>
 
@@ -1135,6 +1134,85 @@ export default function SettingsView() {
                 <span>{dispatchStatus.message}</span>
               </div>
             )}
+          </div>
+        </section>
+
+        {/* ─── 6.5 Enterprise Access Control, Role Permissions & Session Security ─── */}
+        <section className="card settings-card">
+          <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '16px', flexWrap: 'wrap', gap: '10px' }}>
+            <h2 className="settings-card__title" style={{ margin: 0 }}>Access Control, Role Permissions & Security</h2>
+            <span className="settings-tag" style={{ background: 'rgba(56, 189, 248, 0.15)', color: '#38bdf8' }}>
+              RBAC Policy
+            </span>
+          </div>
+
+          <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(280px, 1fr))', gap: '16px', marginBottom: '18px' }}>
+            <div style={{ padding: '14px', background: 'rgba(255, 255, 255, 0.03)', borderRadius: '10px', border: '1px solid var(--border-soft)' }}>
+              <div style={{ fontSize: '0.75rem', color: 'var(--text-muted)', marginBottom: '4px' }}>CURRENT ACCOUNT PRIVILEGE LEVEL</div>
+              <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
+                <span style={{ fontSize: '1.2rem' }}>🛡️</span>
+                <strong style={{ fontSize: '1.05rem', color: 'var(--text-primary)' }}>
+                  {user?.role === 'admin' ? 'Super Administrator' : 'Facility Environmental Officer'}
+                </strong>
+              </div>
+              <p style={{ margin: '6px 0 0 0', fontSize: '0.76rem', color: 'var(--text-muted)' }}>
+                {user?.role === 'admin'
+                  ? 'Full administrative control over all IoT nodes, user authentication, and system dispatch schedules.'
+                  : 'Operator permissions to monitor live telemetry, acknowledge alerts, and export compliance reports.'}
+              </p>
+            </div>
+
+            <div style={{ padding: '14px', background: 'rgba(255, 255, 255, 0.03)', borderRadius: '10px', border: '1px solid var(--border-soft)' }}>
+              <div style={{ fontSize: '0.75rem', color: 'var(--text-muted)', marginBottom: '8px' }}>AUTHORIZED CAPABILITY MATRIX</div>
+              <div style={{ display: 'flex', flexWrap: 'wrap', gap: '6px' }}>
+                <span className="dd-chip dd-chip--online" style={{ fontSize: '0.72rem' }}>✓ Live IoT Streaming</span>
+                <span className="dd-chip dd-chip--online" style={{ fontSize: '0.72rem' }}>✓ Sensor Calibration</span>
+                <span className="dd-chip dd-chip--online" style={{ fontSize: '0.72rem' }}>✓ Web Flasher / Serial</span>
+                <span className="dd-chip dd-chip--online" style={{ fontSize: '0.72rem' }}>✓ Statutory PDF Audits</span>
+                <span className="dd-chip dd-chip--online" style={{ fontSize: '0.72rem' }}>✓ Emergency Web Push</span>
+              </div>
+            </div>
+          </div>
+
+          <div className="settings-grid-2">
+            <div className="settings-field">
+              <label className="settings-field-label" htmlFor="settings-session-timeout">
+                🔒 Inactivity Session Auto-Lock
+              </label>
+              <select
+                id="settings-session-timeout"
+                className="settings-select"
+                value={sessionTimeout}
+                onChange={(e) => {
+                  setSessionTimeout(e.target.value);
+                  localStorage.setItem('airguard_session_timeout', e.target.value);
+                }}
+              >
+                <option value="15m">15 Minutes (High Security Laboratory Standard)</option>
+                <option value="30m">30 Minutes (Recommended)</option>
+                <option value="1h">1 Hour (Standard Workstation Shift)</option>
+                <option value="never">Disabled (Always Active Wall Dashboard Mode)</option>
+              </select>
+              <p className="settings-row__desc">Automatically lock administrative controls when screen is idle.</p>
+            </div>
+
+            <div className="settings-field">
+              <label className="settings-field-label">
+                👥 Multi-Tenant Fleet Monitor Sharing
+              </label>
+              <button
+                type="button"
+                className="btn btn--secondary"
+                style={{ width: '100%', marginTop: '6px', fontSize: '0.82rem' }}
+                onClick={() => {
+                  navigator.clipboard.writeText(`${window.location.origin}/dashboard`);
+                  alert('Copied guest read-only telemetry link to clipboard! Team members can inspect live sensors.');
+                }}
+              >
+                📋 Copy Read-Only Fleet Monitor Link
+              </button>
+              <p className="settings-row__desc">Share real-time dashboard telemetry with facility colleagues.</p>
+            </div>
           </div>
         </section>
 

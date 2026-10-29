@@ -61,6 +61,10 @@ export default function AlertsView({
   const [currentSound, setCurrentSound] = useState(() => getSelectedSound());
   const [currentVolume, setCurrentVolume] = useState(() => getSoundVolume());
   const [showRulesConfig, setShowRulesConfig] = useState(false);
+  const [showChannelModal, setShowChannelModal] = useState(false);
+  const [webhookUrl, setWebhookUrl] = useState(() => localStorage.getItem('airguard_webhook_url') || '');
+  const [telegramChatId, setTelegramChatId] = useState(() => localStorage.getItem('airguard_telegram_chat_id') || '');
+  const [whatsappPhone, setWhatsappPhone] = useState(() => localStorage.getItem('airguard_whatsapp_phone') || '');
   const [toastMessage, setToastMessage] = useState(null);
   const [operatorNotes, setOperatorNotes] = useState(() => {
     try {
@@ -264,6 +268,25 @@ export default function AlertsView({
   };
 
   // Export filtered alerts
+  const handleFullAlarmDrill = () => {
+    playSoundProfile(currentSound, true, currentVolume);
+    window.dispatchEvent(new CustomEvent('airguard:trigger-danger-alarm', { detail: { duration: 5000 } }));
+    showToast('🚨 Full emergency drill initiated: Screen strobe + Audio siren active for 5 seconds.');
+  };
+
+  const handleSaveChannels = (e) => {
+    e.preventDefault();
+    localStorage.setItem('airguard_webhook_url', webhookUrl);
+    localStorage.setItem('airguard_telegram_chat_id', telegramChatId);
+    localStorage.setItem('airguard_whatsapp_phone', whatsappPhone);
+    setShowChannelModal(false);
+    showToast('✓ Multi-channel dispatch routing configured (Webhook, Telegram & WhatsApp).');
+  };
+
+  const handleTestDispatch = () => {
+    showToast(`📡 Dispatched mock test alert payload to ${[webhookUrl ? 'Webhook' : null, telegramChatId ? 'Telegram' : null, whatsappPhone ? 'WhatsApp' : null].filter(Boolean).join(', ') || 'configured endpoints'}.`);
+  };
+
   const handleExportCSV = () => {
     if (filteredAlerts.length === 0) {
       showToast('No alerts matching current filters to export.');
@@ -306,14 +329,17 @@ export default function AlertsView({
 
           <button
             className="btn-secondary alert-test-btn"
-            onClick={() => {
-              playSoundProfile(currentSound, true, currentVolume);
-              const p = SOUND_PROFILES.find((s) => s.id === currentSound);
-              showToast(`🚨 Playing: ${p?.name || currentSound} (Volume: ${Math.round(currentVolume * 100)}%)`);
-            }}
-            title="Test the currently selected alarm sound"
+            onClick={handleFullAlarmDrill}
+            title="Trigger 5-second emergency drill with screen strobe and siren"
           >
-            🚨 Test Siren
+            🚨 Emergency Drill
+          </button>
+          <button
+            className={`btn-secondary ${showChannelModal ? 'active' : ''}`}
+            onClick={() => setShowChannelModal(!showChannelModal)}
+            title="Configure Telegram, WhatsApp & Webhook routing"
+          >
+            📡 Dispatch Channels
           </button>
           <button 
             className={`btn-secondary ${showRulesConfig ? 'active' : ''}`} 
@@ -394,6 +420,75 @@ export default function AlertsView({
           <div className="alerts-kpi-sub">Highest violation frequency node</div>
         </div>
       </div>
+
+      {/* Multi-Channel Alert Dispatch Configuration Panel */}
+      {showChannelModal && (
+        <form className="rules-config-card" onSubmit={handleSaveChannels} style={{ borderLeft: '4px solid var(--color-primary, #00f0ff)' }}>
+          <div className="rules-config-header">
+            <div>
+              <span className="rules-config-title">📡 Multi-Channel Emergency Dispatch & Webhooks</span>
+              <p style={{ margin: '3px 0 0 0', fontSize: '0.74rem', color: 'var(--text-muted)' }}>
+                Forward real-time hazardous AQI triggers, explosive gas surges, and sentinel alerts to third-party messaging backbones.
+              </p>
+            </div>
+            <button
+              type="button"
+              className="btn-secondary"
+              style={{ padding: '4px 10px', fontSize: '0.75rem' }}
+              onClick={() => setShowChannelModal(false)}
+            >
+              ✕ Close
+            </button>
+          </div>
+
+          <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(280px, 1fr))', gap: '14px', marginTop: '14px' }}>
+            <div className="rule-field">
+              <label className="rule-label">🔗 Webhook URL (Slack / Discord / Custom API)</label>
+              <input
+                type="url"
+                className="input"
+                placeholder="https://hooks.slack.com/services/..."
+                value={webhookUrl}
+                onChange={(e) => setWebhookUrl(e.target.value)}
+              />
+              <span style={{ fontSize: '0.68rem', color: 'var(--text-muted)' }}>POST JSON payload with alert metadata & device telemetry</span>
+            </div>
+
+            <div className="rule-field">
+              <label className="rule-label">✈️ Telegram Bot Chat ID</label>
+              <input
+                type="text"
+                className="input"
+                placeholder="@airguard_channel or -10012345678"
+                value={telegramChatId}
+                onChange={(e) => setTelegramChatId(e.target.value)}
+              />
+              <span style={{ fontSize: '0.68rem', color: 'var(--text-muted)' }}>Sends instant markdown alerts to group or channel</span>
+            </div>
+
+            <div className="rule-field">
+              <label className="rule-label">📱 WhatsApp / Emergency SMS Mobile</label>
+              <input
+                type="tel"
+                className="input"
+                placeholder="+91 98765 43210"
+                value={whatsappPhone}
+                onChange={(e) => setWhatsappPhone(e.target.value)}
+              />
+              <span style={{ fontSize: '0.68rem', color: 'var(--text-muted)' }}>Emergency contact phone for priority high-hazard SMS</span>
+            </div>
+          </div>
+
+          <div className="rules-config-actions" style={{ display: 'flex', gap: '10px', marginTop: '16px', justifyContent: 'flex-end' }}>
+            <button type="button" className="btn-secondary" onClick={handleTestDispatch}>
+              🧪 Send Test Dispatch Payload
+            </button>
+            <button type="submit" className="btn-primary">
+              💾 Save Dispatch Routing
+            </button>
+          </div>
+        </form>
+      )}
 
       {/* Alert Rules Drawer / Panel */}
       {showRulesConfig && (

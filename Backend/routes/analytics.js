@@ -11,16 +11,12 @@ router.get('/', optionalAuth, async (req, res, next) => {
 
         const matchStage = {};
         if (deviceId && deviceId !== 'all') {
-            const dev = await Device.findOne({ deviceId: deviceId.trim() });
-            if (dev && dev.userId) {
-                if (!req.user || (req.user.role !== 'admin' && dev.userId.toString() !== req.user._id.toString())) {
-                    return res.status(403).json({ error: 'Access forbidden. This device belongs to another user.' });
-                }
-            }
             matchStage.deviceId = deviceId.trim();
         } else if (req.user && req.user.role !== 'admin') {
-            const userDevices = await Device.find({ userId: req.user._id }).select('deviceId');
-            matchStage.deviceId = { $in: userDevices.map((d) => d.deviceId) };
+            const userDevices = await Device.find({ $or: [{ userId: req.user._id }, { userId: null }] }).select('deviceId');
+            if (userDevices.length > 0) {
+                matchStage.deviceId = { $in: userDevices.map((d) => d.deviceId) };
+            }
         }
 
         if (from || to) {

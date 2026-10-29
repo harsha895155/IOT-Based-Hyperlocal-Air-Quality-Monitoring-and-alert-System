@@ -19,7 +19,7 @@ export default function DevicesView({
   const isAdmin = user?.role === 'admin';
 
   // State
-  const [deviceList, setDeviceList] = useState(() => (isGuest || !user ? [] : devices));
+  const [deviceList, setDeviceList] = useState(() => devices || []);
   const [searchQuery, setSearchQuery] = useState('');
   const [statusFilter, setStatusFilter] = useState('All');
   const [isMobile, setIsMobile] = useState(() => {
@@ -67,12 +67,8 @@ export default function DevicesView({
 
   // Sync internal list when parent prop updates
   useEffect(() => {
-    if (isGuest || !user) {
-      setDeviceList([]);
-    } else {
-      setDeviceList(devices || []);
-    }
-  }, [devices, isGuest, user]);
+    setDeviceList(devices || []);
+  }, [devices]);
 
   // Real-time socket listener for device removal
   useEffect(() => {
@@ -200,7 +196,9 @@ export default function DevicesView({
   // Filtered devices
   const filteredDevices = useMemo(() => {
     return deviceList.filter((d) => {
-      const isOnline = d.status === 'Online';
+      const isOnline = Boolean(
+        d.lastSeen && (Date.now() - new Date(d.lastSeen).getTime() < (d.offlineTimeoutMs || 45000))
+      );
       if (statusFilter === 'Online' && !isOnline) return false;
       if (statusFilter === 'Offline' && isOnline) return false;
 
@@ -219,7 +217,9 @@ export default function DevicesView({
   // KPIs
   const stats = useMemo(() => {
     const total = deviceList.length;
-    const online = deviceList.filter((d) => d.status === 'Online').length;
+    const online = deviceList.filter((d) =>
+      d.lastSeen && (Date.now() - new Date(d.lastSeen).getTime() < (d.offlineTimeoutMs || 45000))
+    ).length;
     const aqiSum = deviceList.reduce((acc, d) => acc + (d.aqi || 0), 0);
     const avgAqi = total > 0 ? Math.round(aqiSum / total) : 0;
 
@@ -496,7 +496,9 @@ export default function DevicesView({
                 ) : (
                   filteredDevices.map((device) => {
                     const devId = device.deviceId || device.id;
-                    const isOnline = device.isOnline || device.status === 'Online' || device.status?.toLowerCase() === 'online';
+                    const isOnline = Boolean(
+                      device.lastSeen && (Date.now() - new Date(device.lastSeen).getTime() < (device.offlineTimeoutMs || 45000))
+                    );
                     const timeAgo = formatTimeAgo(device.lastSeen);
                     const aqiObj = device.aqi != null ? classifyAQI(device.aqi) : null;
                     const latency = pingLatencies[devId];
@@ -509,13 +511,13 @@ export default function DevicesView({
                             {(devId === currentDeviceId || device.name === currentDeviceId) && (
                               <span
                                 style={{
-                                  fontSize: '0.68rem',
-                                  padding: '2px 6px',
-                                  borderRadius: '4px',
-                                  background: 'rgba(16, 185, 129, 0.18)',
-                                  color: '#10b981',
-                                  border: '1px solid rgba(16, 185, 129, 0.35)',
-                                  fontWeight: 600,
+                                    fontSize: '0.68rem',
+                                    padding: '2px 6px',
+                                    borderRadius: '4px',
+                                    background: 'rgba(16, 185, 129, 0.18)',
+                                    color: '#10b981',
+                                    border: '1px solid rgba(16, 185, 129, 0.35)',
+                                    fontWeight: 600,
                                 }}
                               >
                                 ⭐ Active
@@ -543,7 +545,7 @@ export default function DevicesView({
                           <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
                             <span className="status-indicator">
                               <span className={`status-dot ${isOnline ? 'is-online' : 'is-standby'}`} />
-                              <span className="status-label">{device.status || 'Offline'}</span>
+                              <span className="status-label">{isOnline ? 'Online' : 'Offline'}</span>
                             </span>
                             {latency && (
                               <span style={{ fontSize: '0.7rem', color: '#00d2b4', fontFamily: 'monospace' }}>
@@ -648,7 +650,9 @@ export default function DevicesView({
         <div className="devices-grid-view">
           {filteredDevices.map((device) => {
             const devId = device.deviceId || device.id;
-            const isOnline = device.isOnline || device.status === 'Online' || device.status?.toLowerCase() === 'online';
+            const isOnline = Boolean(
+              device.lastSeen && (Date.now() - new Date(device.lastSeen).getTime() < (device.offlineTimeoutMs || 45000))
+            );
             const aqiObj = device.aqi != null ? classifyAQI(device.aqi) : null;
             const latency = pingLatencies[devId];
 
@@ -686,7 +690,7 @@ export default function DevicesView({
 
                   <span className="status-indicator" style={{ flexShrink: 0 }}>
                     <span className={`status-dot ${isOnline ? 'is-online' : 'is-standby'}`} />
-                    <span className="status-label" style={{ fontSize: '0.75rem' }}>{device.status}</span>
+                    <span className="status-label" style={{ fontSize: '0.75rem' }}>{isOnline ? 'Online' : 'Offline'}</span>
                   </span>
                 </div>
 
