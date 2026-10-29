@@ -234,10 +234,10 @@ export default function Dashboard({ readingsData, onNavigateTab }) {
   }
 
   // 4. Gas PPM: Prioritize real hardware sensor MQ-135 gas PPM
+  const numGasPpm = latest?.gasPPM != null ? Number(latest.gasPPM) : 380;
   const sensorGasPpm = latest?.gasPPM != null
     ? (latest.gasPPM < 1 ? Number(latest.gasPPM).toFixed(2) : Number(latest.gasPPM).toFixed(1))
     : (numGasPpm != null ? Number(numGasPpm).toFixed(1) : '380.0');
-  const numGasPpm = latest?.gasPPM != null ? Number(latest.gasPPM) : 380;
 
   // Local solar day/night failsafe: between 6:30 PM (18:30) and 6:00 AM, it is nighttime
   const currentHour = new Date().getHours() + new Date().getMinutes() / 60;

@@ -80,11 +80,6 @@
   "note_taking": {
     "new_note_url": "/dashboard?action=new-log"
   },
-  "scope_extensions": [
-    {
-      "origin": "https://iot-based-hyperlocal-air-quality.onrender.com"
-    }
-  ],
   "orientation": "any",
   "background_color": "#070a10",
   "theme_color": "#0284c7",
