@@ -236,6 +236,24 @@ export default function IoTFleetMap({ onSelectDevice }) {
 
   const getMetricDisplay = (dev) => {
     switch (activeMetric) {
+      case 'all': {
+        const { color } = classifyAQI(dev.aqi);
+        return {
+          val: `
+            <span class="lam-metric-item" style="color: ${color};">AQI ${dev.aqi}</span>
+            <span class="lam-sep">•</span>
+            <span class="lam-metric-item" style="color: ${dev.temp > 30 ? '#f59e0b' : '#10b981'};">${dev.temp}°C</span>
+            <span class="lam-sep">•</span>
+            <span class="lam-metric-item" style="color: #0284c7;">${dev.hum}%</span>
+            <span class="lam-sep">•</span>
+            <span class="lam-metric-item" style="color: #8b5cf6;">${dev.gas} PPM</span>
+          `,
+          isAll: true,
+          num: dev.aqi,
+          label: 'All Metrics',
+          color,
+        };
+      }
       case 'temp':
         return {
           val: `${dev.temp}°C`,
@@ -279,15 +297,16 @@ export default function IoTFleetMap({ onSelectDevice }) {
     filteredDevices.forEach((dev) => {
       const metric = getMetricDisplay(dev);
       const isSelected = selectedStation?.deviceId === dev.deviceId;
+      const isAll = activeMetric === 'all';
 
       const iconHtml = `
         <div class="leaflet-airguard-marker ${isSelected ? 'is-selected' : ''}" style="--marker-color: ${metric.color};">
           <div class="lam-halo"></div>
           <div class="lam-pulse"></div>
           <div class="lam-dot"></div>
-          <div class="lam-pill ${isLight ? 'lam-light' : 'lam-dark'}">
+          <div class="lam-pill ${isAll ? 'lam-pill-all' : ''} ${isLight ? 'lam-light' : 'lam-dark'}">
             <span class="lam-name">${dev.name || dev.deviceId}</span>
-            <span class="lam-val" style="color: ${metric.color};">${metric.val}</span>
+            ${isAll ? `<div class="lam-all-metrics">${metric.val}</div>` : `<span class="lam-val" style="color: ${metric.color};">${metric.val}</span>`}
           </div>
         </div>
       `;
@@ -295,7 +314,7 @@ export default function IoTFleetMap({ onSelectDevice }) {
       const customIcon = L.divIcon({
         className: 'leaflet-airguard-div-icon',
         html: iconHtml,
-        iconSize: [160, 42],
+        iconSize: isAll ? [340, 44] : [170, 42],
         iconAnchor: [12, 12],
       });
 
@@ -456,6 +475,7 @@ export default function IoTFleetMap({ onSelectDevice }) {
               { id: 'temp', label: 'Temp' },
               { id: 'hum', label: 'Humidity' },
               { id: 'gas', label: 'Gas PPM' },
+              { id: 'all', label: 'All' },
             ].map((m) => (
               <button
                 key={m.id}
@@ -506,23 +526,17 @@ export default function IoTFleetMap({ onSelectDevice }) {
             ))}
           </div>
 
-          {/* Map Layer Mode */}
+          {/* Satellite View Toggle */}
           <div className="map-layer-switcher">
             <button
               type="button"
-              className={`layer-btn ${mapLayer === 'auto' ? 'is-active' : ''}`}
-              onClick={() => setMapLayer('auto')}
-              title={isLight ? "Standard Daylight Cartography" : "Cyber Dark Matter"}
-            >
-              {isLight ? '🗺️' : '🌙'}
-            </button>
-            <button
-              type="button"
               className={`layer-btn ${mapLayer === 'satellite' ? 'is-active' : ''}`}
-              onClick={() => setMapLayer('satellite')}
-              title="High-Res Satellite Imagery"
+              onClick={() => setMapLayer((p) => (p === 'satellite' ? 'auto' : 'satellite'))}
+              title={mapLayer === 'satellite' ? "Switch to Standard Cartographic Map" : "Switch to High-Res Satellite View"}
+              style={{ display: 'inline-flex', alignItems: 'center', gap: '5px', fontSize: '0.8rem', fontWeight: 600, padding: '5px 10px' }}
             >
-              🛰️
+              <span>🛰️</span>
+              <span>Satellite</span>
             </button>
           </div>
 
@@ -667,7 +681,9 @@ export default function IoTFleetMap({ onSelectDevice }) {
         </div>
         <div className="mfs-item">
           <span>Fleet Average:</span> <strong>
-            {activeMetric === 'temp'
+            {activeMetric === 'all'
+              ? `${Math.round(devices.reduce((acc, d) => acc + d.aqi, 0) / (devices.length || 1))} AQI • ${(devices.reduce((acc, d) => acc + d.temp, 0) / (devices.length || 1)).toFixed(1)}°C • ${Math.round(devices.reduce((acc, d) => acc + d.hum, 0) / (devices.length || 1))}% RH • ${Math.round(devices.reduce((acc, d) => acc + d.gas, 0) / (devices.length || 1))} PPM`
+              : activeMetric === 'temp'
               ? `${(devices.reduce((acc, d) => acc + d.temp, 0) / (devices.length || 1)).toFixed(1)}°C`
               : activeMetric === 'hum'
               ? `${Math.round(devices.reduce((acc, d) => acc + d.hum, 0) / (devices.length || 1))}% RH`

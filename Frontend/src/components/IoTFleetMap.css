@@ -310,6 +310,31 @@
   font-family: monospace;
 }
 
+.lam-pill-all {
+  gap: 10px;
+  padding: 4px 10px;
+}
+
+.lam-all-metrics {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  font-size: 0.74rem;
+  font-weight: 800;
+  font-family: monospace;
+}
+
+.lam-metric-item {
+  display: inline-flex;
+  align-items: center;
+  white-space: nowrap;
+}
+
+.lam-sep {
+  opacity: 0.35;
+  font-size: 0.62rem;
+}
+
 /* Anchor Cities */
 .leaflet-city-div-icon {
   background: transparent !important;
