@@ -25,6 +25,7 @@ export default function IoTFleetMap({ onSelectDevice }) {
   const mapContainerRef = useRef(null);
   const mapInstanceRef = useRef(null);
   const tileLayerRef = useRef(null);
+  const labelsLayerRef = useRef(null);
   const stationsLayerRef = useRef(null);
   const citiesLayerRef = useRef(null);
   const windLayerRef = useRef(null);
@@ -193,24 +194,32 @@ export default function IoTFleetMap({ onSelectDevice }) {
 
     if (tileLayerRef.current) {
       map.removeLayer(tileLayerRef.current);
+      tileLayerRef.current = null;
     }
-
-    let tileUrl = '';
-    let maxZoom = 19;
+    if (labelsLayerRef.current) {
+      map.removeLayer(labelsLayerRef.current);
+      labelsLayerRef.current = null;
+    }
 
     if (mapLayer === 'satellite') {
-      tileUrl = 'https://server.arcgisonline.com/ArcGIS/rest/services/World_Imagery/MapServer/tile/{z}/{y}/{x}';
-      maxZoom = 18;
-    } else {
-      // 100% Free OpenStreetMap Global Cartography (No API Key Required, No Watermarks)
-      tileUrl = 'https://tile.openstreetmap.org/{z}/{x}/{y}.png';
-      maxZoom = 19;
-    }
+      // 1. Base Satellite Imagery (ESRI World Imagery)
+      tileLayerRef.current = L.tileLayer('https://server.arcgisonline.com/ArcGIS/rest/services/World_Imagery/MapServer/tile/{z}/{y}/{x}', {
+        maxZoom: 18,
+        attribution: '&copy; Esri',
+      }).addTo(map);
 
-    tileLayerRef.current = L.tileLayer(tileUrl, {
-      maxZoom,
-      attribution: '&copy; OpenStreetMap',
-    }).addTo(map);
+      // 2. English Place Names & Boundaries Overlay for Satellite
+      labelsLayerRef.current = L.tileLayer('https://server.arcgisonline.com/ArcGIS/rest/services/Reference/World_Boundaries_and_Places/MapServer/tile/{z}/{y}/{x}', {
+        maxZoom: 18,
+        pane: 'overlayPane',
+      }).addTo(map);
+    } else {
+      // 100% English Global Cartographic Map (ESRI World Street Map) - All place names strictly in English
+      tileLayerRef.current = L.tileLayer('https://server.arcgisonline.com/ArcGIS/rest/services/World_Street_Map/MapServer/tile/{z}/{y}/{x}', {
+        maxZoom: 19,
+        attribution: '&copy; Esri',
+      }).addTo(map);
+    }
   }, [mapLayer, isLight]);
 
   // 5. Invalidate map size on fullscreen toggle
