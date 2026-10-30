@@ -615,14 +615,14 @@ export default function Dashboard({ readingsData, onNavigateTab }) {
         </div>
 
         <div className="pollutants-grid">
-          {/* Card 1: Gas Sensor or Ambient PM2.5 */}
+          {/* Card 1: MQ-135 Physical Gas Sensor or Ambient PM2.5 */}
           <div className="pollutant-card is-active-sensor">
             <div className="pol-top">
               <span className="pol-name">
-                {isDeviceConnected || isDeviceActiveOrRecorded ? 'MQ135 Gas Sensor' : 'Ambient Fine PM2.5'}
+                {isDeviceConnected || isDeviceActiveOrRecorded ? 'MQ-135 Gas Concentration' : 'Ambient Fine PM2.5'}
               </span>
               <span className="pol-tag" style={{ color: isDeviceConnected ? '#10b981' : (isDeviceActiveOrRecorded ? '#f59e0b' : '#38bdf8') }}>
-                {isDeviceConnected ? 'Active Sensor' : (isDeviceActiveOrRecorded ? 'Recorded Telemetry' : 'Current Location')}
+                {isDeviceConnected ? '⚡ Physical Hardware' : (isDeviceActiveOrRecorded ? 'Recorded Telemetry' : 'Current Location')}
               </span>
             </div>
             <div className="pol-val-row">
@@ -635,7 +635,7 @@ export default function Dashboard({ readingsData, onNavigateTab }) {
             </div>
             <div className="pol-sub">
               {isDeviceConnected || isDeviceActiveOrRecorded
-                ? 'Calibrated Baseline: R0 = 76.63 kΩ'
+                ? 'Direct physical MQ-135 sensing chamber measurement'
                 : 'Fine respirable atmospheric particulate'}
             </div>
             <div className="pollutant-live-bar"><div className="pollutant-live-bar-fill" /></div>
@@ -681,51 +681,21 @@ export default function Dashboard({ readingsData, onNavigateTab }) {
             <div className="pollutant-live-bar"><div className="pollutant-live-bar-fill" /></div>
           </div>
 
-          {/* Estimated CO */}
-          <div className="pollutant-card">
-            <div className="pol-top">
-              <span className="pol-name">Carbon Monoxide (CO)</span>
-              <span className="pol-tag text-accent">
-                {isDeviceConnected ? 'Derived' : (isDeviceActiveOrRecorded ? 'Hardware Derived' : 'Regional')}
-              </span>
+          {/* Location Mode Coarse PM10 Particulate (shown only when no hardware node selected) */}
+          {!isDeviceConnected && !isDeviceActiveOrRecorded && (
+            <div className="pollutant-card">
+              <div className="pol-top">
+                <span className="pol-name">Coarse PM10 Particulate</span>
+                <span className="pol-tag text-accent">Regional</span>
+              </div>
+              <div className="pol-val-row">
+                <span className="pol-val mono">{cw.pm10 ?? '28.5'}</span>
+                <span className="pol-unit">µg/m³</span>
+              </div>
+              <div className="pol-sub">Inhalable coarse particulate threshold</div>
+              <div className="pollutant-live-bar"><div className="pollutant-live-bar-fill" /></div>
             </div>
-            <div className="pol-val-row">
-              <span className="pol-val mono">
-                {isDeviceConnected || isDeviceActiveOrRecorded
-                  ? (numGasPpm != null ? (numGasPpm * 0.12).toFixed(2) : '—')
-                  : (cw.carbonMonoxide ? (cw.carbonMonoxide / 100).toFixed(1) : '2.8')}
-              </span>
-              <span className="pol-unit">ppm (est.)</span>
-            </div>
-            <div className="pol-sub">WHO safe 8h exposure limit: 9 ppm</div>
-            <div className="pollutant-live-bar"><div className="pollutant-live-bar-fill" /></div>
-          </div>
-
-          {/* Estimated CO2 Eq / PM10 */}
-          <div className="pollutant-card">
-            <div className="pol-top">
-              <span className="pol-name">
-                {isDeviceConnected || isDeviceActiveOrRecorded ? 'CO₂ Equivalent' : 'Coarse PM10 Particulate'}
-              </span>
-              <span className="pol-tag text-accent">
-                {isDeviceConnected ? 'Derived' : (isDeviceActiveOrRecorded ? 'Hardware Derived' : 'Regional')}
-              </span>
-            </div>
-            <div className="pol-val-row">
-              <span className="pol-val mono">
-                {isDeviceConnected || isDeviceActiveOrRecorded
-                  ? (numGasPpm != null ? Math.round(400 + numGasPpm * 1.8) : '—')
-                  : (cw.pm10 ?? '28.5')}
-              </span>
-              <span className="pol-unit">{isDeviceConnected || isDeviceActiveOrRecorded ? 'ppm eq' : 'µg/m³'}</span>
-            </div>
-            <div className="pol-sub">
-              {isDeviceConnected || isDeviceActiveOrRecorded
-                ? 'Typical fresh air baseline: 400-500 ppm'
-                : 'Inhalable coarse particulate threshold'}
-            </div>
-            <div className="pollutant-live-bar"><div className="pollutant-live-bar-fill" /></div>
-          </div>
+          )}
 
           {/* Hardware Connection Card */}
           <div className={`pollutant-card ${isDeviceConnected ? 'is-active-sensor' : (isDeviceActiveOrRecorded ? 'is-active-sensor' : 'is-unsupported')}`}>
