@@ -101,41 +101,45 @@ bool NodeNetworkManager::startCaptivePortal(unsigned long timeoutMs) {
     html += "<title>AirGuard Wi-Fi Setup</title><style>";
     html += "*{box-sizing:border-box;}body{font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',Roboto,sans-serif;background:#090e1a;color:#f8fafc;margin:0;padding:16px;display:flex;justify-content:center;align-items:center;min-height:92vh;}";
     html += ".card{background:#11192e;border:1px solid #1e293b;border-radius:20px;padding:26px;max-width:400px;width:100%;box-shadow:0 24px 48px rgba(0,0,0,0.6);text-align:center;}";
-    html += ".logo-wrap{display:flex;justify-content:center;margin-bottom:12px;}";
+    html += ".logo-wrap{display:flex;justify-content:center;margin-bottom:14px;}";
     html += ".logo-circle{width:56px;height:56px;border-radius:16px;background:linear-gradient(135deg,rgba(2,132,199,0.2) 0%,rgba(0,210,180,0.2) 100%);border:1px solid rgba(0,210,180,0.35);display:flex;align-items:center;justify-content:center;}";
-    html += "h2{font-size:1.4rem;margin:0 0 6px 0;color:#38bdf8;}";
+    html += "h2{font-size:1.35rem;margin:0 0 6px 0;color:#38bdf8;font-weight:700;}";
     html += "p.desc{font-size:0.86rem;color:#94a3b8;margin:0 0 18px 0;line-height:1.45;}";
-    html += ".field-group{text-align:left;margin-bottom:16px;}";
-    html += "label{font-size:0.76rem;font-weight:700;color:#94a3b8;display:block;margin-bottom:6px;text-transform:uppercase;letter-spacing:0.06em;}";
+    html += ".field-group{text-align:left;margin-bottom:15px;}";
+    html += "label{font-size:0.75rem;font-weight:700;color:#94a3b8;display:block;margin-bottom:6px;text-transform:uppercase;letter-spacing:0.06em;}";
     html += "select,input{width:100%;background:#0a0f1d;border:1px solid #334155;border-radius:12px;padding:12px 14px;font-size:0.95rem;color:#f8fafc;outline:none;transition:border-color 0.2s;}";
     html += "select:focus,input:focus{border-color:#00d2b4;box-shadow:0 0 0 2px rgba(0,210,180,0.2);}";
     html += ".rescan-btn{background:rgba(56,189,248,0.12);border:1px solid rgba(56,189,248,0.3);color:#38bdf8;padding:4px 10px;border-radius:8px;font-size:0.75rem;font-weight:600;cursor:pointer;display:inline-flex;align-items:center;gap:4px;}";
     html += ".rescan-btn:hover{background:rgba(56,189,248,0.2);}";
     html += "button.btn-save{width:100%;background:linear-gradient(135deg,#0284c7 0%,#00d2b4 100%);border:none;border-radius:12px;padding:14px;font-size:1rem;font-weight:700;color:#ffffff;cursor:pointer;margin-top:6px;box-shadow:0 4px 16px rgba(0,210,180,0.35);}";
+    html += "button.btn-save:active{transform:scale(0.99);}";
     html += ".footer{font-size:0.75rem;color:#64748b;margin-top:16px;}";
     html += "</style></head><body><div class=\"card\">";
-    html += "<div class=\"logo-wrap\"><div class=\"logo-circle\"><svg width=\"28\" height=\"28\" viewBox=\"0 0 24 24\" fill=\"none\" stroke=\"#00d2b4\" stroke-width=\"2\" stroke-linecap=\"round\" stroke-linejoin=\"round\"><path d=\"M5 12.55a11 11 0 0 1 14.08 0\"></path><path d=\"M1.42 9a16 16 0 0 1 21.16 0\"></path><path d=\"M8.53 16.11a6 6 0 0 1 6.95 0\"></path><line x1=\"12\" y1=\"20\" x2=\"12.01\" y2=\"20\"></line></svg></div></div>";
+    html += "<div class=\"logo-wrap\"><div class=\"logo-circle\"><svg width=\"30\" height=\"30\" viewBox=\"0 0 24 24\" fill=\"none\" stroke=\"#00d2b4\" stroke-width=\"2.2\" stroke-linecap=\"round\" stroke-linejoin=\"round\"><path d=\"M5 12.55a11 11 0 0 1 14.08 0\"></path><path d=\"M1.42 9a16 16 0 0 1 21.16 0\"></path><path d=\"M8.53 16.11a6 6 0 0 1 6.95 0\"></path><line x1=\"12\" y1=\"20\" x2=\"12.01\" y2=\"20\"></line></svg></div></div>";
     html += "<h2>AirGuard Wi-Fi Setup</h2>";
-    html += "<p class=\"desc\">Connect this sensing node to your home or office 2.4 GHz Wi-Fi network.</p>";
+    html += "<p class=\"desc\">Connect this sensing node to your home or mobile 2.4 GHz hotspot.</p>";
     html += "<form action=\"/save\" method=\"POST\">";
-    html += "<div class=\"field-group\"><div style=\"display:flex;justify-content:space-between;align-items:center;margin-bottom:6px;\"><label style=\"margin:0;\">Select Wi-Fi Network</label><button type=\"button\" class=\"rescan-btn\" onclick=\"fetchNetworks();\">&#x21bb; Rescan</button></div>";
-    html += "<select name=\"ssid\" id=\"ssid\" onchange=\"updateManual();\">";
+    
+    // Always visible SSID Input
+    html += "<div class=\"field-group\"><label>Wi-Fi Name (SSID)</label><input type=\"text\" name=\"ssid\" id=\"ssid\" placeholder=\"Type Wi-Fi SSID or select below\" required autocomplete=\"off\" autocapitalize=\"none\"></div>";
+    
+    // Quick scanned network selector dropdown
+    html += "<div class=\"field-group\"><div style=\"display:flex;justify-content:space-between;align-items:center;margin-bottom:6px;\"><label style=\"margin:0;\">Or Pick Detected Network</label><button type=\"button\" id=\"rescan_btn\" class=\"rescan-btn\" onclick=\"fetchNetworks();\">&#x21bb; Rescan</button></div>";
+    html += "<select id=\"net_select\" onchange=\"pickNetwork(this.value);\">";
+    html += "<option value=\"\">-- Choose detected network --</option>";
     if (cachedNetworkOptions.length() > 0) {
       html += cachedNetworkOptions;
-      html += "<option value=\"__custom__\">-- Enter Wi-Fi Name Manually --</option>";
-    } else {
-      html += "<option value=\"\" disabled selected>Scanning Wi-Fi networks...</option>";
-      html += "<option value=\"__custom__\">-- Enter Wi-Fi Name Manually --</option>";
     }
     html += "</select></div>";
-    html += "<div class=\"field-group\" id=\"manual-wrap\" style=\"" + String(cachedNetworkOptions.length() == 0 ? "display:block;" : "display:none;") + "\"><label>Custom Wi-Fi Name (SSID)</label><input type=\"text\" name=\"manual_ssid\" id=\"manual\" placeholder=\"Enter your 2.4 GHz SSID\"></div>";
-    html += "<div class=\"field-group\"><label>Wi-Fi Password</label><input type=\"password\" name=\"password\" placeholder=\"Enter Wi-Fi Password\" required></div>";
-    html += "<div class=\"field-group\"><label>Device Station ID (Optional)</label><input type=\"text\" name=\"device_id\" placeholder=\"e.g. esp32-node-02 (Current: " + getDeviceId() + ")\"></div>";
+
+    // Password & Device ID
+    html += "<div class=\"field-group\"><label>Wi-Fi Password</label><input type=\"password\" name=\"password\" id=\"password\" placeholder=\"Enter Wi-Fi Password\"></div>";
+    html += "<div class=\"field-group\"><label>Device Station ID (Optional)</label><input type=\"text\" name=\"device_id\" placeholder=\"e.g. esp32-node-01 (Current: " + getDeviceId() + ")\"></div>";
     html += "<button type=\"submit\" class=\"btn-save\">Save & Connect Node</button></form>";
     html += "<div class=\"footer\">AirGuard IoT Sensing Node &bull; Hyperlocal Monitor</div>";
     html += "<script>";
-    html += "function updateManual(){var s=document.getElementById('ssid');var mw=document.getElementById('manual-wrap');var m=document.getElementById('manual');if(!s||s.value==='__custom__'||s.value===''){mw.style.display='block';m.required=true;}else{mw.style.display='none';m.required=false;}}";
-    html += "function fetchNetworks(){var s=document.getElementById('ssid');s.innerHTML='<option value=\"\" disabled selected>Scanning 2.4 GHz networks...</option><option value=\"__custom__\">-- Enter Wi-Fi Name Manually --</option>';updateManual();fetch('/scan').then(function(r){return r.json();}).then(function(nets){s.innerHTML='';if(nets&&nets.length>0){nets.forEach(function(n){var o=document.createElement('option');o.value=n.ssid;o.textContent=n.ssid+' ('+n.rssi+' dBm)';s.appendChild(o);});}var c=document.createElement('option');c.value='__custom__';c.textContent='-- Enter Wi-Fi Name Manually --';s.appendChild(c);updateManual();}).catch(function(e){console.warn('Scan error:',e);updateManual();});}";
+    html += "function pickNetwork(val){if(val&&val!==''){document.getElementById('ssid').value=val;var p=document.getElementById('password');if(p)p.focus();}}";
+    html += "function fetchNetworks(){var s=document.getElementById('net_select');var btn=document.getElementById('rescan_btn');if(btn)btn.innerText='Scanning...';fetch('/scan').then(function(r){return r.json();}).then(function(nets){s.innerHTML='<option value=\"\">-- Choose detected network ('+(nets?nets.length:0)+' found) --</option>';if(nets&&nets.length>0){nets.forEach(function(n){var o=document.createElement('option');o.value=n.ssid;o.textContent=n.ssid+' ('+n.rssi+' dBm)';s.appendChild(o);});}if(btn)btn.innerHTML='&#x21bb; Rescan';}).catch(function(e){if(btn)btn.innerHTML='&#x21bb; Rescan';});}";
     if (cachedNetworkOptions.length() == 0) {
       html += "setTimeout(fetchNetworks, 400);";
     }
