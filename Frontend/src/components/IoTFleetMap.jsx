@@ -3,16 +3,20 @@ import { useNavigate } from 'react-router-dom';
 import client from '../api/client';
 import { getSocket } from '../api/socket';
 import { classifyAQI } from '../utils/aqi';
+import { useTheme } from '../context/ThemeContext';
 import './IoTFleetMap.css';
 
 export default function IoTFleetMap({ onSelectDevice }) {
   const navigate = useNavigate();
+  const { resolvedTheme } = useTheme() || {};
+  const isLight = resolvedTheme === 'light';
+
   const [devices, setDevices] = useState([]);
   const [loading, setLoading] = useState(true);
   const [selectedStation, setSelectedStation] = useState(null);
   const [zoomLevel, setZoomLevel] = useState(1);
   const [panOffset, setPanOffset] = useState({ x: 0, y: 0 });
-  const [mapLayer, setMapLayer] = useState('dark'); // 'dark' | 'satellite' | 'terrain'
+  const [mapLayer, setMapLayer] = useState('dark'); // 'dark' | 'satellite'
   const [filterStatus, setFilterStatus] = useState('all'); // 'all' | 'online' | 'alert'
 
   useEffect(() => {
@@ -199,16 +203,18 @@ export default function IoTFleetMap({ onSelectDevice }) {
           {/* Map Layer Mode */}
           <div className="map-layer-switcher">
             <button
+              type="button"
               className={`layer-btn ${mapLayer === 'dark' ? 'is-active' : ''}`}
               onClick={() => setMapLayer('dark')}
-              title="Cyber Dark Mesh"
+              title={isLight ? "Standard Daylight Cartography" : "Cyber Dark Mesh"}
             >
-              🌙
+              {isLight ? '🗺️' : '🌙'}
             </button>
             <button
+              type="button"
               className={`layer-btn ${mapLayer === 'satellite' ? 'is-active' : ''}`}
               onClick={() => setMapLayer('satellite')}
-              title="Topological Vector Grid"
+              title="Topological & Satellite Elevation Grid"
             >
               🛰️
             </button>
@@ -233,41 +239,198 @@ export default function IoTFleetMap({ onSelectDevice }) {
           }}
         >
           <svg className="map-svg-canvas" viewBox="0 0 800 520">
-            {/* Background Grid Lines & Regional Contours */}
             <defs>
+              {/* Graticule Grid Pattern */}
               <pattern id="mapGrid" width="40" height="40" patternUnits="userSpaceOnUse">
-                <path d="M 40 0 L 0 0 0 40" fill="none" stroke="rgba(255, 255, 255, 0.05)" strokeWidth="0.8" />
+                <path
+                  d="M 40 0 L 0 0 0 40"
+                  fill="none"
+                  stroke={isLight ? "rgba(100, 116, 139, 0.15)" : "rgba(0, 240, 255, 0.08)"}
+                  strokeWidth="0.8"
+                />
               </pattern>
+
+              {/* Water background gradient */}
+              <linearGradient id="oceanGrad" x1="0%" y1="0%" x2="100%" y2="100%">
+                <stop offset="0%" stopColor={isLight ? "#e0f2fe" : "#070b14"} />
+                <stop offset="100%" stopColor={isLight ? "#bae6fd" : "#0a1020"} />
+              </linearGradient>
+
+              {/* Landmass background gradient */}
+              <linearGradient id="landGrad" x1="0%" y1="0%" x2="0%" y2="100%">
+                <stop offset="0%" stopColor={isLight ? "#ffffff" : "#0f172a"} />
+                <stop offset="100%" stopColor={isLight ? "#f8fafc" : "#131d33"} />
+              </linearGradient>
+
               {/* Radial gradient for AQI plume contours */}
               <radialGradient id="plumeGood" cx="50%" cy="50%" r="50%">
-                <stop offset="0%" stopColor="#10b981" stopOpacity="0.38" />
-                <stop offset="70%" stopColor="#10b981" stopOpacity="0.1" />
+                <stop offset="0%" stopColor="#10b981" stopOpacity={isLight ? "0.45" : "0.38"} />
+                <stop offset="70%" stopColor="#10b981" stopOpacity="0.12" />
                 <stop offset="100%" stopColor="#10b981" stopOpacity="0" />
               </radialGradient>
               <radialGradient id="plumeMod" cx="50%" cy="50%" r="50%">
-                <stop offset="0%" stopColor="#f59e0b" stopOpacity="0.4" />
-                <stop offset="70%" stopColor="#f59e0b" stopOpacity="0.1" />
+                <stop offset="0%" stopColor="#f59e0b" stopOpacity={isLight ? "0.48" : "0.4"} />
+                <stop offset="70%" stopColor="#f59e0b" stopOpacity="0.14" />
                 <stop offset="100%" stopColor="#f59e0b" stopOpacity="0" />
               </radialGradient>
               <radialGradient id="plumeDanger" cx="50%" cy="50%" r="50%">
-                <stop offset="0%" stopColor="#ef4444" stopOpacity="0.45" />
-                <stop offset="70%" stopColor="#ef4444" stopOpacity="0.1" />
+                <stop offset="0%" stopColor="#ef4444" stopOpacity={isLight ? "0.52" : "0.45"} />
+                <stop offset="70%" stopColor="#ef4444" stopOpacity="0.16" />
                 <stop offset="100%" stopColor="#ef4444" stopOpacity="0" />
               </radialGradient>
+
+              {/* Land drop shadow for light theme */}
+              <filter id="landShadow" x="-5%" y="-5%" width="115%" height="115%">
+                <feDropShadow dx="0" dy="4" stdDeviation="6" floodColor={isLight ? "rgba(15, 23, 42, 0.12)" : "rgba(0, 240, 255, 0.15)"} />
+              </filter>
             </defs>
 
+            {/* 1. Base Oceanic Canvas */}
+            <rect width="800" height="520" fill="url(#oceanGrad)" />
+
+            {/* 2. Coordinate Grid Overlay */}
             <rect width="800" height="520" fill="url(#mapGrid)" />
 
-            {/* Stylized Subcontinent Geodetic Contours */}
+            {/* 3. Major Latitude & Longitude Graticule Lines */}
+            {[
+              { lat: 30, y: 104, label: '30°N' },
+              { lat: 25, y: 191, label: '25°N' },
+              { lat: 20, y: 277, label: '20°N' },
+              { lat: 15, y: 364, label: '15°N' },
+              { lat: 10, y: 451, label: '10°N' },
+            ].map((g) => (
+              <g key={`lat-${g.lat}`}>
+                <line
+                  x1="0"
+                  y1={g.y}
+                  x2="800"
+                  y2={g.y}
+                  stroke={isLight ? "rgba(100, 116, 139, 0.22)" : "rgba(255, 255, 255, 0.08)"}
+                  strokeWidth="0.7"
+                  strokeDasharray="4 4"
+                />
+                <text
+                  x="10"
+                  y={g.y - 4}
+                  fill={isLight ? "#64748b" : "rgba(255, 255, 255, 0.35)"}
+                  fontSize="9"
+                  fontWeight="600"
+                  fontFamily="monospace"
+                >
+                  {g.label}
+                </text>
+              </g>
+            ))}
+
+            {[
+              { lng: 70, x: 114, label: '70°E' },
+              { lng: 75, x: 257, label: '75°E' },
+              { lng: 80, x: 400, label: '80°E' },
+              { lng: 85, x: 543, label: '85°E' },
+              { lng: 90, x: 686, label: '90°E' },
+            ].map((g) => (
+              <g key={`lng-${g.lng}`}>
+                <line
+                  x1={g.x}
+                  y1="0"
+                  x2={g.x}
+                  y2="520"
+                  stroke={isLight ? "rgba(100, 116, 139, 0.22)" : "rgba(255, 255, 255, 0.08)"}
+                  strokeWidth="0.7"
+                  strokeDasharray="4 4"
+                />
+                <text
+                  x={g.x + 4}
+                  y="16"
+                  fill={isLight ? "#64748b" : "rgba(255, 255, 255, 0.35)"}
+                  fontSize="9"
+                  fontWeight="600"
+                  fontFamily="monospace"
+                >
+                  {g.label}
+                </text>
+              </g>
+            ))}
+
+            {/* 4. Cartographic Water Body Annotations */}
+            <text
+              x="130"
+              y="410"
+              fill={isLight ? "#0284c7" : "rgba(0, 240, 255, 0.3)"}
+              fontSize="12"
+              fontWeight="700"
+              fontStyle="italic"
+              letterSpacing="0.18em"
+              opacity={isLight ? 0.75 : 0.55}
+            >
+              ARABIAN SEA
+            </text>
+            <text
+              x="570"
+              y="400"
+              fill={isLight ? "#0284c7" : "rgba(0, 240, 255, 0.3)"}
+              fontSize="12"
+              fontWeight="700"
+              fontStyle="italic"
+              letterSpacing="0.18em"
+              opacity={isLight ? 0.75 : 0.55}
+            >
+              BAY OF BENGAL
+            </text>
+            <text
+              x="360"
+              y="512"
+              fill={isLight ? "#0284c7" : "rgba(0, 240, 255, 0.3)"}
+              fontSize="11"
+              fontWeight="700"
+              fontStyle="italic"
+              letterSpacing="0.18em"
+              opacity={isLight ? 0.75 : 0.55}
+            >
+              INDIAN OCEAN
+            </text>
+
+            {/* 5. Subcontinent Landmass (Accurate Multi-point Polygon) */}
+            {/* Outer Coastal Glow / Buffer Line */}
             <path
-              d="M 230 90 Q 320 60 480 80 T 620 180 Q 560 300 480 430 Q 420 510 390 510 Q 360 460 320 370 Q 240 280 210 220 Z"
-              fill="rgba(0, 240, 255, 0.025)"
-              stroke="rgba(0, 240, 255, 0.22)"
-              strokeWidth="1.2"
-              strokeDasharray="4 2"
+              d="M 270 25 L 330 20 L 370 40 L 385 95 L 500 130 L 640 148 L 770 140 L 785 175 L 755 215 L 670 242 L 625 250 L 565 282 L 495 320 L 410 355 L 408 400 L 395 440 L 378 465 L 328 485 L 310 475 L 290 448 L 250 400 L 222 355 L 194 298 L 194 256 L 142 265 L 85 240 L 100 228 L 86 208 L 130 165 L 215 112 L 252 75 L 250 45 Z"
+              fill="none"
+              stroke={isLight ? "rgba(2, 132, 199, 0.28)" : "rgba(0, 240, 255, 0.35)"}
+              strokeWidth="4"
+              strokeLinejoin="round"
+              strokeDasharray="6 3"
             />
 
-            {/* Connection Network Mesh Vectors */}
+            {/* Solid Subcontinent Land Base */}
+            <path
+              d="M 270 25 L 330 20 L 370 40 L 385 95 L 500 130 L 640 148 L 770 140 L 785 175 L 755 215 L 670 242 L 625 250 L 565 282 L 495 320 L 410 355 L 408 400 L 395 440 L 378 465 L 328 485 L 310 475 L 290 448 L 250 400 L 222 355 L 194 298 L 194 256 L 142 265 L 85 240 L 100 228 L 86 208 L 130 165 L 215 112 L 252 75 L 250 45 Z"
+              fill="url(#landGrad)"
+              stroke={isLight ? "#94a3b8" : "rgba(0, 240, 255, 0.55)"}
+              strokeWidth={isLight ? "1.6" : "1.4"}
+              strokeLinejoin="round"
+              filter="url(#landShadow)"
+            />
+
+            {/* Sri Lanka Island */}
+            <path
+              d="M 406 454 Q 446 480 435 505 Q 414 518 396 495 Q 392 468 406 454 Z"
+              fill="url(#landGrad)"
+              stroke={isLight ? "#94a3b8" : "rgba(0, 240, 255, 0.55)"}
+              strokeWidth={isLight ? "1.4" : "1.2"}
+              filter="url(#landShadow)"
+            />
+
+            {/* 6. Satellite Topographic Mode Contours (when satellite mode is active) */}
+            {mapLayer === 'satellite' && (
+              <g opacity={isLight ? "0.6" : "0.4"}>
+                <ellipse cx="440" cy="115" rx="130" ry="25" fill="none" stroke={isLight ? "#0284c7" : "#00f0ff"} strokeWidth="1" strokeDasharray="3 3" />
+                <ellipse cx="430" cy="110" rx="90" ry="16" fill="none" stroke={isLight ? "#0284c7" : "#00f0ff"} strokeWidth="1" strokeDasharray="2 2" />
+                <ellipse cx="280" cy="380" rx="35" ry="70" fill="none" stroke={isLight ? "#10b981" : "#10b981"} strokeWidth="1" strokeDasharray="3 3" />
+                <ellipse cx="460" cy="350" rx="35" ry="60" fill="none" stroke={isLight ? "#0284c7" : "#00f0ff"} strokeWidth="1" strokeDasharray="3 3" />
+              </g>
+            )}
+
+            {/* 7. Connection Network Mesh Vectors */}
             {filteredDevices.map((d1, i) => {
               const p1 = projectCoords(d1.lat, d1.lng);
               return filteredDevices.slice(i + 1).map((d2, j) => {
@@ -279,15 +442,15 @@ export default function IoTFleetMap({ onSelectDevice }) {
                     y1={p1.y}
                     x2={p2.x}
                     y2={p2.y}
-                    stroke="rgba(0, 240, 255, 0.12)"
-                    strokeWidth="1"
-                    strokeDasharray="2 4"
+                    stroke={isLight ? "rgba(2, 132, 199, 0.45)" : "rgba(0, 240, 255, 0.2)"}
+                    strokeWidth="1.2"
+                    strokeDasharray="3 4"
                   />
                 );
               });
             })}
 
-            {/* Render Station Nodes & Atmospheric Plumes */}
+            {/* 8. Render Station Nodes & Atmospheric Plumes */}
             {filteredDevices.map((dev) => {
               const { x, y } = projectCoords(dev.lat, dev.lng);
               const { color } = classifyAQI(dev.aqi);
@@ -302,14 +465,14 @@ export default function IoTFleetMap({ onSelectDevice }) {
                   style={{ cursor: 'pointer' }}
                 >
                   {/* Atmospheric AQI Halo Plume */}
-                  <circle cx={x} cy={y} r={isSelected ? 48 : 34} fill={plumeGrad} />
+                  <circle cx={x} cy={y} r={isSelected ? 52 : 36} fill={plumeGrad} />
                   <circle
                     cx={x}
                     cy={y}
-                    r={isSelected ? 20 : 14}
+                    r={isSelected ? 22 : 15}
                     fill="none"
                     stroke={color}
-                    strokeWidth="1.5"
+                    strokeWidth={isLight ? "2" : "1.5"}
                     className="map-pulse-ring"
                   />
 
@@ -317,30 +480,31 @@ export default function IoTFleetMap({ onSelectDevice }) {
                   <circle
                     cx={x}
                     cy={y}
-                    r={isSelected ? 9 : 7}
+                    r={isSelected ? 10 : 8}
                     fill={color}
-                    stroke="#0f172a"
+                    stroke={isLight ? "#ffffff" : "#0f172a"}
                     strokeWidth="2.5"
                   />
 
-                  {/* Node Label Card */}
+                  {/* Node Label Pill Card */}
                   <g transform={`translate(${x + 12}, ${y - 12})`}>
                     <rect
                       x="0"
-                      y="-12"
-                      width={dev.name.length * 6.5 + 46}
-                      height="24"
-                      rx="6"
-                      fill="rgba(15, 23, 42, 0.88)"
-                      stroke={isSelected ? color : 'rgba(255,255,255,0.12)'}
-                      strokeWidth={isSelected ? 1.5 : 0.8}
+                      y="-13"
+                      width={dev.name.length * 6.5 + 48}
+                      height="26"
+                      rx="7"
+                      fill={isLight ? "#ffffff" : "rgba(15, 23, 42, 0.92)"}
+                      stroke={isSelected ? color : (isLight ? "#cbd5e1" : "rgba(255,255,255,0.15)")}
+                      strokeWidth={isSelected ? 1.8 : 1}
+                      filter={isLight ? "drop-shadow(0 2px 6px rgba(15,23,42,0.12))" : "none"}
                     />
                     <text
                       x="8"
                       y="4"
-                      fill="#f8fafc"
+                      fill={isLight ? "#0f172a" : "#f8fafc"}
                       fontSize="10"
-                      fontWeight="600"
+                      fontWeight="700"
                       fontFamily="sans-serif"
                     >
                       {dev.name || dev.deviceId}
@@ -349,8 +513,8 @@ export default function IoTFleetMap({ onSelectDevice }) {
                       x={dev.name.length * 6.5 + 16}
                       y="4"
                       fill={color}
-                      fontSize="10"
-                      fontWeight="700"
+                      fontSize="11"
+                      fontWeight="800"
                       fontFamily="monospace"
                     >
                       {dev.aqi}
@@ -359,6 +523,22 @@ export default function IoTFleetMap({ onSelectDevice }) {
                 </g>
               );
             })}
+
+            {/* 9. GIS Cartographic Elements: Compass Rose & Scale Bar */}
+            <g transform="translate(24, 460)">
+              {/* Scale Bar */}
+              <rect x="0" y="24" width="80" height="4" fill={isLight ? "#64748b" : "rgba(255,255,255,0.4)"} rx="2" />
+              <rect x="0" y="24" width="40" height="4" fill={isLight ? "#0284c7" : "#00f0ff"} rx="2" />
+              <text x="0" y="20" fill={isLight ? "#64748b" : "rgba(255,255,255,0.5)"} fontSize="8" fontWeight="600" fontFamily="sans-serif">0</text>
+              <text x="35" y="20" fill={isLight ? "#64748b" : "rgba(255,255,255,0.5)"} fontSize="8" fontWeight="600" fontFamily="sans-serif">250</text>
+              <text x="70" y="20" fill={isLight ? "#64748b" : "rgba(255,255,255,0.5)"} fontSize="8" fontWeight="600" fontFamily="sans-serif">500 km</text>
+
+              {/* Compass Rose */}
+              <circle cx="116" cy="18" r="14" fill={isLight ? "rgba(255,255,255,0.9)" : "rgba(15,23,42,0.7)"} stroke={isLight ? "#cbd5e1" : "rgba(255,255,255,0.2)"} strokeWidth="1" />
+              <path d="M 116 8 L 120 18 L 116 16 L 112 18 Z" fill={isLight ? "#0284c7" : "#00f0ff"} />
+              <path d="M 116 28 L 120 18 L 116 20 L 112 18 Z" fill={isLight ? "#94a3b8" : "#64748b"} />
+              <text x="116" y="6" textAnchor="middle" fill={isLight ? "#0284c7" : "#00f0ff"} fontSize="8" fontWeight="800">N</text>
+            </g>
           </svg>
         </div>
 
