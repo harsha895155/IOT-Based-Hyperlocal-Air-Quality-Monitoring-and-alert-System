@@ -203,21 +203,26 @@ export default function IoTFleetMap({ onSelectDevice }) {
     }
 
     if (mapLayer === 'satellite') {
-      // 1. Base Satellite Imagery (ESRI World Imagery)
+      // 1. Base Satellite Imagery (ESRI World Imagery) - Native high-res down to zoom 18
       tileLayerRef.current = L.tileLayer('https://server.arcgisonline.com/ArcGIS/rest/services/World_Imagery/MapServer/tile/{z}/{y}/{x}', {
         maxZoom: 18,
+        maxNativeZoom: 18,
         attribution: '&copy; Esri',
       }).addTo(map);
 
       // 2. English Place Names & Boundaries Overlay for Satellite
       labelsLayerRef.current = L.tileLayer('https://server.arcgisonline.com/ArcGIS/rest/services/Reference/World_Boundaries_and_Places/MapServer/tile/{z}/{y}/{x}', {
         maxZoom: 18,
+        maxNativeZoom: 18,
         pane: 'overlayPane',
       }).addTo(map);
     } else {
-      // 100% English Global Cartographic Map (ESRI World Street Map) - All place names strictly in English
+      // 100% English Global Cartographic Map (ESRI World Street Map)
+      // Set maxNativeZoom: 15 so Leaflet automatically upsamples tiles when zooming past 15,
+      // completely preventing the "Map data not yet available" gray placeholder!
       tileLayerRef.current = L.tileLayer('https://server.arcgisonline.com/ArcGIS/rest/services/World_Street_Map/MapServer/tile/{z}/{y}/{x}', {
-        maxZoom: 19,
+        maxZoom: 18,
+        maxNativeZoom: 15,
         attribution: '&copy; Esri',
       }).addTo(map);
     }
@@ -480,10 +485,10 @@ export default function IoTFleetMap({ onSelectDevice }) {
       map.fitBounds(bounds.pad(0.3), {
         animate: true,
         duration: 1.5,
-        maxZoom: 16,
+        maxZoom: 15,
       });
     } else {
-      map.flyTo([dev.lat, dev.lng], 16, { duration: 1.5 });
+      map.flyTo([dev.lat, dev.lng], 15, { duration: 1.5 });
     }
   };
 
