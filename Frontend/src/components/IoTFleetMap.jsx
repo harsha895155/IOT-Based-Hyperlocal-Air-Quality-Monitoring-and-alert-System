@@ -28,6 +28,7 @@ export default function IoTFleetMap({ onSelectDevice }) {
   const stationsLayerRef = useRef(null);
   const citiesLayerRef = useRef(null);
   const windLayerRef = useRef(null);
+  const coverageLayerRef = useRef(null);
 
   const [devices, setDevices] = useState([]);
   const [loading, setLoading] = useState(true);
@@ -175,6 +176,7 @@ export default function IoTFleetMap({ onSelectDevice }) {
     stationsLayerRef.current = L.layerGroup().addTo(map);
     citiesLayerRef.current = L.layerGroup().addTo(map);
     windLayerRef.current = L.layerGroup().addTo(map);
+    coverageLayerRef.current = L.layerGroup().addTo(map);
 
     mapInstanceRef.current = map;
 
@@ -300,7 +302,7 @@ export default function IoTFleetMap({ onSelectDevice }) {
       const marker = L.marker([dev.lat, dev.lng], { icon: customIcon });
 
       marker.on('click', () => {
-        setSelectedStation(dev);
+        handleFocusStation(dev);
       });
 
       layer.addLayer(marker);
@@ -371,6 +373,10 @@ export default function IoTFleetMap({ onSelectDevice }) {
   const handleResetView = () => {
     const map = mapInstanceRef.current;
     if (!map) return;
+    if (coverageLayerRef.current) {
+      coverageLayerRef.current.clearLayers();
+    }
+    setSelectedStation(null);
     if (devices.length > 0) {
       const bounds = L.latLngBounds(devices.map((d) => [d.lat, d.lng]));
       map.fitBounds(bounds.pad(0.35), { animate: true });
@@ -383,7 +389,51 @@ export default function IoTFleetMap({ onSelectDevice }) {
     setSelectedStation(dev);
     const map = mapInstanceRef.current;
     if (!map) return;
-    map.flyTo([dev.lat, dev.lng], 12, { duration: 1.2 });
+
+    if (coverageLayerRef.current) {
+      coverageLayerRef.current.clearLayers();
+
+      const metric = getMetricDisplay(dev);
+      // Hyperlocal microclimate coverage boundary (750 meters)
+      const radiusMeters = 750;
+
+      // 1. Outer Hyperlocal Coverage Perimeter with animated pulse
+      const coverageCircle = L.circle([dev.lat, dev.lng], {
+        radius: radiusMeters,
+        color: metric.color,
+        fillColor: metric.color,
+        fillOpacity: isLight ? 0.16 : 0.22,
+        weight: 2.5,
+        dashArray: '6, 8',
+        className: 'leaflet-coverage-zone',
+      });
+
+      coverageCircle.bindTooltip(
+        `<strong>${dev.name || dev.deviceId}</strong><br/>Hyperlocal Coverage Area (~${(Math.PI * Math.pow(radiusMeters / 1000, 2)).toFixed(1)} km²)`,
+        { permanent: false, direction: 'top', className: isLight ? 'coverage-tooltip-light' : 'coverage-tooltip-dark' }
+      );
+      coverageLayerRef.current.addLayer(coverageCircle);
+
+      // 2. Immediate Sensor Core Zone (220m)
+      const coreCircle = L.circle([dev.lat, dev.lng], {
+        radius: 220,
+        color: metric.color,
+        fillColor: metric.color,
+        fillOpacity: isLight ? 0.28 : 0.35,
+        weight: 1.5,
+      });
+      coverageLayerRef.current.addLayer(coreCircle);
+
+      // 3. Zoom directly to display ONLY the area surrounding this device!
+      const bounds = coverageCircle.getBounds();
+      map.fitBounds(bounds.pad(0.3), {
+        animate: true,
+        duration: 1.5,
+        maxZoom: 16,
+      });
+    } else {
+      map.flyTo([dev.lat, dev.lng], 16, { duration: 1.5 });
+    }
   };
 
   return (
@@ -506,7 +556,10 @@ export default function IoTFleetMap({ onSelectDevice }) {
               </div>
               <button
                 className="msc-close-btn"
-                onClick={() => setSelectedStation(null)}
+                onClick={() => {
+                  setSelectedStation(null);
+                  if (coverageLayerRef.current) coverageLayerRef.current.clearLayers();
+                }}
                 title="Close Drawer"
               >
                 ✕

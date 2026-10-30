@@ -358,6 +358,44 @@
   }
 }
 
+/* Hyperlocal Coverage Sensing Perimeter */
+.leaflet-coverage-zone {
+  animation: coveragePulse 3s infinite ease-in-out;
+}
+
+@keyframes coveragePulse {
+  0%, 100% {
+    stroke-opacity: 0.95;
+    fill-opacity: 0.16;
+  }
+  50% {
+    stroke-opacity: 0.55;
+    fill-opacity: 0.28;
+  }
+}
+
+.coverage-tooltip-light,
+.coverage-tooltip-dark {
+  font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+  font-size: 0.76rem;
+  border-radius: 8px;
+  padding: 5px 10px;
+  box-shadow: 0 4px 16px rgba(0, 0, 0, 0.25);
+  line-height: 1.4;
+}
+
+.coverage-tooltip-light {
+  background: #ffffff;
+  color: #0f172a;
+  border: 1px solid #cbd5e1;
+}
+
+.coverage-tooltip-dark {
+  background: rgba(15, 23, 42, 0.95);
+  color: #f8fafc;
+  border: 1px solid rgba(255, 255, 255, 0.15);
+}
+
 .map-station-card {
   position: absolute;
   top: 16px;
