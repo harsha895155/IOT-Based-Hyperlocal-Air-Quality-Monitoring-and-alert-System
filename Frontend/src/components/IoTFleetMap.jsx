@@ -18,6 +18,19 @@ export default function IoTFleetMap({ onSelectDevice }) {
   const [panOffset, setPanOffset] = useState({ x: 0, y: 0 });
   const [mapLayer, setMapLayer] = useState('dark'); // 'dark' | 'satellite'
   const [filterStatus, setFilterStatus] = useState('all'); // 'all' | 'online' | 'alert'
+  const [activeMetric, setActiveMetric] = useState('aqi'); // 'aqi' | 'temp' | 'hum' | 'gas'
+  const [showWind, setShowWind] = useState(true);
+  const [showCities, setShowCities] = useState(true);
+  const [isFullscreen, setIsFullscreen] = useState(false);
+
+  const ANCHOR_CITIES = useMemo(() => [
+    { name: 'New Delhi', lat: 28.6139, lng: 77.2090 },
+    { name: 'Mumbai', lat: 19.0760, lng: 72.8777 },
+    { name: 'Bengaluru', lat: 12.9716, lng: 77.5946 },
+    { name: 'Hyderabad', lat: 17.3850, lng: 78.4867 },
+    { name: 'Chennai', lat: 13.0827, lng: 80.2707 },
+    { name: 'Kolkata', lat: 22.5726, lng: 88.3639 },
+  ], []);
 
   useEffect(() => {
     async function loadFleet() {
@@ -161,7 +174,7 @@ export default function IoTFleetMap({ onSelectDevice }) {
   };
 
   const handleZoom = (delta) => {
-    setZoomLevel((prev) => Math.max(0.7, Math.min(2.5, Number((prev + delta).toFixed(1)))));
+    setZoomLevel((prev) => Math.max(0.7, Math.min(2.8, Number((prev + delta).toFixed(1)))));
   };
 
   const handleResetView = () => {
@@ -169,8 +182,62 @@ export default function IoTFleetMap({ onSelectDevice }) {
     setPanOffset({ x: 0, y: 0 });
   };
 
+  const handleFocusStation = (dev) => {
+    setSelectedStation(dev);
+    const { x, y } = projectCoords(dev.lat, dev.lng);
+    const targetZoom = 1.85;
+    // Pan offset to bring (x, y) near center (400, 260)
+    const offsetX = (400 - x) * 0.7;
+    const offsetY = (260 - y) * 0.7;
+    setZoomLevel(targetZoom);
+    setPanOffset({
+      x: Math.max(-260, Math.min(260, offsetX)),
+      y: Math.max(-190, Math.min(190, offsetY)),
+    });
+  };
+
+  const getMetricDisplay = (dev) => {
+    switch (activeMetric) {
+      case 'temp':
+        return {
+          val: `${dev.temp}°C`,
+          num: dev.temp,
+          label: 'Temperature',
+          color: dev.temp > 34 ? '#ef4444' : dev.temp > 28 ? '#f59e0b' : dev.temp < 20 ? '#00f0ff' : '#10b981',
+          plume: dev.temp > 32 ? 'url(#plumeDanger)' : dev.temp > 28 ? 'url(#plumeMod)' : 'url(#plumeGood)',
+        };
+      case 'hum':
+        return {
+          val: `${dev.hum}%`,
+          num: dev.hum,
+          label: 'Humidity',
+          color: dev.hum > 75 ? '#0284c7' : dev.hum < 30 ? '#f59e0b' : '#10b981',
+          plume: dev.hum > 75 ? 'url(#plumeMod)' : 'url(#plumeGood)',
+        };
+      case 'gas':
+        return {
+          val: `${dev.gas} PPM`,
+          num: dev.gas,
+          label: 'MQ-135 Gas',
+          color: dev.gas > 550 ? '#ef4444' : dev.gas > 400 ? '#f59e0b' : '#10b981',
+          plume: dev.gas > 550 ? 'url(#plumeDanger)' : dev.gas > 400 ? 'url(#plumeMod)' : 'url(#plumeGood)',
+        };
+      case 'aqi':
+      default: {
+        const { color } = classifyAQI(dev.aqi);
+        return {
+          val: `${dev.aqi}`,
+          num: dev.aqi,
+          label: 'AQI Index',
+          color,
+          plume: dev.aqi > 100 ? 'url(#plumeDanger)' : dev.aqi > 50 ? 'url(#plumeMod)' : 'url(#plumeGood)',
+        };
+      }
+    }
+  };
+
   return (
-    <div className="card iot-fleet-map-container">
+    <div className={`card iot-fleet-map-container ${isFullscreen ? 'is-fullscreen' : ''}`}>
       {/* Map Control Bar */}
       <div className="map-toolbar">
         <div className="map-toolbar-left">
@@ -182,6 +249,45 @@ export default function IoTFleetMap({ onSelectDevice }) {
         </div>
 
         <div className="map-toolbar-right">
+          {/* Active Metric Selector */}
+          <div className="map-metric-control">
+            {[
+              { id: 'aqi', label: 'AQI' },
+              { id: 'temp', label: 'Temp' },
+              { id: 'hum', label: 'Humidity' },
+              { id: 'gas', label: 'Gas PPM' },
+            ].map((m) => (
+              <button
+                key={m.id}
+                type="button"
+                className={`metric-btn ${activeMetric === m.id ? 'is-active' : ''}`}
+                onClick={() => setActiveMetric(m.id)}
+              >
+                {m.label}
+              </button>
+            ))}
+          </div>
+
+          {/* Feature Toggles (Wind & Cities) */}
+          <div className="map-feature-toggles">
+            <button
+              type="button"
+              className={`feature-toggle-btn ${showWind ? 'is-active' : ''}`}
+              onClick={() => setShowWind((p) => !p)}
+              title="Toggle Atmospheric Airflow & Wind Streamlines"
+            >
+              🌬️ Wind
+            </button>
+            <button
+              type="button"
+              className={`feature-toggle-btn ${showCities ? 'is-active' : ''}`}
+              onClick={() => setShowCities((p) => !p)}
+              title="Toggle Major Metropolitan Reference Cities"
+            >
+              🏙️ Cities
+            </button>
+          </div>
+
           {/* Status Filters */}
           <div className="segmented-control" style={{ margin: 0 }}>
             {[
@@ -220,11 +326,18 @@ export default function IoTFleetMap({ onSelectDevice }) {
             </button>
           </div>
 
-          {/* Zoom Buttons */}
+          {/* Zoom & Fullscreen Controls */}
           <div className="map-zoom-group">
-            <button className="zoom-btn" onClick={() => handleZoom(0.2)} title="Zoom In">+</button>
-            <button className="zoom-btn" onClick={() => handleZoom(-0.2)} title="Zoom Out">−</button>
+            <button className="zoom-btn" onClick={() => handleZoom(0.25)} title="Zoom In">+</button>
+            <button className="zoom-btn" onClick={() => handleZoom(-0.25)} title="Zoom Out">−</button>
             <button className="zoom-btn" onClick={handleResetView} title="Reset View">⊙</button>
+            <button
+              className="zoom-btn"
+              onClick={() => setIsFullscreen((p) => !p)}
+              title={isFullscreen ? "Exit Fullscreen" : "Edge-to-Edge Fullscreen"}
+            >
+              {isFullscreen ? '✕' : '⛶'}
+            </button>
           </div>
         </div>
       </div>
@@ -420,7 +533,7 @@ export default function IoTFleetMap({ onSelectDevice }) {
               filter="url(#landShadow)"
             />
 
-            {/* 6. Satellite Topographic Mode Contours (when satellite mode is active) */}
+            {/* 6. Satellite Topographic Mode Contours */}
             {mapLayer === 'satellite' && (
               <g opacity={isLight ? "0.6" : "0.4"}>
                 <ellipse cx="440" cy="115" rx="130" ry="25" fill="none" stroke={isLight ? "#0284c7" : "#00f0ff"} strokeWidth="1" strokeDasharray="3 3" />
@@ -430,7 +543,40 @@ export default function IoTFleetMap({ onSelectDevice }) {
               </g>
             )}
 
-            {/* 7. Connection Network Mesh Vectors */}
+            {/* 7. Atmospheric Airflow & Wind Streamlines (Animated) */}
+            {showWind && (
+              <g className="map-wind-layer" opacity={isLight ? 0.75 : 0.6}>
+                <path d="M 60 410 Q 180 360 300 370 T 420 330" fill="none" stroke={isLight ? "#0284c7" : "#00f0ff"} strokeWidth="1.8" className="wind-streamline" />
+                <path d="M 90 460 Q 200 420 330 430 T 460 390" fill="none" stroke={isLight ? "#0284c7" : "#00f0ff"} strokeWidth="1.5" className="wind-streamline-fast" />
+                <path d="M 690 320 Q 560 300 450 330 T 360 350" fill="none" stroke={isLight ? "#0284c7" : "#00f0ff"} strokeWidth="1.8" className="wind-streamline" />
+                <path d="M 720 420 Q 590 390 470 410 T 380 430" fill="none" stroke={isLight ? "#0284c7" : "#00f0ff"} strokeWidth="1.5" className="wind-streamline-fast" />
+                <path d="M 220 100 Q 380 130 520 170 T 700 220" fill="none" stroke={isLight ? "#0284c7" : "#00f0ff"} strokeWidth="1.8" className="wind-streamline" />
+                <path d="M 260 140 Q 400 165 540 205 T 670 250" fill="none" stroke={isLight ? "#0284c7" : "#00f0ff"} strokeWidth="1.4" className="wind-streamline-fast" />
+              </g>
+            )}
+
+            {/* 8. Major Anchor Reference Cities */}
+            {showCities && ANCHOR_CITIES.map((c) => {
+              const { x, y } = projectCoords(c.lat, c.lng);
+              return (
+                <g key={c.name} opacity={isLight ? 0.85 : 0.7} transform={`translate(${x}, ${y})`}>
+                  <circle r="3" fill={isLight ? "#475569" : "#94a3b8"} />
+                  <circle r="6" fill="none" stroke={isLight ? "#cbd5e1" : "rgba(255,255,255,0.2)"} strokeWidth="0.8" />
+                  <text
+                    x="8"
+                    y="3"
+                    fill={isLight ? "#334155" : "#94a3b8"}
+                    fontSize="9.5"
+                    fontWeight="700"
+                    fontFamily="sans-serif"
+                  >
+                    {c.name}
+                  </text>
+                </g>
+              );
+            })}
+
+            {/* 9. Connection Network Mesh Vectors */}
             {filteredDevices.map((d1, i) => {
               const p1 = projectCoords(d1.lat, d1.lng);
               return filteredDevices.slice(i + 1).map((d2, j) => {
@@ -450,12 +596,11 @@ export default function IoTFleetMap({ onSelectDevice }) {
               });
             })}
 
-            {/* 8. Render Station Nodes & Atmospheric Plumes */}
+            {/* 10. Render Station Nodes & Atmospheric Plumes */}
             {filteredDevices.map((dev) => {
               const { x, y } = projectCoords(dev.lat, dev.lng);
-              const { color } = classifyAQI(dev.aqi);
+              const metric = getMetricDisplay(dev);
               const isSelected = selectedStation?.deviceId === dev.deviceId;
-              const plumeGrad = dev.aqi > 100 ? 'url(#plumeDanger)' : dev.aqi > 50 ? 'url(#plumeMod)' : 'url(#plumeGood)';
 
               return (
                 <g
@@ -464,14 +609,14 @@ export default function IoTFleetMap({ onSelectDevice }) {
                   onClick={() => setSelectedStation(dev)}
                   style={{ cursor: 'pointer' }}
                 >
-                  {/* Atmospheric AQI Halo Plume */}
-                  <circle cx={x} cy={y} r={isSelected ? 52 : 36} fill={plumeGrad} />
+                  {/* Atmospheric Halo Plume */}
+                  <circle cx={x} cy={y} r={isSelected ? 52 : 36} fill={metric.plume} />
                   <circle
                     cx={x}
                     cy={y}
                     r={isSelected ? 22 : 15}
                     fill="none"
-                    stroke={color}
+                    stroke={metric.color}
                     strokeWidth={isLight ? "2" : "1.5"}
                     className="map-pulse-ring"
                   />
@@ -481,7 +626,7 @@ export default function IoTFleetMap({ onSelectDevice }) {
                     cx={x}
                     cy={y}
                     r={isSelected ? 10 : 8}
-                    fill={color}
+                    fill={metric.color}
                     stroke={isLight ? "#ffffff" : "#0f172a"}
                     strokeWidth="2.5"
                   />
@@ -491,11 +636,11 @@ export default function IoTFleetMap({ onSelectDevice }) {
                     <rect
                       x="0"
                       y="-13"
-                      width={dev.name.length * 6.5 + 48}
+                      width={dev.name.length * 6.5 + 54}
                       height="26"
                       rx="7"
                       fill={isLight ? "#ffffff" : "rgba(15, 23, 42, 0.92)"}
-                      stroke={isSelected ? color : (isLight ? "#cbd5e1" : "rgba(255,255,255,0.15)")}
+                      stroke={isSelected ? metric.color : (isLight ? "#cbd5e1" : "rgba(255,255,255,0.15)")}
                       strokeWidth={isSelected ? 1.8 : 1}
                       filter={isLight ? "drop-shadow(0 2px 6px rgba(15,23,42,0.12))" : "none"}
                     />
@@ -512,19 +657,19 @@ export default function IoTFleetMap({ onSelectDevice }) {
                     <text
                       x={dev.name.length * 6.5 + 16}
                       y="4"
-                      fill={color}
-                      fontSize="11"
+                      fill={metric.color}
+                      fontSize="10.5"
                       fontWeight="800"
                       fontFamily="monospace"
                     >
-                      {dev.aqi}
+                      {metric.val}
                     </text>
                   </g>
                 </g>
               );
             })}
 
-            {/* 9. GIS Cartographic Elements: Compass Rose & Scale Bar */}
+            {/* 11. GIS Cartographic Elements: Compass Rose & Scale Bar */}
             <g transform="translate(24, 460)">
               {/* Scale Bar */}
               <rect x="0" y="24" width="80" height="4" fill={isLight ? "#64748b" : "rgba(255,255,255,0.4)"} rx="2" />
@@ -586,6 +731,25 @@ export default function IoTFleetMap({ onSelectDevice }) {
               </div>
             </div>
 
+            {/* Mini 24h Trend Sparkline */}
+            <div className="msc-trend-section">
+              <div className="msc-trend-header">
+                <span>24H DIURNAL TREND</span>
+                <span style={{ color: '#10b981' }}>Live Sync Active</span>
+              </div>
+              <svg className="msc-sparkline-svg" viewBox="0 0 200 30">
+                <polyline
+                  fill="none"
+                  stroke={classifyAQI(selectedStation.aqi).color}
+                  strokeWidth="2.2"
+                  strokeLinecap="round"
+                  strokeLinejoin="round"
+                  points={`0,${Math.max(5, Math.min(25, 30 - (selectedStation.aqi - 10) * 0.3))} 40,${Math.max(5, Math.min(25, 30 - (selectedStation.aqi - 5) * 0.3))} 80,${Math.max(5, Math.min(25, 30 - (selectedStation.aqi + 8) * 0.3))} 120,${Math.max(5, Math.min(25, 30 - (selectedStation.aqi + 2) * 0.3))} 160,${Math.max(5, Math.min(25, 30 - (selectedStation.aqi - 3) * 0.3))} 200,${Math.max(5, Math.min(25, 30 - (selectedStation.aqi) * 0.3))}`}
+                />
+                <circle cx="200" cy={Math.max(5, Math.min(25, 30 - (selectedStation.aqi) * 0.3))} r="3.5" fill={classifyAQI(selectedStation.aqi).color} />
+              </svg>
+            </div>
+
             {/* Micro Sensor Grid */}
             <div className="msc-sensor-grid">
               <div className="msc-sensor-item">
@@ -601,21 +765,30 @@ export default function IoTFleetMap({ onSelectDevice }) {
                 <span className="msc-sensor-val">{selectedStation.gas} PPM</span>
               </div>
               <div className="msc-sensor-item">
-                <span className="msc-sensor-label">SIGNAL</span>
-                <span className="msc-sensor-val" style={{ color: '#10b981' }}>-58 dBm (96%)</span>
+                <span className="msc-sensor-label">SIGNAL / LATENCY</span>
+                <span className="msc-sensor-val" style={{ color: '#10b981' }}>-58 dBm (&lt;1s)</span>
               </div>
             </div>
 
-            <div className="msc-actions">
+            <div className="msc-actions-row">
               <button
+                type="button"
+                className="btn-secondary"
+                style={{ flex: 1, padding: '8px 10px', fontSize: '0.8rem' }}
+                onClick={() => handleFocusStation(selectedStation)}
+              >
+                🎯 Focus Map
+              </button>
+              <button
+                type="button"
                 className="btn-primary"
-                style={{ width: '100%', padding: '8px 12px', fontSize: '0.82rem' }}
+                style={{ flex: 1.5, padding: '8px 10px', fontSize: '0.8rem' }}
                 onClick={() => {
                   if (onSelectDevice) onSelectDevice(selectedStation.deviceId);
                   navigate(`/devices/${selectedStation.deviceId}`);
                 }}
               >
-                🔬 Inspect Hardware Diagnostics
+                🔬 Diagnostics
               </button>
             </div>
           </div>
@@ -628,7 +801,18 @@ export default function IoTFleetMap({ onSelectDevice }) {
           <span>Active Mesh Nodes:</span> <strong>{devices.length} Deployed</strong>
         </div>
         <div className="mfs-item">
-          <span>Fleet Mean AQI:</span> <strong>{Math.round(devices.reduce((acc, d) => acc + d.aqi, 0) / (devices.length || 1))}</strong>
+          <span>Fleet Active Metric:</span> <strong style={{ textTransform: 'uppercase', color: 'var(--color-primary, #00f0ff)' }}>{activeMetric}</strong>
+        </div>
+        <div className="mfs-item">
+          <span>Fleet Average:</span> <strong>
+            {activeMetric === 'temp'
+              ? `${(devices.reduce((acc, d) => acc + d.temp, 0) / (devices.length || 1)).toFixed(1)}°C`
+              : activeMetric === 'hum'
+              ? `${Math.round(devices.reduce((acc, d) => acc + d.hum, 0) / (devices.length || 1))}% RH`
+              : activeMetric === 'gas'
+              ? `${Math.round(devices.reduce((acc, d) => acc + d.gas, 0) / (devices.length || 1))} PPM`
+              : `${Math.round(devices.reduce((acc, d) => acc + d.aqi, 0) / (devices.length || 1))} AQI`}
+          </strong>
         </div>
         <div className="mfs-item">
           <span>Mesh Status:</span> <strong style={{ color: '#10b981' }}>All Channels Synchronized</strong>
