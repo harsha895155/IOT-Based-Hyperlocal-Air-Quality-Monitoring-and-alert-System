@@ -13,6 +13,9 @@ export default function SystemHealthView() {
   const [userList, setUserList] = useState([]);
   const [usersLoading, setUsersLoading] = useState(false);
   const [userSearchTerm, setUserSearchTerm] = useState('');
+  const [userActionError, setUserActionError] = useState(null);
+  const [userActionSuccess, setUserActionSuccess] = useState(null);
+  const [deletingUserId, setDeletingUserId] = useState(null);
   const [loading, setLoading] = useState(true);
   const [latency, setLatency] = useState(24);
   const [refreshInterval, setRefreshInterval] = useState(10); // 5 | 10 | 30 | 0 (paused)
@@ -140,6 +143,42 @@ export default function SystemHealthView() {
     setTimeout(() => {
       addLog('NODE', `✓ Hardware node ${nodeId} responded: RSSI -64 dBm, Packet Loss 0.0%`);
     }, 400);
+  };
+
+  // Delete User Account (Admin Only)
+  const handleDeleteUser = async (targetUser) => {
+    const isSelf = targetUser._id === user._id || targetUser.id === user.id;
+    if (isSelf) {
+      alert('You cannot delete your own active administrator account from this directory.');
+      return;
+    }
+
+    const devCount = targetUser.devices?.length || targetUser.devicesCount || 0;
+    const devWarning = devCount > 0 ? `\n\n⚠️ WARNING: This user owns ${devCount} hardware node(s). Deleting this account will also remove those devices and their telemetry data.` : '';
+
+    const confirmed = window.confirm(
+      `Are you sure you want to permanently delete the user account "${targetUser.name}" (${targetUser.email})?${devWarning}\n\nThis action cannot be undone.`
+    );
+    if (!confirmed) return;
+
+    setUserActionError(null);
+    setUserActionSuccess(null);
+    setDeletingUserId(targetUser._id || targetUser.id);
+
+    try {
+      const res = await client.delete(`/system/users/${targetUser._id || targetUser.id}`);
+      setUserList((prev) => prev.filter((u) => (u._id || u.id) !== (targetUser._id || targetUser.id)));
+      setUserActionSuccess(res.data?.message || `User "${targetUser.name}" successfully deleted.`);
+      addLog('HTTP', `✓ Administrator deleted user account ${targetUser.email}`);
+      setTimeout(() => setUserActionSuccess(null), 6000);
+    } catch (err) {
+      const errMsg = err.response?.data?.error || err.message || 'Failed to delete user account.';
+      setUserActionError(errMsg);
+      addLog('HTTP', `❌ Failed to delete user ${targetUser.email}: ${errMsg}`);
+      setTimeout(() => setUserActionError(null), 6000);
+    } finally {
+      setDeletingUserId(null);
+    }
   };
 
   // Download log as text file
@@ -467,6 +506,18 @@ export default function SystemHealthView() {
               </div>
             </div>
 
+            {userActionSuccess && (
+              <div style={{ background: 'rgba(16, 185, 129, 0.15)', border: '1px solid rgba(16, 185, 129, 0.4)', borderRadius: '8px', padding: '10px 14px', marginBottom: '14px', color: '#10b981', fontSize: '0.82rem', fontWeight: 600 }}>
+                ✓ {userActionSuccess}
+              </div>
+            )}
+
+            {userActionError && (
+              <div style={{ background: 'rgba(239, 68, 68, 0.15)', border: '1px solid rgba(239, 68, 68, 0.4)', borderRadius: '8px', padding: '10px 14px', marginBottom: '14px', color: '#ef4444', fontSize: '0.82rem', fontWeight: 600 }}>
+                ⚠️ {userActionError}
+              </div>
+            )}
+
             <div className="node-health-table-wrap">
               <table className="node-health-table">
                 <thead>
@@ -477,12 +528,13 @@ export default function SystemHealthView() {
                     <th>Status</th>
                     <th>Linked Devices</th>
                     <th>Joined Date</th>
+                    <th>Action</th>
                   </tr>
                 </thead>
                 <tbody>
                   {userList.length === 0 ? (
                     <tr>
-                      <td colSpan={6} style={{ textAlign: 'center', padding: '28px 14px', color: 'var(--text-muted)' }}>
+                      <td colSpan={7} style={{ textAlign: 'center', padding: '28px 14px', color: 'var(--text-muted)' }}>
                         No user accounts found.
                       </td>
                     </tr>
@@ -497,101 +549,134 @@ export default function SystemHealthView() {
                           u.role?.toLowerCase().includes(term)
                         );
                       })
-                      .map((u) => (
-                        <tr key={u._id || u.id}>
-                          <td>
-                            <div style={{ display: 'flex', alignItems: 'center', gap: '10px' }}>
-                              <div
+                      .map((u) => {
+                        const isSelf = (u._id || u.id) === (user._id || user.id);
+                        const isDeleting = deletingUserId === (u._id || u.id);
+                        return (
+                          <tr key={u._id || u.id}>
+                            <td>
+                              <div style={{ display: 'flex', alignItems: 'center', gap: '10px' }}>
+                                <div
+                                  style={{
+                                    width: '32px',
+                                    height: '32px',
+                                    borderRadius: '50%',
+                                    background: u.role === 'admin' ? 'linear-gradient(135deg, #0284c7, #00d2b4)' : 'rgba(255,255,255,0.1)',
+                                    display: 'flex',
+                                    alignItems: 'center',
+                                    justifyContent: 'center',
+                                    fontWeight: 700,
+                                    fontSize: '0.8rem',
+                                    color: '#fff',
+                                  }}
+                                >
+                                  {u.name ? u.name.charAt(0).toUpperCase() : 'U'}
+                                </div>
+                                <div>
+                                  <strong style={{ color: 'var(--text-primary)', fontSize: '0.88rem' }}>{u.name}</strong>
+                                  {isSelf && (
+                                    <span style={{ marginLeft: '6px', fontSize: '0.68rem', color: '#00d2b4', background: 'rgba(0, 210, 180, 0.12)', padding: '2px 6px', borderRadius: '4px' }}>
+                                      YOU
+                                    </span>
+                                  )}
+                                </div>
+                              </div>
+                            </td>
+                            <td>
+                              <span className="mono" style={{ fontSize: '0.82rem', color: '#94a3b8' }}>
+                                {u.email}
+                              </span>
+                            </td>
+                            <td>
+                              <span
                                 style={{
-                                  width: '32px',
-                                  height: '32px',
-                                  borderRadius: '50%',
-                                  background: u.role === 'admin' ? 'linear-gradient(135deg, #0284c7, #00d2b4)' : 'rgba(255,255,255,0.1)',
-                                  display: 'flex',
-                                  alignItems: 'center',
-                                  justifyContent: 'center',
+                                  display: 'inline-block',
+                                  padding: '3px 8px',
+                                  borderRadius: '6px',
+                                  fontSize: '0.74rem',
                                   fontWeight: 700,
-                                  fontSize: '0.8rem',
-                                  color: '#fff',
+                                  textTransform: 'uppercase',
+                                  background: u.role === 'admin' ? 'rgba(239, 68, 68, 0.15)' : 'rgba(56, 189, 248, 0.15)',
+                                  color: u.role === 'admin' ? '#f87171' : '#38bdf8',
+                                  border: u.role === 'admin' ? '1px solid rgba(239, 68, 68, 0.3)' : '1px solid rgba(56, 189, 248, 0.3)',
                                 }}
                               >
-                                {u.name ? u.name.charAt(0).toUpperCase() : 'U'}
-                              </div>
-                              <div>
-                                <strong style={{ color: 'var(--text-primary)', fontSize: '0.88rem' }}>{u.name}</strong>
-                                {u._id === user._id && (
-                                  <span style={{ marginLeft: '6px', fontSize: '0.68rem', color: '#00d2b4', background: 'rgba(0, 210, 180, 0.12)', padding: '2px 6px', borderRadius: '4px' }}>
-                                    YOU
-                                  </span>
-                                )}
-                              </div>
-                            </div>
-                          </td>
-                          <td>
-                            <span className="mono" style={{ fontSize: '0.82rem', color: '#94a3b8' }}>
-                              {u.email}
-                            </span>
-                          </td>
-                          <td>
-                            <span
-                              style={{
-                                display: 'inline-block',
-                                padding: '3px 8px',
-                                borderRadius: '6px',
-                                fontSize: '0.74rem',
-                                fontWeight: 700,
-                                textTransform: 'uppercase',
-                                background: u.role === 'admin' ? 'rgba(239, 68, 68, 0.15)' : 'rgba(56, 189, 248, 0.15)',
-                                color: u.role === 'admin' ? '#f87171' : '#38bdf8',
-                                border: u.role === 'admin' ? '1px solid rgba(239, 68, 68, 0.3)' : '1px solid rgba(56, 189, 248, 0.3)',
-                              }}
-                            >
-                              {u.role === 'admin' ? '🛡️ Admin' : '👤 User'}
-                            </span>
-                          </td>
-                          <td>
-                            <span
-                              style={{
-                                color: u.status === 'Suspended' ? '#ef4444' : '#10b981',
-                                fontSize: '0.78rem',
-                                fontWeight: 600,
-                              }}
-                            >
-                              ● {u.status || 'Active'}
-                            </span>
-                          </td>
-                          <td>
-                            {u.devices && u.devices.length > 0 ? (
-                              <div style={{ display: 'flex', flexWrap: 'wrap', gap: '4px' }}>
-                                {u.devices.map((d) => (
-                                  <span
-                                    key={d.deviceId}
-                                    className="mono"
-                                    style={{
-                                      fontSize: '0.72rem',
-                                      padding: '2px 6px',
-                                      borderRadius: '4px',
-                                      background: 'rgba(0, 210, 180, 0.12)',
-                                      color: '#00d2b4',
-                                      border: '1px solid rgba(0, 210, 180, 0.25)',
-                                    }}
-                                    title={`${d.name} (${d.status || 'Active'})`}
-                                  >
-                                    📡 {d.deviceId}
-                                  </span>
-                                ))}
-                              </div>
-                            ) : (
-                              <span style={{ fontSize: '0.76rem', color: '#64748b' }}>None</span>
-                            )}
-                          </td>
-                          <td>
-                            <span style={{ fontSize: '0.78rem', color: '#94a3b8' }}>
-                              {u.createdAt ? new Date(u.createdAt).toLocaleDateString() : '—'}
-                            </span>
-                          </td>
-                        </tr>
-                      ))
+                                {u.role === 'admin' ? '🛡️ Admin' : '👤 User'}
+                              </span>
+                            </td>
+                            <td>
+                              <span
+                                style={{
+                                  color: u.status === 'Suspended' ? '#ef4444' : '#10b981',
+                                  fontSize: '0.78rem',
+                                  fontWeight: 600,
+                                }}
+                              >
+                                ● {u.status || 'Active'}
+                              </span>
+                            </td>
+                            <td>
+                              {u.devices && u.devices.length > 0 ? (
+                                <div style={{ display: 'flex', flexWrap: 'wrap', gap: '4px' }}>
+                                  {u.devices.map((d) => (
+                                    <span
+                                      key={d.deviceId}
+                                      className="mono"
+                                      style={{
+                                        fontSize: '0.72rem',
+                                        padding: '2px 6px',
+                                        borderRadius: '4px',
+                                        background: 'rgba(0, 210, 180, 0.12)',
+                                        color: '#00d2b4',
+                                        border: '1px solid rgba(0, 210, 180, 0.25)',
+                                      }}
+                                      title={`${d.name} (${d.status || 'Active'})`}
+                                    >
+                                      📡 {d.deviceId}
+                                    </span>
+                                  ))}
+                                </div>
+                              ) : (
+                                <span style={{ fontSize: '0.76rem', color: '#64748b' }}>None</span>
+                              )}
+                            </td>
+                            <td>
+                              <span style={{ fontSize: '0.78rem', color: '#94a3b8' }}>
+                                {u.createdAt ? new Date(u.createdAt).toLocaleDateString() : '—'}
+                              </span>
+                            </td>
+                            <td>
+                              {isSelf ? (
+                                <span style={{ fontSize: '0.72rem', color: '#64748b', fontStyle: 'italic' }}>
+                                  Active Session
+                                </span>
+                              ) : (
+                                <button
+                                  type="button"
+                                  onClick={() => handleDeleteUser(u)}
+                                  disabled={isDeleting}
+                                  title={`Permanently delete user ${u.name}`}
+                                  style={{
+                                    background: 'rgba(239, 68, 68, 0.1)',
+                                    border: '1px solid rgba(239, 68, 68, 0.3)',
+                                    color: '#ef4444',
+                                    borderRadius: '6px',
+                                    padding: '4px 10px',
+                                    fontSize: '0.74rem',
+                                    fontWeight: 600,
+                                    cursor: isDeleting ? 'not-allowed' : 'pointer',
+                                    display: 'inline-flex',
+                                    alignItems: 'center',
+                                    gap: '4px',
+                                  }}
+                                >
+                                  {isDeleting ? 'Deleting...' : '🗑️ Delete User'}
+                                </button>
+                              )}
+                            </td>
+                          </tr>
+                        );
+                      })
                   )}
                 </tbody>
               </table>
