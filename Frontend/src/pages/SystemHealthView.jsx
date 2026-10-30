@@ -10,6 +10,9 @@ export default function SystemHealthView() {
   const [health, setHealth] = useState(null);
   const [deviceStats, setDeviceStats] = useState({ total: 0, online: 0, offline: 0 });
   const [deviceList, setDeviceList] = useState([]);
+  const [userList, setUserList] = useState([]);
+  const [usersLoading, setUsersLoading] = useState(false);
+  const [userSearchTerm, setUserSearchTerm] = useState('');
   const [loading, setLoading] = useState(true);
   const [latency, setLatency] = useState(24);
   const [refreshInterval, setRefreshInterval] = useState(10); // 5 | 10 | 30 | 0 (paused)
@@ -40,9 +43,10 @@ export default function SystemHealthView() {
   const checkHealth = useCallback(async () => {
     const startTime = performance.now();
     try {
-      const [sysRes, devRes] = await Promise.allSettled([
+      const [sysRes, devRes, usersRes] = await Promise.allSettled([
         client.get('/system/health'),
         client.get('/devices'),
+        user?.role === 'admin' ? client.get('/system/users') : Promise.resolve({ data: { users: [] } }),
       ]);
 
       const roundtrip = Math.round(performance.now() - startTime);
@@ -62,12 +66,16 @@ export default function SystemHealthView() {
           offline: Math.max(0, devs.length - online),
         });
       }
+
+      if (usersRes.status === 'fulfilled' && usersRes.value?.data?.users) {
+        setUserList(usersRes.value.data.users);
+      }
     } catch (e) {
       console.error('System health error:', e.message);
     } finally {
       setLoading(false);
     }
-  }, []);
+  }, [user?.role]);
 
   // Timer auto-refresh
   useEffect(() => {
@@ -422,6 +430,174 @@ export default function SystemHealthView() {
             </table>
           </div>
         </section>
+
+        {/* ─── Registered Users & Account Inspector (Admin Only) ─── */}
+        {user?.role === 'admin' && (
+          <section className="card" style={{ padding: '24px' }}>
+            <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', flexWrap: 'wrap', gap: '10px', marginBottom: '16px' }}>
+              <div>
+                <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
+                  <span style={{ fontSize: '1.25rem' }}>👥</span>
+                  <h2 style={{ fontSize: '1.15rem', fontWeight: 600, margin: 0 }}>Registered User Accounts &amp; Ownership Directory</h2>
+                </div>
+                <p className="text-muted fs-xs" style={{ margin: '4px 0 0 0' }}>
+                  Full roster of platform users, email addresses, assigned roles, linked IoT devices, and registration dates
+                </p>
+              </div>
+              <div style={{ display: 'flex', alignItems: 'center', gap: '10px' }}>
+                <input
+                  type="text"
+                  placeholder="Search user name or email..."
+                  value={userSearchTerm}
+                  onChange={(e) => setUserSearchTerm(e.target.value)}
+                  style={{
+                    background: 'var(--surface-raised, rgba(255,255,255,0.05))',
+                    border: '1px solid var(--border-subtle, rgba(255,255,255,0.1))',
+                    borderRadius: '8px',
+                    padding: '6px 12px',
+                    color: 'var(--text-primary)',
+                    fontSize: '0.8rem',
+                    outline: 'none',
+                    minWidth: '220px',
+                  }}
+                />
+                <span className="settings-tag" style={{ background: 'rgba(56, 189, 248, 0.15)', color: '#38bdf8' }}>
+                  {userList.length} {userList.length === 1 ? 'User' : 'Users'}
+                </span>
+              </div>
+            </div>
+
+            <div className="node-health-table-wrap">
+              <table className="node-health-table">
+                <thead>
+                  <tr>
+                    <th>User</th>
+                    <th>Email Address</th>
+                    <th>Account Role</th>
+                    <th>Status</th>
+                    <th>Linked Devices</th>
+                    <th>Joined Date</th>
+                  </tr>
+                </thead>
+                <tbody>
+                  {userList.length === 0 ? (
+                    <tr>
+                      <td colSpan={6} style={{ textAlign: 'center', padding: '28px 14px', color: 'var(--text-muted)' }}>
+                        No user accounts found.
+                      </td>
+                    </tr>
+                  ) : (
+                    userList
+                      .filter((u) => {
+                        if (!userSearchTerm.trim()) return true;
+                        const term = userSearchTerm.toLowerCase();
+                        return (
+                          u.name?.toLowerCase().includes(term) ||
+                          u.email?.toLowerCase().includes(term) ||
+                          u.role?.toLowerCase().includes(term)
+                        );
+                      })
+                      .map((u) => (
+                        <tr key={u._id || u.id}>
+                          <td>
+                            <div style={{ display: 'flex', alignItems: 'center', gap: '10px' }}>
+                              <div
+                                style={{
+                                  width: '32px',
+                                  height: '32px',
+                                  borderRadius: '50%',
+                                  background: u.role === 'admin' ? 'linear-gradient(135deg, #0284c7, #00d2b4)' : 'rgba(255,255,255,0.1)',
+                                  display: 'flex',
+                                  alignItems: 'center',
+                                  justifyContent: 'center',
+                                  fontWeight: 700,
+                                  fontSize: '0.8rem',
+                                  color: '#fff',
+                                }}
+                              >
+                                {u.name ? u.name.charAt(0).toUpperCase() : 'U'}
+                              </div>
+                              <div>
+                                <strong style={{ color: 'var(--text-primary)', fontSize: '0.88rem' }}>{u.name}</strong>
+                                {u._id === user._id && (
+                                  <span style={{ marginLeft: '6px', fontSize: '0.68rem', color: '#00d2b4', background: 'rgba(0, 210, 180, 0.12)', padding: '2px 6px', borderRadius: '4px' }}>
+                                    YOU
+                                  </span>
+                                )}
+                              </div>
+                            </div>
+                          </td>
+                          <td>
+                            <span className="mono" style={{ fontSize: '0.82rem', color: '#94a3b8' }}>
+                              {u.email}
+                            </span>
+                          </td>
+                          <td>
+                            <span
+                              style={{
+                                display: 'inline-block',
+                                padding: '3px 8px',
+                                borderRadius: '6px',
+                                fontSize: '0.74rem',
+                                fontWeight: 700,
+                                textTransform: 'uppercase',
+                                background: u.role === 'admin' ? 'rgba(239, 68, 68, 0.15)' : 'rgba(56, 189, 248, 0.15)',
+                                color: u.role === 'admin' ? '#f87171' : '#38bdf8',
+                                border: u.role === 'admin' ? '1px solid rgba(239, 68, 68, 0.3)' : '1px solid rgba(56, 189, 248, 0.3)',
+                              }}
+                            >
+                              {u.role === 'admin' ? '🛡️ Admin' : '👤 User'}
+                            </span>
+                          </td>
+                          <td>
+                            <span
+                              style={{
+                                color: u.status === 'Suspended' ? '#ef4444' : '#10b981',
+                                fontSize: '0.78rem',
+                                fontWeight: 600,
+                              }}
+                            >
+                              ● {u.status || 'Active'}
+                            </span>
+                          </td>
+                          <td>
+                            {u.devices && u.devices.length > 0 ? (
+                              <div style={{ display: 'flex', flexWrap: 'wrap', gap: '4px' }}>
+                                {u.devices.map((d) => (
+                                  <span
+                                    key={d.deviceId}
+                                    className="mono"
+                                    style={{
+                                      fontSize: '0.72rem',
+                                      padding: '2px 6px',
+                                      borderRadius: '4px',
+                                      background: 'rgba(0, 210, 180, 0.12)',
+                                      color: '#00d2b4',
+                                      border: '1px solid rgba(0, 210, 180, 0.25)',
+                                    }}
+                                    title={`${d.name} (${d.status || 'Active'})`}
+                                  >
+                                    📡 {d.deviceId}
+                                  </span>
+                                ))}
+                              </div>
+                            ) : (
+                              <span style={{ fontSize: '0.76rem', color: '#64748b' }}>None</span>
+                            )}
+                          </td>
+                          <td>
+                            <span style={{ fontSize: '0.78rem', color: '#94a3b8' }}>
+                              {u.createdAt ? new Date(u.createdAt).toLocaleDateString() : '—'}
+                            </span>
+                          </td>
+                        </tr>
+                      ))
+                  )}
+                </tbody>
+              </table>
+            </div>
+          </section>
+        )}
 
         {/* ─── Interactive Diagnostic Performance Benchmarks ─── */}
         <section className="card" style={{ padding: '24px' }}>
