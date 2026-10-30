@@ -191,64 +191,171 @@
 .map-canvas-wrapper {
   position: relative;
   width: 100%;
-  height: 500px;
+  height: 520px;
   background: #090d16;
   border-radius: 12px;
   border: 1px solid var(--border-color, rgba(255, 255, 255, 0.08));
   overflow: hidden;
 }
 
-.map-viewport {
+.leaflet-map-canvas {
   width: 100%;
   height: 100%;
-  transition: transform 0.35s cubic-bezier(0.16, 1, 0.3, 1);
+  z-index: 1;
 }
 
-.map-svg-canvas {
-  width: 100%;
-  height: 100%;
-  display: block;
+/* Custom Marker Styling */
+.leaflet-airguard-div-icon {
+  background: transparent !important;
+  border: none !important;
 }
 
-/* Atmospheric Wind Streamline Animation */
-.wind-streamline {
-  stroke-dasharray: 12 18;
-  animation: windFlow 4.5s linear infinite;
+.leaflet-airguard-marker {
+  position: relative;
+  width: 24px;
+  height: 24px;
 }
 
-.wind-streamline-fast {
-  stroke-dasharray: 14 16;
-  animation: windFlow 3s linear infinite;
+.lam-dot {
+  position: absolute;
+  top: 6px;
+  left: 6px;
+  width: 12px;
+  height: 12px;
+  border-radius: 50%;
+  background: var(--marker-color, #10b981);
+  border: 2.5px solid #ffffff;
+  box-shadow: 0 2px 6px rgba(0, 0, 0, 0.4);
+  z-index: 3;
 }
 
-@keyframes windFlow {
-  from {
-    stroke-dashoffset: 200;
-  }
-  to {
-    stroke-dashoffset: 0;
-  }
+.lam-halo {
+  position: absolute;
+  top: -8px;
+  left: -8px;
+  width: 40px;
+  height: 40px;
+  border-radius: 50%;
+  background: var(--marker-color, #10b981);
+  opacity: 0.28;
+  filter: blur(4px);
+  z-index: 1;
 }
 
-.map-pulse-ring {
-  transform-origin: center;
-  animation: mapPulse 2.4s infinite ease-out;
+.lam-pulse {
+  position: absolute;
+  top: -2px;
+  left: -2px;
+  width: 28px;
+  height: 28px;
+  border-radius: 50%;
+  border: 2px solid var(--marker-color, #10b981);
+  opacity: 0.8;
+  animation: markerPulse 2.2s infinite ease-out;
+  z-index: 2;
 }
 
-@keyframes mapPulse {
+@keyframes markerPulse {
   0% {
-    r: 12;
-    opacity: 0.8;
+    transform: scale(0.6);
+    opacity: 0.9;
   }
   100% {
-    r: 32;
+    transform: scale(2.2);
     opacity: 0;
   }
 }
 
-.map-node-group:hover circle:first-child {
-  transform: scale(1.15);
-  transition: transform 0.2s ease;
+.lam-pill {
+  position: absolute;
+  left: 24px;
+  top: -2px;
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  padding: 3px 8px;
+  border-radius: 8px;
+  font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+  white-space: nowrap;
+  box-shadow: 0 4px 14px rgba(0, 0, 0, 0.28);
+  cursor: pointer;
+  z-index: 4;
+  transition: transform 0.15s ease;
+}
+
+.lam-pill:hover {
+  transform: translateY(-1px) scale(1.03);
+}
+
+.lam-light {
+  background: #ffffff;
+  border: 1px solid #cbd5e1;
+  color: #0f172a;
+}
+
+.lam-dark {
+  background: rgba(15, 23, 42, 0.94);
+  border: 1px solid rgba(255, 255, 255, 0.15);
+  color: #f8fafc;
+}
+
+.lam-name {
+  font-size: 0.72rem;
+  font-weight: 700;
+}
+
+.lam-val {
+  font-size: 0.75rem;
+  font-weight: 800;
+  font-family: monospace;
+}
+
+/* Anchor Cities */
+.leaflet-city-div-icon {
+  background: transparent !important;
+  border: none !important;
+}
+
+.leaflet-city-badge {
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+  font-size: 0.72rem;
+  font-weight: 700;
+  pointer-events: none;
+}
+
+.city-dot {
+  width: 6px;
+  height: 6px;
+  border-radius: 50%;
+  background: #64748b;
+  border: 1.5px solid #ffffff;
+}
+
+.city-light .city-label {
+  color: #334155;
+  text-shadow: 0 1px 2px #ffffff, 0 -1px 2px #ffffff;
+}
+
+.city-dark .city-label {
+  color: #94a3b8;
+  text-shadow: 0 1px 3px rgba(0, 0, 0, 0.8), 0 -1px 3px rgba(0, 0, 0, 0.8);
+}
+
+/* Wind streamline path */
+.leaflet-wind-path {
+  stroke-dasharray: 10 16;
+  animation: leafletWindFlow 3.5s linear infinite;
+}
+
+@keyframes leafletWindFlow {
+  from {
+    stroke-dashoffset: 150;
+  }
+  to {
+    stroke-dashoffset: 0;
+  }
 }
 
 .map-station-card {
