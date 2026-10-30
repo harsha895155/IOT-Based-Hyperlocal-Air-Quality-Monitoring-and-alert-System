@@ -249,6 +249,16 @@ bool NodeNetworkManager::startCaptivePortal(unsigned long timeoutMs) {
     delay(10);
   }
 
+  if (configReceived) {
+    // Keep server active for 1.2s so the phone browser fully receives and renders the confirmation screen
+    unsigned long linger = millis();
+    while (millis() - linger < 1200) {
+      dnsServer.processNextRequest();
+      webServer.handleClient();
+      delay(10);
+    }
+  }
+
   digitalWrite(STATUS_LED_PIN, LOW);
   webServer.stop();
   dnsServer.stop();
