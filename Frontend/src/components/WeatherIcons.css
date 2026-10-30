@@ -246,3 +246,34 @@
   padding-top: 8px;
   border-top: 1px solid var(--border-subtle, rgba(255, 255, 255, 0.08));
 }
+
+
+/* Twinkling Night Stars & Atmospheric Starlight */
+@keyframes twinkleStar {
+  0%, 100% {
+    opacity: 0.25;
+    transform: scale(0.7);
+  }
+  50% {
+    opacity: 1;
+    transform: scale(1.3);
+    filter: drop-shadow(0 0 3px #38bdf8);
+  }
+}
+
+.anim-star-twinkle {
+  animation: twinkleStar 2.4s ease-in-out infinite;
+  transform-origin: center;
+}
+
+.anim-star-d1 {
+  animation-delay: 0s;
+}
+
+.anim-star-d2 {
+  animation-delay: 0.8s;
+}
+
+.anim-star-d3 {
+  animation-delay: 1.6s;
+}

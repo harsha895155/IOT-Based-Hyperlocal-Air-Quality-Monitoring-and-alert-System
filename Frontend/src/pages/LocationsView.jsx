@@ -604,7 +604,7 @@ export default function LocationsView() {
                 </div>
 
                 <div className="loc-hero-icon-box">
-                  <WeatherIconComponent size={96} />
+                  <WeatherIconComponent size={96} isDay={cw.isDay ?? true} />
                 </div>
               </div>
 
@@ -716,14 +716,22 @@ export default function LocationsView() {
 
               <div className="loc-hourly-strip">
                 {hourlyList.map((hour, idx) => {
+                  const hourDate = new Date(hour.time);
+                  const hourNum = hourDate.getHours();
+                  const isDay = hour.isDay !== undefined ? Boolean(hour.isDay) : (hourNum >= 6 && hourNum < 18);
                   const IconComp = getWeatherIcon(hour.icon, hour.condition);
-                  const hourTime = new Date(hour.time).toLocaleTimeString([], { hour: 'numeric', hour12: true });
+                  const hourTime = hourDate.toLocaleTimeString([], { hour: 'numeric', hour12: true });
+                  const climateClass = (hour.icon || '').toLowerCase();
 
                   return (
-                    <div key={`${hour.time}-${idx}`} className="loc-hour-item">
+                    <div
+                      key={`${hour.time}-${idx}`}
+                      className={`loc-hour-item ${isDay ? 'is-day-slot' : 'is-night-slot'} climate-${climateClass} ${idx === 0 ? 'is-current-slot' : ''}`}
+                      title={`${idx === 0 ? 'Now' : hourTime}: ${hour.condition || 'Clear'} (${isDay ? 'Daytime' : 'Night'})`}
+                    >
                       <span className="loc-hour-time">{idx === 0 ? 'Now' : hourTime}</span>
                       <div className="loc-hour-icon">
-                        <IconComp size={20} className="loc-hour-svg" />
+                        <IconComp size={22} isDay={isDay} className="loc-hour-svg" />
                       </div>
                       <span className="loc-hour-temp">{hour.temp}°</span>
                       {hour.precipitationProb > 0 ? (

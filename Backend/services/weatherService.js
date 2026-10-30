@@ -317,7 +317,7 @@ async function getWeatherForCoordinates(lat, lng, locationName = 'Current Locati
     return { ...cached.data, cached: true };
   }
 
-  const endpoint = `https://api.open-meteo.com/v1/forecast?latitude=${lat}&longitude=${lng}&current=temperature_2m,relative_humidity_2m,apparent_temperature,is_day,precipitation,weather_code,surface_pressure,wind_speed_10m,wind_direction_10m,wind_gusts_10m&hourly=temperature_2m,relative_humidity_2m,apparent_temperature,precipitation_probability,precipitation,weather_code,surface_pressure,visibility,wind_speed_10m,wind_direction_10m,uv_index&daily=weather_code,temperature_2m_max,temperature_2m_min,apparent_temperature_max,apparent_temperature_min,sunrise,sunset,uv_index_max,precipitation_sum,precipitation_probability_max,wind_speed_10m_max&timezone=auto&forecast_days=7`;
+  const endpoint = `https://api.open-meteo.com/v1/forecast?latitude=${lat}&longitude=${lng}&current=temperature_2m,relative_humidity_2m,apparent_temperature,is_day,precipitation,weather_code,surface_pressure,wind_speed_10m,wind_direction_10m,wind_gusts_10m&hourly=temperature_2m,relative_humidity_2m,apparent_temperature,precipitation_probability,precipitation,weather_code,surface_pressure,visibility,wind_speed_10m,wind_direction_10m,uv_index,is_day&daily=weather_code,temperature_2m_max,temperature_2m_min,apparent_temperature_max,apparent_temperature_min,sunrise,sunset,uv_index_max,precipitation_sum,precipitation_probability_max,wind_speed_10m_max&timezone=auto&forecast_days=7`;
   const aqEndpoint = `https://air-quality-api.open-meteo.com/v1/air-quality?latitude=${lat}&longitude=${lng}&current=us_aqi,pm10,pm2_5,carbon_monoxide`;
 
   const headers = {
@@ -374,6 +374,7 @@ async function getWeatherForCoordinates(lat, lng, locationName = 'Current Locati
         weatherCode: code,
         condition: meta.label,
         icon: meta.icon,
+        isDay: hourly.is_day?.[realIdx] !== undefined ? (hourly.is_day[realIdx] === 1 || hourly.is_day[realIdx] === true) : (() => { const h = new Date(timeStr).getHours(); return h >= 6 && h < 18; })(),
         windSpeed: Math.round(hourly.wind_speed_10m?.[realIdx] ?? current.wind_speed_10m),
         uvIndex: Number((hourly.uv_index?.[realIdx] ?? 0).toFixed(1)),
       };
@@ -480,6 +481,7 @@ async function getWeatherForCoordinates(lat, lng, locationName = 'Current Locati
         weatherCode: hIsDay ? 2 : 0,
         condition: hIsDay ? 'Partly Cloudy' : 'Clear Sky',
         icon: hIsDay ? 'partly-cloudy' : 'clear',
+        isDay: hIsDay,
         windSpeed: 11,
         uvIndex: hIsDay && hSolarHour >= 10 && hSolarHour <= 15 ? 6.5 : 0,
       };

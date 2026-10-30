@@ -21,7 +21,10 @@ export const WeatherIcons = {
       </svg>
     ) : (
       <svg width={size} height={size} viewBox="0 0 24 24" fill="none" stroke="#38bdf8" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className={`anim-moon-glow ${className}`}>
-        <path d="M21 12.79A9 9 0 1 1 11.21 3 7 7 0 0 0 21 12.79z" fill="#38bdf8" fillOpacity="0.25" />
+        <path d="M21 12.79A9 9 0 1 1 11.21 3 7 7 0 0 0 21 12.79z" fill="#38bdf8" fillOpacity="0.35" stroke="#38bdf8" />
+        <circle cx="17.5" cy="5.5" r="1.1" fill="#e0f2fe" stroke="none" className="anim-star-twinkle anim-star-d1" />
+        <circle cx="19.5" cy="18" r="0.8" fill="#bae6fd" stroke="none" className="anim-star-twinkle anim-star-d2" />
+        <circle cx="6" cy="6.5" r="0.8" fill="#38bdf8" stroke="none" className="anim-star-twinkle anim-star-d3" />
       </svg>
     )
   ),
@@ -36,7 +39,8 @@ export const WeatherIcons = {
       </svg>
     ) : (
       <svg width={size} height={size} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className={`anim-moon-glow ${className}`}>
-        <path d="M15.5 11A5 5 0 0 0 10 5.2a6 6 0 1 1 5.5 5.8z" fill="#38bdf8" fillOpacity="0.3" stroke="#38bdf8" />
+        <path d="M15.5 11A5 5 0 0 0 10 5.2a6 6 0 1 1 5.5 5.8z" fill="#38bdf8" fillOpacity="0.35" stroke="#38bdf8" />
+        <circle cx="18" cy="4.5" r="0.8" fill="#e0f2fe" stroke="none" className="anim-star-twinkle anim-star-d1" />
         <path className="anim-cloud-float" d="M17.5 19H9a5 5 0 1 1 2.3-9.45A7 7 0 0 1 21 16a3.5 3.5 0 0 1-3.5 3z" fill="#94a3b8" fillOpacity="0.3" stroke="#94a3b8" />
       </svg>
     )
