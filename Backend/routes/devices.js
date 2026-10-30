@@ -469,9 +469,11 @@ router.delete('/:id', protect, async (req, res, next) => {
     // 1. Remove device from fleet registry
     await Device.deleteOne({ _id: device._id });
 
-    // 2. Cascade delete all historical readings and alerts for this device
+    // 2. Cascade delete all historical readings, alerts, and push subscriptions for this device ID
     await Reading.deleteMany({ deviceId: devId });
     await Alert.deleteMany({ deviceId: devId });
+    const PushSubscription = require('../models/PushSubscription');
+    await PushSubscription.deleteMany({ deviceId: devId });
 
     // 3. Update user data: reset defaultStation if this device was the default
     const targetUserId = device.userId || req.user._id;

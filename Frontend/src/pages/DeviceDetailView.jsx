@@ -193,6 +193,9 @@ export default function DeviceDetailView({ readingsData }) {
 
     try {
       await client.delete(`/devices/${devId}`);
+      if (localStorage.getItem('airguard_selected_device') === devId) {
+        localStorage.removeItem('airguard_selected_device');
+      }
       if (readingsData?.removeDevice) {
         readingsData.removeDevice(devId);
       }
