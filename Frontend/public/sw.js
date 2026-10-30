@@ -7,7 +7,7 @@
  * 4. Resilient fallback navigation: All views remain accessible offline.
  */
 
-const CACHE_NAME = 'airguard-v1.1.0';
+const CACHE_NAME = 'airguard-v2.4.1';
 const OFFLINE_FALLBACK_PAGE = '/offline.html';
 const PRECACHE_ASSETS = [
   '/',
