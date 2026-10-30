@@ -189,7 +189,7 @@ export default function Dashboard({ readingsData, onNavigateTab }) {
   const { category: aqiCategory, color: aqiColor } = classifyAQI(aqiVal ?? 0);
   const aqiHealthAdvice = healthRecommendation(aqiVal ?? 0);
 
-  // 2. Temperature: Prioritize real hardware sensor DHT temperature
+  // 2. Temperature: Prioritize real hardware sensor DHT temperature, or location weather if DHT inactive
   let currentTemp = null;
   let currentTempTag = 'Physical DHT Sensor';
   let currentTempSub = 'Live hardware sensor reading';
@@ -200,8 +200,10 @@ export default function Dashboard({ readingsData, onNavigateTab }) {
     currentTempSub = 'Live regional meteorological observation';
   } else if (latest?.temperature != null) {
     currentTemp = Number(latest.temperature).toFixed(1);
-    currentTempTag = 'Physical DHT Sensor';
-    currentTempSub = `Live hardware telemetry • ${formatTimeAgo(latest?.createdAt)}`;
+    currentTempTag = latest.dhtSource === 'location_weather' ? 'Location Weather' : 'Physical DHT Sensor';
+    currentTempSub = latest.dhtSource === 'location_weather'
+      ? 'Physical station location meteorology (Hardware DHT Inactive)'
+      : `Live hardware telemetry • ${formatTimeAgo(latest?.createdAt)}`;
   } else if (cw.temp != null) {
     currentTemp = `${cw.temp}`;
     currentTempTag = 'Location Meteorological';
@@ -212,7 +214,7 @@ export default function Dashboard({ readingsData, onNavigateTab }) {
 
   const feelsLike = cw.feelsLike != null ? `${cw.feelsLike}°C` : (latest?.temperature != null ? `${Number(latest.temperature).toFixed(1)}°C` : '—');
 
-  // 3. Humidity: Prioritize real hardware sensor DHT humidity
+  // 3. Humidity: Prioritize real hardware sensor DHT humidity, or location weather if DHT inactive
   let sensorHumidity = null;
   let sensorHumidityTag = 'Physical DHT Sensor';
   let sensorHumiditySub = 'Live sensor relative moisture';
@@ -223,8 +225,10 @@ export default function Dashboard({ readingsData, onNavigateTab }) {
     sensorHumiditySub = 'Live regional moisture saturation';
   } else if (latest?.humidity != null) {
     sensorHumidity = Math.round(latest.humidity);
-    sensorHumidityTag = 'Physical DHT Sensor';
-    sensorHumiditySub = `Live hardware telemetry • ${formatTimeAgo(latest?.createdAt)}`;
+    sensorHumidityTag = latest.dhtSource === 'location_weather' ? 'Location Weather' : 'Physical DHT Sensor';
+    sensorHumiditySub = latest.dhtSource === 'location_weather'
+      ? 'Physical station location moisture (Hardware DHT Inactive)'
+      : `Live hardware telemetry • ${formatTimeAgo(latest?.createdAt)}`;
   } else if (cw.humidity != null) {
     sensorHumidity = cw.humidity;
     sensorHumidityTag = 'Location Meteorological';

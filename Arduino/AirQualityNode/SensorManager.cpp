@@ -141,19 +141,17 @@ SensorReading SensorManager::read() {
     }
   }
 
-  // 3. Fallback only if hardware pin communication fails
+  // 3. Mark inactive if physical hardware pin communication fails (no fake estimates!)
   if (isnan(r.temperature) || isnan(r.humidity)) {
-    r.dhtHardwareValid = false; // Mark that DHT failed so cloud backend provides location weather
-    Serial.printf("[Sensors WARN] DHT returned NaN on GPIO %d! Check wiring (VCC to 3.3V/5V, GND, DATA to GPIO %d).\n", DHT11_PIN, DHT11_PIN);
-    // Add natural micro-variance so fallback is not a dead static line
-    float jitterT = ((float)(random(-15, 16))) / 10.0f; // +/- 1.5C
-    float jitterH = ((float)(random(-25, 26))) / 10.0f; // +/- 2.5%
-    if (isnan(r.temperature)) r.temperature = 26.0f + jitterT;
-    if (isnan(r.humidity))    r.humidity    = 50.0f + jitterH;
+    r.dhtHardwareValid = false; // Physical DHT is disconnected or failed
+    r.temperature = NAN;
+    r.humidity    = NAN;
+    Serial.printf("[Sensors WARN] Physical DHT inactive on GPIO %d! Cloud backend will supply live physical location meteorology.\n", DHT11_PIN);
   }
 
   r.gasPPM   = readMQ135PPM();
-  r.aqi      = computeAQI(r.gasPPM, r.temperature, r.humidity);
+  // If physical DHT is active, compute local AQI; if inactive, backend will compute AQI using location weather + physical MQ-135 Gas PPM
+  r.aqi      = r.dhtHardwareValid ? computeAQI(r.gasPPM, r.temperature, r.humidity) : 0;
   r.category = aqiCategory(r.aqi);
   r.valid    = true;
   return r;

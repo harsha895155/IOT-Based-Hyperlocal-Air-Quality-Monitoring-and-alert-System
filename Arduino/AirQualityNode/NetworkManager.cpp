@@ -336,9 +336,15 @@ bool NodeNetworkManager::sendReading(const SensorReading &reading) {
   // this small and keeps flash usage down.
   String payload = "{";
   payload += "\"deviceId\":\"" + getDeviceId() + "\",";
-  payload += "\"temperature\":" + String(reading.temperature, 2) + ",";
-  payload += "\"humidity\":" + String(reading.humidity, 2) + ",";
-  payload += "\"dhtHardwareValid\":" + String(reading.dhtHardwareValid ? "true" : "false") + ",";
+  if (reading.dhtHardwareValid && !isnan(reading.temperature) && !isnan(reading.humidity)) {
+    payload += "\"temperature\":" + String(reading.temperature, 2) + ",";
+    payload += "\"humidity\":" + String(reading.humidity, 2) + ",";
+    payload += "\"dhtHardwareValid\":true,";
+  } else {
+    payload += "\"temperature\":null,";
+    payload += "\"humidity\":null,";
+    payload += "\"dhtHardwareValid\":false,";
+  }
   payload += "\"gasPPM\":" + String(reading.gasPPM, 2) + ",";
   payload += "\"airQuality\":" + String(reading.aqi) + ",";
   payload += "\"wifiSSID\":\"" + WiFi.SSID() + "\",";

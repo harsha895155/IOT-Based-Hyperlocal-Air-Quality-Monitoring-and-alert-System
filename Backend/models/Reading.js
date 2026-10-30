@@ -38,6 +38,11 @@ const readingSchema = new mongoose.Schema(
       type: String,
       required: true,
     },
+    dhtSource: {
+      type: String,
+      enum: ['physical_sensor', 'location_weather'],
+      default: 'physical_sensor',
+    },
   },
   {
     timestamps: { createdAt: true, updatedAt: false },

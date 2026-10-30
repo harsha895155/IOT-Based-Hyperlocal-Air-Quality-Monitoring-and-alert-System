@@ -65,6 +65,7 @@ router.get('/', optionalAuth, async (req, res, next) => {
           temperature: temp,
           humidity: hum,
           gasPPM: latest ? latest.gasPPM : null,
+          dhtSource: latest ? (latest.dhtSource || 'physical_sensor') : 'physical_sensor',
         };
       })
     );
@@ -101,6 +102,7 @@ router.get('/:id', protect, async (req, res, next) => {
       temperature: latest ? latest.temperature : null,
       humidity: latest ? latest.humidity : null,
       gasPPM: latest ? latest.gasPPM : null,
+      dhtSource: latest ? (latest.dhtSource || 'physical_sensor') : 'physical_sensor',
     });
   } catch (err) {
     next(err);
@@ -329,6 +331,7 @@ router.get('/verify/:id', protect, async (req, res, next) => {
             airQuality: latest.airQuality,
             gasPPM: latest.gasPPM,
             category: latest.category,
+            dhtSource: latest.dhtSource || 'physical_sensor',
             createdAt: latest.createdAt,
             wifiSSID: latest.wifiSSID,
           }

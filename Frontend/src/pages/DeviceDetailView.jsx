@@ -305,6 +305,7 @@ export default function DeviceDetailView({ readingsData }) {
   const tempVal = liveLatest?.temperature ?? device.temperature;
   const humVal = liveLatest?.humidity ?? device.humidity;
   const gasVal = liveLatest?.gasPPM ?? device.gasPPM;
+  const dhtSource = liveLatest?.dhtSource || device?.dhtSource || (history.length > 0 ? history[history.length - 1].dhtSource : 'physical_sensor');
   const lastSeenVal = liveLatest?.createdAt ?? device.lastSeen;
   const timeoutMs = device.offlineTimeoutMs || 45000;
   const isOnline = Boolean(
@@ -642,7 +643,9 @@ export default function DeviceDetailView({ readingsData }) {
             >
               {aqiClass ? aqiClass.category : 'Awaiting data'}
             </span>
-            <span className="text-faint fs-xs">EPA Scale</span>
+            <span className="text-faint fs-xs">
+              {dhtSource === 'location_weather' ? 'MQ-135 + Location Weather' : 'Physical Sensor Mesh'}
+            </span>
           </div>
         </div>
 
@@ -659,7 +662,9 @@ export default function DeviceDetailView({ readingsData }) {
             <span className="dd-kpi-card__unit">°C</span>
           </div>
           <div className="dd-kpi-card__footer">
-            <span className="text-muted fs-xs">DHT22 / DHT11 Sensor</span>
+            <span className="fs-xs" style={{ color: dhtSource === 'location_weather' ? '#38bdf8' : '#10b981', fontWeight: 600 }}>
+              {dhtSource === 'location_weather' ? '📍 Gangavaram Location Weather' : '⚡ Physical DHT Sensor'}
+            </span>
             <span className="mono fs-xs text-faint">
               {tempVal != null ? `${((Number(tempVal) * 9) / 5 + 32).toFixed(1)}°F` : ''}
             </span>
@@ -679,7 +684,9 @@ export default function DeviceDetailView({ readingsData }) {
             <span className="dd-kpi-card__unit">%</span>
           </div>
           <div className="dd-kpi-card__footer">
-            <span className="text-muted fs-xs">Atmospheric Moisture</span>
+            <span className="fs-xs" style={{ color: dhtSource === 'location_weather' ? '#38bdf8' : '#10b981', fontWeight: 600 }}>
+              {dhtSource === 'location_weather' ? '📍 Gangavaram Location Weather' : '⚡ Physical DHT Sensor'}
+            </span>
             <span className="text-faint fs-xs">
               {humVal != null && humVal >= 30 && humVal <= 65 ? 'Optimal' : 'Elevated'}
             </span>
@@ -699,7 +706,9 @@ export default function DeviceDetailView({ readingsData }) {
             <span className="dd-kpi-card__unit">ppm</span>
           </div>
           <div className="dd-kpi-card__footer">
-            <span className="text-muted fs-xs">MQ-135 Gas Chamber</span>
+            <span className="fs-xs" style={{ color: '#10b981', fontWeight: 600 }}>
+              ⚡ Physical Hardware (MQ-135 Active)
+            </span>
             <span className="text-faint fs-xs">GPIO 34 ADC1</span>
           </div>
         </div>

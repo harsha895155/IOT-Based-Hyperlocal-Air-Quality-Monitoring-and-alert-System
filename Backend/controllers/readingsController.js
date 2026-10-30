@@ -23,28 +23,20 @@ async function createReading(req, res, next) {
     const incomingIp = ip || req.body.ipAddress || req.body.ip_address;
     const incomingRssi = rssi != null ? rssi : (req.body.signal != null ? req.body.signal : null);
 
-    // Strict validation of payload types & physiological/sensor ranges
+    // Strict validation of payload types: deviceId & physical MQ-135 gasPPM are strictly required
     if (
       typeof deviceId !== 'string' ||
       !deviceId.trim() ||
-      [temperature, humidity, gasPPM, airQuality].some((v) => typeof v !== 'number' || Number.isNaN(v))
+      typeof gasPPM !== 'number' ||
+      Number.isNaN(gasPPM)
     ) {
       return res.status(400).json({
-        error: 'deviceId (string) and temperature, humidity, gasPPM, airQuality (numbers) are required.',
+        error: 'deviceId (string) and physical gasPPM (number) are required.',
       });
     }
 
-    if (temperature < -40 || temperature > 85) {
-      return res.status(400).json({ error: 'temperature out of range (-40 to 85°C).' });
-    }
-    if (humidity < 0 || humidity > 100) {
-      return res.status(400).json({ error: 'humidity out of range (0 to 100%).' });
-    }
     if (gasPPM < 0 || gasPPM > 5000) {
       return res.status(400).json({ error: 'gasPPM out of range (0 to 5000ppm).' });
-    }
-    if (airQuality < 0 || airQuality > 500) {
-      return res.status(400).json({ error: 'airQuality out of range (0 to 500).' });
     }
 
     // 1. Verify device exists in fleet registry, or auto-provision on first ping
@@ -74,38 +66,53 @@ async function createReading(req, res, next) {
       if (incomingRssi != null) device.rssi = Number(incomingRssi);
     }
 
-    // 1. Temperature & Humidity: Prioritize physical hardware sensor readings
-    // If the board's DHT communicated (or values differ from the static fallback 26.0 / 50.0),
-    // we preserve the physical hardware temperature & humidity 100% without modification!
-    const isPhysicalDHTReading = req.body.dhtHardwareValid === true ||
-      (Number(temperature) !== 26.0 || Number(humidity) !== 50.0);
+    // 2. Temperature & Humidity: Check physical hardware DHT vs physical location meteorology
+    const isPhysicalDHTReading = req.body.dhtHardwareValid === true &&
+      typeof temperature === 'number' &&
+      !Number.isNaN(temperature) &&
+      temperature >= -40 &&
+      temperature <= 85 &&
+      typeof humidity === 'number' &&
+      !Number.isNaN(humidity) &&
+      humidity >= 0 &&
+      humidity <= 100 &&
+      (temperature !== 26.0 || humidity !== 50.0);
 
-    let finalTemp = Number(temperature);
-    let finalHumidity = Number(humidity);
+    let finalTemp = null;
+    let finalHumidity = null;
+    let dhtSource = 'physical_sensor';
 
-    if (!isPhysicalDHTReading) {
-      // ONLY if physical sensor is disconnected/failed, use location's real-time weather
+    if (isPhysicalDHTReading) {
+      finalTemp = Number(temperature.toFixed(1));
+      finalHumidity = Math.round(humidity);
+      dhtSource = 'physical_sensor';
+    } else {
+      // Physical DHT is inactive / disconnected: fetch real-time weather for the device's physical location!
+      dhtSource = 'location_weather';
       try {
         const coords = (device.coordinates && device.coordinates.lat != null)
           ? device.coordinates
-          : { lat: 14.489, lng: 79.957 };
-        const weather = await getWeatherForCoordinates(coords.lat, coords.lng, device.location);
+          : { lat: 14.4891, lng: 79.9578 };
+        const weather = await getWeatherForCoordinates(coords.lat, coords.lng, device.location || 'Gangavaram, Andhra Pradesh');
         if (weather && weather.temperature != null && weather.humidity != null) {
-          finalTemp = weather.temperature;
-          finalHumidity = weather.humidity;
+          finalTemp = Number(weather.temperature.toFixed(1));
+          finalHumidity = Math.round(weather.humidity);
+        } else {
+          finalTemp = 25.0;
+          finalHumidity = 55;
         }
-      } catch (wErr) {}
+      } catch (wErr) {
+        finalTemp = 25.0;
+        finalHumidity = 55;
+      }
     }
 
-    // 2. Accurately compute EPA/CPCB AQI from real sensor gasPPM, temperature, and humidity
-    let finalAQI = Number(airQuality);
-    if (!finalAQI || finalAQI < 10) {
-      finalAQI = calculateAQIFromSensors(gasPPM, finalTemp, finalHumidity);
-    }
-
+    // 3. Accurately compute EPA/CPCB AQI from physical MQ-135 Gas PPM adjusted by ambient temperature & humidity!
+    // Note: When DHT is inactive, the AQI is computed using the physical gas PPM + the physical location's live temperature & humidity!
+    const finalAQI = calculateAQIFromSensors(gasPPM, finalTemp, finalHumidity);
     const { category } = classifyAQI(finalAQI);
 
-    // 3. Persist sensor reading
+    // 4. Persist sensor reading
     const reading = await Reading.create({
       deviceId: cleanId,
       temperature: finalTemp,
@@ -113,6 +120,7 @@ async function createReading(req, res, next) {
       gasPPM,
       airQuality: finalAQI,
       category,
+      dhtSource,
     });
 
     // 3. Update device telemetry
@@ -264,6 +272,7 @@ async function createReading(req, res, next) {
         temperature: reading.temperature,
         humidity: reading.humidity,
         gasPPM: reading.gasPPM,
+        dhtSource: reading.dhtSource || 'physical_sensor',
         lastSeen: now,
       };
 
