@@ -345,7 +345,7 @@ async function getLatestReading(req, res, next) {
     if (!readingDoc) {
       readingDoc = await Reading.findOne().sort({ createdAt: -1 });
     }
-    if (!readingDoc) return res.status(404).json({ error: 'No readings found.' });
+    if (!readingDoc) return res.json(null);
 
     const reading = readingDoc.toObject();
     res.json(reading);

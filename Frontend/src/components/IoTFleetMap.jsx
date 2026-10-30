@@ -8,38 +8,7 @@ import { classifyAQI } from '../utils/aqi';
 import { useTheme } from '../context/ThemeContext';
 import './IoTFleetMap.css';
 
-// 20 Strategic Anchor Metropolitan Hubs with Collision-Free Orientations
-const ANCHOR_CITIES = [
-  // North India
-  { name: 'New Delhi', lat: 28.6139, lng: 77.2090, align: 'top', aqi: 172, region: 'Capital NCR' },
-  { name: 'Jaipur', lat: 26.9124, lng: 75.7873, align: 'left', aqi: 128, region: 'Rajasthan' },
-  { name: 'Lucknow', lat: 26.8467, lng: 80.9462, align: 'right', aqi: 145, region: 'Uttar Pradesh' },
-  { name: 'Chandigarh', lat: 30.7333, lng: 76.7794, align: 'top', aqi: 92, region: 'Punjab / Haryana' },
 
-  // West India
-  { name: 'Mumbai', lat: 19.0760, lng: 72.8777, align: 'left', aqi: 88, region: 'Maharashtra' },
-  { name: 'Pune', lat: 18.5204, lng: 73.8567, align: 'right', aqi: 76, region: 'Maharashtra' },
-  { name: 'Ahmedabad', lat: 23.0225, lng: 72.5714, align: 'left', aqi: 118, region: 'Gujarat' },
-  { name: 'Surat', lat: 21.1702, lng: 72.8311, align: 'left', aqi: 96, region: 'Gujarat' },
-
-  // Central India
-  { name: 'Bhopal', lat: 23.2599, lng: 77.4126, align: 'top', aqi: 95, region: 'Madhya Pradesh' },
-  { name: 'Nagpur', lat: 21.1458, lng: 79.0882, align: 'right', aqi: 82, region: 'Maharashtra' },
-
-  // South India - Bengaluru is anchored to the LEFT and Chennai to the RIGHT so they never overlap
-  { name: 'Hyderabad', lat: 17.3850, lng: 78.4867, align: 'top', aqi: 68, region: 'Telangana' },
-  { name: 'Bengaluru', lat: 12.9716, lng: 77.5946, align: 'left', aqi: 52, region: 'Karnataka' },
-  { name: 'Chennai', lat: 13.0827, lng: 80.2707, align: 'right', aqi: 58, region: 'Tamil Nadu' },
-  { name: 'Nellore', lat: 14.4426, lng: 79.9865, align: 'bottom', aqi: 44, region: 'Andhra Pradesh' },
-  { name: 'Visakhapatnam', lat: 17.6868, lng: 83.2185, align: 'right', aqi: 64, region: 'Andhra Pradesh' },
-  { name: 'Kochi', lat: 9.9312, lng: 76.2673, align: 'left', aqi: 42, region: 'Kerala' },
-
-  // East & North-East India
-  { name: 'Kolkata', lat: 22.5726, lng: 88.3639, align: 'right', aqi: 122, region: 'West Bengal' },
-  { name: 'Bhubaneswar', lat: 20.2961, lng: 85.8245, align: 'right', aqi: 84, region: 'Odisha' },
-  { name: 'Patna', lat: 25.5941, lng: 85.1376, align: 'top', aqi: 160, region: 'Bihar' },
-  { name: 'Guwahati', lat: 26.1445, lng: 91.7362, align: 'top', aqi: 65, region: 'Assam' },
-];
 
 // Helper: Calculate forward geographic azimuth/bearing (0° = North, 90° = East, 180° = South, 270° = West)
 function calculateSegmentBearing(lat1, lng1, lat2, lng2) {
@@ -62,7 +31,6 @@ export default function IoTFleetMap({ onSelectDevice }) {
   const tileLayerRef = useRef(null);
   const labelsLayerRef = useRef(null);
   const stationsLayerRef = useRef(null);
-  const citiesLayerRef = useRef(null);
   const windLayerRef = useRef(null);
   const coverageLayerRef = useRef(null);
 
@@ -73,7 +41,6 @@ export default function IoTFleetMap({ onSelectDevice }) {
   const [filterStatus, setFilterStatus] = useState('all'); // 'all' | 'online' | 'alert'
   const [activeMetric, setActiveMetric] = useState('aqi'); // 'aqi' | 'temp' | 'hum' | 'gas'
   const [showWind, setShowWind] = useState(true);
-  const [showCities, setShowCities] = useState(true);
   const [isFullscreen, setIsFullscreen] = useState(false);
 
   // 1. Fetch Fleet & latest readings
@@ -210,7 +177,6 @@ export default function IoTFleetMap({ onSelectDevice }) {
     });
 
     stationsLayerRef.current = L.layerGroup().addTo(map);
-    citiesLayerRef.current = L.layerGroup().addTo(map);
     windLayerRef.current = L.layerGroup().addTo(map);
     coverageLayerRef.current = L.layerGroup().addTo(map);
 
@@ -372,60 +338,7 @@ export default function IoTFleetMap({ onSelectDevice }) {
     });
   }, [filteredDevices, selectedStation, activeMetric, isLight]);
 
-  // 7. Render Anchor Cities with Smart Orientations & Tooltips
-  useEffect(() => {
-    const layer = citiesLayerRef.current;
-    if (!layer) return;
-    layer.clearLayers();
 
-    if (!showCities) return;
-
-    ANCHOR_CITIES.forEach((c) => {
-      const isLeft = c.align === 'left';
-      const isRight = c.align === 'right';
-      const isTop = c.align === 'top';
-      const isBottom = c.align === 'bottom';
-
-      const cityHtml = `
-        <div class="leaflet-city-badge city-align-${c.align || 'right'} ${isLight ? 'city-light' : 'city-dark'}">
-          ${isLeft || isTop ? `<span class="city-label">${c.name}</span><span class="city-dot"></span>` : `<span class="city-dot"></span><span class="city-label">${c.name}</span>`}
-        </div>
-      `;
-
-      // Smart anchor coordinates so the dot is precisely centered on [c.lat, c.lng]
-      let iconAnchor = [6, 11]; // default right-aligned: dot at left edge
-      if (isLeft) iconAnchor = [88, 11]; // dot at right edge
-      else if (isTop) iconAnchor = [45, 22]; // dot at bottom center
-      else if (isBottom) iconAnchor = [45, 4]; // dot at top center
-
-      const icon = L.divIcon({
-        className: 'leaflet-city-div-icon',
-        html: cityHtml,
-        iconSize: [96, 24],
-        iconAnchor,
-      });
-
-      const marker = L.marker([c.lat, c.lng], { icon, interactive: true });
-
-      marker.bindTooltip(
-        `<strong>${c.name}</strong> (${c.region})<br/>Ambient AQI Index: <strong>${c.aqi}</strong>`,
-        {
-          direction: isLeft ? 'left' : isTop ? 'top' : isBottom ? 'bottom' : 'right',
-          offset: isLeft ? [-6, 0] : isRight ? [6, 0] : [0, 0],
-          className: isLight ? 'coverage-tooltip-light' : 'coverage-tooltip-dark',
-        }
-      );
-
-      marker.on('click', () => {
-        const map = mapInstanceRef.current;
-        if (map) {
-          map.flyTo([c.lat, c.lng], 9, { duration: 1.2 });
-        }
-      });
-
-      layer.addLayer(marker);
-    });
-  }, [showCities, isLight]);
 
   // 8. Render Realistic Wind Streamlines Overlay with Directional Vector Chevrons
   useEffect(() => {
@@ -607,7 +520,7 @@ export default function IoTFleetMap({ onSelectDevice }) {
             ))}
           </div>
 
-          {/* Feature Toggles (Wind & Cities) */}
+          {/* Feature Toggles (Wind) */}
           <div className="map-feature-toggles">
             <button
               type="button"
@@ -616,14 +529,6 @@ export default function IoTFleetMap({ onSelectDevice }) {
               title="Toggle Atmospheric Airflow & Directional Wind Vectors (Prevailing NE ➔ SW Flow)"
             >
               🌬️ Wind
-            </button>
-            <button
-              type="button"
-              className={`feature-toggle-btn ${showCities ? 'is-active' : ''}`}
-              onClick={() => setShowCities((p) => !p)}
-              title={`Toggle All ${ANCHOR_CITIES.length} Major Metropolitan Reference Hubs Across India`}
-            >
-              🏙️ Cities ({ANCHOR_CITIES.length})
             </button>
           </div>
 

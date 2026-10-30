@@ -31,6 +31,8 @@ export default function DeviceDetailView({ readingsData }) {
 
   // Firmware Management Modal State
   const [showOtaModal, setShowOtaModal] = useState(false);
+  const [otaStatus, setOtaStatus] = useState('idle');
+  const [otaProgress, setOtaProgress] = useState(0);
   const [, setTick] = useState(0);
 
   // Live periodic ticker to verify sensor freshness
