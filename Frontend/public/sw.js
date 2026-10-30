@@ -85,29 +85,13 @@ self.addEventListener('fetch', (event) => {
 
   const url = new URL(request.url);
 
-  // 2. Never cache auth sessions or mutable write requests
-  if (request.method !== 'GET' || url.pathname.startsWith('/api/auth')) {
+  // 2. Cross-origin API calls to backend: Let the browser handle network directly without SW interference
+  if (url.origin !== self.location.origin) {
     return;
   }
 
-  // 3. Dynamic Sensor Telemetry, Alerts, Analytics & Weather: Network-First with Cache Fallback
-  // When offline, cached historical telemetry and alerts load seamlessly!
-  if (
-    url.pathname.startsWith('/api/readings') ||
-    url.pathname.startsWith('/api/devices') ||
-    url.pathname.startsWith('/api/weather') ||
-    url.pathname.startsWith('/api/alerts') ||
-    url.pathname.startsWith('/api/analytics') ||
-    url.pathname.startsWith('/api/locations')
-  ) {
-    event.respondWith(
-      fetch(request)
-        .then((response) => {
-          safeCachePut(CACHE_NAME, request, response);
-          return response;
-        })
-        .catch(() => caches.match(request))
-    );
+  // 3. Never cache auth sessions or local api mutable write requests
+  if (request.method !== 'GET' || url.pathname.startsWith('/api/')) {
     return;
   }
 
@@ -141,9 +125,7 @@ self.addEventListener('fetch', (event) => {
           .then((networkResponse) => {
             safeCachePut(CACHE_NAME, request, networkResponse);
           })
-          .catch(() => {
-            // Ignore offline fetch errors during revalidation
-          });
+          .catch(() => {});
         return cachedResponse;
       }
 
