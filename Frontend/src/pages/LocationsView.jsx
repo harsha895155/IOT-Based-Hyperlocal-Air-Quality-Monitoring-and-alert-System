@@ -20,6 +20,16 @@ const POPULAR_CITIES = [
   { name: 'Tokyo', label: 'Tokyo, Japan', lat: 35.6762, lng: 139.6503 },
 ];
 
+
+const CLIMATE_PRESETS = [
+  { id: 'high-sun', label: '☀️ High Sun', condition: 'High Sun (Solar Zenith)', icon: 'high-sun', temp: 34, feelsLike: 37, humidity: 32, pop: 0, wind: 8, isDay: true },
+  { id: 'thunderstorm', label: '⛈️ Thunderstorm', condition: 'Severe Thunderstorm & Lightning', icon: 'thunderstorm', temp: 22, feelsLike: 23, humidity: 88, pop: 95, wind: 36, isDay: false },
+  { id: 'heavy-rain', label: '🌧️ Heavy Rain', condition: 'Heavy Torrential Rain', icon: 'heavy-rain', temp: 21, feelsLike: 21, humidity: 92, pop: 85, wind: 24, isDay: false },
+  { id: 'drizzle', label: '🌦️ Drizzling', condition: 'Gentle Atmospheric Drizzle', icon: 'drizzle', temp: 24, feelsLike: 25, humidity: 76, pop: 45, wind: 12, isDay: true },
+  { id: 'night', label: '🌙 Starlit Night', condition: 'Clear Starlit Night Sky', icon: 'clear', temp: 19, feelsLike: 19, humidity: 65, pop: 5, wind: 7, isDay: false },
+  { id: 'fog', label: '🌫️ Misty Fog', condition: 'Dense Misty Fog', icon: 'fog', temp: 18, feelsLike: 18, humidity: 95, pop: 15, wind: 5, isDay: true },
+];
+
 export default function LocationsView() {
   const { user, isGuest } = useAuth();
   const { resolvedTheme } = useTheme() || {};
@@ -75,6 +85,8 @@ export default function LocationsView() {
   });
 
   const [toastMessage, setToastMessage] = useState(null);
+  const [selectedHour, setSelectedHour] = useState(null);
+  const [simulatedPreset, setSimulatedPreset] = useState(null);
 
   const showToast = (msg) => {
     setToastMessage(msg);
@@ -359,7 +371,33 @@ export default function LocationsView() {
   const todayForecast = weatherData?.daily?.[0] || {};
   const hourlyList = weatherData?.hourly || [];
   const dailyList = weatherData?.daily || [];
-  const WeatherIconComponent = getWeatherIcon(cw.icon, cw.condition);
+
+  // Active Preview / Simulation logic
+  const isSimulated = Boolean(simulatedPreset);
+  const isPreviewingHour = Boolean(selectedHour);
+  const isPreviewActive = isSimulated || isPreviewingHour;
+
+  const previewData = simulatedPreset
+    ? simulatedPreset
+    : selectedHour
+      ? {
+          temp: selectedHour.temp,
+          feelsLike: selectedHour.feelsLike ?? selectedHour.temp,
+          condition: selectedHour.condition,
+          icon: selectedHour.icon,
+          isDay: selectedHour.isDay,
+          humidity: selectedHour.humidity,
+          windSpeed: selectedHour.windSpeed,
+          time: selectedHour.time,
+        }
+      : null;
+
+  const displayCondition = previewData?.condition || cw.condition || 'Partly Cloudy';
+  const displayIcon = previewData?.icon || cw.icon || 'partly-cloudy';
+  const displayIsDay = previewData?.isDay ?? (cw.isDay ?? true);
+  const displayTemp = previewData?.temp != null ? Math.round(previewData.temp) : (cw.temp != null ? Math.round(cw.temp) : '—');
+  const displayFeelsLike = previewData?.feelsLike != null ? Math.round(previewData.feelsLike) : (cw.feelsLike != null ? Math.round(cw.feelsLike) : '—');
+  const WeatherIconComponent = getWeatherIcon(displayIcon, displayCondition);
 
   return (
     <div className="location-weather-page">
@@ -563,11 +601,34 @@ export default function LocationsView() {
             {/* Main Current Conditions Hero */}
             <div className="loc-hero-card">
               <WeatherHero3DCanvas
-                condition={cw.condition}
-                iconType={cw.icon}
-                isDay={cw.isDay ?? true}
+                condition={displayCondition}
+                iconType={displayIcon}
+                isDay={displayIsDay}
                 theme={resolvedTheme}
               />
+              {isPreviewActive && (
+                <div className="loc-hero-preview-bar">
+                  <div className="loc-preview-info">
+                    <span className="loc-preview-spark">✨</span>
+                    <span className="loc-preview-title">
+                      {isSimulated
+                        ? `Climate Simulation: ${simulatedPreset.label}`
+                        : `Hourly Outlook: ${new Date(selectedHour.time).toLocaleTimeString([], { hour: 'numeric', minute: '2-digit', hour12: true })} (${selectedHour.isDay ? 'Daytime' : 'Night'})`}
+                    </span>
+                  </div>
+                  <button
+                    type="button"
+                    className="loc-preview-reset-btn"
+                    onClick={() => {
+                      setSelectedHour(null);
+                      setSimulatedPreset(null);
+                    }}
+                  >
+                    ✕ Return to Live Weather
+                  </button>
+                </div>
+              )}
+
               <div className="loc-hero-top">
                 <div>
                   <div className="loc-hero-place-row">
@@ -588,23 +649,23 @@ export default function LocationsView() {
                 </div>
 
                 <div className="loc-condition-badge">
-                  {cw.condition || 'Partly Cloudy'}
+                  {displayCondition}
                 </div>
               </div>
 
               <div className="loc-hero-mid">
                 <div className="loc-hero-temp-group">
                   <div className="loc-hero-temp">
-                    {cw.temp != null ? Math.round(cw.temp) : '—'}
+                    {displayTemp}
                     <span className="loc-hero-deg">°C</span>
                   </div>
                   <div className="loc-hero-feels">
-                    Feels like <strong>{cw.feelsLike != null ? Math.round(cw.feelsLike) : '—'}°C</strong>
+                    Feels like <strong>{displayFeelsLike}°C</strong>
                   </div>
                 </div>
 
                 <div className="loc-hero-icon-box">
-                  <WeatherIconComponent size={96} isDay={cw.isDay ?? true} />
+                  <WeatherIconComponent size={96} isDay={displayIsDay} />
                 </div>
               </div>
 
@@ -710,8 +771,52 @@ export default function LocationsView() {
           {hourlyList.length > 0 && (
             <div className="loc-forecast-card">
               <div className="loc-forecast-title-row">
-                <h3 className="loc-forecast-title">Hourly Forecast (Next 24 Hours)</h3>
-                <span className="loc-forecast-sub">Google Meteorological Time-Series</span>
+                <div>
+                  <h3 className="loc-forecast-title">Hourly Forecast (Next 24 Hours)</h3>
+                  <span className="loc-forecast-sub">Tap any hour to inspect its 3D atmospheric climate effect</span>
+                </div>
+              </div>
+
+              {/* Interactive Atmospheric Climate Effect Simulator */}
+              <div className="loc-climate-sim-bar">
+                <div className="loc-sim-bar-label">
+                  <span className="loc-sim-icon">⚡</span>
+                  <span>Interactive Climate Effects:</span>
+                </div>
+                <div className="loc-sim-chips">
+                  {CLIMATE_PRESETS.map((p) => {
+                    const isActive = simulatedPreset?.id === p.id;
+                    return (
+                      <button
+                        key={p.id}
+                        type="button"
+                        className={`loc-sim-chip ${isActive ? 'is-active' : ''}`}
+                        onClick={() => {
+                          if (isActive) {
+                            setSimulatedPreset(null);
+                          } else {
+                            setSelectedHour(null);
+                            setSimulatedPreset(p);
+                          }
+                        }}
+                      >
+                        {p.label}
+                      </button>
+                    );
+                  })}
+                  {isPreviewActive && (
+                    <button
+                      type="button"
+                      className="loc-sim-chip is-reset"
+                      onClick={() => {
+                        setSelectedHour(null);
+                        setSimulatedPreset(null);
+                      }}
+                    >
+                      ↺ Reset to Live
+                    </button>
+                  )}
+                </div>
               </div>
 
               <div className="loc-hourly-strip">
@@ -726,14 +831,27 @@ export default function LocationsView() {
                   return (
                     <div
                       key={`${hour.time}-${idx}`}
-                      className={`loc-hour-item ${isDay ? 'is-day-slot' : 'is-night-slot'} climate-${climateClass} ${idx === 0 ? 'is-current-slot' : ''}`}
-                      title={`${idx === 0 ? 'Now' : hourTime}: ${hour.condition || 'Clear'} (${isDay ? 'Daytime' : 'Night'})`}
+                      className={`loc-hour-item ${isDay ? 'is-day-slot' : 'is-night-slot'} climate-${climateClass} ${selectedHour?.time === hour.time ? 'is-selected-hour' : ''} ${idx === 0 && !selectedHour ? 'is-current-slot' : ''}`}
+                      onClick={() => {
+                        setSimulatedPreset(null);
+                        setSelectedHour(selectedHour?.time === hour.time ? null : hour);
+                      }}
+                      title={`Click to simulate ${idx === 0 ? 'Now' : hourTime} (${hour.condition || 'Clear'})`}
                     >
+                      {/* Atmospheric Climate Micro-FX Layer */}
+                      <div className={`loc-card-fx loc-card-fx--${climateClass} ${isDay ? 'fx-day' : 'fx-night'}`}>
+                        {climateClass.includes('rain') && <div className="fx-rain-drop-streak" />}
+                        {climateClass.includes('thunder') && <div className="fx-lightning-sparkle" />}
+                        {climateClass.includes('high-sun') && <div className="fx-solar-pulse-halo" />}
+                        {!isDay && <div className="fx-star-glint" />}
+                      </div>
+
                       <span className="loc-hour-time">{idx === 0 ? 'Now' : hourTime}</span>
                       <div className="loc-hour-icon">
                         <IconComp size={22} isDay={isDay} className="loc-hour-svg" />
                       </div>
                       <span className="loc-hour-temp">{hour.temp}°</span>
+                      <span className="loc-hour-cond-badge">{hour.condition || (isDay ? 'Sunny' : 'Clear')}</span>
                       {hour.precipitationProb > 0 ? (
                         <span className="loc-hour-pop">💧 {hour.precipitationProb}%</span>
                       ) : (

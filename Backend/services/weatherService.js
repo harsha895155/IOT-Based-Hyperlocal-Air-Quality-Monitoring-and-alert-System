@@ -363,7 +363,18 @@ async function getWeatherForCoordinates(lat, lng, locationName = 'Current Locati
     const next24Hours = (hourly.time || []).slice(nowHourIndex, nowHourIndex + 24).map((timeStr, idx) => {
       const realIdx = nowHourIndex + idx;
       const code = hourly.weather_code?.[realIdx];
-      const meta = getWMOMeta(code);
+      let meta = getWMOMeta(code);
+      const hourIsDay = hourly.is_day?.[realIdx] !== undefined ? (hourly.is_day[realIdx] === 1 || hourly.is_day[realIdx] === true) : (() => { const h = new Date(timeStr).getHours(); return h >= 6 && h < 18; })();
+      const hourOfDay = new Date(timeStr).getHours();
+      const uv = Number((hourly.uv_index?.[realIdx] ?? 0).toFixed(1));
+
+      // Peak Midday Solar Zenith (High Sun) detection
+      if (hourIsDay && (uv >= 5.5 || (code <= 1 && hourOfDay >= 11 && hourOfDay <= 15))) {
+        meta = { label: 'High Sun', icon: 'high-sun' };
+      } else if (!hourIsDay && code <= 1) {
+        meta = { label: 'Clear Night', icon: 'clear' };
+      }
+
       return {
         time: timeStr,
         temp: Math.round(hourly.temperature_2m?.[realIdx] ?? current.temperature_2m),
@@ -374,9 +385,9 @@ async function getWeatherForCoordinates(lat, lng, locationName = 'Current Locati
         weatherCode: code,
         condition: meta.label,
         icon: meta.icon,
-        isDay: hourly.is_day?.[realIdx] !== undefined ? (hourly.is_day[realIdx] === 1 || hourly.is_day[realIdx] === true) : (() => { const h = new Date(timeStr).getHours(); return h >= 6 && h < 18; })(),
+        isDay: hourIsDay,
         windSpeed: Math.round(hourly.wind_speed_10m?.[realIdx] ?? current.wind_speed_10m),
-        uvIndex: Number((hourly.uv_index?.[realIdx] ?? 0).toFixed(1)),
+        uvIndex: uv,
       };
     });
 

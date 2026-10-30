@@ -29,6 +29,29 @@ export const WeatherIcons = {
     )
   ),
 
+    'high-sun': ({ size = 28, className = '' }) => (
+    <svg width={size} height={size} viewBox="0 0 24 24" fill="none" stroke="#f59e0b" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className={`anim-weather-high-sun ${className}`}>
+      {/* Blazing outer rotating corona halo */}
+      <circle cx="12" cy="12" r="8.2" fill="#fbbf24" fillOpacity="0.22" stroke="#f59e0b" strokeWidth="1" strokeDasharray="3 2" className="anim-sun-corona-outer" />
+      {/* Pulsing solar core */}
+      <g className="anim-sun-core">
+        <circle cx="12" cy="12" r="5.2" fill="#f59e0b" fillOpacity="0.65" stroke="#fbbf24" strokeWidth="2" />
+        <circle cx="12" cy="12" r="2.2" fill="#ffffff" />
+      </g>
+      {/* 12 Radiant Zenith Sun Rays */}
+      <g className="anim-sun-rays">
+        <line x1="12" y1="1" x2="12" y2="3.2" stroke="#f59e0b" strokeWidth="2.4" />
+        <line x1="12" y1="20.8" x2="12" y2="23" stroke="#f59e0b" strokeWidth="2.4" />
+        <line x1="3.2" y1="12" x2="1" y2="12" stroke="#f59e0b" strokeWidth="2.4" />
+        <line x1="23" y1="12" x2="20.8" y2="12" stroke="#f59e0b" strokeWidth="2.4" />
+        <line x1="4.22" y1="4.22" x2="5.8" y2="5.8" stroke="#f59e0b" strokeWidth="2" />
+        <line x1="18.2" y1="18.2" x2="19.78" y2="19.78" stroke="#f59e0b" strokeWidth="2" />
+        <line x1="4.22" y1="19.78" x2="5.8" y2="18.2" stroke="#f59e0b" strokeWidth="2" />
+        <line x1="18.2" y1="5.8" x2="19.78" y2="4.22" stroke="#f59e0b" strokeWidth="2" />
+      </g>
+    </svg>
+  ),
+
   'partly-cloudy': ({ size = 28, isDay = true, className = '' }) => (
     isDay ? (
       <svg width={size} height={size} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className={className}>
@@ -325,6 +348,20 @@ export function getWeatherIcon(iconKey, conditionText) {
     cond.includes('haze')
   ) {
     return WeatherIcons.fog;
+  }
+
+    // Check for High Sun / Intense Zenith Solar / Scorching
+  if (
+    key.includes('high-sun') ||
+    key.includes('highsun') ||
+    key.includes('scorching') ||
+    key.includes('intense') ||
+    cond.includes('high sun') ||
+    cond.includes('scorching') ||
+    cond.includes('intense sun') ||
+    cond.includes('blazing')
+  ) {
+    return WeatherIcons['high-sun'];
   }
 
   // 7. Check for Clear / Sunny

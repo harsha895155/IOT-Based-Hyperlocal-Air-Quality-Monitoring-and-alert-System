@@ -49,6 +49,9 @@ export default function WeatherHero3DCanvas({
     if (!day) {
       return 'clear-night';
     }
+    if (c.includes('high sun') || c.includes('scorching') || c.includes('intense') || ic.includes('high-sun')) {
+      return 'high-sun';
+    }
     if (c.includes('clear') || c.includes('sunny') || ic.includes('clear')) {
       return 'clear-day';
     }
@@ -489,34 +492,36 @@ export default function WeatherHero3DCanvas({
     // ══════════════════════════════════════════════════════════════════════════
     // D. CLEAR DAY: CELESTIAL SUN & EDGE-TO-EDGE WARM SOLAR DUST
     // ══════════════════════════════════════════════════════════════════════════
-    else if (weatherMode === 'clear-day') {
+    else if (weatherMode === 'clear-day' || weatherMode === 'high-sun') {
+      const isHighSun = weatherMode === 'high-sun';
       const sunGroup = new THREE.Group();
-      sunGroup.position.set(frustum.halfW * 0.65, frustum.halfH * 0.25, -6);
+      sunGroup.position.set(frustum.halfW * (isHighSun ? 0.55 : 0.65), frustum.halfH * 0.25, -6);
       rootGroup.add(sunGroup);
 
+      const sunRadius = isHighSun ? 12.0 : 8.5;
       const sunCore = new THREE.Mesh(
-        new THREE.SphereGeometry(8.5, 24, 24),
-        new THREE.MeshBasicMaterial({ color: isLight ? 0xf59e0b : 0xfbbf24 })
+        new THREE.SphereGeometry(sunRadius, 28, 28),
+        new THREE.MeshBasicMaterial({ color: isHighSun ? 0xfffbeb : (isLight ? 0xf59e0b : 0xfbbf24) })
       );
       sunGroup.add(sunCore);
 
       const corona1 = new THREE.Mesh(
-        new THREE.RingGeometry(9.5, 14, 32),
+        new THREE.RingGeometry(sunRadius + 1.2, sunRadius + (isHighSun ? 8 : 5.5), 32),
         new THREE.MeshBasicMaterial({
           color: isLight ? 0xd97706 : 0xf59e0b,
           transparent: true,
-          opacity: isLight ? 0.55 : 0.38,
+          opacity: isHighSun ? 0.65 : (isLight ? 0.55 : 0.38),
           side: THREE.DoubleSide,
         })
       );
       sunGroup.add(corona1);
 
       const corona2 = new THREE.Mesh(
-        new THREE.RingGeometry(15, 21, 32),
+        new THREE.RingGeometry(sunRadius + (isHighSun ? 9 : 6.5), sunRadius + (isHighSun ? 18 : 12.5), 32),
         new THREE.MeshBasicMaterial({
           color: isLight ? 0xe11d48 : 0xfb923c,
           transparent: true,
-          opacity: isLight ? 0.42 : 0.2,
+          opacity: isHighSun ? 0.48 : (isLight ? 0.42 : 0.2),
           side: THREE.DoubleSide,
         })
       );

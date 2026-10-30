@@ -277,3 +277,24 @@
 .anim-star-d3 {
   animation-delay: 1.6s;
 }
+
+
+/* High Sun / Blazing Solar Zenith Animations */
+.anim-weather-high-sun {
+  filter: drop-shadow(0 0 6px rgba(245, 158, 11, 0.7));
+}
+
+.anim-sun-corona-outer {
+  transform-origin: 12px 12px;
+  animation: spinCorona 24s linear infinite reverse, pulseCorona 3s ease-in-out infinite alternate;
+}
+
+@keyframes spinCorona {
+  from { transform: rotate(0deg); }
+  to { transform: rotate(360deg); }
+}
+
+@keyframes pulseCorona {
+  0% { transform: scale(0.92); opacity: 0.2; }
+  100% { transform: scale(1.15); opacity: 0.55; }
+}
