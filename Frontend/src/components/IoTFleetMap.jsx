@@ -8,14 +8,49 @@ import { classifyAQI } from '../utils/aqi';
 import { useTheme } from '../context/ThemeContext';
 import './IoTFleetMap.css';
 
+// 20 Strategic Anchor Metropolitan Hubs with Collision-Free Orientations
 const ANCHOR_CITIES = [
-  { name: 'New Delhi', lat: 28.6139, lng: 77.2090 },
-  { name: 'Mumbai', lat: 19.0760, lng: 72.8777 },
-  { name: 'Bengaluru', lat: 12.9716, lng: 77.5946 },
-  { name: 'Hyderabad', lat: 17.3850, lng: 78.4867 },
-  { name: 'Chennai', lat: 13.0827, lng: 80.2707 },
-  { name: 'Kolkata', lat: 22.5726, lng: 88.3639 },
+  // North India
+  { name: 'New Delhi', lat: 28.6139, lng: 77.2090, align: 'top', aqi: 172, region: 'Capital NCR' },
+  { name: 'Jaipur', lat: 26.9124, lng: 75.7873, align: 'left', aqi: 128, region: 'Rajasthan' },
+  { name: 'Lucknow', lat: 26.8467, lng: 80.9462, align: 'right', aqi: 145, region: 'Uttar Pradesh' },
+  { name: 'Chandigarh', lat: 30.7333, lng: 76.7794, align: 'top', aqi: 92, region: 'Punjab / Haryana' },
+
+  // West India
+  { name: 'Mumbai', lat: 19.0760, lng: 72.8777, align: 'left', aqi: 88, region: 'Maharashtra' },
+  { name: 'Pune', lat: 18.5204, lng: 73.8567, align: 'right', aqi: 76, region: 'Maharashtra' },
+  { name: 'Ahmedabad', lat: 23.0225, lng: 72.5714, align: 'left', aqi: 118, region: 'Gujarat' },
+  { name: 'Surat', lat: 21.1702, lng: 72.8311, align: 'left', aqi: 96, region: 'Gujarat' },
+
+  // Central India
+  { name: 'Bhopal', lat: 23.2599, lng: 77.4126, align: 'top', aqi: 95, region: 'Madhya Pradesh' },
+  { name: 'Nagpur', lat: 21.1458, lng: 79.0882, align: 'right', aqi: 82, region: 'Maharashtra' },
+
+  // South India - Bengaluru is anchored to the LEFT and Chennai to the RIGHT so they never overlap
+  { name: 'Hyderabad', lat: 17.3850, lng: 78.4867, align: 'top', aqi: 68, region: 'Telangana' },
+  { name: 'Bengaluru', lat: 12.9716, lng: 77.5946, align: 'left', aqi: 52, region: 'Karnataka' },
+  { name: 'Chennai', lat: 13.0827, lng: 80.2707, align: 'right', aqi: 58, region: 'Tamil Nadu' },
+  { name: 'Nellore', lat: 14.4426, lng: 79.9865, align: 'bottom', aqi: 44, region: 'Andhra Pradesh' },
+  { name: 'Visakhapatnam', lat: 17.6868, lng: 83.2185, align: 'right', aqi: 64, region: 'Andhra Pradesh' },
+  { name: 'Kochi', lat: 9.9312, lng: 76.2673, align: 'left', aqi: 42, region: 'Kerala' },
+
+  // East & North-East India
+  { name: 'Kolkata', lat: 22.5726, lng: 88.3639, align: 'right', aqi: 122, region: 'West Bengal' },
+  { name: 'Bhubaneswar', lat: 20.2961, lng: 85.8245, align: 'right', aqi: 84, region: 'Odisha' },
+  { name: 'Patna', lat: 25.5941, lng: 85.1376, align: 'top', aqi: 160, region: 'Bihar' },
+  { name: 'Guwahati', lat: 26.1445, lng: 91.7362, align: 'top', aqi: 65, region: 'Assam' },
 ];
+
+// Helper: Calculate forward geographic azimuth/bearing (0° = North, 90° = East, 180° = South, 270° = West)
+function calculateSegmentBearing(lat1, lng1, lat2, lng2) {
+  const dLng = ((lng2 - lng1) * Math.PI) / 180;
+  const phi1 = (lat1 * Math.PI) / 180;
+  const phi2 = (lat2 * Math.PI) / 180;
+  const y = Math.sin(dLng) * Math.cos(phi2);
+  const x = Math.cos(phi1) * Math.sin(phi2) - Math.sin(phi1) * Math.cos(phi2) * Math.cos(dLng);
+  let brng = (Math.atan2(y, x) * 180) / Math.PI;
+  return (brng + 360) % 360;
+}
 
 export default function IoTFleetMap({ onSelectDevice }) {
   const navigate = useNavigate();
@@ -337,7 +372,7 @@ export default function IoTFleetMap({ onSelectDevice }) {
     });
   }, [filteredDevices, selectedStation, activeMetric, isLight]);
 
-  // 7. Render Anchor Cities
+  // 7. Render Anchor Cities with Smart Orientations & Tooltips
   useEffect(() => {
     const layer = citiesLayerRef.current;
     if (!layer) return;
@@ -346,25 +381,53 @@ export default function IoTFleetMap({ onSelectDevice }) {
     if (!showCities) return;
 
     ANCHOR_CITIES.forEach((c) => {
+      const isLeft = c.align === 'left';
+      const isRight = c.align === 'right';
+      const isTop = c.align === 'top';
+      const isBottom = c.align === 'bottom';
+
       const cityHtml = `
-        <div class="leaflet-city-badge ${isLight ? 'city-light' : 'city-dark'}">
-          <span class="city-dot"></span>
-          <span class="city-label">${c.name}</span>
+        <div class="leaflet-city-badge city-align-${c.align || 'right'} ${isLight ? 'city-light' : 'city-dark'}">
+          ${isLeft || isTop ? `<span class="city-label">${c.name}</span><span class="city-dot"></span>` : `<span class="city-dot"></span><span class="city-label">${c.name}</span>`}
         </div>
       `;
+
+      // Smart anchor coordinates so the dot is precisely centered on [c.lat, c.lng]
+      let iconAnchor = [6, 11]; // default right-aligned: dot at left edge
+      if (isLeft) iconAnchor = [88, 11]; // dot at right edge
+      else if (isTop) iconAnchor = [45, 22]; // dot at bottom center
+      else if (isBottom) iconAnchor = [45, 4]; // dot at top center
 
       const icon = L.divIcon({
         className: 'leaflet-city-div-icon',
         html: cityHtml,
-        iconSize: [90, 22],
-        iconAnchor: [6, 6],
+        iconSize: [96, 24],
+        iconAnchor,
       });
 
-      layer.addLayer(L.marker([c.lat, c.lng], { icon, interactive: false }));
+      const marker = L.marker([c.lat, c.lng], { icon, interactive: true });
+
+      marker.bindTooltip(
+        `<strong>${c.name}</strong> (${c.region})<br/>Ambient AQI Index: <strong>${c.aqi}</strong>`,
+        {
+          direction: isLeft ? 'left' : isTop ? 'top' : isBottom ? 'bottom' : 'right',
+          offset: isLeft ? [-6, 0] : isRight ? [6, 0] : [0, 0],
+          className: isLight ? 'coverage-tooltip-light' : 'coverage-tooltip-dark',
+        }
+      );
+
+      marker.on('click', () => {
+        const map = mapInstanceRef.current;
+        if (map) {
+          map.flyTo([c.lat, c.lng], 9, { duration: 1.2 });
+        }
+      });
+
+      layer.addLayer(marker);
     });
   }, [showCities, isLight]);
 
-  // 8. Render Wind Streamlines Overlay
+  // 8. Render Realistic Wind Streamlines Overlay with Directional Vector Chevrons
   useEffect(() => {
     const layer = windLayerRef.current;
     if (!layer) return;
@@ -372,22 +435,69 @@ export default function IoTFleetMap({ onSelectDevice }) {
 
     if (!showWind) return;
 
-    const windPaths = [
-      [[10.5, 68.0], [14.0, 72.5], [17.5, 76.0], [19.0, 80.0]],
-      [[8.5, 71.0], [12.0, 75.0], [15.5, 78.5]],
-      [[13.0, 87.0], [15.0, 83.5], [17.0, 80.0]],
-      [[11.0, 85.0], [13.5, 81.5], [15.0, 78.5]],
-      [[26.0, 72.0], [24.0, 78.0], [23.0, 85.0], [22.0, 90.0]],
+    // Ordered strictly from UPWIND (source) to DOWNWIND (target) along real regional atmospheric currents:
+    // 1 & 2: Bay of Bengal Maritime Stream (Northeast Monsoon flow directly into AP & Tamil Nadu)
+    // 3 & 4: Indo-Gangetic Northwestern Continental Flow (Punjab -> Delhi -> UP -> Bihar -> West Bengal)
+    // 5: Arabian Sea Western Coastal Stream (North to South along Western Ghats)
+    // 6: Central Peninsular Flow (Central India to Hyderabad plateau)
+    const windStreams = [
+      // Northeast Monsoon: Bay of Bengal -> Andhra Coast (passing right over Gangavaram) -> Bengaluru / Karnataka
+      [[17.8, 86.8], [15.8, 83.2], [14.48, 79.95], [13.2, 77.4], [11.8, 75.2]],
+      // Coromandel Coastal Stream: Bay of Bengal -> Chennai -> Southern Tamil Nadu
+      [[15.2, 85.5], [13.6, 82.0], [12.2, 79.2], [10.2, 77.0]],
+      // Northern Andhra / Odisha Maritime Stream
+      [[20.2, 88.6], [18.2, 84.8], [16.5, 81.6], [14.8, 78.4]],
+      // Indo-Gangetic Basin Flow (NW to SE): Punjab -> Delhi -> Kanpur/Lucknow -> Patna -> Kolkata
+      [[30.5, 74.8], [28.6, 77.2], [26.8, 80.9], [25.5, 85.1], [22.6, 88.4]],
+      // Central Indo-Gangetic Tributary: Rajasthan -> MP -> West Bengal
+      [[27.5, 73.0], [25.5, 76.8], [23.8, 81.2], [22.4, 85.6]],
+      // Arabian Sea Coastal Stream (NW to SE): Gujarat Coast -> Mumbai -> Goa -> Karnataka
+      [[21.8, 69.4], [19.1, 71.8], [15.8, 73.2], [12.4, 74.6]],
+      // Central Deccan Airflow (West/Central to South-East)
+      [[23.5, 74.2], [20.8, 76.5], [17.8, 78.8], [15.6, 80.4]],
     ];
 
-    windPaths.forEach((pts) => {
+    windStreams.forEach((pts) => {
+      // 1. Animated glowing polyline with forward stroke-dashoffset flow
       const line = L.polyline(pts, {
         color: isLight ? '#0284c7' : '#00f0ff',
-        weight: 2.2,
+        weight: 2.4,
         dashArray: '10, 16',
         className: 'leaflet-wind-path',
       });
       layer.addLayer(line);
+
+      // 2. Add directional navigation chevrons along segments to make direction 100% unequivocal
+      for (let i = 0; i < pts.length - 1; i++) {
+        const p1 = pts[i];
+        const p2 = pts[i + 1];
+        const midLat = (p1[0] + p2[0]) / 2;
+        const midLng = (p1[1] + p2[1]) / 2;
+        const bearing = calculateSegmentBearing(p1[0], p1[1], p2[0], p2[1]);
+
+        const arrowColor = isLight ? '#0284c7' : '#00f0ff';
+        const arrowHtml = `
+          <div class="leaflet-wind-arrow" style="transform: rotate(${bearing}deg);">
+            <svg viewBox="0 0 24 24" width="16" height="16">
+              <path d="M12 2 L19 19 L12 15 L5 19 Z" fill="${arrowColor}" />
+            </svg>
+          </div>
+        `;
+
+        const arrowIcon = L.divIcon({
+          className: 'leaflet-wind-arrow-div-icon',
+          html: arrowHtml,
+          iconSize: [16, 16],
+          iconAnchor: [8, 8],
+        });
+
+        const arrowMarker = L.marker([midLat, midLng], {
+          icon: arrowIcon,
+          interactive: false,
+        });
+
+        layer.addLayer(arrowMarker);
+      }
     });
   }, [showWind, isLight]);
 
@@ -503,7 +613,7 @@ export default function IoTFleetMap({ onSelectDevice }) {
               type="button"
               className={`feature-toggle-btn ${showWind ? 'is-active' : ''}`}
               onClick={() => setShowWind((p) => !p)}
-              title="Toggle Atmospheric Airflow & Wind Streamlines"
+              title="Toggle Atmospheric Airflow & Directional Wind Vectors (Prevailing NE ➔ SW Flow)"
             >
               🌬️ Wind
             </button>
@@ -511,9 +621,9 @@ export default function IoTFleetMap({ onSelectDevice }) {
               type="button"
               className={`feature-toggle-btn ${showCities ? 'is-active' : ''}`}
               onClick={() => setShowCities((p) => !p)}
-              title="Toggle Major Metropolitan Reference Cities"
+              title={`Toggle All ${ANCHOR_CITIES.length} Major Metropolitan Reference Hubs Across India`}
             >
-              🏙️ Cities
+              🏙️ Cities ({ANCHOR_CITIES.length})
             </button>
           </div>
 
@@ -568,6 +678,22 @@ export default function IoTFleetMap({ onSelectDevice }) {
       {/* Main Interactive Leaflet Map Canvas */}
       <div className="map-canvas-wrapper">
         <div ref={mapContainerRef} className={`leaflet-map-canvas ${mapLayer === 'satellite' ? 'leaflet-map-satellite' : ''}`} />
+
+        {/* Live Prevailing Wind Vector Telemetry HUD */}
+        {showWind && (
+          <div className={`map-wind-hud ${isLight ? 'wind-hud-light' : 'wind-hud-dark'}`}>
+            <div className="wind-hud-icon-wrap">
+              <svg className="wind-hud-compass" viewBox="0 0 24 24" width="16" height="16">
+                <path d="M12 2 L16 12 L12 9 L8 12 Z" fill={isLight ? '#0284c7' : '#00f0ff'} />
+                <path d="M12 22 L16 12 L12 15 L8 12 Z" fill="#64748b" opacity="0.6" />
+              </svg>
+            </div>
+            <div className="wind-hud-info">
+              <span className="wind-hud-title">PREVAILING SURFACE AIRFLOW</span>
+              <span className="wind-hud-val">14 km/h • ENE ➔ WSW (Northeast Monsoon Stream)</span>
+            </div>
+          </div>
+        )}
 
         {/* Selected Station Telemetry Flyout Drawer */}
         {selectedStation && (
