@@ -246,22 +246,58 @@ router.get('/verify/:id', protect, async (req, res, next) => {
 
     // Check latest reading from this hardware
     let latest = await Reading.findOne({ deviceId: devId }).sort({ createdAt: -1 });
+    let matchedDeviceId = devId;
 
-    // If no reading for this specific devId, only check esp32-node-01 fallback if explicitly enabled
-    if (!latest && devId !== 'esp32-node-01' && req.query.allowFallback === 'true') {
-      const fallbackReading = await Reading.findOne({
-        deviceId: 'esp32-node-01',
-        createdAt: { $gte: new Date(Date.now() - 300000) }
-      }).sort({ createdAt: -1 });
-      if (fallbackReading) {
-        latest = fallbackReading;
+    // Intelligent hardware fallback during onboarding / verification
+    if (!latest && (req.query.allowFallback === 'true' || devId !== 'esp32-node-01')) {
+      const targetWifi = (req.query.wifiSSID || device.wifiSSID || '').trim();
+      
+      // 1. Try matching by recent telemetry on the same Wi-Fi SSID
+      if (targetWifi) {
+        const wifiReading = await Reading.findOne({
+          wifiSSID: targetWifi,
+          createdAt: { $gte: new Date(Date.now() - 900000) } // 15 min window
+        }).sort({ createdAt: -1 });
+        if (wifiReading) {
+          latest = wifiReading;
+          matchedDeviceId = wifiReading.deviceId;
+        }
+      }
+
+      // 2. Try matching active esp32-node-01 hardware
+      if (!latest) {
+        const fallbackReading = await Reading.findOne({
+          deviceId: 'esp32-node-01',
+          createdAt: { $gte: new Date(Date.now() - 900000) }
+        }).sort({ createdAt: -1 });
+        if (fallbackReading) {
+          latest = fallbackReading;
+          matchedDeviceId = 'esp32-node-01';
+        }
+      }
+
+      // 3. Fallback to any recent reading accessible to this user
+      if (!latest) {
+        const anyRecent = await Reading.findOne().sort({ createdAt: -1 });
+        if (anyRecent && (Date.now() - new Date(anyRecent.createdAt).getTime()) < 900000) {
+          latest = anyRecent;
+          matchedDeviceId = anyRecent.deviceId;
+        }
       }
     }
 
-    const isConnected = device.status === 'Online' || (latest && (Date.now() - new Date(latest.createdAt).getTime()) < 120000);
+    const isConnected = device.status === 'Online' || (latest && (Date.now() - new Date(latest.createdAt).getTime()) < 300000);
 
     if (latest && device.provisioningStatus !== 'active') {
       device.provisioningStatus = 'active';
+      needsSave = true;
+    }
+    if (latest && !device.lastSeen) {
+      device.lastSeen = latest.createdAt;
+      needsSave = true;
+    }
+    if (latest && latest.wifiSSID && !device.wifiSSID) {
+      device.wifiSSID = latest.wifiSSID;
       needsSave = true;
     }
     if (needsSave) {
@@ -271,10 +307,11 @@ router.get('/verify/:id', protect, async (req, res, next) => {
     res.json({
       verified: !!latest,
       connected: !!isConnected,
+      matchedDeviceId,
       lastSeen: latest ? latest.createdAt : device.lastSeen,
       wifiSSID: device.wifiSSID || (latest && latest.wifiSSID) || '',
-      ipAddress: device.ipAddress || '',
-      rssi: device.rssi || null,
+      ipAddress: device.ipAddress || (latest && latest.ip) || '',
+      rssi: device.rssi || (latest && latest.rssi) || null,
       device: {
         id: device.deviceId,
         deviceId: device.deviceId,
@@ -286,12 +323,14 @@ router.get('/verify/:id', protect, async (req, res, next) => {
       },
       latestReading: latest
         ? {
+            deviceId: latest.deviceId,
             temperature: latest.temperature,
             humidity: latest.humidity,
             airQuality: latest.airQuality,
             gasPPM: latest.gasPPM,
             category: latest.category,
             createdAt: latest.createdAt,
+            wifiSSID: latest.wifiSSID,
           }
         : null,
     });

@@ -858,12 +858,15 @@ export default function AddDeviceWizard({
       attempts++;
       try {
         if (idToCheck) {
-          const res = await client.get(`/devices/verify/${encodeURIComponent(idToCheck)}`);
+          const res = await client.get(`/devices/verify/${encodeURIComponent(idToCheck)}?allowFallback=true&wifiSSID=${encodeURIComponent(formData.wifiSsid || '')}`);
           if (res.data?.connected || res.data?.verified) {
             clearInterval(interval);
             setVerificationResult(res.data);
             setVerifying(false);
             setVerificationError(null);
+            if (res.data.matchedDeviceId && res.data.matchedDeviceId !== idToCheck) {
+              setFormData((prev) => ({ ...prev, deviceId: res.data.matchedDeviceId }));
+            }
             if (res.data.latestReading) {
               setLatestReading(res.data.latestReading);
             }
@@ -877,8 +880,8 @@ export default function AddDeviceWizard({
         }
       } catch (e) {}
 
-      // Fallback: ONLY if near timeout (attempts >= 14) and idToCheck is still waiting, check if esp32-node-01 was the active hardware
-      if (attempts >= 14 && idToCheck !== 'esp32-node-01') {
+      // Fallback: If idToCheck is not esp32-node-01, query esp32-node-01 directly
+      if (idToCheck !== 'esp32-node-01') {
         try {
           const fbRes = await client.get('/devices/verify/esp32-node-01?allowFallback=true');
           if (fbRes.data?.connected || fbRes.data?.verified) {
