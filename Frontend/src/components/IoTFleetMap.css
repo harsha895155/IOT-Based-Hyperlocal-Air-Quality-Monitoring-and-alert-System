@@ -204,6 +204,18 @@
   z-index: 1;
 }
 
+/* Dark theme styling for OpenStreetMap tiles without any watermarks */
+[data-theme='obsidian'] .leaflet-map-canvas:not(.leaflet-map-satellite) .leaflet-tile-pane,
+[data-theme='slate'] .leaflet-map-canvas:not(.leaflet-map-satellite) .leaflet-tile-pane,
+[data-theme='neon'] .leaflet-map-canvas:not(.leaflet-map-satellite) .leaflet-tile-pane {
+  filter: brightness(0.65) invert(1) contrast(2.6) hue-rotate(200deg) saturate(0.25) brightness(0.75);
+}
+
+/* Ensure satellite mode always retains true natural photography colors */
+.leaflet-map-satellite .leaflet-tile-pane {
+  filter: none !important;
+}
+
 /* Custom Marker Styling */
 .leaflet-airguard-div-icon {
   background: transparent !important;

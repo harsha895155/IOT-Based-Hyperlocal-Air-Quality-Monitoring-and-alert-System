@@ -201,15 +201,15 @@ export default function IoTFleetMap({ onSelectDevice }) {
     if (mapLayer === 'satellite') {
       tileUrl = 'https://server.arcgisonline.com/ArcGIS/rest/services/World_Imagery/MapServer/tile/{z}/{y}/{x}';
       maxZoom = 18;
-    } else if (mapLayer === 'streets' || isLight) {
-      tileUrl = 'https://{s}.basemaps.cartocdn.com/rastertiles/voyager/{z}/{x}/{y}{r}.png';
     } else {
-      tileUrl = 'https://{s}.basemaps.cartocdn.com/dark_all/{z}/{x}/{y}{r}.png';
+      // 100% Free OpenStreetMap Global Cartography (No API Key Required, No Watermarks)
+      tileUrl = 'https://tile.openstreetmap.org/{z}/{x}/{y}.png';
+      maxZoom = 19;
     }
 
     tileLayerRef.current = L.tileLayer(tileUrl, {
-      subdomains: 'abcd',
       maxZoom,
+      attribution: '&copy; OpenStreetMap',
     }).addTo(map);
   }, [mapLayer, isLight]);
 
@@ -558,7 +558,7 @@ export default function IoTFleetMap({ onSelectDevice }) {
 
       {/* Main Interactive Leaflet Map Canvas */}
       <div className="map-canvas-wrapper">
-        <div ref={mapContainerRef} className="leaflet-map-canvas" />
+        <div ref={mapContainerRef} className={`leaflet-map-canvas ${mapLayer === 'satellite' ? 'leaflet-map-satellite' : ''}`} />
 
         {/* Selected Station Telemetry Flyout Drawer */}
         {selectedStation && (
