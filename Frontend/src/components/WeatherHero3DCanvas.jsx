@@ -494,38 +494,7 @@ export default function WeatherHero3DCanvas({
     // ══════════════════════════════════════════════════════════════════════════
     else if (weatherMode === 'clear-day' || weatherMode === 'high-sun') {
       const isHighSun = weatherMode === 'high-sun';
-      const sunGroup = new THREE.Group();
-      sunGroup.position.set(frustum.halfW * (isHighSun ? 0.55 : 0.65), frustum.halfH * 0.25, -6);
-      rootGroup.add(sunGroup);
-
-      const sunRadius = isHighSun ? 12.0 : 8.5;
-      const sunCore = new THREE.Mesh(
-        new THREE.SphereGeometry(sunRadius, 28, 28),
-        new THREE.MeshBasicMaterial({ color: isHighSun ? 0xfffbeb : (isLight ? 0xf59e0b : 0xfbbf24) })
-      );
-      sunGroup.add(sunCore);
-
-      const corona1 = new THREE.Mesh(
-        new THREE.RingGeometry(sunRadius + 1.2, sunRadius + (isHighSun ? 8 : 5.5), 32),
-        new THREE.MeshBasicMaterial({
-          color: isLight ? 0xd97706 : 0xf59e0b,
-          transparent: true,
-          opacity: isHighSun ? 0.65 : (isLight ? 0.55 : 0.38),
-          side: THREE.DoubleSide,
-        })
-      );
-      sunGroup.add(corona1);
-
-      const corona2 = new THREE.Mesh(
-        new THREE.RingGeometry(sunRadius + (isHighSun ? 9 : 6.5), sunRadius + (isHighSun ? 18 : 12.5), 32),
-        new THREE.MeshBasicMaterial({
-          color: isLight ? 0xe11d48 : 0xfb923c,
-          transparent: true,
-          opacity: isHighSun ? 0.48 : (isLight ? 0.42 : 0.2),
-          side: THREE.DoubleSide,
-        })
-      );
-      sunGroup.add(corona2);
+      // Atmospheric solar dust & ambient sunbeam rays (clean backdrop without duplicate colliding sphere)
 
       // Edge-to-edge floating warm golden dust
       const dustCount = Math.max(90, Math.round(frustum.vWidth * 0.6));
@@ -549,11 +518,6 @@ export default function WeatherHero3DCanvas({
       rootGroup.add(dustPoints);
 
       updateFn = (elapsed) => {
-        corona1.rotation.z = elapsed * 0.12;
-        corona2.rotation.z = -elapsed * 0.08;
-        const pulse = Math.sin(elapsed * 2.0) * 0.08;
-        sunCore.scale.set(1 + pulse, 1 + pulse, 1 + pulse);
-
         const pos = dustPoints.geometry.attributes.position.array;
         const topLimit = frustum.halfH + 6;
         for (let i = 0; i < dustCount; i++) {
@@ -568,50 +532,9 @@ export default function WeatherHero3DCanvas({
     // E. CLEAR NIGHT: LUMINOUS CRESCENT MOON, TWINKLING STARS & METEORS
     // ══════════════════════════════════════════════════════════════════════════
     else if (weatherMode === 'clear-night') {
-      const moonGroup = new THREE.Group();
-      moonGroup.position.set(frustum.halfW * 0.68, frustum.halfH * 0.28, -6);
-      rootGroup.add(moonGroup);
+      // Atmospheric Cosmic Starfield with Meteors & Aurora (clean backdrop without colliding duplicate orb)
 
-      // 1. Glowing 3D Moon Core
-      const moonRadius = 7.5;
-      const moon = new THREE.Mesh(
-        new THREE.SphereGeometry(moonRadius, 32, 32),
-        new THREE.MeshStandardMaterial({
-          color: 0xf8fafc,
-          roughness: 0.45,
-          metalness: 0.1,
-          emissive: 0xc7d2fe,
-          emissiveIntensity: 0.6,
-        })
-      );
-      moonGroup.add(moon);
-
-
-      // Inner soft pearl halo
-      const innerHalo = new THREE.Mesh(
-        new THREE.RingGeometry(moonRadius + 0.3, moonRadius + 3.8, 32),
-        new THREE.MeshBasicMaterial({
-          color: 0xbae6fd,
-          transparent: true,
-          opacity: 0.45,
-          side: THREE.DoubleSide,
-        })
-      );
-      moonGroup.add(innerHalo);
-
-      // Outer ethereal sapphire corona
-      const outerCorona = new THREE.Mesh(
-        new THREE.RingGeometry(moonRadius + 2.5, moonRadius + 7.5, 32),
-        new THREE.MeshBasicMaterial({
-          color: 0x38bdf8,
-          transparent: true,
-          opacity: 0.28,
-          side: THREE.DoubleSide,
-        })
-      );
-      moonGroup.add(outerCorona);
-
-      // 2. Full-Width Cosmic Sparkling Starfield with Individual Scintillation
+      // 1. Full-Width Cosmic Sparkling Starfield with Individual Scintillation
       const starCount = Math.max(180, Math.round(frustum.vWidth * 1.2));
       const starGeo = new THREE.BufferGeometry();
       const starPos = new Float32Array(starCount * 3);
@@ -674,13 +597,6 @@ export default function WeatherHero3DCanvas({
       rootGroup.add(auroraMesh);
 
       updateFn = (elapsed, delta) => {
-        // Moon corona breathing
-        innerHalo.rotation.z = elapsed * 0.05;
-        outerCorona.rotation.z = -elapsed * 0.03;
-        const breath = (Math.sin(elapsed * 1.8) + 1) / 2;
-        innerHalo.material.opacity = 0.28 + breath * 0.15;
-        outerCorona.material.opacity = 0.14 + breath * 0.12;
-
         // Twinkling stars
         const pos = stars.geometry.attributes.position.array;
         for (let i = 0; i < starCount; i++) {

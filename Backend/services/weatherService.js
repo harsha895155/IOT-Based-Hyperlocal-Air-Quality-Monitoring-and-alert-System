@@ -158,37 +158,54 @@ async function reverseGeocode(lat, lng) {
     if (nomRes.ok) {
       const nomData = await nomRes.json();
       const addr = nomData.address || {};
+const isRoadCode = (str) => /^(MDR|SH|NH|ODR|AH|NE|ORR|RR|Route|State Highway|National Highway)\s*\d+/i.test(String(str || '').trim());
 
       const buildingName = addr.building || addr.house_name || addr.amenity || addr.office || addr.shop || addr.leisure || null;
       const houseNumber = addr.house_number || null;
-      const road = addr.road || addr.pedestrian || null;
-      const houseName = houseNumber ? (road ? `${houseNumber}, ${road}` : houseNumber) : null;
+      const rawRoad = addr.road || addr.pedestrian || null;
+      const road = isRoadCode(rawRoad) ? null : rawRoad;
+      const houseName = houseNumber ? (road ? houseNumber + ', ' + road : houseNumber) : null;
       const neighbourhood = addr.neighbourhood || addr.suburb || addr.quarter || addr.residential || addr.hamlet || null;
-      const city = addr.city || addr.town || addr.village || addr.municipality || '';
+      const village = addr.village || addr.hamlet || null;
+      const townOrCity = addr.city || addr.town || addr.municipality || village || '';
+      const county = (addr.county || addr.subdistrict || '').replace(/\s+mandal/i, '').trim();
       const state = addr.state || '';
       const country = addr.country || '';
 
-      // Hyperlocal place hierarchy: Building > House > Road with Neighbourhood > Road > Area > City
+      // Human locality hierarchy: Building > House > Village/Town with Mandal/County > Locality
       let specificPlace = buildingName || houseName;
       if (!specificPlace && road) {
-        specificPlace = neighbourhood ? `${road}, ${neighbourhood}` : road;
-      }
-      if (!specificPlace && neighbourhood) {
-        specificPlace = city ? `${neighbourhood}, ${city}` : neighbourhood;
+        specificPlace = neighbourhood ? road + ', ' + neighbourhood : road;
       }
 
-      if (specificPlace || city) {
+      let humanTown = village || townOrCity;
+      if (humanTown && county && !humanTown.toLowerCase().includes(county.toLowerCase())) {
+        humanTown = humanTown + ', ' + county;
+      }
+
+      const finalName = specificPlace || humanTown || townOrCity || 'Current Location';
+
+      // Clean label: remove leading highway road codes like "MDR0117, "
+      let cleanLabel = nomData.display_name || '';
+      if (cleanLabel) {
+        cleanLabel = cleanLabel.replace(/^(MDR|SH|NH|ODR|AH|NE|ORR|RR|Route|State Highway|National Highway)\s*\d+,\s*/i, '');
+      } else {
+        cleanLabel = [finalName, state, country].filter(Boolean).join(', ');
+      }
+
+      if (finalName) {
         return {
-          name: specificPlace || city || 'Current Location',
+          name: finalName,
           placeName: specificPlace || null,
           buildingName: buildingName || null,
           houseName: houseName || null,
           road: road || null,
+          village: village || null,
           neighbourhood: neighbourhood || null,
-          city,
+          city: humanTown || townOrCity,
           state,
           country,
-          label: nomData.display_name || [specificPlace || city, state, country].filter(Boolean).join(', '),
+          label: cleanLabel,
           gpsLocation: gpsString,
           latitude: latNum,
           longitude: lngNum,
