@@ -67,3 +67,4 @@ if (fs.existsSync('Frontend/dist/firmware')) {
 }
 console.log('Updated Frontend/public/firmware/AirGuard_ESP32_AllInOne.bin!');
 console.log('ALL DONE! The website flasher now burns the updated firmware with visible SSID input!');
+
