@@ -1,0 +1,172 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>AirGuard - 1-Click Wireless Setup</title>
+  <style>
+    * { box-sizing: border-box; margin: 0; padding: 0; }
+    body {
+      font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Helvetica, Arial, sans-serif;
+      background: #090e1a;
+      color: #f8fafc;
+      min-height: 100vh;
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      padding: 20px;
+    }
+    .card {
+      background: #11192e;
+      border: 1px solid #1e293b;
+      border-radius: 24px;
+      padding: 32px 28px;
+      max-width: 440px;
+      width: 100%;
+      box-shadow: 0 25px 50px -12px rgba(0, 0, 0, 0.7);
+    }
+    .header {
+      text-align: center;
+      margin-bottom: 24px;
+    }
+    .badge {
+      display: inline-block;
+      padding: 4px 12px;
+      background: rgba(14, 165, 233, 0.15);
+      border: 1px solid rgba(14, 165, 233, 0.3);
+      border-radius: 9999px;
+      color: #38bdf8;
+      font-size: 0.75rem;
+      font-weight: 700;
+      letter-spacing: 0.05em;
+      text-transform: uppercase;
+      margin-bottom: 12px;
+    }
+    h1 {
+      font-size: 1.4rem;
+      font-weight: 700;
+      color: #f8fafc;
+      margin-bottom: 8px;
+    }
+    p.sub {
+      color: #94a3b8;
+      font-size: 0.88rem;
+      line-height: 1.45;
+    }
+    .instruction-box {
+      background: rgba(30, 41, 59, 0.5);
+      border-left: 3px solid #00d2b4;
+      padding: 12px 14px;
+      border-radius: 8px;
+      margin-bottom: 20px;
+      font-size: 0.82rem;
+      color: #cbd5e1;
+      line-height: 1.5;
+    }
+    .field {
+      margin-bottom: 18px;
+    }
+    label {
+      display: block;
+      font-size: 0.78rem;
+      font-weight: 700;
+      color: #94a3b8;
+      text-transform: uppercase;
+      letter-spacing: 0.05em;
+      margin-bottom: 6px;
+    }
+    input {
+      width: 100%;
+      background: #0a0f1d;
+      border: 1px solid #334155;
+      border-radius: 12px;
+      padding: 13px 15px;
+      font-size: 0.95rem;
+      color: #f8fafc;
+      outline: none;
+      transition: all 0.2s ease;
+    }
+    input:focus {
+      border-color: #00d2b4;
+      box-shadow: 0 0 0 3px rgba(0, 210, 180, 0.2);
+    }
+    .btn-submit {
+      width: 100%;
+      background: linear-gradient(135deg, #0284c7 0%, #00d2b4 100%);
+      border: none;
+      border-radius: 12px;
+      padding: 14px;
+      font-size: 1rem;
+      font-weight: 700;
+      color: #ffffff;
+      cursor: pointer;
+      box-shadow: 0 4px 16px rgba(0, 210, 180, 0.35);
+      transition: all 0.2s ease;
+      margin-top: 6px;
+    }
+    .btn-submit:hover {
+      opacity: 0.95;
+      transform: translateY(-1px);
+    }
+    .btn-submit:active {
+      transform: translateY(1px);
+    }
+    .footer {
+      text-align: center;
+      margin-top: 20px;
+      font-size: 0.75rem;
+      color: #64748b;
+    }
+  </style>
+</head>
+<body>
+  <div class="card">
+    <div class="header">
+      <span class="badge">Wireless Wi-Fi Fix</span>
+      <h1>Connect AirGuard ESP32</h1>
+      <p class="sub">Transmit your Wi-Fi credentials directly to the sensing node over Wi-Fi.</p>
+    </div>
+
+    <div class="instruction-box">
+      <strong>Prerequisite:</strong> Connect your device (Laptop or Phone) Wi-Fi to <strong>AirGuard-Setup</strong> before clicking the button below.
+    </div>
+
+    <form id="setupForm" action="http://192.168.4.1/save" method="POST">
+      <!-- We send both ssid and manual_ssid so both old & new firmware accept it seamlessly -->
+      <div class="field">
+        <label for="wifi_ssid">Wi-Fi Network Name (SSID)</label>
+        <input type="text" id="wifi_ssid" placeholder="e.g. Men's pG 5g or Airtel_Wifi_first floor" required autocomplete="off" autocapitalize="none">
+        <input type="hidden" name="ssid" id="form_ssid">
+        <input type="hidden" name="manual_ssid" id="form_manual_ssid">
+      </div>
+
+      <div class="field">
+        <label for="wifi_pass">Wi-Fi Password</label>
+        <input type="password" name="password" id="wifi_pass" placeholder="Enter Wi-Fi Password" required>
+      </div>
+
+      <div class="field">
+        <label for="dev_id">Device Station ID (Optional)</label>
+        <input type="text" name="device_id" id="dev_id" value="esp32-node-01">
+      </div>
+
+      <button type="submit" class="btn-submit" id="submitBtn">&#x1F4F6; Save & Connect Node Wirelessly</button>
+    </form>
+
+    <div class="footer">
+      AirGuard Hyperlocal Sensing System &bull; 100% Pure Wireless Setup
+    </div>
+  </div>
+
+  <script>
+    const form = document.getElementById('setupForm');
+    form.addEventListener('submit', function(e) {
+      const rawSsid = document.getElementById('wifi_ssid').value.trim();
+      document.getElementById('form_ssid').value = rawSsid;
+      document.getElementById('form_manual_ssid').value = rawSsid;
+      document.getElementById('submitBtn').innerText = "Sending credentials to ESP32...";
+    });
+  </script>
+</body>
+</html>
+
