@@ -396,7 +396,7 @@ export default function AddDeviceWizard({
 
       let arrayBuf;
       try {
-        const resp = await fetch('/firmware/AirGuard_ESP32_AllInOne.bin');
+        const resp = await fetch(`/firmware/AirGuard_ESP32_AllInOne.bin?t=${Date.now()}`, { cache: 'no-store' });
         if (!resp.ok) {
           throw new Error(`HTTP ${resp.status}`);
         }
