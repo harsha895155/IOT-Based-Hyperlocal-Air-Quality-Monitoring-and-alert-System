@@ -14,6 +14,7 @@ import HyperlocalComparisonBar from '../components/HyperlocalComparisonBar';
 import DominantPollutantCard from '../components/DominantPollutantCard';
 import HourlyAQITimeline from '../components/HourlyAQITimeline';
 import HardwareDiagnosticsBadge from '../components/HardwareDiagnosticsBadge';
+import AuditCertificateModal from '../components/AuditCertificateModal';
 import { useTheme } from '../context/ThemeContext';
 import './Dashboard.css';
 
@@ -81,6 +82,7 @@ export default function Dashboard({ readingsData, onNavigateTab }) {
   const [searchDropdownOpen, setSearchDropdownOpen] = useState(false);
   const [deviceDropdownOpen, setDeviceDropdownOpen] = useState(false);
   const [shareModalOpen, setShareModalOpen] = useState(false);
+  const [certModalOpen, setCertModalOpen] = useState(false);
   const searchRef = useRef(null);
 
   const displayPlaceName =
@@ -337,6 +339,16 @@ export default function Dashboard({ readingsData, onNavigateTab }) {
               >
                 <span className="share-btn-icon">📤</span>
                 <span className="share-btn-label">Share AQI</span>
+              </button>
+
+              <button
+                type="button"
+                className="btn-cert-trigger"
+                onClick={() => setCertModalOpen(true)}
+                title="Download Official 1-Page Environmental Audit Certificate PDF"
+              >
+                <span className="cert-btn-icon">📜</span>
+                <span className="cert-btn-label">Audit Certificate</span>
               </button>
 
               <div className="device-quick-picker">
@@ -1024,6 +1036,24 @@ export default function Dashboard({ readingsData, onNavigateTab }) {
         category={hasAqi ? aqiCategory : (weatherData?.current?.condition || 'Good')}
         temperature={currentTemp ?? 25}
         condition={weatherCondition}
+      />
+
+      {/* ─── 1-CLICK OFFICIAL DAILY AIR QUALITY AUDIT CERTIFICATE PDF MODAL ─── */}
+      <AuditCertificateModal
+        isOpen={certModalOpen}
+        onClose={() => setCertModalOpen(false)}
+        stationName={currentDevice?.name || 'Primary AirGuard Station'}
+        deviceId={currentDevice?.id || latest?.deviceId || 'esp32-node-01'}
+        placeName={displayPlaceName}
+        gpsLocation={gpsLocation || (coords ? `${coords.lat.toFixed(4)}° N, ${coords.lng.toFixed(4)}° E` : '14.4889° N, 79.9578° E')}
+        aqi={hasAqi ? aqiVal : (weatherData?.current?.aqi || 22)}
+        category={hasAqi ? aqiCategory : 'Good'}
+        temperature={currentTemp ?? 31.1}
+        humidity={sensorHumidity ?? cw.humidity ?? 55}
+        pm25={cw.pm2_5 ?? 12.4}
+        pm10={cw.pm10 ?? 24.5}
+        gasPpm={sensorGasPpm ?? 18.2}
+        trend={trend}
       />
     </div>
   );

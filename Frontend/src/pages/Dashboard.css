@@ -67,10 +67,48 @@
   letter-spacing: 0.02em;
 }
 
+.btn-cert-trigger {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  padding: 8px 14px;
+  border-radius: 12px;
+  background: rgba(16, 185, 129, 0.12);
+  border: 1px solid rgba(16, 185, 129, 0.35);
+  color: #10b981;
+  font-size: 0.8rem;
+  font-weight: 700;
+  cursor: pointer;
+  transition: all 0.2s ease;
+  white-space: nowrap;
+}
+
+.btn-cert-trigger:hover {
+  background: rgba(16, 185, 129, 0.22);
+  border-color: #10b981;
+  transform: translateY(-1px);
+  box-shadow: 0 4px 14px rgba(16, 185, 129, 0.25);
+}
+
+.cert-btn-icon {
+  font-size: 0.95rem;
+  line-height: 1;
+}
+
+.cert-btn-label {
+  letter-spacing: 0.02em;
+}
+
 [data-theme='light'] .btn-share-trigger {
   background: #f0f9ff;
   border-color: #bae6fd;
   color: #0284c7;
+}
+
+[data-theme='light'] .btn-cert-trigger {
+  background: #f0fdf4;
+  border-color: #bbf7d0;
+  color: #15803d;
 }
 
 .weather-title-left {
