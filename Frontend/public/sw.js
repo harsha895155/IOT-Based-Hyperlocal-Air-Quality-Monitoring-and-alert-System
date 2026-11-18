@@ -7,7 +7,7 @@
  * 4. Resilient fallback navigation: All views remain accessible offline.
  */
 
-const CACHE_NAME = 'airguard-v2.5.0';
+const CACHE_NAME = 'airguard-v3.0.0';
 const OFFLINE_FALLBACK_PAGE = '/offline.html';
 const PRECACHE_ASSETS = [
   '/',
@@ -95,7 +95,13 @@ self.addEventListener('fetch', (event) => {
     return;
   }
 
-  // 4. SPA Navigation Requests (HTML Pages): Network-First, falling back to cached index.html
+  // 4. Bundled Vite assets (/assets/): Bypass SW completely and let browser load directly from Vercel CDN.
+  // Vite assets are immutably hashed, so direct browser CDN fetching guarantees perfect MIME types and instant loading.
+  if (url.pathname.startsWith('/assets/')) {
+    return;
+  }
+
+  // 5. SPA Navigation Requests (HTML Pages): Network-First, falling back to cached index.html
   if (request.mode === 'navigate' || (request.method === 'GET' && request.headers.get('accept')?.includes('text/html'))) {
     event.respondWith(
       fetch(request)
