@@ -68,7 +68,7 @@ export default function AuditCertificateModal({
   return (
     <div className="cert-modal-backdrop" onClick={onClose}>
       <div className="cert-modal-dialog" onClick={(e) => e.stopPropagation()}>
-        {/* Top Action Bar (Hidden during Print) */}
+        {/* Top Action Bar (Fixed at top, never cut off) */}
         <div className="cert-modal-actions-bar no-print">
           <div className="cert-modal-title">
             <span>📜 Official Environmental Audit Certificate</span>
@@ -83,11 +83,12 @@ export default function AuditCertificateModal({
           </div>
         </div>
 
-        {/* Printable Certificate Document Sheet */}
-        <div className="printable-cert-sheet" ref={certRef}>
-          <div className="cert-border-outer">
-            <div className="cert-border-inner">
-              {/* Header */}
+        {/* Scrollable Container for Document Sheet */}
+        <div className="cert-modal-scroll-body">
+          <div className="printable-cert-sheet" ref={certRef}>
+            <div className="cert-border-outer">
+              <div className="cert-border-inner">
+                {/* Header */}
               <div className="cert-header">
                 <div className="cert-emblem-wrap">
                   <span className="cert-emblem-icon">🛡️</span>
@@ -224,6 +225,7 @@ export default function AuditCertificateModal({
               </div>
             </div>
           </div>
+        </div>
         </div>
       </div>
     </div>
