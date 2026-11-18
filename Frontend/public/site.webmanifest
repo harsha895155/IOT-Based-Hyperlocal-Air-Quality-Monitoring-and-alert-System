@@ -1,6 +1,6 @@
 {
-  "name": "AirGuard — Hyperlocal Air Quality & Weather",
-  "short_name": "AirGuard",
+  "name": "AirGuard-Hyperlocal — Air Quality & Weather",
+  "short_name": "AirGuard-Hyperlocal",
   "description": "Real-Time Hyperlocal Air Quality Monitoring, Weather Telemetry & Smart Alerts",
   "id": "/",
   "start_url": "/dashboard",
