@@ -647,14 +647,24 @@ export default function Dashboard({ readingsData, onNavigateTab }) {
       {/* ─── 3. SENSORS & MULTI-POLLUTANT BREAKDOWN ─── */}
       <div className="card weather-section-card">
         <div className="section-card-header">
-          <h2 className="section-card-title">
-            {isDeviceConnected ? 'IoT Air Quality & Sensor Breakdown' : 'Current Location Atmospheric & Air Metrics'}
-          </h2>
-          <span className="section-card-sub">
-            {isDeviceConnected
-              ? 'Hardware measurements from ESP32, MQ135 & DHT22 modules'
-              : `Local ambient measurements for ${customSearchedLocation || locationName || 'current location'}`}
-          </span>
+          <div className="section-card-header-left">
+            <h2 className="section-card-title">
+              {isDeviceConnected ? 'IoT Air Quality & Sensor Breakdown' : 'Current Location Atmospheric & Air Metrics'}
+            </h2>
+            <span className="section-card-sub">
+              {isDeviceConnected
+                ? 'Hardware measurements from ESP32, MQ135 & DHT22 modules'
+                : `Local ambient measurements for ${customSearchedLocation || locationName || 'current location'}`}
+            </span>
+          </div>
+
+          <div className="section-card-header-right">
+            <HardwareDiagnosticsBadge
+              isDeviceConnected={isDeviceConnected}
+              deviceName={currentDevice?.name || 'ESP32 Sensing Node'}
+              deviceId={currentDevice?.id || 'esp32-node-01'}
+            />
+          </div>
         </div>
 
         {/* Primary Hazard Contributor & Proportional Multi-Pollutant Distribution */}
@@ -808,18 +818,11 @@ export default function Dashboard({ readingsData, onNavigateTab }) {
               </span>
             </div>
             <div className="pol-sub">
-              <div>
-                {isDeviceConnected
-                  ? `Transmitting via ${currentDevice?.type || 'ESP32'}`
-                  : (isDeviceActiveOrRecorded
-                    ? `Hardware Offline • Last seen ${timeAgo}`
-                    : 'Click "+ Connect Device" to link hardware')}
-              </div>
-              <HardwareDiagnosticsBadge
-                isDeviceConnected={isDeviceConnected}
-                deviceName={currentDevice?.name || 'ESP32 Sensing Node'}
-                deviceId={currentDevice?.id || 'esp32-node-01'}
-              />
+              {isDeviceConnected
+                ? `Transmitting via ${currentDevice?.type || 'ESP32'}`
+                : (isDeviceActiveOrRecorded
+                  ? `Hardware Offline • Last seen ${timeAgo}`
+                  : 'Click "+ Connect Device" to link hardware')}
             </div>
             <div className="pollutant-live-bar"><div className="pollutant-live-bar-fill" /></div>
           </div>

@@ -707,14 +707,30 @@
 
 /* ─── 3. SECTION CARDS ─── */
 .weather-section-card {
-  padding: 24px;
+  padding: 20px 22px;
   border-radius: 16px;
   background: var(--surface);
   border: 1px solid var(--border);
+  margin-top: 0;
 }
 
 .section-card-header {
-  margin-bottom: 20px;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  flex-wrap: wrap;
+  gap: 12px;
+  margin-bottom: 14px;
+}
+
+.section-card-header-left {
+  display: flex;
+  flex-direction: column;
+}
+
+.section-card-header-right {
+  display: flex;
+  align-items: center;
 }
 
 .section-card-title {

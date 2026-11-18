@@ -1,18 +1,20 @@
 /* ─── Hardware Diagnostics & Sensor Drift Badge ─── */
 .hardware-diag-wrap {
-  margin-top: 6px;
+  margin-top: 0;
+  display: inline-flex;
 }
 
 .hardware-diag-strip {
   display: inline-flex;
   align-items: center;
-  gap: 6px;
-  padding: 3px 8px;
-  background: rgba(15, 23, 42, 0.4);
-  border: 1px solid rgba(255, 255, 255, 0.06);
-  border-radius: 8px;
-  font-size: 0.68rem;
-  color: #94a3b8;
+  gap: 8px;
+  padding: 4px 10px;
+  background: rgba(15, 23, 42, 0.55);
+  border: 1px solid rgba(255, 255, 255, 0.1);
+  border-radius: 9999px;
+  font-size: 0.72rem;
+  color: #cbd5e1;
+  backdrop-filter: blur(8px);
 }
 
 .diag-item {
