@@ -549,14 +549,6 @@ export default function Dashboard({ readingsData, onNavigateTab }) {
         </div>
       )}
 
-      {/* ─── LIVE TELEMETRY HEARTBEAT STREAM PULSE ─── */}
-      <LiveTelemetryPulse
-        isConnected={isDeviceConnected}
-        deviceName={currentDevice?.name || latest?.deviceId || 'ESP32 Sensing Node'}
-        lastSeenTime={latest?.createdAt || currentDevice?.lastSeen || weatherData?.updatedAt}
-        isLiveLocation={isLiveLocation}
-      />
-
       {/* ─── 2. ATMOSPHERIC CURRENT CONDITIONS HERO (GOOGLE WEATHER STYLE) ─── */}
       <div className={`weather-hero-card ${isDay ? 'is-daytime' : 'is-nighttime'}`}>
         {/* Dynamic 3D Weather Simulation — changes automatically with weather report */}
@@ -581,25 +573,16 @@ export default function Dashboard({ readingsData, onNavigateTab }) {
                 {hasAqi ? aqiCategory : 'Current Location AQI'}
               </div>
               <p className="aqi-hero-advice">{hasAqi ? aqiHealthAdvice : 'Current location atmospheric data active'}</p>
-              <div className="aqi-source-pill">
-                <span className="source-dot" style={{ background: '#10b981' }} />
-                <span>
-                  {latest?.deviceId
-                    ? `IoT Hardware Station (${currentDevice?.name || latest?.deviceId}) — LIVE REAL-TIME TELEMETRY`
-                    : `📍 Ambient Air Quality (${displayPlaceName})`}
-                </span>
-              </div>
-
-              {/* Live Place Tracked / GPS Coordinates placed here inside the card as shown in Image 2 */}
-              <div className="weather-hero-tracking-sub">
-                <span style={{ color: isLiveLocation ? '#10b981' : 'var(--color-primary, #38bdf8)', fontWeight: 600 }}>
-                  {isLiveLocation ? (buildingName || houseName ? `🏠 ${buildingName || houseName}` : '📍 Live Place Tracked') : '📍 Location Mode'}
-                </span>
-                <span className="sep">•</span>
-                <span>{gpsLocation || (coords ? `${coords.lat.toFixed(4)}°, ${coords.lng.toFixed(4)}°` : 'Resolving GPS')}</span>
-                <span className="sep">•</span>
-                <span>{weatherData?.updatedAt ? `Updated ${formatTimeAgo(weatherData.updatedAt)}` : 'Live Forecast'}</span>
-              </div>
+              
+              {/* Integrated Live Telemetry Heartbeat Stream */}
+              <LiveTelemetryPulse
+                isConnected={isDeviceConnected}
+                deviceName={currentDevice?.name || latest?.deviceId || 'Primary AirGuard Station'}
+                lastSeenTime={latest?.createdAt || currentDevice?.lastSeen || weatherData?.updatedAt}
+                isLiveLocation={isLiveLocation}
+                displayPlaceName={displayPlaceName}
+                gpsLocation={gpsLocation || (coords ? `${coords.lat.toFixed(4)}°, ${coords.lng.toFixed(4)}°` : null)}
+              />
             </div>
           </div>
         </div>

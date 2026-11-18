@@ -3,20 +3,19 @@ import './LiveTelemetryPulse.css';
 
 export default function LiveTelemetryPulse({
   isConnected = false,
-  deviceName = 'esp32-node-01',
+  deviceName = 'ESP32 Sensing Node',
   lastSeenTime = null,
   isLiveLocation = false,
+  displayPlaceName = 'Current Location',
+  gpsLocation = null,
 }) {
   const [secondsAgo, setSecondsAgo] = useState(0);
 
   useEffect(() => {
-    // When lastSeenTime changes, reset counter
     setSecondsAgo(0);
-
     const interval = setInterval(() => {
       setSecondsAgo((prev) => prev + 1);
     }, 1000);
-
     return () => clearInterval(interval);
   }, [lastSeenTime]);
 
@@ -29,30 +28,37 @@ export default function LiveTelemetryPulse({
 
   return (
     <div className={`live-telemetry-strip ${isConnected ? 'is-streaming' : 'is-standby'}`}>
-      <div className="telemetry-left">
-        <span className="live-radar-dot">
-          <span className="radar-ring" />
-          <span className="radar-core" />
-        </span>
-        <span className="live-label">
-          {isConnected ? 'LIVE WEBSOCKET STREAM' : (isLiveLocation ? 'LIVE GPS ATMOSPHERIC STREAM' : 'LOCATION MESH FEED')}
+      <div className="telemetry-row-primary">
+        <div className="telemetry-badge">
+          <span className="live-radar-dot">
+            <span className="radar-ring" />
+            <span className="radar-core" />
+          </span>
+          <span className="live-label">
+            {isConnected ? 'LIVE REAL-TIME TELEMETRY' : (isLiveLocation ? 'LIVE GPS STREAM' : 'LOCATION MESH FEED')}
+          </span>
+        </div>
+
+        <span className="meta-station">
+          {isConnected ? `Station: ${deviceName}` : `Mesh: ${deviceName || 'Satellite Grid'}`}
         </span>
       </div>
 
-      <div className="telemetry-meta">
-        <span className="meta-item meta-device">
-          <span className="meta-icon">{isConnected ? '⚡' : '🛰️'}</span>
-          <span>{isConnected ? `Station: ${deviceName}` : 'Satellite Grid Mesh'}</span>
+      <div className="telemetry-row-sub">
+        <span className="meta-loc">
+          <span style={{ color: isLiveLocation ? '#10b981' : '#38bdf8', fontWeight: 600 }}>
+            {isLiveLocation ? '📍 Live Place' : '📍 Location Mode'}
+          </span>
+          {gpsLocation && (
+            <>
+              <span className="meta-sep">•</span>
+              <span>{gpsLocation}</span>
+            </>
+          )}
         </span>
         <span className="meta-sep">•</span>
-        <span className="meta-item meta-transport">
-          <span className="meta-icon">🔄</span>
-          <span>{isConnected ? 'Socket.IO Full-Duplex' : 'HTTP/2 Edge CDN'}</span>
-        </span>
-        <span className="meta-sep">•</span>
-        <span className="meta-item meta-time">
-          <span className="meta-icon">⏱️</span>
-          <span>Packet: <strong>{getTimeString()}</strong></span>
+        <span className="meta-time">
+          Packet: <strong>{getTimeString()}</strong>
         </span>
       </div>
     </div>
