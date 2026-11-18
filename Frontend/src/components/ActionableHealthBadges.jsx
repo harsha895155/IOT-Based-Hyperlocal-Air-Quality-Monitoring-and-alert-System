@@ -152,12 +152,12 @@ export default function ActionableHealthBadges({ aqi = 0, placeName = 'Current L
     <div className="card actionable-health-card">
       <div className="actionable-health-header">
         <div className="health-header-left">
-          <span className="health-header-badge">🛡️ Actionable Health Decisions</span>
           <h2 className="health-header-title">Personal Protection &amp; Activity Guide</h2>
           <p className="health-header-sub">
             Real-world EPA &amp; WHO health actions calibrated for AQI {aqiNum} in {placeName}
           </p>
         </div>
+        <span className="health-header-badge">📍 Actionable Health Decisions</span>
       </div>
 
       <div className="actionable-health-grid">

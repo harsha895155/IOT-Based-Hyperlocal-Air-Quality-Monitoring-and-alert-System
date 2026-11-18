@@ -1,0 +1,287 @@
+/* ─── Audit Certificate Modal ─── */
+.cert-modal-backdrop {
+  position: fixed;
+  inset: 0;
+  background: rgba(0, 0, 0, 0.75);
+  backdrop-filter: blur(8px);
+  z-index: 9999;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 20px;
+}
+
+.cert-modal-dialog {
+  max-width: 720px;
+  width: 100%;
+  max-height: 90vh;
+  overflow-y: auto;
+  border-radius: 16px;
+  background: #0f172a;
+  box-shadow: 0 20px 40px rgba(0, 0, 0, 0.6);
+  border: 1px solid rgba(255, 255, 255, 0.1);
+  display: flex;
+  flex-direction: column;
+}
+
+.cert-modal-actions-bar {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 14px 20px;
+  background: #1e293b;
+  border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+}
+
+.cert-modal-title {
+  font-size: 0.95rem;
+  font-weight: 700;
+  color: #f8fafc;
+}
+
+.cert-btn-group {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+}
+
+.btn-cert-print {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  padding: 6px 14px;
+  border-radius: 8px;
+  background: #10b981;
+  color: #ffffff;
+  font-size: 0.82rem;
+  font-weight: 700;
+  border: none;
+  cursor: pointer;
+  transition: background 0.2s;
+}
+
+.btn-cert-print:hover {
+  background: #059669;
+}
+
+.btn-cert-close {
+  background: transparent;
+  border: none;
+  color: #94a3b8;
+  font-size: 1.1rem;
+  cursor: pointer;
+  padding: 4px 8px;
+}
+
+.btn-cert-close:hover {
+  color: #ffffff;
+}
+
+/* Printable Sheet */
+.printable-cert-sheet {
+  padding: 24px;
+  background: #ffffff;
+  color: #1e293b;
+  font-family: 'Georgia', serif;
+}
+
+.cert-border-outer {
+  border: 4px solid #0f172a;
+  padding: 6px;
+}
+
+.cert-border-inner {
+  border: 1px solid #94a3b8;
+  padding: 24px;
+  text-align: center;
+}
+
+.cert-emblem {
+  font-size: 2.2rem;
+  margin-bottom: 6px;
+}
+
+.cert-main-title {
+  font-size: 1.6rem;
+  font-weight: 900;
+  letter-spacing: 0.08em;
+  color: #0f172a;
+  margin: 0;
+}
+
+.cert-sub-title {
+  font-size: 0.78rem;
+  font-weight: 700;
+  letter-spacing: 0.05em;
+  color: #0284c7;
+  margin-top: 4px;
+}
+
+.cert-serial {
+  font-size: 0.65rem;
+  color: #64748b;
+  margin-top: 6px;
+  letter-spacing: 0.04em;
+  font-family: monospace;
+}
+
+.cert-body {
+  margin-top: 20px;
+  text-align: left;
+}
+
+.cert-prose {
+  font-size: 0.85rem;
+  line-height: 1.6;
+  color: #334155;
+  text-align: justify;
+  margin-bottom: 16px;
+}
+
+.cert-meta-grid {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 12px;
+  background: #f8fafc;
+  border: 1px solid #e2e8f0;
+  border-radius: 8px;
+  padding: 12px 16px;
+  margin-bottom: 18px;
+  font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
+}
+
+.cert-meta-box {
+  display: flex;
+  flex-direction: column;
+}
+
+.cert-meta-lbl {
+  font-size: 0.65rem;
+  font-weight: 700;
+  color: #64748b;
+  letter-spacing: 0.03em;
+}
+
+.cert-meta-val {
+  font-size: 0.85rem;
+  color: #0f172a;
+}
+
+.cert-score-banner {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  background: #0f172a;
+  color: #ffffff;
+  border-radius: 10px;
+  padding: 14px 20px;
+  margin-bottom: 18px;
+  font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
+}
+
+.cert-score-left {
+  display: flex;
+  flex-direction: column;
+}
+
+.cert-score-num {
+  font-size: 2.2rem;
+  font-weight: 900;
+  line-height: 1;
+  color: #10b981;
+}
+
+.cert-score-cat {
+  font-size: 0.72rem;
+  font-weight: 800;
+  letter-spacing: 0.05em;
+  color: #94a3b8;
+}
+
+.cert-score-details {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+  font-size: 0.78rem;
+  text-align: right;
+}
+
+.cert-score-line span {
+  color: #94a3b8;
+  margin-right: 6px;
+}
+
+.cert-footer-legal {
+  font-size: 0.68rem;
+  line-height: 1.4;
+  color: #64748b;
+  text-align: center;
+  border-top: 1px solid #e2e8f0;
+  padding-top: 10px;
+  margin-bottom: 20px;
+  font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
+}
+
+.cert-signatures-row {
+  display: flex;
+  justify-content: space-between;
+  align-items: flex-end;
+  padding-top: 10px;
+  font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
+}
+
+.cert-sig-block {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+}
+
+.cert-sig-line {
+  font-size: 0.85rem;
+  font-weight: 700;
+  color: #0f172a;
+  border-bottom: 1px solid #0f172a;
+  padding-bottom: 4px;
+}
+
+.cert-sig-lbl {
+  font-size: 0.65rem;
+  color: #64748b;
+}
+
+.cert-seal-stamp {
+  width: 68px;
+  height: 68px;
+  border: 2px dashed #0284c7;
+  border-radius: 50%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 0.62rem;
+  font-weight: 900;
+  color: #0284c7;
+  text-align: center;
+  line-height: 1.2;
+  transform: rotate(-10deg);
+}
+
+/* Print CSS */
+@media print {
+  body * {
+    visibility: hidden;
+  }
+  .printable-cert-sheet, .printable-cert-sheet * {
+    visibility: visible;
+  }
+  .printable-cert-sheet {
+    position: absolute;
+    left: 0;
+    top: 0;
+    width: 100%;
+    padding: 0;
+    box-shadow: none;
+  }
+  .no-print {
+    display: none !important;
+  }
+}
