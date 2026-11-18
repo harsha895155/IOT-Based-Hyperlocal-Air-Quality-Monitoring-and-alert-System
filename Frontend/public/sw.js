@@ -7,7 +7,7 @@
  * 4. Resilient fallback navigation: All views remain accessible offline.
  */
 
-const CACHE_NAME = 'airguard-v2.4.1';
+const CACHE_NAME = 'airguard-v2.5.0';
 const OFFLINE_FALLBACK_PAGE = '/offline.html';
 const PRECACHE_ASSETS = [
   '/',
@@ -131,10 +131,24 @@ self.addEventListener('fetch', (event) => {
 
       return fetch(request)
         .then((networkResponse) => {
-          safeCachePut(CACHE_NAME, request, networkResponse);
+          if (networkResponse && networkResponse.status === 200) {
+            safeCachePut(CACHE_NAME, request, networkResponse);
+          }
           return networkResponse;
         })
         .catch(() => {
+          if (request.destination === 'style' || request.url.includes('.css')) {
+            return new Response('/* offline stylesheet fallback */', {
+              status: 200,
+              headers: { 'Content-Type': 'text/css; charset=utf-8' },
+            });
+          }
+          if (request.destination === 'script' || request.url.includes('.js')) {
+            return new Response('/* offline script fallback */', {
+              status: 200,
+              headers: { 'Content-Type': 'application/javascript; charset=utf-8' },
+            });
+          }
           return new Response('', { status: 503, statusText: 'Service Unavailable (Offline)' });
         });
     })
