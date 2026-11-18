@@ -1,0 +1,153 @@
+/* ─── Dominant Pollutant Card ─── */
+.dominant-pollutant-card {
+  background: rgba(15, 23, 42, 0.5);
+  border: 1px solid rgba(255, 255, 255, 0.08);
+  border-radius: 14px;
+  padding: 14px 18px;
+  margin-bottom: 18px;
+  backdrop-filter: blur(8px);
+}
+
+.dominant-main-row {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  flex-wrap: wrap;
+  gap: 12px;
+  margin-bottom: 12px;
+}
+
+.dominant-info-left {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+}
+
+.dominant-pill-badge {
+  display: inline-flex;
+  align-items: center;
+  gap: 5px;
+  font-size: 0.68rem;
+  font-weight: 800;
+  letter-spacing: 0.06em;
+  color: #f59e0b;
+}
+
+.dominant-spark {
+  font-size: 0.8rem;
+}
+
+.dominant-headline {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  flex-wrap: wrap;
+}
+
+.dom-icon {
+  font-size: 1.15rem;
+}
+
+.dom-name {
+  font-size: 0.95rem;
+  color: #f8fafc;
+  font-weight: 700;
+}
+
+.dom-pct-tag {
+  font-size: 0.72rem;
+  font-weight: 700;
+  padding: 2px 8px;
+  border-radius: 12px;
+}
+
+.dominant-desc {
+  font-size: 0.72rem;
+  color: #94a3b8;
+}
+
+.dominant-desc span {
+  color: #cbd5e1;
+}
+
+.dominant-desc strong {
+  color: #38bdf8;
+}
+
+/* Proportional Segmented Bar */
+.proportional-bar-wrap {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+
+.proportional-bar {
+  display: flex;
+  height: 8px;
+  width: 100%;
+  border-radius: 4px;
+  overflow: hidden;
+  background: rgba(255, 255, 255, 0.06);
+}
+
+.prop-segment {
+  height: 100%;
+  transition: width 0.5s ease;
+}
+
+.prop-segment:hover {
+  filter: brightness(1.2);
+}
+
+.proportional-legend {
+  display: flex;
+  align-items: center;
+  flex-wrap: wrap;
+  gap: 14px;
+  font-size: 0.72rem;
+}
+
+.legend-chip {
+  display: inline-flex;
+  align-items: center;
+  gap: 5px;
+  color: #cbd5e1;
+}
+
+.legend-dot {
+  width: 7px;
+  height: 7px;
+  border-radius: 50%;
+}
+
+.legend-name {
+  color: #94a3b8;
+}
+
+.legend-pct {
+  font-weight: 700;
+  color: #f8fafc;
+}
+
+.legend-val {
+  color: #64748b;
+  font-size: 0.68rem;
+}
+
+/* Light Theme */
+[data-theme='light'] .dominant-pollutant-card {
+  background: #f8fafc;
+  border-color: #e2e8f0;
+}
+
+[data-theme='light'] .dom-name {
+  color: #0f172a;
+}
+
+[data-theme='light'] .legend-chip {
+  color: #334155;
+}
+
+[data-theme='light'] .legend-pct {
+  color: #0f172a;
+}

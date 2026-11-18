@@ -1,28 +1,26 @@
 /* ─── Actionable Health Badges Component ─── */
 .actionable-health-card {
-  padding: 20px 24px;
+  padding: 22px 24px;
   background: var(--card-bg, #11192e);
   border: 1px solid var(--border, #1e293b);
   border-radius: 20px;
   box-shadow: 0 10px 30px rgba(0, 0, 0, 0.25);
-  margin-bottom: 12px;
+  margin-bottom: 24px;
   transition: all 0.2s ease;
 }
 
 .actionable-health-header {
   display: flex;
   justify-content: space-between;
-  align-items: center;
+  align-items: flex-start;
   flex-wrap: wrap;
   gap: 12px;
-  margin-bottom: 16px;
+  margin-bottom: 18px;
 }
 
 .health-header-badge {
-  display: inline-flex;
-  align-items: center;
-  gap: 6px;
-  padding: 5px 12px;
+  display: inline-block;
+  padding: 3px 10px;
   background: rgba(14, 165, 233, 0.12);
   border: 1px solid rgba(14, 165, 233, 0.3);
   border-radius: 9999px;
@@ -31,7 +29,7 @@
   font-weight: 700;
   letter-spacing: 0.04em;
   text-transform: uppercase;
-  margin-bottom: 0;
+  margin-bottom: 6px;
 }
 
 .health-header-title {

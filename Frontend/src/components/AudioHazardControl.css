@@ -1,0 +1,327 @@
+/* ─── Audio Hazard Siren Control ─── */
+.audio-hazard-wrap {
+  position: relative;
+  display: inline-flex;
+}
+
+.btn-audio-siren-trigger {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  padding: 6px 12px;
+  background: rgba(15, 23, 42, 0.6);
+  border: 1px solid rgba(255, 255, 255, 0.1);
+  border-radius: 20px;
+  font-size: 0.78rem;
+  font-weight: 600;
+  color: #cbd5e1;
+  cursor: pointer;
+  transition: all 0.2s cubic-bezier(0.4, 0, 0.2, 1);
+  backdrop-filter: blur(8px);
+}
+
+.btn-audio-siren-trigger:hover {
+  background: rgba(30, 41, 59, 0.8);
+  border-color: rgba(255, 255, 255, 0.2);
+  transform: translateY(-1px);
+}
+
+.btn-audio-siren-trigger.is-armed {
+  border-color: rgba(16, 185, 129, 0.35);
+  color: #6ee7b7;
+}
+
+.btn-audio-siren-trigger.is-muted {
+  border-color: rgba(148, 163, 184, 0.2);
+  color: #94a3b8;
+  opacity: 0.8;
+}
+
+.btn-audio-siren-trigger.is-hazard-pulsing {
+  border-color: #ef4444;
+  color: #fca5a5;
+  background: rgba(239, 68, 68, 0.15);
+  animation: sirenTriggerPulse 1.2s infinite;
+}
+
+@keyframes sirenTriggerPulse {
+  0% { box-shadow: 0 0 0 0 rgba(239, 68, 68, 0.5); }
+  70% { box-shadow: 0 0 0 10px rgba(239, 68, 68, 0); }
+  100% { box-shadow: 0 0 0 0 rgba(239, 68, 68, 0); }
+}
+
+.siren-icon {
+  font-size: 0.95rem;
+}
+
+.siren-pulse-dot {
+  width: 6px;
+  height: 6px;
+  border-radius: 50%;
+  background: #10b981;
+  box-shadow: 0 0 6px #10b981;
+  animation: sirenDotPulse 1.5s infinite;
+}
+
+@keyframes sirenDotPulse {
+  0%, 100% { opacity: 1; transform: scale(1); }
+  50% { opacity: 0.4; transform: scale(0.8); }
+}
+
+/* ─── Popover ─── */
+.audio-siren-popover {
+  position: absolute;
+  top: calc(100% + 8px);
+  right: 0;
+  width: 320px;
+  background: #0f172a;
+  border: 1px solid rgba(255, 255, 255, 0.12);
+  border-radius: 16px;
+  padding: 16px;
+  box-shadow: 0 12px 36px rgba(0, 0, 0, 0.45);
+  z-index: 1000;
+  backdrop-filter: blur(16px);
+}
+
+.siren-popover-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  margin-bottom: 14px;
+}
+
+.siren-popover-title {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+}
+
+.siren-popover-icon {
+  font-size: 1.4rem;
+}
+
+.siren-popover-title strong {
+  display: block;
+  font-size: 0.88rem;
+  color: #f8fafc;
+}
+
+.siren-popover-title p {
+  margin: 0;
+  font-size: 0.72rem;
+  color: #94a3b8;
+}
+
+.siren-close-btn {
+  background: none;
+  border: none;
+  color: #94a3b8;
+  cursor: pointer;
+  font-size: 0.9rem;
+  padding: 4px;
+  border-radius: 6px;
+}
+
+.siren-close-btn:hover {
+  color: #fff;
+}
+
+/* Switch */
+.siren-toggle-row {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 10px 12px;
+  background: rgba(30, 41, 59, 0.5);
+  border-radius: 10px;
+  margin-bottom: 12px;
+}
+
+.siren-toggle-label {
+  display: block;
+  font-size: 0.8rem;
+  font-weight: 600;
+  color: #f1f5f9;
+}
+
+.siren-toggle-sub {
+  display: block;
+  font-size: 0.68rem;
+  color: #94a3b8;
+}
+
+.siren-switch {
+  position: relative;
+  width: 44px;
+  height: 24px;
+  border-radius: 12px;
+  border: none;
+  cursor: pointer;
+  transition: background 0.25s ease;
+  padding: 2px;
+}
+
+.siren-switch.switch-on {
+  background: #10b981;
+}
+
+.siren-switch.switch-off {
+  background: #475569;
+}
+
+.switch-knob {
+  display: block;
+  width: 20px;
+  height: 20px;
+  background: #ffffff;
+  border-radius: 50%;
+  transition: transform 0.25s ease;
+  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.3);
+}
+
+.siren-switch.switch-on .switch-knob {
+  transform: translateX(20px);
+}
+
+/* Sound profiles */
+.siren-profile-section {
+  margin-bottom: 12px;
+}
+
+.siren-field-label {
+  display: block;
+  font-size: 0.72rem;
+  font-weight: 700;
+  color: #94a3b8;
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+  margin-bottom: 6px;
+}
+
+.siren-profiles-list {
+  display: flex;
+  flex-direction: column;
+  gap: 5px;
+  max-height: 140px;
+  overflow-y: auto;
+}
+
+.siren-profile-btn {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  padding: 6px 10px;
+  background: rgba(30, 41, 59, 0.4);
+  border: 1px solid rgba(255, 255, 255, 0.05);
+  border-radius: 8px;
+  cursor: pointer;
+  text-align: left;
+  transition: all 0.15s ease;
+}
+
+.siren-profile-btn:hover {
+  background: rgba(51, 65, 85, 0.6);
+}
+
+.siren-profile-btn.is-selected {
+  border-color: #38bdf8;
+  background: rgba(56, 189, 248, 0.12);
+}
+
+.p-icon {
+  font-size: 1rem;
+}
+
+.p-text {
+  flex: 1;
+  min-width: 0;
+}
+
+.p-name {
+  display: block;
+  font-size: 0.76rem;
+  font-weight: 600;
+  color: #e2e8f0;
+}
+
+.p-desc {
+  display: block;
+  font-size: 0.65rem;
+  color: #94a3b8;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+/* Volume Slider */
+.siren-volume-row {
+  margin-bottom: 12px;
+}
+
+.siren-volume-slider {
+  width: 100%;
+  accent-color: #38bdf8;
+  cursor: pointer;
+}
+
+/* Test sound button */
+.btn-test-siren {
+  width: 100%;
+  padding: 8px 12px;
+  background: linear-gradient(135deg, #0284c7, #0369a1);
+  border: none;
+  border-radius: 8px;
+  color: #ffffff;
+  font-size: 0.8rem;
+  font-weight: 600;
+  cursor: pointer;
+  transition: all 0.2s ease;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 6px;
+}
+
+.btn-test-siren:hover {
+  filter: brightness(1.1);
+  transform: translateY(-1px);
+}
+
+.btn-test-siren.is-testing {
+  background: #ef4444;
+  animation: sirenTriggerPulse 1s infinite;
+}
+
+/* Light Mode */
+[data-theme='light'] .btn-audio-siren-trigger {
+  background: rgba(255, 255, 255, 0.8);
+  border-color: rgba(203, 213, 225, 0.8);
+  color: #334155;
+}
+
+[data-theme='light'] .audio-siren-popover {
+  background: #ffffff;
+  border-color: rgba(226, 232, 240, 0.9);
+  box-shadow: 0 12px 32px rgba(0, 0, 0, 0.12);
+}
+
+[data-theme='light'] .siren-popover-title strong {
+  color: #0f172a;
+}
+
+[data-theme='light'] .siren-toggle-row {
+  background: #f8fafc;
+}
+
+[data-theme='light'] .siren-toggle-label {
+  color: #1e293b;
+}
+
+[data-theme='light'] .siren-profile-btn {
+  background: #f8fafc;
+  border-color: #e2e8f0;
+}
+
+[data-theme='light'] .p-name {
+  color: #1e293b;
+}

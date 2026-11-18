@@ -133,24 +133,19 @@
     }
     </script>
 
-    <!-- Immediate Self-Healing: Unregister all service workers and purge corrupted caches -->
+    <!-- PWA Service Worker Registration for PWABuilder & Google Play Store -->
     <script>
-      (function() {
-        if ('serviceWorker' in navigator) {
-          navigator.serviceWorker.getRegistrations().then(function(registrations) {
-            for (var reg of registrations) {
-              reg.unregister();
-            }
-          });
-        }
-        if ('caches' in window) {
-          caches.keys().then(function(names) {
-            for (var name of names) {
-              caches.delete(name);
-            }
-          });
-        }
-      })();
+      if ('serviceWorker' in navigator && window.location.protocol.startsWith('http')) {
+        window.addEventListener('load', function() {
+          navigator.serviceWorker.register('/sw.js', { scope: '/' })
+            .then(function(reg) {
+              console.log('[PWA] Service Worker registered with scope:', reg.scope);
+            })
+            .catch(function(err) {
+              console.warn('[PWA] Service Worker registration failed:', err);
+            });
+        });
+      }
     </script>
   </head>
   <body>
