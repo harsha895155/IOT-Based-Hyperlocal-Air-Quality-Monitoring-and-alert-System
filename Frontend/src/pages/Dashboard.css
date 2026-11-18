@@ -29,6 +29,50 @@
   flex-wrap: wrap;
 }
 
+.weather-topbar-actions {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+}
+
+.btn-share-trigger {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  padding: 8px 14px;
+  border-radius: 12px;
+  background: rgba(14, 165, 233, 0.12);
+  border: 1px solid rgba(14, 165, 233, 0.35);
+  color: #38bdf8;
+  font-size: 0.8rem;
+  font-weight: 700;
+  cursor: pointer;
+  transition: all 0.2s ease;
+  white-space: nowrap;
+}
+
+.btn-share-trigger:hover {
+  background: rgba(14, 165, 233, 0.22);
+  border-color: #38bdf8;
+  transform: translateY(-1px);
+  box-shadow: 0 4px 14px rgba(14, 165, 233, 0.25);
+}
+
+.share-btn-icon {
+  font-size: 0.95rem;
+  line-height: 1;
+}
+
+.share-btn-label {
+  letter-spacing: 0.02em;
+}
+
+[data-theme='light'] .btn-share-trigger {
+  background: #f0f9ff;
+  border-color: #bae6fd;
+  color: #0284c7;
+}
+
 .weather-title-left {
   display: flex;
   align-items: center;

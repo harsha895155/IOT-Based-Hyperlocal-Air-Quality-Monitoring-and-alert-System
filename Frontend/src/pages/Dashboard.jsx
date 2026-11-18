@@ -6,6 +6,9 @@ import WeatherIcons, { getWeatherIcon } from '../components/WeatherIcons';
 import TrendChart from '../components/TrendChart';
 import PredictiveForecastCard from '../components/PredictiveForecastCard';
 import WeatherHero3DCanvas from '../components/WeatherHero3DCanvas';
+import ActionableHealthBadges from '../components/ActionableHealthBadges';
+import LiveTelemetryPulse from '../components/LiveTelemetryPulse';
+import ShareAQIModal from '../components/ShareAQIModal';
 import { useTheme } from '../context/ThemeContext';
 import './Dashboard.css';
 
@@ -72,6 +75,7 @@ export default function Dashboard({ readingsData, onNavigateTab }) {
   const [searchQuery, setSearchQuery] = useState('');
   const [searchDropdownOpen, setSearchDropdownOpen] = useState(false);
   const [deviceDropdownOpen, setDeviceDropdownOpen] = useState(false);
+  const [shareModalOpen, setShareModalOpen] = useState(false);
   const searchRef = useRef(null);
 
   const displayPlaceName =
@@ -313,8 +317,19 @@ export default function Dashboard({ readingsData, onNavigateTab }) {
               </div>
             </div>
 
-            {/* Station / Location Picker placed at top right as requested in Image 2 */}
-            <div className="device-quick-picker">
+            {/* Topbar Actions: Share Report & Station / Location Picker */}
+            <div className="weather-topbar-actions">
+              <button
+                type="button"
+                className="btn-share-trigger"
+                onClick={() => setShareModalOpen(true)}
+                title="Share live air quality on WhatsApp, Social Media, or Copy"
+              >
+                <span className="share-btn-icon">📤</span>
+                <span className="share-btn-label">Share AQI</span>
+              </button>
+
+              <div className="device-quick-picker">
               <button
                 type="button"
                 className="btn-glass-dropdown"
@@ -386,6 +401,7 @@ export default function Dashboard({ readingsData, onNavigateTab }) {
               )}
             </div>
           </div>
+        </div>
         </div>
 
         <div className="weather-topbar__actions" style={{ width: '100%' }}>
@@ -533,6 +549,14 @@ export default function Dashboard({ readingsData, onNavigateTab }) {
         </div>
       )}
 
+      {/* ─── LIVE TELEMETRY HEARTBEAT STREAM PULSE ─── */}
+      <LiveTelemetryPulse
+        isConnected={isDeviceConnected}
+        deviceName={currentDevice?.name || latest?.deviceId || 'ESP32 Sensing Node'}
+        lastSeenTime={latest?.createdAt || currentDevice?.lastSeen || weatherData?.updatedAt}
+        isLiveLocation={isLiveLocation}
+      />
+
       {/* ─── 2. ATMOSPHERIC CURRENT CONDITIONS HERO (GOOGLE WEATHER STYLE) ─── */}
       <div className={`weather-hero-card ${isDay ? 'is-daytime' : 'is-nighttime'}`}>
         {/* Dynamic 3D Weather Simulation — changes automatically with weather report */}
@@ -600,6 +624,12 @@ export default function Dashboard({ readingsData, onNavigateTab }) {
           </div>
         </div>
       </div>
+
+      {/* ─── ACTIONABLE HEALTH DECISION ENGINE ─── */}
+      <ActionableHealthBadges
+        aqi={hasAqi ? aqiVal : (weatherData?.current?.aqi || 42)}
+        placeName={displayPlaceName}
+      />
 
       {/* ─── 3. SENSORS & MULTI-POLLUTANT BREAKDOWN ─── */}
       <div className="card weather-section-card">
@@ -960,6 +990,17 @@ export default function Dashboard({ readingsData, onNavigateTab }) {
           </button>
         </div>
       </div>
+
+      {/* ─── 1-CLICK SOCIAL & WHATSAPP SHARE MODAL ─── */}
+      <ShareAQIModal
+        isOpen={shareModalOpen}
+        onClose={() => setShareModalOpen(false)}
+        placeName={displayPlaceName}
+        aqi={hasAqi ? aqiVal : (weatherData?.current?.aqi || 42)}
+        category={hasAqi ? aqiCategory : (weatherData?.current?.condition || 'Good')}
+        temperature={currentTemp ?? 25}
+        condition={weatherCondition}
+      />
     </div>
   );
 }
