@@ -1233,6 +1233,52 @@
     width: 100% !important;
   }
 
+  .weather-topbar-actions {
+    display: flex !important;
+    align-items: center !important;
+    flex-wrap: nowrap !important;
+    overflow-x: auto !important;
+    width: 100% !important;
+    gap: 6px !important;
+    padding-bottom: 4px !important;
+    -webkit-overflow-scrolling: touch !important;
+    scrollbar-width: none !important;
+  }
+
+  .weather-topbar-actions::-webkit-scrollbar {
+    display: none !important;
+  }
+
+  .btn-share-trigger,
+  .btn-cert-trigger,
+  .btn-audio-siren-trigger {
+    padding: 6px 10px !important;
+    font-size: 0.72rem !important;
+    flex-shrink: 0 !important;
+    white-space: nowrap !important;
+    border-radius: 9999px !important;
+  }
+
+  .device-quick-picker {
+    flex-shrink: 0 !important;
+  }
+
+  .section-card-header {
+    flex-direction: column !important;
+    align-items: flex-start !important;
+    gap: 8px !important;
+  }
+
+  .section-card-header-right {
+    width: 100% !important;
+  }
+
+  .hardware-diag-strip {
+    width: 100% !important;
+    justify-content: space-between !important;
+    padding: 4px 10px !important;
+  }
+
   .weather-topbar__actions {
     display: flex !important;
     flex-direction: column !important;

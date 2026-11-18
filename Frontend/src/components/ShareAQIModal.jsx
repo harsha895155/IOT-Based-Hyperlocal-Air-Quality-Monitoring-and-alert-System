@@ -1,4 +1,5 @@
 import React, { useState } from 'react';
+import { createPortal } from 'react-dom';
 import './ShareAQIModal.css';
 
 export default function ShareAQIModal({
@@ -49,7 +50,7 @@ export default function ShareAQIModal({
   const whatsappUrl = `https://api.whatsapp.com/send?text=${encodeURIComponent(shareText)}`;
   const twitterUrl = `https://twitter.com/intent/tweet?text=${encodeURIComponent(shareText)}`;
 
-  return (
+  const modalContent = (
     <div className="share-modal-overlay" onClick={onClose}>
       <div className="share-modal-card" onClick={(e) => e.stopPropagation()}>
         <div className="share-modal-header">
@@ -133,4 +134,9 @@ export default function ShareAQIModal({
       </div>
     </div>
   );
+
+  if (typeof document !== 'undefined') {
+    return createPortal(modalContent, document.body);
+  }
+  return modalContent;
 }

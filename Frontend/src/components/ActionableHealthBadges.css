@@ -127,3 +127,39 @@
 [data-theme='light'] .health-header-sub {
   color: #64748b;
 }
+
+@media (max-width: 640px) {
+  .actionable-health-card {
+    padding: 12px 10px;
+    border-radius: 14px;
+    margin-bottom: 10px;
+  }
+  .health-header-title {
+    font-size: 1.05rem;
+  }
+  .health-header-sub {
+    font-size: 0.72rem;
+  }
+  .actionable-health-grid {
+    grid-template-columns: repeat(2, 1fr);
+    gap: 8px;
+  }
+  .actionable-badge-item {
+    padding: 10px 8px;
+    border-radius: 12px;
+  }
+  .badge-emoji {
+    font-size: 1.35rem;
+  }
+  .badge-status-pill {
+    font-size: 0.62rem;
+    padding: 2px 5px;
+  }
+  .badge-item-title {
+    font-size: 0.8rem;
+  }
+  .badge-item-advice {
+    font-size: 0.68rem;
+    line-height: 1.35;
+  }
+}

@@ -1,10 +1,12 @@
 import React, { useRef } from 'react';
+import { createPortal } from 'react-dom';
 import './AuditCertificateModal.css';
 
 /**
  * AuditCertificateModal
  * Official Executive 1-Click "Daily Air Quality Certificate & Audit PDF"
  * Features:
+ * - Mounted via React Portal (document.body) to guarantee proper stacking above all navigation
  * - Station ID & Precise GPS Coordinates
  * - 24-Hour Min / Max / Average Exposure Analytics
  * - Safe Exposure Compliance Table (WHO & EPA standards)
@@ -63,15 +65,14 @@ export default function AuditCertificateModal({
     window.print();
   };
 
-  const isCompliant = aqi <= 50;
-
-  return (
+  const modalContent = (
     <div className="cert-modal-backdrop" onClick={onClose}>
       <div className="cert-modal-dialog" onClick={(e) => e.stopPropagation()}>
-        {/* Top Action Bar (Fixed at top, never cut off) */}
+        {/* Top Action Bar (Locked at top, unclipped, always visible) */}
         <div className="cert-modal-actions-bar no-print">
           <div className="cert-modal-title">
-            <span>📜 Official Environmental Audit Certificate</span>
+            <span className="cert-title-icon">📜</span>
+            <span>Official Environmental Audit Certificate</span>
           </div>
           <div className="cert-btn-group">
             <button type="button" className="btn-cert-print" onClick={handlePrint}>
@@ -83,151 +84,158 @@ export default function AuditCertificateModal({
           </div>
         </div>
 
-        {/* Scrollable Container for Document Sheet */}
+        {/* Scrollable Container for Complete Document Display */}
         <div className="cert-modal-scroll-body">
           <div className="printable-cert-sheet" ref={certRef}>
             <div className="cert-border-outer">
               <div className="cert-border-inner">
                 {/* Header */}
-              <div className="cert-header">
-                <div className="cert-emblem-wrap">
-                  <span className="cert-emblem-icon">🛡️</span>
-                </div>
-                <h1 className="cert-org-title">AIRGUARD HYPERLOCAL</h1>
-                <div className="cert-doc-sub">ENVIRONMENTAL AUDIT & COMPLIANCE CERTIFICATE</div>
-                <div className="cert-meta-serial">
-                  DOCUMENT SERIAL: <strong>{certSerial}</strong> • ISSUED: <strong>{todayStr}, {timeStr}</strong>
-                </div>
-              </div>
-
-              {/* Legal Prose */}
-              <div className="cert-body">
-                <p className="cert-summary-text">
-                  This document serves as an authenticated environmental audit certificate verifying that real-time
-                  telemetry collected by the localized AirGuard sensing node at <strong>{placeName}</strong> has been
-                  cross-referenced against the World Health Organization (WHO 2021) and EPA Air Quality Guidelines.
-                </p>
-
-                {/* Section 1: Monitoring Station & Geospatial Identity */}
-                <div className="cert-section-title">1. MONITORING STATION & GEOSPATIAL IDENTITY</div>
-                <div className="cert-specs-grid">
-                  <div className="cert-spec-item">
-                    <span className="spec-lbl">STATION IDENTIFIER</span>
-                    <strong className="spec-val">{stationName} ({deviceId})</strong>
+                <div className="cert-header">
+                  <div className="cert-emblem-wrap">
+                    <span className="cert-emblem-icon">🛡️</span>
                   </div>
-                  <div className="cert-spec-item">
-                    <span className="spec-lbl">GEOSPATIAL COORDINATES</span>
-                    <strong className="spec-val mono">{gpsLocation}</strong>
-                  </div>
-                  <div className="cert-spec-item">
-                    <span className="spec-lbl">LOCAL DEPLOYMENT ZONE</span>
-                    <strong className="spec-val">{placeName}</strong>
-                  </div>
-                  <div className="cert-spec-item">
-                    <span className="spec-lbl">HARDWARE & SENSING ARCHITECTURE</span>
-                    <strong className="spec-val">ESP32 SoC + MQ-135 Gas + DHT22 Psychrometric</strong>
+                  <h1 className="cert-org-title">AIRGUARD HYPERLOCAL</h1>
+                  <div className="cert-doc-sub">ENVIRONMENTAL AUDIT & COMPLIANCE CERTIFICATE</div>
+                  <div className="cert-meta-serial">
+                    DOCUMENT SERIAL: <strong>{certSerial}</strong> • ISSUED: <strong>{todayStr}, {timeStr}</strong>
                   </div>
                 </div>
 
-                {/* Section 2: 24-Hour Exposure Analytics */}
-                <div className="cert-section-title">2. 24-HOUR AIR QUALITY EXPOSURE PROFILE</div>
-                <div className="cert-exposure-banner">
-                  <div className="exposure-block">
-                    <span className="exp-lbl">24h Minimum</span>
-                    <div className="exp-num" style={{ color: '#10b981' }}>{minAqi}</div>
-                    <span className="exp-sub">AQI (Good)</span>
-                  </div>
-                  <div className="exposure-block is-primary">
-                    <span className="exp-lbl">24h Weighted Average</span>
-                    <div className="exp-num">{avgAqi}</div>
-                    <span className="exp-sub">Mean Daily Exposure</span>
-                  </div>
-                  <div className="exposure-block">
-                    <span className="exp-lbl">24h Peak Exposure</span>
-                    <div className="exp-num" style={{ color: maxAqi <= 50 ? '#10b981' : '#f59e0b' }}>{maxAqi}</div>
-                    <span className="exp-sub">Peak Diurnal Surge</span>
-                  </div>
-                  <div className="exposure-block">
-                    <span className="exp-lbl">Thermals</span>
-                    <div className="exp-num" style={{ fontSize: '1.25rem', color: '#0284c7' }}>{temperature}°C</div>
-                    <span className="exp-sub">{humidity}% Humidity</span>
-                  </div>
-                </div>
+                {/* Legal Prose */}
+                <div className="cert-body">
+                  <p className="cert-summary-text">
+                    This document serves as an authenticated environmental audit certificate verifying that real-time
+                    telemetry collected by the localized AirGuard sensing node at <strong>{placeName}</strong> has been
+                    cross-referenced against the World Health Organization (WHO 2021) and EPA Air Quality Guidelines.
+                  </p>
 
-                {/* Section 3: Safe Exposure Compliance Table (WHO / EPA) */}
-                <div className="cert-section-title">3. REGULATORY STANDARDS COMPLIANCE (WHO & EPA)</div>
-                <table className="cert-compliance-table">
-                  <thead>
-                    <tr>
-                      <th>Pollutant / Parameter</th>
-                      <th>Measured Reading</th>
-                      <th>WHO 24h Threshold</th>
-                      <th>EPA Standard Limit</th>
-                      <th>Compliance Status</th>
-                    </tr>
-                  </thead>
-                  <tbody>
-                    <tr>
-                      <td><strong>Fine Particulate (PM2.5)</strong></td>
-                      <td className="mono">{pm25} µg/m³</td>
-                      <td>15.0 µg/m³</td>
-                      <td>35.0 µg/m³</td>
-                      <td><span className="compliance-badge is-pass">✅ COMPLIANT (SAFE)</span></td>
-                    </tr>
-                    <tr>
-                      <td><strong>Inhalable Coarse (PM10)</strong></td>
-                      <td className="mono">{pm10} µg/m³</td>
-                      <td>45.0 µg/m³</td>
-                      <td>150.0 µg/m³</td>
-                      <td><span className="compliance-badge is-pass">✅ COMPLIANT (SAFE)</span></td>
-                    </tr>
-                    <tr>
-                      <td><strong>Carbon Monoxide (CO)</strong></td>
-                      <td className="mono">0.6 ppm</td>
-                      <td>9.0 ppm (8h)</td>
-                      <td>9.0 ppm (8h)</td>
-                      <td><span className="compliance-badge is-pass">✅ COMPLIANT (SAFE)</span></td>
-                    </tr>
-                    <tr>
-                      <td><strong>Chemical Vapors (MQ-135)</strong></td>
-                      <td className="mono">{gasPpm} ppm</td>
-                      <td>R0 Baseline 76.6 kΩ</td>
-                      <td>&lt; 50 ppm Safe</td>
-                      <td><span className="compliance-badge is-pass">✅ NORMAL BASELINE</span></td>
-                    </tr>
-                  </tbody>
-                </table>
-
-                {/* Section 4: Audit Declaration & Cryptographic Verification */}
-                <div className="cert-footer-row">
-                  <div className="cert-sig-box">
-                    <div className="cert-sig-line">✓ Cryptographically Logged</div>
-                    <span className="cert-sig-sub">Hardware Sensing Node Firmware Baseline</span>
-                  </div>
-
-                  <div className="cert-official-seal">
-                    <div className="seal-ring">
-                      <span>AIRGUARD</span>
-                      <strong>AUDIT</strong>
-                      <span>CERTIFIED</span>
+                  {/* Section 1: Monitoring Station & Geospatial Identity */}
+                  <div className="cert-section-title">1. MONITORING STATION & GEOSPATIAL IDENTITY</div>
+                  <div className="cert-specs-grid">
+                    <div className="cert-spec-item">
+                      <span className="spec-lbl">STATION IDENTIFIER</span>
+                      <strong className="spec-val">{stationName} ({deviceId})</strong>
+                    </div>
+                    <div className="cert-spec-item">
+                      <span className="spec-lbl">GEOSPATIAL COORDINATES</span>
+                      <strong className="spec-val mono">{gpsLocation}</strong>
+                    </div>
+                    <div className="cert-spec-item">
+                      <span className="spec-lbl">LOCAL DEPLOYMENT ZONE</span>
+                      <strong className="spec-val">{placeName}</strong>
+                    </div>
+                    <div className="cert-spec-item">
+                      <span className="spec-lbl">HARDWARE & SENSING ARCHITECTURE</span>
+                      <strong className="spec-val">ESP32 SoC + MQ-135 Gas + DHT22 Psychrometric</strong>
                     </div>
                   </div>
 
-                  <div className="cert-sig-box" style={{ textAlign: 'right' }}>
-                    <div className="cert-sig-line">Academic Review Verification</div>
-                    <span className="cert-sig-sub">B.Tech Final Year Engineering Project</span>
+                  {/* Section 2: 24-Hour Exposure Analytics */}
+                  <div className="cert-section-title">2. 24-HOUR AIR QUALITY EXPOSURE PROFILE</div>
+                  <div className="cert-exposure-banner">
+                    <div className="exposure-block">
+                      <span className="exp-lbl">24h Minimum</span>
+                      <div className="exp-num" style={{ color: '#10b981' }}>{minAqi}</div>
+                      <span className="exp-sub">AQI (Good)</span>
+                    </div>
+                    <div className="exposure-block is-primary">
+                      <span className="exp-lbl">24h Weighted Average</span>
+                      <div className="exp-num">{avgAqi}</div>
+                      <span className="exp-sub">Mean Daily Exposure</span>
+                    </div>
+                    <div className="exposure-block">
+                      <span className="exp-lbl">24h Peak Exposure</span>
+                      <div className="exp-num" style={{ color: maxAqi <= 50 ? '#10b981' : '#f59e0b' }}>{maxAqi}</div>
+                      <span className="exp-sub">Peak Diurnal Surge</span>
+                    </div>
+                    <div className="exposure-block">
+                      <span className="exp-lbl">Thermals</span>
+                      <div className="exp-num" style={{ fontSize: '1.25rem', color: '#0284c7' }}>{temperature}°C</div>
+                      <span className="exp-sub">{humidity}% Humidity</span>
+                    </div>
                   </div>
-                </div>
 
-                <div className="cert-footnote">
-                  Generated by AirGuard Hyperlocal Environmental Telemetry System. Verified via SHA-256 data frame checksums.
+                  {/* Section 3: Safe Exposure Compliance Table (WHO / EPA) */}
+                  <div className="cert-section-title">3. REGULATORY STANDARDS COMPLIANCE (WHO & EPA)</div>
+                  <div className="cert-table-scroll-wrap">
+                    <table className="cert-compliance-table">
+                      <thead>
+                        <tr>
+                          <th>Pollutant / Parameter</th>
+                          <th>Measured Reading</th>
+                          <th>WHO 24h Threshold</th>
+                          <th>EPA Standard Limit</th>
+                          <th>Compliance Status</th>
+                        </tr>
+                      </thead>
+                      <tbody>
+                        <tr>
+                          <td><strong>Fine Particulate (PM2.5)</strong></td>
+                          <td className="mono">{pm25} µg/m³</td>
+                          <td>15.0 µg/m³</td>
+                          <td>35.0 µg/m³</td>
+                          <td><span className="compliance-badge is-pass">✅ COMPLIANT (SAFE)</span></td>
+                        </tr>
+                        <tr>
+                          <td><strong>Inhalable Coarse (PM10)</strong></td>
+                          <td className="mono">{pm10} µg/m³</td>
+                          <td>45.0 µg/m³</td>
+                          <td>150.0 µg/m³</td>
+                          <td><span className="compliance-badge is-pass">✅ COMPLIANT (SAFE)</span></td>
+                        </tr>
+                        <tr>
+                          <td><strong>Carbon Monoxide (CO)</strong></td>
+                          <td className="mono">0.6 ppm</td>
+                          <td>9.0 ppm (8h)</td>
+                          <td>9.0 ppm (8h)</td>
+                          <td><span className="compliance-badge is-pass">✅ COMPLIANT (SAFE)</span></td>
+                        </tr>
+                        <tr>
+                          <td><strong>Chemical Vapors (MQ-135)</strong></td>
+                          <td className="mono">{gasPpm} ppm</td>
+                          <td>R0 Baseline 76.6 kΩ</td>
+                          <td>&lt; 50 ppm Safe</td>
+                          <td><span className="compliance-badge is-pass">✅ NORMAL BASELINE</span></td>
+                        </tr>
+                      </tbody>
+                    </table>
+                  </div>
+
+                  {/* Section 4: Audit Declaration & Cryptographic Verification */}
+                  <div className="cert-footer-row">
+                    <div className="cert-sig-box">
+                      <div className="cert-sig-line">✓ Cryptographically Logged</div>
+                      <span className="cert-sig-sub">Hardware Sensing Node Firmware Baseline</span>
+                    </div>
+
+                    <div className="cert-official-seal">
+                      <div className="seal-ring">
+                        <span>AIRGUARD</span>
+                        <strong>AUDIT</strong>
+                        <span>CERTIFIED</span>
+                      </div>
+                    </div>
+
+                    <div className="cert-sig-box" style={{ textAlign: 'right' }}>
+                      <div className="cert-sig-line">Academic Review Verification</div>
+                      <span className="cert-sig-sub">B.Tech Final Year Engineering Project</span>
+                    </div>
+                  </div>
+
+                  <div className="cert-footnote">
+                    Generated by AirGuard Hyperlocal Environmental Telemetry System. Verified via SHA-256 data frame checksums.
+                  </div>
                 </div>
               </div>
             </div>
           </div>
         </div>
-        </div>
       </div>
     </div>
   );
+
+  if (typeof document !== 'undefined') {
+    return createPortal(modalContent, document.body);
+  }
+  return modalContent;
 }

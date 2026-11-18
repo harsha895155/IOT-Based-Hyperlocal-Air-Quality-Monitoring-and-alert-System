@@ -218,3 +218,42 @@
   background: #f0fdf4;
   color: #475569;
 }
+
+@media (max-width: 640px) {
+  .hyperlocal-comparison-card {
+    padding: 10px 12px;
+    border-radius: 12px;
+    margin-bottom: 10px;
+  }
+  .comparison-header {
+    gap: 8px;
+    margin-bottom: 10px;
+  }
+  .comparison-title {
+    font-size: 0.88rem;
+  }
+  .comparison-sub {
+    font-size: 0.68rem;
+  }
+  .advantage-pill {
+    padding: 3px 8px;
+    font-size: 0.68rem;
+  }
+  .comparison-nodes-grid {
+    grid-template-columns: 1fr;
+    gap: 6px;
+  }
+  .comparison-node {
+    padding: 8px 10px;
+    gap: 4px;
+    border-radius: 10px;
+  }
+  .node-aqi-num {
+    font-size: 1.4rem;
+  }
+  .comparison-footer-insight {
+    font-size: 0.68rem;
+    padding: 6px 10px;
+    line-height: 1.35;
+  }
+}

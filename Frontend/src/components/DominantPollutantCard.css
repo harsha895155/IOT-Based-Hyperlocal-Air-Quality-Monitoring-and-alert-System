@@ -151,3 +151,29 @@
 [data-theme='light'] .legend-pct {
   color: #0f172a;
 }
+
+@media (max-width: 640px) {
+  .dominant-pollutant-card {
+    padding: 10px 12px;
+    border-radius: 12px;
+    margin-bottom: 10px;
+  }
+  .dom-icon {
+    font-size: 1rem;
+  }
+  .dom-name {
+    font-size: 0.85rem;
+  }
+  .dom-pct-tag {
+    font-size: 0.68rem;
+    padding: 1px 6px;
+  }
+  .dominant-desc {
+    font-size: 0.68rem;
+    line-height: 1.35;
+  }
+  .proportional-legend {
+    gap: 6px 10px;
+    font-size: 0.66rem;
+  }
+}
