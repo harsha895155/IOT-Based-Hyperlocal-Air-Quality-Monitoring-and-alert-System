@@ -866,26 +866,26 @@ export default function ProfileView({ onNavigateLogin }) {
 
             <div style={{ display: 'flex', flexDirection: 'column', gap: '14px', fontSize: '0.85rem' }}>
               <div className="profile-setting-item">
-                <span style={{ color: '#94a3b8' }}>Account ID:</span>
-                <span className="mono" style={{ color: '#38bdf8', fontSize: '0.82rem' }}>
+                <span style={{ color: 'var(--text-secondary, #64748b)', fontWeight: 600 }}>Account ID:</span>
+                <span className="mono" style={{ color: 'var(--accent, #0284c7)', fontSize: '0.82rem', fontWeight: 600 }}>
                   {user._id || user.id || 'N/A'}
                 </span>
               </div>
 
               <div className="profile-setting-item">
-                <span style={{ color: '#94a3b8' }}>Registered Email:</span>
+                <span style={{ color: 'var(--text-secondary, #64748b)', fontWeight: 600 }}>Registered Email:</span>
                 <span style={{ color: 'var(--text-primary)', fontWeight: 600 }}>{user.email}</span>
               </div>
 
               <div className="profile-setting-item">
-                <span style={{ color: '#94a3b8' }}>Role:</span>
+                <span style={{ color: 'var(--text-secondary, #64748b)', fontWeight: 600 }}>Role:</span>
                 <span className={`profile-role-badge ${user.role === 'admin' ? 'admin' : ''}`}>
                   {roleDisplay}
                 </span>
               </div>
 
               <div className="profile-setting-item">
-                <span style={{ color: '#94a3b8' }}>Account Status:</span>
+                <span style={{ color: 'var(--text-secondary, #64748b)', fontWeight: 600 }}>Account Status:</span>
                 <span style={{ color: '#10b981', fontWeight: 600 }}>● Active</span>
               </div>
 
@@ -896,22 +896,22 @@ export default function ProfileView({ onNavigateLogin }) {
                 </div>
                 <div style={{ display: 'flex', flexDirection: 'column', gap: '4px', textAlign: 'right' }}>
                   <span style={{ color: '#10b981', fontWeight: 600 }}>✓ Password</span>
-                  <span style={{ color: user.googleId ? '#10b981' : '#94a3b8', fontWeight: 600 }}>
+                  <span style={{ color: user.googleId ? '#10b981' : 'var(--text-secondary, #64748b)', fontWeight: 600 }}>
                     {user.googleId ? '✓ Google Account Connected' : 'Google: Not Linked'}
                   </span>
                 </div>
               </div>
 
               <div className="profile-setting-item">
-                <span style={{ color: '#94a3b8' }}>Created Date:</span>
-                <span style={{ color: '#cbd5e1' }}>
+                <span style={{ color: 'var(--text-secondary, #64748b)', fontWeight: 600 }}>Created Date:</span>
+                <span style={{ color: 'var(--text-primary)', fontWeight: 500 }}>
                   {user.createdAt ? formatDate(user.createdAt) : 'October 2026'}
                 </span>
               </div>
 
               <div className="profile-setting-item">
-                <span style={{ color: '#94a3b8' }}>Last Login:</span>
-                <span style={{ color: '#cbd5e1' }}>
+                <span style={{ color: 'var(--text-secondary, #64748b)', fontWeight: 600 }}>Last Login:</span>
+                <span style={{ color: 'var(--text-primary)', fontWeight: 500 }}>
                   {user.lastLogin ? formatDate(user.lastLogin, { hour: '2-digit', minute: '2-digit' }) : 'Current Session'}
                 </span>
               </div>
@@ -1603,7 +1603,9 @@ export default function ProfileView({ onNavigateLogin }) {
                   <span className="profile-setting-title">Backend API Target</span>
                   <span className="profile-setting-desc">Secure REST endpoint origin</span>
                 </div>
-                <span className="mono" style={{ color: '#cbd5e1' }}>http://localhost:5001</span>
+                <span className="mono" style={{ color: 'var(--accent, #0284c7)', fontWeight: 600, fontSize: '0.82rem' }}>
+                  {client?.defaults?.baseURL ? client.defaults.baseURL.replace(/\/api$/, '') : 'https://iot-based-hyperlocal-air-quality.onrender.com'}
+                </span>
               </div>
 
               <div style={{ display: 'flex', justifyContent: 'flex-end', marginTop: '8px' }}>
@@ -1706,10 +1708,10 @@ export default function ProfileView({ onNavigateLogin }) {
 
             <div className="profile-danger-box">
               <div>
-                <strong style={{ color: '#fca5a5', fontSize: '0.95rem' }}>
+                <strong className="profile-danger-title" style={{ fontSize: '0.95rem' }}>
                   Permanently Delete AirGuard Account
                 </strong>
-                <p style={{ margin: '6px 0 0', color: '#cbd5e1', fontSize: '0.84rem', lineHeight: 1.5 }}>
+                <p className="profile-danger-desc" style={{ margin: '6px 0 0', fontSize: '0.84rem', lineHeight: 1.5 }}>
                   Once deleted, your profile, saved locations, notification preferences, and all ownership links to {devices.length} registered hardware sensing node(s) will be permanently purged. This action cannot be undone.
                 </p>
               </div>
