@@ -426,59 +426,80 @@ async function updateProfile(req, res, next) {
   try {
     const authHeader = req.headers.authorization;
     if (!authHeader || !authHeader.startsWith('Bearer ')) {
-      return res.status(401).json({ error: 'Not authorized.' });
+      return res.status(401).json({ error: 'Access denied. Please log in.' });
     }
 
     const token = authHeader.split(' ')[1];
-    const decoded = jwt.verify(token, process.env.JWT_SECRET || 'airguard_default_secret_key_2026');
-    const user = await User.findById(decoded.id);
-    if (!user) {
-      return res.status(404).json({ error: 'User not found.' });
+    let decoded;
+    try {
+      decoded = jwt.verify(token, process.env.JWT_SECRET || 'airguard_default_secret_key_2026');
+    } catch (tokenErr) {
+      return res.status(401).json({ error: 'Your session has expired or is invalid. Please log in again.' });
     }
 
-    const { name, avatar, phone, organization, bio, preferences } = req.body;
+    if (!decoded || !decoded.id) {
+      return res.status(401).json({ error: 'Invalid authentication credentials.' });
+    }
+
+    const { name, avatar, phone, organization, bio, username, preferences } = req.body;
+    const updateData = {};
+
     if (typeof name === 'string' && name.trim()) {
-      user.name = name.trim();
+      updateData.name = name.trim();
     }
     if (typeof avatar === 'string') {
-      user.avatar = avatar;
+      updateData.avatar = avatar;
     }
     if (typeof phone === 'string') {
-      user.phone = phone.trim();
+      updateData.phone = phone.trim();
     }
     if (typeof organization === 'string') {
-      user.organization = organization.trim();
+      updateData.organization = organization.trim();
     }
     if (typeof bio === 'string') {
-      user.bio = bio.trim();
+      updateData.bio = bio.trim();
+    }
+    if (typeof username === 'string' && username.trim()) {
+      updateData.username = username.trim();
     }
     if (preferences && typeof preferences === 'object') {
-      user.preferences = { ...user.preferences, ...preferences };
-      user.markModified('preferences');
+      for (const [k, v] of Object.entries(preferences)) {
+        updateData[`preferences.${k}`] = v;
+      }
     }
 
-    if (!user.activityLog) user.activityLog = [];
-    user.activityLog.unshift({
-      action: 'Profile Updated',
-      detail: 'Personal info and preferences updated',
-      timestamp: new Date(),
-    });
-    if (user.activityLog.length > 30) user.activityLog = user.activityLog.slice(0, 30);
+    const updatedUser = await User.findByIdAndUpdate(
+      decoded.id,
+      {
+        $set: updateData,
+        $push: {
+          activityLog: {
+            $each: [
+              {
+                action: 'Profile Updated',
+                detail: 'Personal info and preferences updated',
+                timestamp: new Date(),
+              },
+            ],
+            $slice: -30,
+          },
+        },
+      },
+      { new: true, runValidators: false }
+    ).select('-password -resetPasswordToken -resetPasswordExpires');
 
-    await user.save();
-
-    const safeUser = user.toObject();
-    delete safeUser.password;
-    delete safeUser.resetPasswordToken;
-    delete safeUser.resetPasswordExpires;
+    if (!updatedUser) {
+      return res.status(404).json({ error: 'User account not found.' });
+    }
 
     res.json({
       success: true,
       message: 'Profile updated successfully.',
-      user: safeUser,
+      user: updatedUser,
     });
   } catch (err) {
-    next(err);
+    console.error('[updateProfile Error]', err);
+    res.status(500).json({ error: err.message || 'Unable to update profile.' });
   }
 }
 

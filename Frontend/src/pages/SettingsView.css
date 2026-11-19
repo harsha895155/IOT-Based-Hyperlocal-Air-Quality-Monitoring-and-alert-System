@@ -575,4 +575,25 @@
   background: #f8fafc;
 }
 
+[data-theme='light'] .settings-checkbox {
+  border: 2px solid #94a3b8 !important;
+  background: #ffffff !important;
+}
+
+[data-theme='light'] .settings-checkbox:hover {
+  border-color: #0284c7 !important;
+  box-shadow: 0 0 0 3px rgba(2, 132, 199, 0.15) !important;
+}
+
+[data-theme='light'] .settings-checkbox:checked {
+  background: linear-gradient(135deg, #0284c7 0%, #0369a1 100%) !important;
+  border-color: #0284c7 !important;
+  box-shadow: 0 2px 8px rgba(2, 132, 199, 0.3) !important;
+}
+
+[data-theme='light'] .settings-checkbox-label {
+  color: #0f172a !important;
+  font-weight: 600 !important;
+}
+
 

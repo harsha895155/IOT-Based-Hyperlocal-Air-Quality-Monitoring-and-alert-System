@@ -40,13 +40,15 @@ export default function SystemHealthView() {
   }, [isLogStreaming]);
 
   // Fetch health data
+  const isAdmin = user?.role?.toLowerCase() === 'admin';
+
   const checkHealth = useCallback(async () => {
     const startTime = performance.now();
     try {
       const [sysRes, devRes, usersRes] = await Promise.allSettled([
         client.get('/system/health'),
         client.get('/devices'),
-        user?.role === 'admin' ? client.get('/system/users') : Promise.resolve({ data: { users: [] } }),
+        isAdmin ? client.get('/system/users') : Promise.resolve({ data: { users: [] } }),
       ]);
 
       const roundtrip = Math.round(performance.now() - startTime);
@@ -67,15 +69,21 @@ export default function SystemHealthView() {
         });
       }
 
-      if (usersRes.status === 'fulfilled' && usersRes.value?.data?.users) {
-        setUserList(usersRes.value.data.users);
+      if (usersRes.status === 'fulfilled') {
+        const payload = usersRes.value?.data;
+        const list = Array.isArray(payload)
+          ? payload
+          : Array.isArray(payload?.users)
+          ? payload.users
+          : [];
+        setUserList(list);
       }
     } catch (e) {
       console.error('System health error:', e.message);
     } finally {
       setLoading(false);
     }
-  }, [user?.role]);
+  }, [isAdmin]);
 
   // Timer auto-refresh
   useEffect(() => {
@@ -432,7 +440,7 @@ export default function SystemHealthView() {
         </section>
 
         {/* ─── Registered Users & Account Inspector (Admin Only) ─── */}
-        {user?.role === 'admin' && (
+        {isAdmin && (
           <section className="card" style={{ padding: '24px' }}>
             <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', flexWrap: 'wrap', gap: '10px', marginBottom: '16px' }}>
               <div>

@@ -622,12 +622,12 @@ void loop() {
               </div>
 
               {/* Scientific Formula Details Box */}
-              <div style={{ marginTop: '16px', padding: '14px', background: 'rgba(0, 0, 0, 0.25)', borderRadius: '10px', fontSize: '0.82rem', color: '#94a3b8', lineHeight: 1.5 }}>
-                <strong>🔬 Scientific Physics Formula &amp; Compensation:</strong>
-                <div className="mono" style={{ color: '#38bdf8', marginTop: '4px' }}>
+              <div className="scientific-formula-box">
+                <strong className="formula-header">🔬 Scientific Physics Formula &amp; Compensation:</strong>
+                <div className="mono formula-main" style={{ marginTop: '4px' }}>
                   PPM = 116.6020682 * (Rs / R0)^(-2.769034857)
                 </div>
-                <div className="mono text-faint" style={{ marginTop: '4px', fontSize: '0.78rem' }}>
+                <div className="mono formula-sub" style={{ marginTop: '4px', fontSize: '0.78rem' }}>
                   Rs_Compensated = Rs / [1.0 + 0.005*(Temp - 20) - 0.002*(Humidity - 33)]
                 </div>
               </div>
@@ -920,14 +920,14 @@ void loop() {
               </button> */}
             </div>
 
-            <div style={{ marginTop: '16px', padding: '16px', borderRadius: '12px', background: 'rgba(15, 23, 42, 0.45)', border: '1px solid rgba(255, 255, 255, 0.08)' }}>
+            <div className="academic-citation-box">
               <div style={{ fontSize: '1rem', fontWeight: 600, color: 'var(--text-primary)', marginBottom: '4px' }}>
                 "IoT-Based Hyperlocal Air Quality Monitoring and Alert System with Cloud Integration"
               </div>
               <div className="text-muted fs-xs" style={{ marginBottom: '12px' }}>
                 Published in Proceedings of the International Conference on Smart Systems and IoT (2026).
               </div>
-              <div className="mono text-faint fs-xs" style={{ background: '#070b13', padding: '12px', borderRadius: '8px', overflowX: 'auto', whiteSpace: 'pre-wrap' }}>
+              <div className="mono academic-citation-code fs-xs">
                 {bibtexCitation}
               </div>
             </div>

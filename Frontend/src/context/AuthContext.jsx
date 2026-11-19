@@ -186,10 +186,17 @@ export function AuthProvider({ children }) {
       const res = await client.put('/auth/profile', profileData);
       if (res.data?.user) {
         setUser(res.data.user);
+        try {
+          localStorage.setItem('airguard_user', JSON.stringify(res.data.user));
+        } catch (storageErr) {}
       }
       return res.data;
     } catch (err) {
-      const msg = err.response?.data?.error || err.message || 'Failed to update profile.';
+      if (err.response?.status === 401) {
+        logout();
+        throw new Error('Your session has expired. Please log in again.');
+      }
+      const msg = err.response?.data?.error || err.response?.data?.message || err.message || 'Failed to update profile.';
       throw new Error(msg);
     }
   };
