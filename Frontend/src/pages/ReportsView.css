@@ -481,14 +481,59 @@
   background: var(--bg-card, linear-gradient(135deg, rgba(18, 22, 36, 0.9) 0%, rgba(15, 28, 48, 0.9) 100%));
   border: 1px solid var(--border-subtle, rgba(0, 210, 180, 0.25));
   border-radius: 14px;
-  padding: 24px;
+  padding: 22px 24px;
   display: flex;
-  flex-wrap: wrap;
-  align-items: center;
-  justify-content: space-between;
-  gap: 20px;
+  flex-direction: column;
+  gap: 12px;
   margin-bottom: 24px;
   box-shadow: var(--shadow-card);
+}
+
+.cert-main-row {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  flex-wrap: wrap;
+  gap: 16px;
+  width: 100%;
+}
+
+.cert-meta-footer {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  flex-wrap: wrap;
+  gap: 12px;
+  padding-top: 14px;
+  border-top: 1px dashed rgba(255, 255, 255, 0.12);
+  width: 100%;
+  font-size: 0.78rem;
+}
+
+.cert-hash {
+  font-family: var(--font-mono, monospace);
+  font-size: 0.76rem;
+  color: var(--text-faint, #94a3b8);
+}
+
+.cert-hash-label {
+  font-weight: 700;
+  color: #38bdf8;
+  letter-spacing: 0.04em;
+}
+
+.cert-hash-code {
+  color: var(--text-primary, #f8fafc);
+}
+
+.cert-audit-id {
+  font-family: var(--font-mono, monospace);
+  font-size: 0.76rem;
+  color: var(--text-muted, #94a3b8);
+}
+
+.cert-audit-id strong {
+  color: #10b981;
 }
 
 [data-theme='light'] .reports-page {
@@ -502,6 +547,14 @@
   color: #0f172a !important;
 }
 
+[data-theme='light'] .cert-main-row {
+  border-color: #e2e8f0;
+}
+
+[data-theme='light'] .cert-meta-footer {
+  border-top: 1px dashed #cbd5e1 !important;
+}
+
 [data-theme='light'] .cert-title {
   color: #0f172a !important;
 }
@@ -511,14 +564,70 @@
 }
 
 [data-theme='light'] .cert-hash {
-  color: #64748b !important;
+  color: #475569 !important;
+}
+
+[data-theme='light'] .cert-hash-label {
+  color: #0284c7 !important;
+}
+
+[data-theme='light'] .cert-hash-code {
+  color: #0f172a !important;
+}
+
+[data-theme='light'] .cert-audit-id {
+  color: #475569 !important;
+}
+
+[data-theme='light'] .cert-audit-id strong {
+  color: #059669 !important;
 }
 
 [data-theme='light'] .audit-meta-pill {
   background: #ecfdf5 !important;
   color: #047857 !important;
-  border: 1px solid #a7f3d0 !important;
+  border: 1.5px solid #a7f3d0 !important;
   font-weight: 700 !important;
+}
+
+[data-theme='light'] .export-card {
+  background: #ffffff !important;
+  border: 1.5px solid #cbd5e1 !important;
+  box-shadow: 0 2px 8px rgba(15, 23, 42, 0.04) !important;
+}
+
+[data-theme='light'] .export-card-title {
+  color: #0f172a !important;
+  font-weight: 700 !important;
+}
+
+[data-theme='light'] .export-card-desc {
+  color: #64748b !important;
+}
+
+[data-theme='light'] .export-card-btn {
+  background: #f1f5f9 !important;
+  border: 1.5px solid #cbd5e1 !important;
+  color: #0f172a !important;
+  font-weight: 600 !important;
+  box-shadow: 0 1px 3px rgba(15, 23, 42, 0.05);
+}
+
+[data-theme='light'] .export-card-btn:hover {
+  background: #0284c7 !important;
+  border-color: #0284c7 !important;
+  color: #ffffff !important;
+}
+
+[data-theme='light'] .export-card-btn.primary {
+  background: #10b981 !important;
+  border-color: #10b981 !important;
+  color: #ffffff !important;
+}
+
+[data-theme='light'] .export-card-btn.primary:hover {
+  background: #059669 !important;
+  border-color: #059669 !important;
 }
 
 [data-theme='light'] .compliance-kpi-card,

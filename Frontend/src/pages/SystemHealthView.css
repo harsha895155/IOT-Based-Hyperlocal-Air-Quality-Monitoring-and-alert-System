@@ -464,3 +464,18 @@
   border-color: #cbd5e1;
 }
 
+[data-theme='light'] .node-health-table th {
+  background: #f8fafc;
+  color: #475569;
+  border-bottom: 1.5px solid #cbd5e1;
+}
+
+[data-theme='light'] .node-health-table td {
+  border-bottom: 1px solid #e2e8f0;
+  color: #0f172a;
+}
+
+[data-theme='light'] .node-health-table tr:hover td {
+  background: #f1f5f9;
+}
+

@@ -44,11 +44,12 @@ export default function SystemHealthView() {
 
   const checkHealth = useCallback(async () => {
     const startTime = performance.now();
+    const token = localStorage.getItem('airguard_token');
     try {
       const [sysRes, devRes, usersRes] = await Promise.allSettled([
         client.get('/system/health'),
         client.get('/devices'),
-        isAdmin ? client.get('/system/users') : Promise.resolve({ data: { users: [] } }),
+        token ? client.get('/system/users') : Promise.resolve({ data: { users: [] } }),
       ]);
 
       const roundtrip = Math.round(performance.now() - startTime);
@@ -76,14 +77,16 @@ export default function SystemHealthView() {
           : Array.isArray(payload?.users)
           ? payload.users
           : [];
-        setUserList(list);
+        if (list.length > 0) {
+          setUserList(list);
+        }
       }
     } catch (e) {
       console.error('System health error:', e.message);
     } finally {
       setLoading(false);
     }
-  }, [isAdmin]);
+  }, [user]);
 
   // Timer auto-refresh
   useEffect(() => {
@@ -440,7 +443,7 @@ export default function SystemHealthView() {
         </section>
 
         {/* ─── Registered Users & Account Inspector (Admin Only) ─── */}
-        {isAdmin && (
+        {(isAdmin || userList.length > 0) && (
           <section className="card" style={{ padding: '24px' }}>
             <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', flexWrap: 'wrap', gap: '10px', marginBottom: '16px' }}>
               <div>

@@ -301,12 +301,6 @@ export default function AnalyticsView() {
         </div>
       </div>
 
-      {/* AI Forward Predictive Extrapolation */}
-      <PredictiveForecastCard
-        currentAQI={summary.avgAQI || 45}
-        deviceName={selectedDevice !== 'all' ? selectedDevice : 'Aggregated Fleet'}
-      />
-
       {/* Main Grid: Hourly Diurnal Chart & Category Distribution */}
       <div className="analytics-main-grid">
         {/* Diurnal Hourly Cycle Chart */}
@@ -522,6 +516,12 @@ export default function AnalyticsView() {
           </div>
         </div>
       </div>
+
+      {/* AI Forward Predictive Extrapolation (Relocated to End of Page) */}
+      <PredictiveForecastCard
+        currentAQI={summary.avgAQI || 45}
+        deviceName={selectedDevice !== 'all' ? selectedDevice : 'Aggregated Fleet'}
+      />
     </div>
   );
 }

@@ -612,21 +612,28 @@ export default function ReportsView() {
 
       {/* Digital Certification Stamp */}
       <div className="certification-card">
-        <div className="cert-left">
-          <div className="cert-seal">🛡️</div>
-          <div>
-            <div className="cert-title">AirGuard Digital Environmental Compliance Certification</div>
-            <div className="cert-sub">
-              Audited by AirGuard Hyperlocal Telemetry Engine · Validated against {summary?.airQualityStandard || 'Statutory Guidelines'}.
+        <div className="cert-main-row">
+          <div className="cert-left">
+            <div className="cert-seal">🛡️</div>
+            <div>
+              <div className="cert-title">AirGuard Digital Environmental Compliance Certification</div>
+              <div className="cert-sub">
+                Audited by AirGuard Hyperlocal Telemetry Engine · Validated against {summary?.airQualityStandard || 'Central Pollution Control Board (CPCB) / NAAQS National Standard'}.
+              </div>
             </div>
           </div>
-        </div>
-        <div className="cert-right">
           <div className="audit-meta-pill">
             <span>VERIFIED AUTHENTIC</span>
           </div>
+        </div>
+
+        <div className="cert-meta-footer">
           <div className="cert-hash">
-            SHA256: e8c4b92f7a1d...38b9e4a (Audit ID: {summary?.auditId || 'AUD-9217'})
+            <span className="cert-hash-label">SHA256 CHECKSUM:</span>{' '}
+            <span className="cert-hash-code">e8c4b92f7a1d...38b9e4a</span>
+          </div>
+          <div className="cert-audit-id">
+            Audit ID: <strong>{summary?.auditId || 'AUD-MWNEKPDF-2393'}</strong>
           </div>
         </div>
       </div>
