@@ -42,6 +42,22 @@ export default function SystemHealthView() {
   // Fetch health data
   const isAdmin = user?.role?.toLowerCase() === 'admin';
 
+  // Distinct visible avatar palette for light and dark themes
+  const getAvatarGradient = (role, name = '') => {
+    if (role === 'admin') return 'linear-gradient(135deg, #0284c7, #00d2b4)';
+    const palettes = [
+      'linear-gradient(135deg, #6366f1, #8b5cf6)', // Indigo - Violet
+      'linear-gradient(135deg, #0284c7, #3b82f6)', // Sky - Blue
+      'linear-gradient(135deg, #0d9488, #10b981)', // Teal - Emerald
+      'linear-gradient(135deg, #f59e0b, #d97706)', // Amber
+      'linear-gradient(135deg, #ec4899, #be185d)', // Pink
+      'linear-gradient(135deg, #8b5cf6, #d946ef)', // Purple - Fuchsia
+    ];
+    let hash = 0;
+    for (let i = 0; i < name.length; i++) hash = name.charCodeAt(i) + ((hash << 5) - hash);
+    return palettes[Math.abs(hash) % palettes.length];
+  };
+
   const fetchUsers = useCallback(async () => {
     setUsersLoading(true);
     try {
@@ -546,22 +562,42 @@ export default function SystemHealthView() {
                           <tr key={u._id || u.id}>
                             <td>
                               <div style={{ display: 'flex', alignItems: 'center', gap: '10px' }}>
-                                <div
-                                  style={{
-                                    width: '32px',
-                                    height: '32px',
-                                    borderRadius: '50%',
-                                    background: u.role === 'admin' ? 'linear-gradient(135deg, #0284c7, #00d2b4)' : 'rgba(255,255,255,0.1)',
-                                    display: 'flex',
-                                    alignItems: 'center',
-                                    justifyContent: 'center',
-                                    fontWeight: 700,
-                                    fontSize: '0.8rem',
-                                    color: '#fff',
-                                  }}
-                                >
-                                  {u.name ? u.name.charAt(0).toUpperCase() : 'U'}
-                                </div>
+                                {u.avatar ? (
+                                  <img
+                                    src={u.avatar}
+                                    alt={u.name}
+                                    style={{
+                                      width: '34px',
+                                      height: '34px',
+                                      borderRadius: '50%',
+                                      objectFit: 'cover',
+                                      border: u.role === 'admin' ? '2px solid #00d2b4' : '2px solid rgba(99, 102, 241, 0.45)',
+                                      boxShadow: '0 2px 6px rgba(0,0,0,0.15)',
+                                      flexShrink: 0,
+                                    }}
+                                  />
+                                ) : (
+                                  <div
+                                    style={{
+                                      width: '34px',
+                                      height: '34px',
+                                      borderRadius: '50%',
+                                      background: getAvatarGradient(u.role, u.name),
+                                      display: 'flex',
+                                      alignItems: 'center',
+                                      justifyContent: 'center',
+                                      fontWeight: 700,
+                                      fontSize: '0.85rem',
+                                      color: '#ffffff',
+                                      textShadow: '0 1px 2px rgba(0,0,0,0.3)',
+                                      boxShadow: '0 2px 6px rgba(0,0,0,0.12)',
+                                      border: '1.5px solid rgba(255,255,255,0.35)',
+                                      flexShrink: 0,
+                                    }}
+                                  >
+                                    {u.name ? u.name.charAt(0).toUpperCase() : 'U'}
+                                  </div>
+                                )}
                                 <div>
                                   <strong style={{ color: 'var(--text-primary)', fontSize: '0.88rem' }}>{u.name}</strong>
                                   {isSelf && (

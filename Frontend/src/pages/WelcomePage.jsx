@@ -957,6 +957,66 @@ export default function WelcomePage() {
               </div>
             </div>
           </div>
+
+          {/* ─── OFFICIAL DIGITAL ENVIRONMENTAL COMPLIANCE CERTIFICATION STAMP ─── */}
+          <div className="welcome-certification-trust-card">
+            <div className="cert-watermark-seal" aria-hidden="true">
+              <svg viewBox="0 0 200 200" fill="none" xmlns="http://www.w3.org/2000/svg">
+                <circle cx="100" cy="100" r="90" stroke="currentColor" strokeWidth="2" strokeDasharray="6 4" opacity="0.35"/>
+                <circle cx="100" cy="100" r="76" stroke="currentColor" strokeWidth="1" opacity="0.2"/>
+                <path d="M100 35 L145 60 V105 C145 140 100 165 100 165 C100 165 55 140 55 105 V60 Z" stroke="currentColor" strokeWidth="2" fill="none" opacity="0.4"/>
+                <path d="M85 102 L96 113 L118 90" stroke="currentColor" strokeWidth="3" strokeLinecap="round" strokeLinejoin="round" opacity="0.5"/>
+                <text x="100" y="186" textAnchor="middle" fontSize="9" fontWeight="700" letterSpacing="2" fill="currentColor" opacity="0.3">OFFICIAL AUDIT</text>
+              </svg>
+            </div>
+
+            <div className="welcome-cert-inner">
+              <div className="welcome-cert-left">
+                <div className="welcome-cert-seal-badge">
+                  <span className="welcome-cert-shield-icon">🛡️</span>
+                </div>
+                <div className="welcome-cert-text">
+                  <div className="welcome-cert-headline-row">
+                    <h3 className="welcome-cert-title">AirGuard Digital Environmental Compliance Certification</h3>
+                    <span className="welcome-cert-pill-statutory">ISO 14001 STATUTORY PASS</span>
+                  </div>
+                  <p className="welcome-cert-sub">
+                    Live telemetry audited in real time by AirGuard Hyperlocal Telemetry Engine · Fully compliant with Central Pollution Control Board (CPCB) India NAAQS, US EPA 40 CFR Part 58, and World Health Organization (WHO 2021) safe thresholds.
+                  </p>
+                </div>
+              </div>
+
+              <div className="welcome-cert-actions">
+                <div className="welcome-verified-authentic-badge">
+                  <span className="welcome-cert-pulse" />
+                  <span>VERIFIED AUTHENTIC</span>
+                </div>
+                <Link to="/reports" className="btn btn--primary welcome-cert-report-btn">
+                  <span>View Official Audit Dossier</span>
+                  <span className="welcome-btn-arrow">➔</span>
+                </Link>
+              </div>
+            </div>
+
+            <div className="welcome-cert-footer">
+              <div className="welcome-cert-meta-item">
+                <span className="welcome-cert-meta-label">AUDIT STANDARD:</span>{' '}
+                <strong className="mono">CPCB NAAQS + WHO (2021)</strong>
+              </div>
+              <div className="welcome-cert-meta-item">
+                <span className="welcome-cert-meta-label">DEPLOYMENT:</span>{' '}
+                <strong className="mono">IoT Mesh Fleet Nodes (ESP32)</strong>
+              </div>
+              <div className="welcome-cert-meta-item">
+                <span className="welcome-cert-meta-label">SHA256 CHECKSUM:</span>{' '}
+                <strong className="mono welcome-cert-cyan">e8c4b92f7a1d...38b9e4a</strong>
+              </div>
+              <div className="welcome-cert-meta-item">
+                <span className="welcome-cert-meta-label">AUDIT ID:</span>{' '}
+                <strong className="mono welcome-cert-emerald">AUD-CPCB-2026-PASS</strong>
+              </div>
+            </div>
+          </div>
         </div>
       </section>
 

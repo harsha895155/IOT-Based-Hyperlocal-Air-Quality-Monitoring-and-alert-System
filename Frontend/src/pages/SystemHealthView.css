@@ -475,6 +475,14 @@
   color: #0f172a;
 }
 
+[data-theme='light'] .node-health-table td .mono {
+  color: #334155 !important;
+}
+
+[data-theme='light'] .node-health-table td strong {
+  color: #0f172a !important;
+}
+
 [data-theme='light'] .node-health-table tr:hover td {
   background: #f1f5f9;
 }

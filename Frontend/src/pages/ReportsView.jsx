@@ -272,22 +272,18 @@ export default function ReportsView() {
       </div>
 
       {/* Statutory Environmental Compliance Verification Certificate */}
-      <div
-        className="card"
-        style={{
-          padding: '20px 24px',
-          marginBottom: '24px',
-          background: 'rgba(255, 255, 255, 0.02)',
-          border: '1px solid var(--border-color)',
-          borderRadius: '16px',
-          display: 'flex',
-          alignItems: 'center',
-          justifyContent: 'space-between',
-          flexWrap: 'wrap',
-          gap: '20px',
-        }}
-      >
-        <div style={{ display: 'flex', alignItems: 'center', gap: '16px' }}>
+      <div className="compliance-audit-banner card">
+        <div className="cert-watermark-seal" aria-hidden="true">
+          <svg viewBox="0 0 200 200" fill="none" xmlns="http://www.w3.org/2000/svg">
+            <circle cx="100" cy="100" r="90" stroke="currentColor" strokeWidth="2" strokeDasharray="6 4" opacity="0.35"/>
+            <circle cx="100" cy="100" r="76" stroke="currentColor" strokeWidth="1" opacity="0.2"/>
+            <path d="M100 35 L145 60 V105 C145 140 100 165 100 165 C100 165 55 140 55 105 V60 Z" stroke="currentColor" strokeWidth="2" fill="none" opacity="0.4"/>
+            <path d="M85 102 L96 113 L118 90" stroke="currentColor" strokeWidth="3" strokeLinecap="round" strokeLinejoin="round" opacity="0.5"/>
+            <text x="100" y="186" textAnchor="middle" fontSize="9" fontWeight="700" letterSpacing="2" fill="currentColor" opacity="0.3">OFFICIAL AUDIT</text>
+          </svg>
+        </div>
+
+        <div style={{ display: 'flex', alignItems: 'center', gap: '16px', position: 'relative', zIndex: 1 }}>
           <div
             style={{
               width: '56px',
@@ -314,12 +310,12 @@ export default function ReportsView() {
               </span>
             </div>
             <p style={{ margin: '4px 0 0 0', fontSize: '0.8rem', color: 'var(--text-muted)' }}>
-              Validated against Central Pollution Control Board (CPCB) & WHO Guidelines. Verification Audit Hash: <code style={{ color: 'var(--accent)' }}>{summary?.auditId || 'AUD-VERIFIED'}</code>
+              Validated against Central Pollution Control Board (CPCB) &amp; WHO Guidelines. Verification Audit Hash: <code style={{ color: 'var(--accent)' }}>{summary?.auditId || 'AUD-VERIFIED'}</code>
             </p>
           </div>
         </div>
 
-        <div style={{ display: 'flex', alignItems: 'center', gap: '14px' }}>
+        <div style={{ display: 'flex', alignItems: 'center', gap: '14px', position: 'relative', zIndex: 1 }}>
           <div style={{ textAlign: 'right', fontSize: '0.78rem' }}>
             <span style={{ color: 'var(--text-muted)' }}>Audited Target: </span>
             <strong>{selectedDevice === 'all' ? 'All Mesh Fleet Nodes' : selectedDevice}</strong>
@@ -612,7 +608,17 @@ export default function ReportsView() {
 
       {/* Digital Certification Stamp */}
       <div className="certification-card">
-        <div className="cert-main-row">
+        <div className="cert-watermark-seal" aria-hidden="true">
+          <svg viewBox="0 0 200 200" fill="none" xmlns="http://www.w3.org/2000/svg">
+            <circle cx="100" cy="100" r="90" stroke="currentColor" strokeWidth="2" strokeDasharray="6 4" opacity="0.35"/>
+            <circle cx="100" cy="100" r="76" stroke="currentColor" strokeWidth="1" opacity="0.2"/>
+            <path d="M100 35 L145 60 V105 C145 140 100 165 100 165 C100 165 55 140 55 105 V60 Z" stroke="currentColor" strokeWidth="2" fill="none" opacity="0.4"/>
+            <path d="M85 102 L96 113 L118 90" stroke="currentColor" strokeWidth="3" strokeLinecap="round" strokeLinejoin="round" opacity="0.5"/>
+            <text x="100" y="186" textAnchor="middle" fontSize="9" fontWeight="700" letterSpacing="2" fill="currentColor" opacity="0.3">OFFICIAL AUDIT</text>
+          </svg>
+        </div>
+
+        <div className="cert-main-row" style={{ position: 'relative', zIndex: 1 }}>
           <div className="cert-left">
             <div className="cert-seal">🛡️</div>
             <div>
@@ -627,7 +633,7 @@ export default function ReportsView() {
           </div>
         </div>
 
-        <div className="cert-meta-footer">
+        <div className="cert-meta-footer" style={{ position: 'relative', zIndex: 1 }}>
           <div className="cert-hash">
             <span className="cert-hash-label">SHA256 CHECKSUM:</span>{' '}
             <span className="cert-hash-code">e8c4b92f7a1d...38b9e4a</span>

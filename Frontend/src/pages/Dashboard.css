@@ -1818,3 +1818,182 @@
   box-shadow: 0 12px 28px -6px rgba(2, 132, 199, 0.2);
 }
 
+/* ─── 8. Bottom Dashboard Official Environmental Compliance Certification Card ─── */
+.dashboard-certification-card {
+  position: relative;
+  overflow: hidden;
+  margin-top: 24px;
+  margin-bottom: 24px;
+  padding: 24px 28px;
+  border-radius: 16px;
+  background: 
+    radial-gradient(circle at 92% 30%, rgba(0, 210, 180, 0.14) 0%, transparent 50%),
+    radial-gradient(circle at 8% 70%, rgba(2, 132, 199, 0.1) 0%, transparent 50%),
+    linear-gradient(135deg, rgba(15, 23, 42, 0.95) 0%, rgba(10, 28, 44, 0.95) 100%),
+    url("data:image/svg+xml,%3Csvg width='80' height='80' viewBox='0 0 80 80' xmlns='http://www.w3.org/2000/svg'%3E%3Cg fill='none' stroke='%2300d2b4' stroke-width='0.75' stroke-opacity='0.08'%3E%3Cpath d='M0 40 Q 20 10, 40 40 T 80 40'/%3E%3Cpath d='M0 20 Q 20 50, 40 20 T 80 20'/%3E%3Cpath d='M0 60 Q 20 30, 40 60 T 80 60'/%3E%3Ccircle cx='40' cy='40' r='30' stroke-dasharray='3,3'/%3E%3C/g%3E%3C/svg%3E");
+  background-size: auto, auto, auto, 80px 80px;
+  border: 1.5px solid rgba(0, 210, 180, 0.3) !important;
+  box-shadow: 0 4px 24px rgba(0, 0, 0, 0.28);
+}
+
+.dashboard-certification-card .cert-watermark-seal {
+  position: absolute;
+  right: 20px;
+  top: 50%;
+  transform: translateY(-50%);
+  width: 160px;
+  height: 160px;
+  pointer-events: none;
+  opacity: 0.12;
+  color: #00d2b4;
+  z-index: 0;
+}
+
+.dash-cert-main-row {
+  position: relative;
+  z-index: 1;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  flex-wrap: wrap;
+  gap: 18px;
+  margin-bottom: 16px;
+}
+
+.dash-cert-left {
+  display: flex;
+  align-items: center;
+  gap: 16px;
+  flex: 1;
+  min-width: 280px;
+}
+
+.dash-cert-seal {
+  width: 52px;
+  height: 52px;
+  border-radius: 50%;
+  background: rgba(0, 210, 180, 0.12);
+  border: 2px dashed #00d2b4;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 1.6rem;
+  flex-shrink: 0;
+  box-shadow: 0 0 16px rgba(0, 210, 180, 0.2);
+}
+
+.dash-cert-title-row {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  flex-wrap: wrap;
+  margin-bottom: 4px;
+}
+
+.dash-cert-title {
+  margin: 0;
+  font-size: 1.05rem;
+  font-weight: 700;
+  color: var(--text-primary, #f8fafc);
+  letter-spacing: -0.01em;
+}
+
+.dash-cert-sub {
+  margin: 0;
+  font-size: 0.8rem;
+  color: var(--text-muted, #94a3b8);
+  line-height: 1.45;
+  max-width: 680px;
+}
+
+.dash-cert-actions {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  flex-wrap: wrap;
+}
+
+.dash-cert-btn {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  padding: 8px 16px;
+  border-radius: 8px;
+  font-size: 0.82rem;
+  font-weight: 600;
+  cursor: pointer;
+  background: linear-gradient(135deg, #0284c7 0%, #00d2b4 100%);
+  color: #06111f !important;
+  border: none;
+  box-shadow: 0 2px 10px rgba(0, 210, 180, 0.25);
+  transition: transform 0.2s, box-shadow 0.2s;
+  white-space: nowrap;
+}
+
+.dash-cert-btn:hover {
+  transform: translateY(-1px);
+  box-shadow: 0 4px 14px rgba(0, 210, 180, 0.4);
+}
+
+.dash-cert-footer {
+  position: relative;
+  z-index: 1;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  flex-wrap: wrap;
+  gap: 12px;
+  padding-top: 14px;
+  border-top: 1px dashed rgba(255, 255, 255, 0.12);
+  font-size: 0.78rem;
+}
+
+.dash-cert-meta-item {
+  color: var(--text-muted, #94a3b8);
+}
+
+.dash-cert-label {
+  font-weight: 700;
+  color: var(--text-faint, #64748b);
+  letter-spacing: 0.04em;
+  font-size: 0.72rem;
+}
+
+/* Light Theme Styling for Dashboard Certification Card */
+[data-theme='light'] .dashboard-certification-card {
+  background: 
+    radial-gradient(circle at 92% 30%, rgba(2, 132, 199, 0.1) 0%, transparent 60%),
+    radial-gradient(circle at 8% 70%, rgba(16, 185, 129, 0.08) 0%, transparent 50%),
+    linear-gradient(135deg, #ffffff 0%, #f0f9ff 100%),
+    url("data:image/svg+xml,%3Csvg width='80' height='80' viewBox='0 0 80 80' xmlns='http://www.w3.org/2000/svg'%3E%3Cg fill='none' stroke='%230284c7' stroke-width='0.75' stroke-opacity='0.08'%3E%3Cpath d='M0 40 Q 20 10, 40 40 T 80 40'/%3E%3Cpath d='M0 20 Q 20 50, 40 20 T 80 20'/%3E%3Cpath d='M0 60 Q 20 30, 40 60 T 80 60'/%3E%3Ccircle cx='40' cy='40' r='30' stroke-dasharray='3,3'/%3E%3C/g%3E%3C/svg%3E") !important;
+  border: 1.5px solid #bae6fd !important;
+  box-shadow: 0 4px 20px rgba(2, 132, 199, 0.08) !important;
+}
+
+[data-theme='light'] .dashboard-certification-card .cert-watermark-seal {
+  opacity: 0.15 !important;
+  color: #0284c7 !important;
+}
+
+[data-theme='light'] .dash-cert-title {
+  color: #0f172a !important;
+}
+
+[data-theme='light'] .dash-cert-sub {
+  color: #475569 !important;
+}
+
+[data-theme='light'] .dash-cert-footer {
+  border-top-color: #cbd5e1 !important;
+}
+
+[data-theme='light'] .dash-cert-label {
+  color: #475569 !important;
+}
+
+[data-theme='light'] .dash-cert-seal {
+  background: rgba(2, 132, 199, 0.1);
+  border-color: #0284c7;
+  box-shadow: 0 0 16px rgba(2, 132, 199, 0.15);
+}
+

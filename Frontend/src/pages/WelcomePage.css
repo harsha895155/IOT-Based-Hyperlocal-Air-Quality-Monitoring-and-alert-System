@@ -1324,6 +1324,222 @@
   line-height: 1.4;
 }
 
+/* ─── Official Digital Environmental Compliance Certification Stamp (Trust Section) ─── */
+.welcome-certification-trust-card {
+  position: relative;
+  overflow: hidden;
+  margin-top: 28px;
+  padding: 26px 30px;
+  border-radius: 18px;
+  background: 
+    radial-gradient(circle at 92% 30%, rgba(0, 210, 180, 0.14) 0%, transparent 50%),
+    radial-gradient(circle at 8% 70%, rgba(2, 132, 199, 0.1) 0%, transparent 50%),
+    linear-gradient(135deg, rgba(15, 23, 42, 0.95) 0%, rgba(10, 28, 44, 0.95) 100%),
+    url("data:image/svg+xml,%3Csvg width='80' height='80' viewBox='0 0 80 80' xmlns='http://www.w3.org/2000/svg'%3E%3Cg fill='none' stroke='%2300d2b4' stroke-width='0.75' stroke-opacity='0.08'%3E%3Cpath d='M0 40 Q 20 10, 40 40 T 80 40'/%3E%3Cpath d='M0 20 Q 20 50, 40 20 T 80 20'/%3E%3Cpath d='M0 60 Q 20 30, 40 60 T 80 60'/%3E%3Ccircle cx='40' cy='40' r='30' stroke-dasharray='3,3'/%3E%3C/g%3E%3C/svg%3E");
+  background-size: auto, auto, auto, 80px 80px;
+  border: 1.5px solid rgba(0, 210, 180, 0.35) !important;
+  box-shadow: 0 8px 32px rgba(0, 0, 0, 0.35);
+  backdrop-filter: blur(16px);
+}
+
+.welcome-certification-trust-card .cert-watermark-seal {
+  position: absolute;
+  right: 24px;
+  top: 50%;
+  transform: translateY(-50%);
+  width: 170px;
+  height: 170px;
+  pointer-events: none;
+  opacity: 0.12;
+  color: #00d2b4;
+  z-index: 0;
+}
+
+.welcome-cert-inner {
+  position: relative;
+  z-index: 1;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  flex-wrap: wrap;
+  gap: 20px;
+  margin-bottom: 18px;
+}
+
+.welcome-cert-left {
+  display: flex;
+  align-items: center;
+  gap: 18px;
+  flex: 1;
+  min-width: 290px;
+}
+
+.welcome-cert-seal-badge {
+  width: 56px;
+  height: 56px;
+  border-radius: 50%;
+  background: rgba(0, 210, 180, 0.12);
+  border: 2px dashed #00d2b4;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 1.7rem;
+  flex-shrink: 0;
+  box-shadow: 0 0 20px rgba(0, 210, 180, 0.25);
+}
+
+.welcome-cert-headline-row {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  flex-wrap: wrap;
+  margin-bottom: 5px;
+}
+
+.welcome-cert-title {
+  margin: 0;
+  font-size: 1.15rem;
+  font-weight: 700;
+  color: #f8fafc;
+  letter-spacing: -0.01em;
+}
+
+.welcome-cert-pill-statutory {
+  display: inline-block;
+  padding: 3px 10px;
+  border-radius: 999px;
+  font-size: 0.72rem;
+  font-weight: 700;
+  letter-spacing: 0.05em;
+  background: rgba(16, 185, 129, 0.18);
+  color: #10b981;
+  border: 1px solid rgba(16, 185, 129, 0.35);
+}
+
+.welcome-cert-sub {
+  margin: 0;
+  font-size: 0.84rem;
+  color: #94a3b8;
+  line-height: 1.5;
+  max-width: 700px;
+}
+
+.welcome-cert-actions {
+  display: flex;
+  align-items: center;
+  gap: 14px;
+  flex-wrap: wrap;
+}
+
+.welcome-verified-authentic-badge {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  padding: 6px 14px;
+  border-radius: 999px;
+  font-size: 0.75rem;
+  font-weight: 800;
+  letter-spacing: 0.06em;
+  background: rgba(16, 185, 129, 0.14);
+  color: #10b981;
+  border: 1px solid rgba(16, 185, 129, 0.35);
+}
+
+.welcome-cert-pulse {
+  width: 8px;
+  height: 8px;
+  border-radius: 50%;
+  background: #10b981;
+  box-shadow: 0 0 8px #10b981;
+  animation: pulseHealthDot 2s infinite ease-in-out;
+}
+
+.welcome-cert-report-btn {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  padding: 8px 18px;
+  font-size: 0.84rem;
+  font-weight: 600;
+  border-radius: 10px;
+  text-decoration: none;
+  white-space: nowrap;
+}
+
+.welcome-cert-footer {
+  position: relative;
+  z-index: 1;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  flex-wrap: wrap;
+  gap: 14px;
+  padding-top: 16px;
+  border-top: 1px dashed rgba(255, 255, 255, 0.12);
+  font-size: 0.8rem;
+}
+
+.welcome-cert-meta-item {
+  color: #94a3b8;
+}
+
+.welcome-cert-meta-label {
+  font-weight: 700;
+  color: #64748b;
+  letter-spacing: 0.04em;
+  font-size: 0.72rem;
+}
+
+.welcome-cert-cyan {
+  color: #38bdf8;
+}
+
+.welcome-cert-emerald {
+  color: #10b981;
+}
+
+/* Light Mode Styling for Welcome Certification Card */
+[data-theme='light'] .welcome-certification-trust-card {
+  background: 
+    radial-gradient(circle at 92% 30%, rgba(2, 132, 199, 0.1) 0%, transparent 60%),
+    radial-gradient(circle at 8% 70%, rgba(16, 185, 129, 0.08) 0%, transparent 50%),
+    linear-gradient(135deg, #ffffff 0%, #f0f9ff 100%),
+    url("data:image/svg+xml,%3Csvg width='80' height='80' viewBox='0 0 80 80' xmlns='http://www.w3.org/2000/svg'%3E%3Cg fill='none' stroke='%230284c7' stroke-width='0.75' stroke-opacity='0.08'%3E%3Cpath d='M0 40 Q 20 10, 40 40 T 80 40'/%3E%3Cpath d='M0 20 Q 20 50, 40 20 T 80 20'/%3E%3Cpath d='M0 60 Q 20 30, 40 60 T 80 60'/%3E%3Ccircle cx='40' cy='40' r='30' stroke-dasharray='3,3'/%3E%3C/g%3E%3C/svg%3E") !important;
+  border: 1.5px solid #bae6fd !important;
+  box-shadow: 0 8px 28px rgba(2, 132, 199, 0.1) !important;
+}
+
+[data-theme='light'] .welcome-certification-trust-card .cert-watermark-seal {
+  opacity: 0.15 !important;
+  color: #0284c7 !important;
+}
+
+[data-theme='light'] .welcome-cert-title {
+  color: #0f172a !important;
+}
+
+[data-theme='light'] .welcome-cert-sub {
+  color: #475569 !important;
+}
+
+[data-theme='light'] .welcome-cert-footer {
+  border-top-color: #cbd5e1 !important;
+}
+
+[data-theme='light'] .welcome-cert-meta-label {
+  color: #64748b !important;
+}
+
+[data-theme='light'] .welcome-cert-meta-item {
+  color: #334155 !important;
+}
+
+[data-theme='light'] .welcome-cert-seal-badge {
+  background: rgba(2, 132, 199, 0.1) !important;
+  border-color: #0284c7 !important;
+  box-shadow: 0 0 16px rgba(2, 132, 199, 0.18) !important;
+}
+
 /* ─── 5. Interactive Platform Modules Showcase ─── */
 .welcome-modules {
   padding: 70px 24px;
