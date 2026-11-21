@@ -25,9 +25,13 @@ router.get('/', optionalAuth, async (req, res, next) => {
             if (to) matchStage.createdAt.$lte = new Date(to);
         }
 
+        let activeMatch = { ...matchStage };
+        let isStandby = false;
+        let lastSeenDate = null;
+
         // 1. Overall statistical aggregations
-        const [stats] = await Reading.aggregate([
-            { $match: matchStage },
+        let [stats] = await Reading.aggregate([
+            { $match: activeMatch },
             {
                 $group: {
                     _id: null,
@@ -42,9 +46,56 @@ router.get('/', optionalAuth, async (req, res, next) => {
             },
         ]);
 
+        // If no records in the strict wall-clock window (e.g. device is offline / standby):
+        if (!stats || stats.totalSamples === 0) {
+            const baseFilter = {};
+            if (activeMatch.deviceId) baseFilter.deviceId = activeMatch.deviceId;
+            const latestDoc = await Reading.findOne(baseFilter).sort({ createdAt: -1 });
+
+            if (latestDoc) {
+                isStandby = true;
+                lastSeenDate = latestDoc.createdAt;
+
+                // Anchor the observation window to the latest recorded operational telemetry session
+                if (from && to) {
+                    const diffMs = Math.max(24 * 60 * 60 * 1000, new Date(to).getTime() - new Date(from).getTime());
+                    activeMatch.createdAt = {
+                        $gte: new Date(new Date(latestDoc.createdAt).getTime() - diffMs),
+                        $lte: new Date(latestDoc.createdAt),
+                    };
+                } else if (from) {
+                    const diffMs = Math.max(24 * 60 * 60 * 1000, Date.now() - new Date(from).getTime());
+                    activeMatch.createdAt = {
+                        $gte: new Date(new Date(latestDoc.createdAt).getTime() - diffMs),
+                    };
+                } else {
+                    delete activeMatch.createdAt;
+                }
+
+                const [standbyStats] = await Reading.aggregate([
+                    { $match: activeMatch },
+                    {
+                        $group: {
+                            _id: null,
+                            minAQI: { $min: '$airQuality' },
+                            maxAQI: { $max: '$airQuality' },
+                            avgAQI: { $avg: '$airQuality' },
+                            avgTemp: { $avg: '$temperature' },
+                            avgHumidity: { $avg: '$humidity' },
+                            avgGasPPM: { $avg: '$gasPPM' },
+                            totalSamples: { $sum: 1 },
+                        },
+                    },
+                ]);
+                if (standbyStats) {
+                    stats = standbyStats;
+                }
+            }
+        }
+
         // 2. Category distribution
         const categoryDistribution = await Reading.aggregate([
-            { $match: matchStage },
+            { $match: activeMatch },
             {
                 $group: {
                     _id: '$category',
@@ -54,15 +105,9 @@ router.get('/', optionalAuth, async (req, res, next) => {
             { $sort: { count: -1 } },
         ]);
 
-        // 3. Hourly diurnal aggregation (last 24 hours)
-        const twentyFourHoursAgo = new Date(Date.now() - 24 * 60 * 60 * 1000);
+        // 3. Hourly diurnal aggregation
         const hourlyTrends = await Reading.aggregate([
-            {
-                $match: {
-                    ...matchStage,
-                    createdAt: { $gte: twentyFourHoursAgo },
-                },
-            },
+            { $match: activeMatch },
             {
                 $group: {
                     _id: {
@@ -77,6 +122,8 @@ router.get('/', optionalAuth, async (req, res, next) => {
         ]);
 
         res.json({
+            isStandby,
+            lastSeenDate,
             summary: {
                 minAQI: stats ? Math.round(stats.minAQI) : 0,
                 maxAQI: stats ? Math.round(stats.maxAQI) : 0,

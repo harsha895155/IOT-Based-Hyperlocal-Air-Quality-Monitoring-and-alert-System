@@ -236,6 +236,76 @@ export default function AnalyticsView() {
         </div>
       </div>
 
+      {/* Informative Standby Telemetry Banner when hardware node is in standby */}
+      {data?.isStandby && (
+        <div
+          style={{
+            display: 'flex',
+            alignItems: 'center',
+            justifyContent: 'space-between',
+            flexWrap: 'wrap',
+            gap: '12px',
+            background: 'rgba(2, 132, 199, 0.08)',
+            border: '1px solid rgba(2, 132, 199, 0.25)',
+            borderRadius: '12px',
+            padding: '12px 18px',
+            marginBottom: '20px',
+            fontSize: '0.84rem',
+            color: 'var(--text-primary)',
+          }}
+        >
+          <div style={{ display: 'flex', alignItems: 'center', gap: '10px' }}>
+            <span style={{ fontSize: '1.2rem' }}>📡</span>
+            <div>
+              <strong style={{ color: '#0284c7' }}>Operational Dataset Active:</strong> Station {selectedDevice === 'all' ? 'fleet' : selectedDevice} is in standby (last recorded telemetry {data.lastSeenDate ? new Date(data.lastSeenDate).toLocaleDateString() : 'recently'}). Displaying the last verified operational observation window ({summary.totalSamples} samples).
+            </div>
+          </div>
+          <button
+            type="button"
+            className="btn btn--secondary"
+            style={{ fontSize: '0.76rem', padding: '5px 12px', whiteSpace: 'nowrap' }}
+            onClick={() => setTimeHorizon('all')}
+          >
+            Review All Recorded History
+          </button>
+        </div>
+      )}
+
+      {summary.totalSamples === 0 && !loading && (
+        <div
+          style={{
+            display: 'flex',
+            alignItems: 'center',
+            justifyContent: 'space-between',
+            flexWrap: 'wrap',
+            gap: '12px',
+            background: 'rgba(245, 158, 11, 0.1)',
+            border: '1px solid rgba(245, 158, 11, 0.3)',
+            borderRadius: '12px',
+            padding: '12px 18px',
+            marginBottom: '20px',
+            fontSize: '0.84rem',
+            color: '#fef08a',
+          }}
+        >
+          <div style={{ display: 'flex', alignItems: 'center', gap: '10px' }}>
+            <span>⚠️</span>
+            <span>No telemetry recorded during the selected horizon. Click below to load all verified historical records.</span>
+          </div>
+          <button
+            type="button"
+            className="btn btn--primary"
+            style={{ fontSize: '0.76rem', padding: '5px 12px', whiteSpace: 'nowrap' }}
+            onClick={() => {
+              setSelectedDevice('all');
+              setTimeHorizon('all');
+            }}
+          >
+            View All Historical Data
+          </button>
+        </div>
+      )}
+
       {/* Statistical KPI Matrix */}
       <div className="analytics-kpi-grid">
         <div className="analytics-kpi-card" style={{ '--kpi-accent': avgAQIInfo.color }}>
