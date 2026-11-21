@@ -42,24 +42,41 @@ export default function SystemHealthView() {
   // Fetch health data
   const isAdmin = user?.role?.toLowerCase() === 'admin';
 
+  const fetchUsers = useCallback(async () => {
+    setUsersLoading(true);
+    try {
+      const res = await client.get('/system/users');
+      const payload = res?.data;
+      const list = Array.isArray(payload)
+        ? payload
+        : Array.isArray(payload?.users)
+        ? payload.users
+        : [];
+      setUserList(list);
+    } catch (err) {
+      console.warn('Could not load user accounts directory:', err?.message);
+    } finally {
+      setUsersLoading(false);
+    }
+  }, []);
+
   const checkHealth = useCallback(async () => {
     const startTime = performance.now();
-    const token = localStorage.getItem('airguard_token');
     try {
       const [sysRes, devRes, usersRes] = await Promise.allSettled([
         client.get('/system/health'),
         client.get('/devices'),
-        token ? client.get('/system/users') : Promise.resolve({ data: { users: [] } }),
+        client.get('/system/users'),
       ]);
 
       const roundtrip = Math.round(performance.now() - startTime);
       setLatency(roundtrip);
 
-      if (sysRes.status === 'fulfilled' && sysRes.value.data) {
+      if (sysRes.status === 'fulfilled' && sysRes.value?.data) {
         setHealth(sysRes.value.data);
       }
 
-      if (devRes.status === 'fulfilled' && Array.isArray(devRes.value.data)) {
+      if (devRes.status === 'fulfilled' && Array.isArray(devRes.value?.data)) {
         const devs = devRes.value.data;
         const online = devs.filter((d) => d.status === 'Online').length;
         setDeviceList(devs);
@@ -77,16 +94,14 @@ export default function SystemHealthView() {
           : Array.isArray(payload?.users)
           ? payload.users
           : [];
-        if (list.length > 0) {
-          setUserList(list);
-        }
+        setUserList(list);
       }
     } catch (e) {
       console.error('System health error:', e.message);
     } finally {
       setLoading(false);
     }
-  }, [user]);
+  }, []);
 
   // Timer auto-refresh
   useEffect(() => {
@@ -95,11 +110,11 @@ export default function SystemHealthView() {
 
     const timer = setInterval(() => {
       checkHealth();
-      addLog('HTTP', `Automated health probe completed (${latency}ms roundtrip)`);
+      addLog('HTTP', `Automated health probe completed`);
     }, refreshInterval * 1000);
 
     return () => clearInterval(timer);
-  }, [checkHealth, refreshInterval, addLog, latency]);
+  }, [checkHealth, refreshInterval, addLog]);
 
   // Run comprehensive diagnostic sweep
   const runDiagnosticSweep = async () => {
@@ -177,6 +192,16 @@ export default function SystemHealthView() {
   };
 
   const isOperational = health?.status === 'operational' || health?.status === 'ok';
+
+  const filteredUsers = userList.filter((u) => {
+    if (!userSearchTerm.trim()) return true;
+    const term = userSearchTerm.toLowerCase();
+    return (
+      u.name?.toLowerCase().includes(term) ||
+      u.email?.toLowerCase().includes(term) ||
+      u.role?.toLowerCase().includes(term)
+    );
+  });
 
   return (
     <div className="health-page">
@@ -472,6 +497,15 @@ export default function SystemHealthView() {
                     minWidth: '220px',
                   }}
                 />
+                <button
+                  type="button"
+                  className="btn btn--secondary"
+                  onClick={fetchUsers}
+                  disabled={usersLoading}
+                  style={{ padding: '6px 12px', fontSize: '0.78rem' }}
+                >
+                  {usersLoading ? '↻ Refreshing...' : '↻ Refresh'}
+                </button>
                 <span className="settings-tag" style={{ background: 'rgba(56, 189, 248, 0.15)', color: '#38bdf8' }}>
                   {userList.length} {userList.length === 1 ? 'User' : 'Users'}
                 </span>
@@ -491,24 +525,22 @@ export default function SystemHealthView() {
                   </tr>
                 </thead>
                 <tbody>
-                  {userList.length === 0 ? (
+                  {usersLoading && userList.length === 0 ? (
                     <tr>
                       <td colSpan={6} style={{ textAlign: 'center', padding: '28px 14px', color: 'var(--text-muted)' }}>
-                        No user accounts found.
+                        Loading user accounts directory...
+                      </td>
+                    </tr>
+                  ) : filteredUsers.length === 0 ? (
+                    <tr>
+                      <td colSpan={6} style={{ textAlign: 'center', padding: '28px 14px', color: 'var(--text-muted)' }}>
+                        {userSearchTerm.trim()
+                          ? `No user accounts matching "${userSearchTerm}".`
+                          : 'No user accounts found.'}
                       </td>
                     </tr>
                   ) : (
-                    userList
-                      .filter((u) => {
-                        if (!userSearchTerm.trim()) return true;
-                        const term = userSearchTerm.toLowerCase();
-                        return (
-                          u.name?.toLowerCase().includes(term) ||
-                          u.email?.toLowerCase().includes(term) ||
-                          u.role?.toLowerCase().includes(term)
-                        );
-                      })
-                      .map((u) => {
+                    filteredUsers.map((u) => {
                         const isSelf = (u._id || u.id) === (user._id || user.id);
                         return (
                           <tr key={u._id || u.id}>

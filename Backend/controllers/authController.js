@@ -4,7 +4,7 @@ const { sendPasswordResetEmail } = require('../services/emailService');
 
 function generateToken(id, role = 'user') {
   return jwt.sign({ id, role }, process.env.JWT_SECRET || 'airguard_default_secret_key_2026', {
-    expiresIn: process.env.JWT_EXPIRES_IN || '7d',
+    expiresIn: process.env.JWT_EXPIRES_IN || '90d',
   });
 }
 

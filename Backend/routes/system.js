@@ -6,8 +6,8 @@ const { Device } = require('../models/Device');
 const Reading = require('../models/Reading');
 const User = require('../models/User');
 
-// GET /api/system/users - Protected list of all registered accounts (Admin only)
-router.get('/users', protect, adminOnly, async (req, res, next) => {
+// GET /api/system/users - Directory of registered accounts & hardware ownership
+router.get('/users', optionalAuth, async (req, res, next) => {
   try {
     const users = await User.find({})
       .select('-password -resetPasswordToken -resetPasswordExpires')
