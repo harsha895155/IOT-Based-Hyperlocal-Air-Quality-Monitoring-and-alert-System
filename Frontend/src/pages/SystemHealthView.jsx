@@ -12,6 +12,7 @@ export default function SystemHealthView() {
   const [deviceList, setDeviceList] = useState([]);
   const [userList, setUserList] = useState([]);
   const [usersLoading, setUsersLoading] = useState(false);
+  const [userFetchError, setUserFetchError] = useState(null);
   const [userSearchTerm, setUserSearchTerm] = useState('');
   const [loading, setLoading] = useState(true);
   const [latency, setLatency] = useState(24);
@@ -60,6 +61,7 @@ export default function SystemHealthView() {
 
   const fetchUsers = useCallback(async () => {
     setUsersLoading(true);
+    setUserFetchError(null);
     try {
       const res = await client.get('/system/users');
       const payload = res?.data;
@@ -68,9 +70,17 @@ export default function SystemHealthView() {
         : Array.isArray(payload?.users)
         ? payload.users
         : [];
-      setUserList(list);
+      if (list.length > 0) {
+        setUserList(list);
+        setUserFetchError(null);
+      }
     } catch (err) {
       console.warn('Could not load user accounts directory:', err?.message);
+      if (err?.response?.status === 401 || err?.response?.status === 403) {
+        setUserFetchError('Admin session expired on this browser. Sign in again to refresh administrator credentials.');
+      } else {
+        setUserFetchError(err?.message || 'Directory offline.');
+      }
     } finally {
       setUsersLoading(false);
     }
@@ -110,7 +120,51 @@ export default function SystemHealthView() {
           : Array.isArray(payload?.users)
           ? payload.users
           : [];
-        setUserList(list);
+        if (list.length > 0) {
+          setUserList(list);
+          setUserFetchError(null);
+        }
+      } else {
+        // Fallback: If /system/users failed with 401 or network error
+        const reason = usersRes.reason;
+        if (reason?.response?.status === 401 || reason?.response?.status === 403) {
+          setUserFetchError('Admin session expired on this browser. Sign in again to synchronize credentials.');
+        }
+        // Extract known registered users from active fleet devices & logged in user
+        if (devRes.status === 'fulfilled' && Array.isArray(devRes.value?.data)) {
+          const devs = devRes.value.data;
+          setUserList((prev) => {
+            if (prev.length > 0) return prev;
+            const fallbackList = [];
+            devs.forEach((d) => {
+              if (d.userId && typeof d.userId === 'object' && d.userId.email) {
+                if (!fallbackList.some((u) => u.email === d.userId.email)) {
+                  fallbackList.push({
+                    _id: d.userId._id || d.userId.id,
+                    name: d.userId.name,
+                    email: d.userId.email,
+                    role: d.userId.role || 'user',
+                    status: 'Active',
+                    devices: [{ deviceId: d.deviceId, name: d.name, status: d.status }],
+                    createdAt: d.createdAt,
+                  });
+                }
+              }
+            });
+            if (user && !fallbackList.some((u) => u.email === user.email)) {
+              fallbackList.unshift({
+                _id: user._id || user.id,
+                name: user.name,
+                email: user.email,
+                role: user.role || 'admin',
+                status: 'Active',
+                devices: devs.filter((d) => d.userId?.email === user.email),
+                createdAt: user.createdAt,
+              });
+            }
+            return fallbackList;
+          });
+        }
       }
     } catch (e) {
       console.error('System health error:', e.message);
@@ -528,6 +582,38 @@ export default function SystemHealthView() {
               </div>
             </div>
 
+            {userFetchError && (
+              <div
+                style={{
+                  display: 'flex',
+                  alignItems: 'center',
+                  justifyContent: 'space-between',
+                  flexWrap: 'wrap',
+                  gap: '12px',
+                  padding: '10px 16px',
+                  marginBottom: '16px',
+                  borderRadius: '10px',
+                  background: 'rgba(239, 68, 68, 0.1)',
+                  border: '1px solid rgba(239, 68, 68, 0.3)',
+                  color: '#f87171',
+                  fontSize: '0.82rem',
+                }}
+              >
+                <div>⚠️ {userFetchError}</div>
+                <button
+                  type="button"
+                  className="btn btn--primary"
+                  style={{ padding: '4px 12px', fontSize: '0.74rem' }}
+                  onClick={() => {
+                    localStorage.removeItem('airguard_token');
+                    window.location.href = '/login';
+                  }}
+                >
+                  🔐 Re-Login as Admin
+                </button>
+              </div>
+            )}
+
             <div className="node-health-table-wrap">
               <table className="node-health-table">
                 <thead>
@@ -562,7 +648,7 @@ export default function SystemHealthView() {
                           <tr key={u._id || u.id}>
                             <td>
                               <div style={{ display: 'flex', alignItems: 'center', gap: '10px' }}>
-                                {u.avatar ? (
+                                {u.avatar && u.avatar.startsWith('data:image/') ? (
                                   <img
                                     src={u.avatar}
                                     alt={u.name}
